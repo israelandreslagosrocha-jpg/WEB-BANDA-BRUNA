@@ -4,33 +4,29 @@
 
 export const getLatestVideo = () => {
   return {
-    id: "a-fuego-lento",
-    title: "A FUEGO LENTO",
-    type: "Videoclip Oficial",
-    youtubeUrl: "https://www.youtube.com/watch?v=F_YOUTUBE_MOCK_1",
-    embedUrl: "https://www.youtube.com/embed/F_YOUTUBE_MOCK_1?autoplay=1&mute=1&loop=1&playlist=F_YOUTUBE_MOCK_1&controls=0&showinfo=0&rel=0&modestbranding=1",
-    thumbnail: "assets/images/album.png",
-    publishedAt: "Hace 3 días"
+    id: "p_zdcQEEOFY",
+    title: "AGONÍA (SESIÓN EN VIVO)",
+    type: "Sesión En Vivo",
+    youtubeUrl: "https://www.youtube.com/watch?v=p_zdcQEEOFY",
+    embedUrl: "https://www.youtube.com/embed/p_zdcQEEOFY?autoplay=1&mute=1&loop=1&playlist=p_zdcQEEOFY&controls=0&showinfo=0&rel=0&modestbranding=1",
+    thumbnail: "https://img.youtube.com/vi/p_zdcQEEOFY/maxresdefault.jpg",
+    publishedAt: "Reciente"
   };
 };
 
 export const getVideoPlaylists = () => {
   return {
-    "videoclips": [
-      { id: "v1", title: "A Fuego Lento", url: "https://www.youtube.com/watch?v=1", duration: "3:45", category: "Videoclips Oficiales" },
-      { id: "v2", title: "Cumbia del Amor", url: "https://www.youtube.com/watch?v=2", duration: "4:12", category: "Videoclips Oficiales" },
-      { id: "v3", title: "Nocturno Sureño", url: "https://www.youtube.com/watch?v=3", duration: "3:30", category: "Videoclips Oficiales" }
+    "youtube": [
+      { id: "yt1", title: "Banda Bruna - Luna Amiga (Videoclip Oficial)", url: "https://www.youtube.com/watch?v=R2_S1YfT9Jk", embedId: "R2_S1YfT9Jk", thumbnail: "https://img.youtube.com/vi/R2_S1YfT9Jk/maxresdefault.jpg", duration: "3:10", category: "YouTube Oficial" },
+      { id: "yt2", title: "Banda Bruna - Agonía (Sesión En Vivo)", url: "https://www.youtube.com/watch?v=p_zdcQEEOFY", embedId: "p_zdcQEEOFY", thumbnail: "https://img.youtube.com/vi/p_zdcQEEOFY/maxresdefault.jpg", duration: "4:20", category: "YouTube Oficial" },
+      { id: "yt3", title: "Banda Bruna - Mix Cumbias Clásicas (Sesión En Vivo)", url: "https://www.youtube.com/watch?v=R2_S1YfT9Jk", embedId: "R2_S1YfT9Jk", thumbnail: "https://img.youtube.com/vi/R2_S1YfT9Jk/maxresdefault.jpg", duration: "8:45", category: "YouTube Oficial" },
+      { id: "yt4", title: "Banda Bruna - Mix Vikings 5 (Show En Vivo)", url: "https://www.youtube.com/watch?v=p_zdcQEEOFY", embedId: "p_zdcQEEOFY", thumbnail: "https://img.youtube.com/vi/p_zdcQEEOFY/maxresdefault.jpg", duration: "7:15", category: "YouTube Oficial" }
     ],
-    "envivo": [
-      { id: "l1", title: "Presentación en Vivo - Festival de la Cerveza Temuco 2025", url: "https://www.youtube.com/watch?v=4", duration: "25:40", category: "En Vivo" },
-      { id: "l2", title: "Show Completo - Club Subterráneo Santiago", url: "https://www.youtube.com/watch?v=5", duration: "45:15", category: "En Vivo" }
-    ],
-    "backstage": [
-      { id: "b1", title: "Detrás de Cámaras: Grabación de 'A Fuego Lento'", url: "https://www.youtube.com/watch?v=6", duration: "5:22", category: "Backstage" },
-      { id: "b2", title: "Gira Sureña 2025 - Diario de Viaje", url: "https://www.youtube.com/watch?v=7", duration: "12:10", category: "Backstage" }
-    ],
-    "promocionales": [
-      { id: "p1", title: "Teaser Oficial Album 2026", url: "https://www.youtube.com/watch?v=8", duration: "1:00", category: "Promocionales" }
+    "facebook": [
+      { id: "fb1", title: "Presentación Destacada (Show en Vivo)", url: "https://www.facebook.com/reel/918184277458701", embedUrl: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F918184277458701&show_text=0&width=560", duration: "Vivo", category: "Presentación" },
+      { id: "fb2", title: "Ensayo y Ritmo Cumbianchero", url: "https://www.facebook.com/bandabruna/reels/", duration: "0:50", category: "Facebook Reel" },
+      { id: "fb3", title: "Detrás de Cámaras: Villarrica Tour", url: "https://www.facebook.com/bandabruna/reels/", duration: "1:00", category: "Facebook Reel" },
+      { id: "fb4", title: "La alegría del público sureño", url: "https://www.facebook.com/bandabruna/reels/", duration: "0:45", category: "Facebook Reel" }
     ]
   };
 };
@@ -200,9 +196,54 @@ export const getSpotifyAlbum = () => {
 
 export const getBandMembers = () => {
   return [
-    { name: "Bruna", role: "Voz Principal & Sintetizadores", bio: "Líder vocal y fundadora de la banda, combinando raíces melódicas sureñas con ritmos alternativos." },
-    { name: "Israel", role: "Guitarra & Coros", bio: "Creador de los riffs y acordes distintivos que definen la cumbia sureña alternativa." },
-    { name: "Andrés", role: "Bajo", bio: "Base rítmica sólida de la banda, aportando el groove bailable en cada presentación." },
-    { name: "Rocha", role: "Batería & Percusión", bio: "El motor de los espectáculos en vivo, manejando dinámicas desde percusiones tradicionales hasta electrónicas." }
+    {
+      name: "Cesar Bruna",
+      role: "Vocalista",
+      image: "/assets/images/banda/cesar_bruna.webp",
+      instagram: "https://www.instagram.com/bruna.cantante/",
+      bio: "La voz y el carisma al frente de Banda Bruna, conectando al público con el alma y el ritmo de la cumbia sureña."
+    },
+    {
+      name: "Jaime Cárdenas Sanhueza",
+      role: "Percusión",
+      image: "/assets/images/banda/jaime_sanhueza.webp",
+      instagram: "https://www.instagram.com/jaime_cardenas_s/",
+      bio: "El latido rítmico de la banda, dominando las congas y los bongos para encender la pista de baile."
+    },
+    {
+      name: "Vicente Nuñez",
+      role: "Guitarras & Dirección Musical",
+      image: "/assets/images/banda/vicente_nunez.webp",
+      instagram: "https://www.instagram.com/nunezenun_4/",
+      bio: "Creador de las armonías y riffs de guitarra, guiando la dirección musical y la energía en el escenario."
+    },
+    {
+      name: "Jaime Cárdenas Quilodrán",
+      role: "Batería",
+      image: "/assets/images/banda/jaime_quilodran.webp",
+      instagram: "https://www.instagram.com/jaime.wavv/",
+      bio: "El motor de la batería, asegurando la potencia y el tempo perfecto en cada presentación en vivo."
+    },
+    {
+      name: "Gerson Ulloa",
+      role: "Bajos",
+      image: "/assets/images/banda/gerson_ulloa.webp",
+      instagram: "https://www.instagram.com/geruson79/",
+      bio: "El groove y la profundidad del bajo eléctrico que le da cuerpo a la propuesta tropical de la banda."
+    },
+    {
+      name: "Fabián Garrido",
+      role: "Güiros",
+      image: "/assets/images/banda/fabian_garrido.webp",
+      instagram: "https://www.instagram.com/fabian.gaes/",
+      bio: "El brillo indispensable de la cumbia, aportando el sonido metálico del güiro y la percusión menor."
+    },
+    {
+      name: "Israel Lagos",
+      role: "Teclados",
+      image: "/assets/images/banda/israel_lagos.webp",
+      instagram: "https://www.instagram.com/andresromusic/",
+      bio: "Teclados y sintetizadores que crean los ganchos melódicos y las secuencias de nuestro show."
+    }
   ];
 };

@@ -5,8 +5,8 @@ import { getBandMembers } from '../services/socialApi.js';
 const members = getBandMembers();
 ---
 
-<Layout title="Integrantes | Banda Bruna - Miembros Oficiales de la Orquesta" description="Conoce a los músicos detrás del sonido de Banda Bruna: Bruna, Israel, Andrés y Rocha. Voz, guitarra, bajo y batería.">
-  <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+<Layout title="Integrantes | Banda Bruna - Miembros Oficiales de la Orquesta" description="Conoce a los músicos detrás del sonido de Banda Bruna: Cesar Bruna, Jaime Cárdenas, Vicente Nuñez, Gerson Ulloa, Fabián Garrido e Israel Lagos.">
+  <section class="max-w-6xl mx-auto px-6 py-16 md:py-24 overflow-hidden">
     
     <div class="text-center mb-16">
       <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">EL EQUIPO</span>
@@ -14,37 +14,168 @@ const members = getBandMembers();
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
-    <!-- Members Detailed Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {members.map(member => (
-        <div class="bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start hover:border-gold-bruna transition-colors group">
-          
-          <!-- Avatar Placeholder with first letter of name -->
-          <div class="w-16 h-16 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center font-title text-2xl font-bold text-gold-bruna group-hover:bg-gold-bruna group-hover:text-black transition-all flex-shrink-0">
-            {member.name.charAt(0)}
-          </div>
-          
-          <div class="flex-grow">
-            <span class="text-xs font-bold text-gold-bruna uppercase tracking-wider block">{member.role}</span>
-            <h2 class="font-title font-bold text-2xl text-white mt-1 mb-3">{member.name}</h2>
-            <p class="text-sm text-slate-400 font-light leading-relaxed">
-              {member.bio}
-            </p>
-          </div>
+    <!-- Members Slider Container -->
+    <div class="relative w-full px-2 md:px-10">
+      
+      <!-- Viewport -->
+      <div class="overflow-hidden w-full">
+        <!-- Track -->
+        <div id="members-track" class="flex transition-transform duration-500 ease-out">
+          {members.map(member => (
+            <div class="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3 md:px-4 box-border">
+              <!-- Card -->
+              <div class="relative overflow-hidden rounded-xl border border-white/5 bg-slate-900/40 transition-all duration-300 hover:border-gold-bruna/30 hover:shadow-[0_10px_30px_rgba(212,175,55,0.08)] group flex flex-col h-full">
+                
+                <!-- Image Container (object-contain ensures the image is NEVER cropped) -->
+                <div class="relative w-full aspect-[2/3] overflow-hidden bg-slate-950 flex-shrink-0 border-b border-white/5 flex items-center justify-center">
+                  <img 
+                    src={member.image} 
+                    alt={member.name} 
+                    class="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500" 
+                    loading="lazy"
+                  />
+                  <!-- Dark gradient overlay behind content area -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none"></div>
+                </div>
+                
+                <!-- Info Details Box -->
+                <div class="p-6 flex-grow flex flex-col justify-between bg-slate-900/20">
+                  <div>
+                    <!-- Recuadro para nombre e icono de Instagram -->
+                    <div class="flex items-center justify-between gap-4 border-b border-white/5 pb-2.5">
+                      <h2 class="font-title font-bold text-base text-white group-hover:text-gold-bruna transition-colors uppercase leading-snug">
+                        {member.name}
+                      </h2>
+                      {member.instagram && (
+                        <a 
+                          href={member.instagram} 
+                          target="_blank" 
+                          rel="noopener" 
+                          class="text-slate-400 hover:text-gold-bruna transition-colors p-1 flex-shrink-0" 
+                          aria-label={`Instagram de ${member.name}`}
+                        >
+                          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                    
+                    <!-- Rol del miembro -->
+                    <span class="text-[10px] font-bold text-gold-bruna uppercase tracking-widest block mt-2.5">
+                      {member.role}
+                    </span>
+                    
+                    <!-- Biografía descriptiva -->
+                    <p class="text-xs text-slate-400 font-light leading-relaxed mt-2.5 line-clamp-4 group-hover:text-slate-300 transition-colors">
+                      {member.bio}
+                    </p>
+                  </div>
+                </div>
 
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+
+      <!-- Navigation Arrows (Positioned at far left and right) -->
+      <button id="members-prev" class="absolute -left-2 md:-left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-black/60 hover:bg-black/90 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none" aria-label="Miembro anterior">
+        <span class="text-lg">❮</span>
+      </button>
+      <button id="members-next" class="absolute -right-2 md:-right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-black/60 hover:bg-black/90 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none" aria-label="Miembro siguiente">
+        <span class="text-lg">❯</span>
+      </button>
+
     </div>
 
     <!-- Booking CTA -->
-    <div class="text-center mt-16 max-w-lg mx-auto">
+    <div class="text-center mt-20 max-w-lg mx-auto bg-slate-900/40 border border-white/5 p-8 rounded-xl">
       <p class="text-slate-400 text-sm mb-6">
         ¿Quieres conversar con nuestro equipo de booking para coordinar una presentación en vivo?
       </p>
-      <a href="/contacto" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-8 py-3 rounded font-bold hover:scale-105 transition-all inline-block cursor-pointer">
+      <a href="/contacto" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-8 py-3 rounded font-bold hover:scale-105 transition-all inline-block cursor-pointer uppercase text-xs tracking-wider">
         IR A CONTACTO
       </a>
     </div>
 
   </section>
+
+  <!-- Slider logic script -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const track = document.getElementById('members-track');
+      const prevBtn = document.getElementById('members-prev');
+      const nextBtn = document.getElementById('members-next');
+
+      if (track && prevBtn && nextBtn) {
+        let currentIndex = 0;
+        let autoplayInterval;
+        const autoplayDelay = 5000;
+
+        function getVisibleCount() {
+          if (window.innerWidth >= 1024) return 3;
+          if (window.innerWidth >= 768) return 2;
+          return 1;
+        }
+
+        function updateSlider() {
+          const visibleCount = getVisibleCount();
+          const totalItems = track.children.length;
+          const maxIndex = Math.max(0, totalItems - visibleCount);
+
+          if (currentIndex > maxIndex) currentIndex = maxIndex;
+          if (currentIndex < 0) currentIndex = 0;
+
+          const percentage = -(currentIndex * (100 / visibleCount));
+          track.style.transform = `translateX(${percentage}%)`;
+
+          // Button visibility styles
+          prevBtn.style.opacity = currentIndex === 0 ? '0.2' : '1';
+          prevBtn.style.cursor = currentIndex === 0 ? 'default' : 'pointer';
+          prevBtn.style.pointerEvents = currentIndex === 0 ? 'none' : 'auto';
+
+          nextBtn.style.opacity = currentIndex === maxIndex ? '0.2' : '1';
+          nextBtn.style.cursor = currentIndex === maxIndex ? 'default' : 'pointer';
+          nextBtn.style.pointerEvents = currentIndex === maxIndex ? 'none' : 'auto';
+        }
+
+        function startAutoplay() {
+          clearInterval(autoplayInterval);
+          autoplayInterval = setInterval(() => {
+            const visibleCount = getVisibleCount();
+            const totalItems = track.children.length;
+            const maxIndex = Math.max(0, totalItems - visibleCount);
+
+            if (currentIndex >= maxIndex) {
+              currentIndex = 0;
+            } else {
+              currentIndex++;
+            }
+            updateSlider();
+          }, autoplayDelay);
+        }
+
+        prevBtn.addEventListener('click', () => {
+          currentIndex--;
+          updateSlider();
+          startAutoplay();
+        });
+
+        nextBtn.addEventListener('click', () => {
+          currentIndex++;
+          updateSlider();
+          startAutoplay();
+        });
+
+        window.addEventListener('resize', () => {
+          updateSlider();
+        });
+
+        // Initialize
+        updateSlider();
+        startAutoplay();
+      }
+    });
+  </script>
 </Layout>
