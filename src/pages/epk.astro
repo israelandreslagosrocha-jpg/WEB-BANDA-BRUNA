@@ -31,13 +31,22 @@ import Layout from '../layouts/Layout.astro';
         <div class="bg-slate-900 border border-white/5 rounded-xl p-6 flex flex-col justify-between">
           <div>
             <h3 class="font-title font-bold text-xl text-white mb-3 uppercase">Kit de Marca & Logos</h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-6">
-              Descarga logotipos oficiales de Banda Bruna en formatos vectoriales e imágenes de alta definición con fondo transparente para afiches publicitarios.
+            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+              Descarga logotipos oficiales de Banda Bruna en formatos de alta definición con fondo transparente para afiches publicitarios.
             </p>
+            <!-- Logo previews for visual aesthetics -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+              <div class="bg-black/40 border border-white/5 rounded p-3 flex items-center justify-center h-20" title="Logo Blanco Horizontal">
+                <img src="/assets/images/logos/logo_main.webp" alt="Logo Blanco Horizontal" class="max-h-8 w-auto object-contain" />
+              </div>
+              <div class="bg-white border border-white/5 rounded p-3 flex items-center justify-center h-20" title="Logo Negro Vertical">
+                <img src="/assets/images/logos/logo_2.webp" alt="Logo Negro Vertical" class="max-h-14 w-auto object-contain" />
+              </div>
+            </div>
           </div>
-          <button class="w-full bg-slate-950 border border-white/10 hover:border-gold-bruna text-gold-bruna font-semibold py-3 rounded text-xs transition-colors cursor-pointer">
+          <a href="/assets/downloads/logos.zip" download class="w-full text-center block bg-slate-950 border border-white/10 hover:border-gold-bruna text-gold-bruna font-semibold py-3 rounded text-xs transition-colors cursor-pointer uppercase">
             DESCARGAR LOGOS (.ZIP)
-          </button>
+          </a>
         </div>
 
         <!-- Photos Asset -->
@@ -56,69 +65,347 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <!-- Technical Rider details -->
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-8 shadow-lg">
-        <h2 class="font-title font-bold text-2xl text-white mb-4 uppercase">Rider Técnico & Ficha Técnica</h2>
+      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-lg">
+        <h2 class="font-title font-bold text-2xl text-white mb-2 uppercase">Rider Técnico & Ficha Técnica</h2>
         <p class="text-xs text-slate-400 leading-relaxed mb-6">
-          Nuestra ficha técnica detalla el listado de canales (input list), requerimientos de monitoreo (in-ears), distribución de escenario (stage plot) e iluminación necesaria para el show.
+          Consulta y descarga los requerimientos de audio (P.A. & FOH), monitores (In-Ears), iluminación, la lista completa de canales (input list) y distribución del escenario.
         </p>
         
-        <div class="border border-white/5 rounded-lg overflow-hidden mb-6 text-xs">
-          <table class="w-full border-collapse text-left">
-            <thead>
-              <tr class="bg-slate-950 text-gold-bruna">
-                <th class="p-3 border-b border-white/5">Canal</th>
-                <th class="p-3 border-b border-white/5">Instrumento</th>
-                <th class="p-3 border-b border-white/5">Micrófono / DI</th>
-                <th class="p-3 border-b border-white/5">Soporte</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-white/5 text-slate-300">
-              <tr>
-                <td class="p-3">01</td>
-                <td class="p-3">Bombo (Rocha)</td>
-                <td class="p-3">Shure Beta 52A / EQ</td>
-                <td class="p-3">Brazo Corto</td>
-              </tr>
-              <tr>
-                <td class="p-3">02</td>
-                <td class="p-3">Caja (Rocha)</td>
-                <td class="p-3">Shure SM57</td>
-                <td class="p-3">Brazo Corto</td>
-              </tr>
-              <tr>
-                <td class="p-3">03</td>
-                <td class="p-3">Bajo (Andrés)</td>
-                <td class="p-3">Direct Box Activa (DI)</td>
-                <td class="p-3">Línea</td>
-              </tr>
-              <tr>
-                <td class="p-3">04</td>
-                <td class="p-3">Guitarra (Israel)</td>
-                <td class="p-3">Sennheiser e609 / DI</td>
-                <td class="p-3">Brazo Corto</td>
-              </tr>
-              <tr>
-                <td class="p-3">05</td>
-                <td class="p-3">Sintetizadores (Bruna)</td>
-                <td class="p-3">Direct Box Estéreo (DI x2)</td>
-                <td class="p-3">Línea</td>
-              </tr>
-              <tr>
-                <td class="p-3">06</td>
-                <td class="p-3">Voz Bruna</td>
-                <td class="p-3">Shure Beta 58A (Inalámbrico)</td>
-                <td class="p-3">Píe Jirafa</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Tabs Buttons Navigation -->
+        <div class="flex border-b border-white/10 mb-6 overflow-x-auto gap-2 scrollbar-none">
+          <button class="tab-btn active px-4 py-2.5 text-xs font-title font-bold tracking-widest text-gold-bruna border-b-2 border-gold-bruna cursor-pointer uppercase whitespace-nowrap" data-tab="reqs">
+            Requerimientos
+          </button>
+          <button class="tab-btn px-4 py-2.5 text-xs font-title font-bold tracking-widest text-slate-400 hover:text-white cursor-pointer uppercase whitespace-nowrap" data-tab="channels">
+            Lista de Canales
+          </button>
+          <button class="tab-btn px-4 py-2.5 text-xs font-title font-bold tracking-widest text-slate-400 hover:text-white cursor-pointer uppercase whitespace-nowrap" data-tab="stage">
+            Escenario (Stage Plot)
+          </button>
         </div>
 
-        <button class="bg-gold-bruna text-black px-6 py-3 rounded font-bold hover:scale-105 transition-all text-xs cursor-pointer">
-          DESCARGAR RIDER TÉCNICO COMPLETO (PDF)
-        </button>
+        <!-- Tab Content 1: Reqs -->
+        <div id="tab-reqs" class="tab-content flex flex-col gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Audio Reqs -->
+            <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
+              <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
+                <span>🔊</span> SISTEMA DE AUDIO (P.A. & FOH)
+              </h3>
+              <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
+                <li><strong>P.A.:</strong> Refuerzo sonoro profesional (Line Array o similar) de marcas reconocidas, con cobertura uniforme para todo el recinto y excelente respuesta en bajas frecuencias.</li>
+                <li><strong>Presión:</strong> Mínimo de 100 dB SPL sostenidos en la mesa de control sin distorsión.</li>
+                <li><strong>Consola FOH:</strong> Consola digital profesional (Midas M32, Behringer X32, A&H SQ/Avantis, Yamaha CL/QL o similar) con mín. 24 canales libres y efectos integrados (Reverb/Delay).</li>
+              </ul>
+            </div>
+
+            <!-- Monitoreo Reqs -->
+            <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
+              <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
+                <span>🎧</span> MONITOREO (MONITORS)
+              </h3>
+              <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
+                <li><strong>Sistemas In-Ear:</strong> 6 vías independientes (inalámbricas/cableadas) para Voces, Teclados, Secuencia, etc.</li>
+                <li><strong>Monitores de Piso:</strong> Mínimo 3 monitores profesionales de alta calidad.</li>
+                <li><strong>Drum-Fill / Side-Fill:</strong> Sistema de monitoreo con Subwoofer potente para la sección rítmica.</li>
+              </ul>
+            </div>
+
+            <!-- Iluminacion Reqs -->
+            <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
+              <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
+                <span>💡</span> ILUMINACIÓN Y ESCENARIO
+              </h3>
+              <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
+                <li><strong>Diseño de Luces:</strong> Dinámico y festivo. Uso de focos LED móviles, cegadores para interacción con el público y máquina de humo constante de manera controlada.</li>
+                <li><strong>Alimentación Eléctrica:</strong> Puntos de corriente 220V regulados y estabilizados con toma de tierra en: Teclados, Bajo, Guitarra y Percusión.</li>
+              </ul>
+            </div>
+
+            <!-- Logística Reqs -->
+            <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
+              <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
+                <span>🏥</span> LOGÍSTICA Y HOSPITALIDAD
+              </h3>
+              <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
+                <li><strong>Camarines:</strong> Espacio privado, limpio, con llave y espejo de cuerpo entero, apto para 10 personas (músicos y staff).</li>
+                <li><strong>Catering:</strong> Agua mineral sin gas abundante (fría y ambiente), bebidas, jugos, energéticas, sándwiches, snacks salados y frutos secos.</li>
+                <li><strong>Estacionamiento:</strong> Cupos reservados y seguros cerca de la zona de carga y descarga para vehículos del equipo.</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="text-[11px] text-slate-400 italic bg-slate-950/40 p-4 border border-white/5 rounded leading-relaxed">
+            <strong>Nota de Coordinación Obligatoria:</strong> Cualquier modificación o imposibilidad de cumplir con estos puntos debe ser notificada y consensuada con el equipo técnico de la banda con un mínimo de 10 días de anticipación al evento.
+            <br />
+            <strong>Contacto Directo:</strong> Tel: +56976149408 / +56990021689 | Email: contactobandabruna@gmail.com
+          </div>
+        </div>
+
+        <!-- Tab Content 2: Channels -->
+        <div id="tab-channels" class="tab-content hidden flex flex-col gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Channel List Table -->
+            <div class="lg:col-span-2 border border-white/5 rounded-lg overflow-hidden text-xs">
+              <div class="bg-slate-950 px-4 py-3 font-title font-bold text-gold-bruna border-b border-white/5 uppercase tracking-widest text-[10px]">
+                Lista de Canales (Input List) - 24 Canales
+              </div>
+              <div class="max-h-[480px] overflow-y-auto">
+                <table class="w-full border-collapse text-left">
+                  <thead>
+                    <tr class="bg-slate-950/60 text-slate-400 font-bold border-b border-white/5 text-[10px] uppercase">
+                      <th class="p-3">CH</th>
+                      <th class="p-3">Fuente / Instrumento</th>
+                      <th class="p-3">Micrófono / Conexión (DI)</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-white/5 text-slate-300">
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">1</td><td class="p-2.5">KICK</td><td class="p-2.5">SHURE PGA52</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">2</td><td class="p-2.5">SNARE</td><td class="p-2.5">SHURE PGA57</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">3</td><td class="p-2.5">TIMBAL HIGH</td><td class="p-2.5">SHURE PGA56</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">4</td><td class="p-2.5">TIMBAL LOW</td><td class="p-2.5">SHURE PGA56</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">5</td><td class="p-2.5">OCTAPAD</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">6</td><td class="p-2.5">OH L</td><td class="p-2.5">SHURE PGA81</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">7</td><td class="p-2.5">OH R</td><td class="p-2.5">SHURE PGA81</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">8</td><td class="p-2.5">CONGA HIGH</td><td class="p-2.5">SHURE PGA56</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">9</td><td class="p-2.5">CONGA LOW</td><td class="p-2.5">SHURE PGA56</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">10</td><td class="p-2.5">BONGOS</td><td class="p-2.5">SHURE SM57</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">11</td><td class="p-2.5">CHIMES</td><td class="p-2.5">SHURE SM57</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">12</td><td class="p-2.5">HUIRO</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">13</td><td class="p-2.5">BAJO</td><td class="p-2.5">XLR DIRECTO</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">14</td><td class="p-2.5">GTR</td><td class="p-2.5">SHURE SM57</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">15</td><td class="p-2.5">KEY L</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">16</td><td class="p-2.5">KEY R</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">17</td><td class="p-2.5">VOZ CONGA</td><td class="p-2.5">SHURE SM58</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">18</td><td class="p-2.5">VOZ BAJO</td><td class="p-2.5">SHURE SM58</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">19</td><td class="p-2.5">VOZ BATERIA</td><td class="p-2.5">SHURE SM58</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">20</td><td class="p-2.5">VOZ GTR</td><td class="p-2.5">SHURE SM58</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">21</td><td class="p-2.5">VOZ PRINCIPAL</td><td class="p-2.5">SHURE SM58</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">22</td><td class="p-2.5">TALBACK</td><td class="p-2.5">SHURE SM58</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">23</td><td class="p-2.5">SECUENCIA L</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">24</td><td class="p-2.5">SECUENCIA R</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Monitor Mixes Table -->
+            <div class="border border-white/5 rounded-lg overflow-hidden text-xs self-start">
+              <div class="bg-slate-950 px-4 py-3 font-title font-bold text-gold-bruna border-b border-white/5 uppercase tracking-widest text-[10px]">
+                Mezclas de Retorno
+              </div>
+              <table class="w-full border-collapse text-left">
+                <thead>
+                  <tr class="bg-slate-950/60 text-slate-400 font-bold border-b border-white/5 text-[10px] uppercase">
+                    <th class="p-3">MIX</th>
+                    <th class="p-3">Asignación</th>
+                    <th class="p-3">Sistema</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 text-slate-300">
+                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">1</td><td class="p-2.5">MONITOR BATERIA</td><td class="p-2.5">IN EAR</td></tr>
+                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">2</td><td class="p-2.5">MONITOR CONGAS</td><td class="p-2.5">IN EAR</td></tr>
+                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">3</td><td class="p-2.5">MONITOR TECLADO</td><td class="p-2.5">IN EAR</td></tr>
+                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">4</td><td class="p-2.5">MONITOR GTR</td><td class="p-2.5">IN EAR</td></tr>
+                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">5</td><td class="p-2.5">MONITOR BAJO</td><td class="p-2.5">IN EAR</td></tr>
+                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">6</td><td class="p-2.5">MONITOR DE PISO</td><td class="p-2.5">PISO (FLOOR)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content 3: Stageplot -->
+        <div id="tab-stage" class="tab-content hidden flex flex-col gap-6">
+          <div class="bg-slate-950/60 border border-white/5 p-6 rounded-lg text-xs leading-relaxed text-slate-300">
+            <h3 class="text-white font-title font-bold text-sm mb-2 text-gold-bruna text-center uppercase">
+              DISTRIBUCIÓN DEL ESCENARIO (STAGE PLOT)
+            </h3>
+            <p class="mb-6 text-center text-slate-400 text-[10px]">
+              Distribución física exacta del escenario, adaptada al mapa gráfico oficial de Banda Bruna.
+            </p>
+            
+            <!-- CSS Grid Visual Stage Map (Exactly matching the uploaded image) -->
+            <div class="border border-white/10 rounded-lg p-6 bg-slate-950 flex flex-col gap-6 text-center max-w-3xl mx-auto mb-6 shadow-inner shadow-black relative overflow-hidden">
+              
+              <!-- Background grid lines decoration -->
+              <div class="absolute inset-0 bg-[radial-gradient(#e5a72b05_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" aria-hidden="true"></div>
+
+              <!-- ESCENARIO FONDO -->
+              <div class="text-[9px] text-slate-500 uppercase tracking-[0.2em] border-b border-white/5 pb-2 z-10">FONDO DEL ESCENARIO (BACK LINE)</div>
+              
+              <!-- Fila Posterior: Percusión (L), Batería (C), Teclados (R) -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 z-10">
+                <!-- Lado Izquierdo: Percusión -->
+                <div class="bg-slate-900/90 border border-white/15 rounded-lg p-4 shadow-md flex flex-col justify-between h-36">
+                  <div>
+                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🥁 Percusión</span>
+                    <span class="text-[10px] text-slate-400 block mt-1">Congas, Bongos y Chimes</span>
+                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">CH 8, 9, 10, 11</span>
+                  </div>
+                  <div class="border-t border-white/5 pt-2 mt-2">
+                    <span class="text-[10px] text-white block font-bold">Voz Conga (CH 17)</span>
+                    <span class="text-[9px] text-slate-500 italic">Mon 2 (In-Ear) + Monitor Piso</span>
+                  </div>
+                </div>
+
+                <!-- Centro: Batería -->
+                <div class="bg-slate-900/95 border border-gold-bruna/30 rounded-lg p-4 shadow-lg shadow-gold-bruna/5 flex flex-col justify-between h-36">
+                  <div>
+                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🥁 Batería & Timbales</span>
+                    <span class="text-[10px] text-slate-400 block mt-1">Kick, Snare, Timbales, Octapad y Overheads</span>
+                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">CH 1, 2, 3, 4, 5, 6, 7</span>
+                  </div>
+                  <div class="border-t border-white/5 pt-2 mt-2">
+                    <span class="text-[10px] text-white block font-bold">Voz Batería (CH 19)</span>
+                    <span class="text-[9px] text-slate-500 italic">Mon 1 (In-Ear) + Drum-Fill</span>
+                  </div>
+                </div>
+
+                <!-- Lado Derecho: Teclados -->
+                <div class="bg-slate-900/90 border border-white/15 rounded-lg p-4 shadow-md flex flex-col justify-between h-36">
+                  <div>
+                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🎹 Teclados</span>
+                    <span class="text-[10px] text-slate-400 block mt-1">Sintetizadores & Secuencias</span>
+                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">CH 15, 16 (L/R)</span>
+                  </div>
+                  <div class="border-t border-white/5 pt-2 mt-2">
+                    <span class="text-[10px] text-white block font-bold">Secuencias (CH 23, 24)</span>
+                    <span class="text-[9px] text-slate-500 italic">Mon 3 (In-Ear)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fila Media: Bajo (L), Güiro (C-L), Guitarra (R) + Amp (Far Right) -->
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center z-10">
+                <!-- Lado Izquierdo: Bajo (4 cols) -->
+                <div class="md:col-span-4 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28">
+                  <div>
+                    <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🎸 Bajo Eléctrico</span>
+                    <span class="text-[9px] text-slate-400 block">Línea Directa (CH 13)</span>
+                  </div>
+                  <div class="border-t border-white/5 pt-1.5">
+                    <span class="text-[10px] text-white block font-semibold">Voz Bajo (CH 18)</span>
+                    <span class="text-[9px] text-slate-500 italic">Mon 5 (In-Ear)</span>
+                  </div>
+                </div>
+
+                <!-- Centro-Izquierda: Güiro / Percusión Menor (3 cols) -->
+                <div class="md:col-span-3 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28">
+                  <div>
+                    <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🪵 Huiro / Güiro</span>
+                    <span class="text-[9px] text-slate-400 block">Línea Directa (CH 12)</span>
+                  </div>
+                  <div class="border-t border-white/5 pt-1.5">
+                    <span class="text-[9px] text-slate-400 block">Percusión Menor</span>
+                    <span class="text-[9px] text-slate-500 italic">Retorno por P.A. / In-Ear</span>
+                  </div>
+                </div>
+
+                <!-- Spacer (1 col) -->
+                <div class="hidden md:block md:col-span-1"></div>
+
+                <!-- Lado Derecho: Guitarra & Amplificador (4 cols) -->
+                <div class="md:col-span-4 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28 relative">
+                  <div>
+                    <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🎸 Guitarra & Amp</span>
+                    <span class="text-[9px] text-slate-400 block">Micro SM57 (CH 14) + GTR Amp</span>
+                  </div>
+                  <div class="border-t border-white/5 pt-1.5">
+                    <span class="text-[10px] text-white block font-semibold">Voz GTR (CH 20)</span>
+                    <span class="text-[9px] text-slate-500 italic">Mon 4 (In-Ear)</span>
+                  </div>
+                  <!-- Amp visual icon placeholder on right side -->
+                  <div class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-12 bg-slate-800 border border-white/20 rounded-sm flex items-center justify-center text-[7px] text-slate-500 rotate-90 md:rotate-0" title="Guitar Amp Cabinet">AMP</div>
+                </div>
+              </div>
+
+              <!-- Fila Frontal: Vocalista Principal y Monitores de Piso -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center z-10">
+                <!-- Left spacer -->
+                <div></div>
+
+                <!-- Center: Lead Vocal -->
+                <div class="bg-gold-bruna/10 border border-gold-bruna/30 rounded-xl p-4 shadow-lg shadow-gold-bruna/5 flex flex-col justify-between h-28">
+                  <div>
+                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-widest">🎤 Voz Principal</span>
+                    <span class="text-[10px] text-white block mt-1">Micrófono SM58 (CH 21)</span>
+                  </div>
+                  <div class="border-t border-gold-bruna/20 pt-1.5">
+                    <span class="text-[9px] text-slate-300 block font-semibold">Talkback (CH 22)</span>
+                    <span class="text-[9px] text-slate-500 italic">Mon 6 (In-Ear)</span>
+                  </div>
+                </div>
+
+                <!-- Right spacer -->
+                <div></div>
+              </div>
+
+              <!-- Monitores de Piso del Frente (Wedges facing the singer) -->
+              <div class="flex justify-center gap-12 mt-2 z-10">
+                <div class="flex flex-col items-center gap-1">
+                  <div class="w-8 h-4 bg-slate-800 border border-white/30 rounded-sm transform -rotate-12 shadow" title="Monitor de Piso Izquierdo (Singer)"></div>
+                  <span class="text-[8px] text-slate-500">MON 6 (L)</span>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                  <div class="w-8 h-4 bg-slate-800 border border-white/30 rounded-sm transform rotate-12 shadow" title="Monitor de Piso Derecho (Singer)"></div>
+                  <span class="text-[8px] text-slate-500">MON 6 (R)</span>
+                </div>
+              </div>
+              
+              <!-- ESCENARIO FRENTE -->
+              <div class="text-[9px] text-slate-500 uppercase tracking-[0.2em] border-t border-white/5 pt-2 mt-2 z-10">FRENTE DEL ESCENARIO (PÚBLICO)</div>
+            </div>
+            
+            <p class="text-center text-slate-400 text-[11px] leading-relaxed max-w-lg mx-auto">
+              * El plano de distribución gráfica detallada con las conexiones físicas de mangueras, patch panels, backline y requerimientos de FOH y monitores se encuentra disponible en formato oficial en el documento descargable.
+            </p>
+          </div>
+        </div>
+
+        <!-- Download Buttons -->
+        <div class="mt-8 flex flex-wrap gap-4 justify-start">
+          <a href="/assets/downloads/rider_tecnico_banda_bruna.pdf" download class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-6 py-3 rounded font-bold hover:scale-105 transition-all text-xs cursor-pointer text-center block uppercase tracking-wider shadow-lg shadow-gold-bruna/10">
+            DESCARGAR RIDER TÉCNICO COMPLETO (PDF)
+          </a>
+        </div>
       </div>
 
     </div>
 
   </section>
+
+  <!-- Client-side script for interactive tabs -->
+  <script>
+    // Tab switching logic for EPK Rider Page
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        
+        // Remove active states from buttons
+        tabButtons.forEach(b => {
+          b.classList.remove('active', 'text-gold-bruna', 'border-b-2', 'border-gold-bruna');
+          b.classList.add('text-slate-400');
+        });
+        
+        // Add active states to clicked button
+        btn.classList.add('active', 'text-gold-bruna', 'border-b-2', 'border-gold-bruna');
+        btn.classList.remove('text-slate-400');
+        
+        // Hide all contents
+        tabContents.forEach(content => {
+          content.classList.add('hidden');
+        });
+        
+        // Show selected content
+        const activeContent = document.getElementById(`tab-${tabId}`);
+        if (activeContent) {
+          activeContent.classList.remove('hidden');
+        }
+      });
+    });
+  </script>
 </Layout>

@@ -18,77 +18,118 @@ const newsList = getNews();
 
 <Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
   
-  <!-- Hero Section with Background Video Loop -->
-  <section class="relative h-screen flex items-center justify-center overflow-hidden bg-black px-6" aria-label="Portada Principal">
+  <!-- Hero Section with Background Image Slider -->
+  <section class="relative min-h-screen lg:h-screen flex flex-col justify-between overflow-hidden bg-black px-6 md:px-12 pt-24 pb-12 lg:py-0" aria-label="Portada Principal">
     
-    <!-- Video background / Iframe container -->
-    <div class="absolute top-0 left-0 w-full h-full z-0 opacity-30 pointer-events-none overflow-hidden">
-      <!-- Fallback static hero image during load -->
-      <div class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat" style="background-image: url('assets/images/hero.png');"></div>
+    <!-- Background Slider/Carousel -->
+    <div class="absolute inset-0 z-0 w-full h-full overflow-hidden">
+      <!-- Slide 1 -->
+      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-100 scale-100" style="background-image: url('/assets/images/hero/hero_1.webp');"></div>
+      <!-- Slide 2 -->
+      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_2.webp');"></div>
+      <!-- Slide 3 -->
+      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_3.webp');"></div>
+      <!-- Slide 4 -->
+      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_4.webp');"></div>
+      <!-- Slide 5 -->
+      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_5.webp');"></div>
+      <!-- Slide 6 -->
+      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_6.webp');"></div>
       
-      <!-- YouTube Embed in background simulating automated video loop -->
-      <iframe 
-        class="absolute top-1/2 left-1/2 w-[100vw] h-[56.25vw] min-h-screen min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2"
-        src={latestVideo.embedUrl}
-        title="Banda Bruna Hero Background Video"
-        frameborder="0" 
-        allow="autoplay; mute; loop; encrypted-media" 
-        allowfullscreen
-      ></iframe>
+      <!-- Dark overlay for readability -->
+      <div class="absolute inset-0 bg-black/55 z-1"></div>
     </div>
 
-    <!-- Radial backdrop gradient overlay -->
-    <div class="absolute top-0 left-0 w-full h-full z-10 bg-radial-gradient from-transparent via-bg-darkest/65 to-bg-darkest" aria-hidden="true"></div>
+    <!-- Slider Navigation Arrows (Far left and right) -->
+    <button id="hero-prev" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 hover:border-gold-bruna bg-black/40 hover:bg-black/85 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none" aria-label="Imagen anterior">
+      <span class="text-lg md:text-xl">❮</span>
+    </button>
+    <button id="hero-next" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 hover:border-gold-bruna bg-black/40 hover:bg-black/85 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none" aria-label="Imagen siguiente">
+      <span class="text-lg md:text-xl">❯</span>
+    </button>
 
-    <!-- Hero Content Layout -->
-    <div class="relative max-w-7xl mx-auto w-full z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-16">
+    <!-- Radial backdrop gradient overlay -->
+    <div class="absolute top-0 left-0 w-full h-full z-10 bg-radial-gradient from-transparent via-bg-darkest/65 to-bg-darkest pointer-events-none" aria-hidden="true"></div>
+
+    <!-- Hero Content Layout (Re-structured for corner alignment and maximum background visibility) -->
+    <div class="relative max-w-[1500px] mx-auto w-full lg:h-full z-20 flex flex-col justify-between lg:pt-28 lg:pb-16 gap-8 lg:gap-0">
       
-      <!-- Text & Primary CTAs (Left) -->
-      <div class="lg:col-span-7 text-left flex flex-col gap-6">
-        <span class="text-xs tracking-[0.4em] font-semibold text-gold-bruna uppercase block">
+      <!-- Top Title Section (Modern, thinner font, not covering background) -->
+      <div class="w-full text-center lg:text-left border-b border-white/5 pb-4">
+        <span class="text-xs tracking-[0.4em] font-semibold text-gold-bruna uppercase block mb-1">
           CUMBIA · SHOW EN VIVO · EXPERIENCIA BRUNA
         </span>
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-none tracking-tight font-title">
-          MÚSICA EN VIVO PARA <br class="hidden md:inline"/>
-          <span class="text-gold-bruna uppercase">EVENTOS, FESTIVALES <br class="hidden md:inline"/>Y CELEBRACIONES</span>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.15em] leading-tight text-white uppercase font-sans">
+          MÚSICA EN VIVO PARA <span class="text-gold-bruna font-semibold">EVENTOS, FESTIVALES Y CELEBRACIONES</span>
         </h1>
-        <div class="flex flex-wrap gap-4 mt-4">
-          <a href="#lanzamientos" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-6 py-3.5 rounded-sm font-bold text-xs hover:scale-105 transition-all shadow-lg shadow-gold-bruna/20 cursor-pointer text-center flex items-center gap-2">
-            <!-- Inline play icon in a circle -->
-            <span class="w-4 h-4 bg-black text-gold-bruna rounded-full flex items-center justify-center text-[8px] pl-0.5">▶</span>
-            VER ÚLTIMO VIDEOCLIP
-          </a>
-          <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="border border-white/20 hover:border-white bg-white/5 hover:bg-white/10 px-6 py-3.5 rounded-sm font-bold text-xs hover:scale-105 transition-all cursor-pointer text-center flex items-center gap-2 justify-center uppercase">
-            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
-            COTIZAR EVENTO
+      </div>
+
+      <!-- Bottom Action Section (Pushed to left/right corners) -->
+      <div class="flex flex-col lg:flex-row justify-between items-end gap-8 w-full mt-auto">
+        <!-- Left Column: Booking & Instagram CTAs -->
+        <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto max-w-2xl">
+          <!-- Card 1: WhatsApp Booking -->
+          <div class="flex-1 bg-slate-950/65 border border-white/10 rounded-xl p-5 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 hover:border-gold-bruna/30 transition-all">
+            <div>
+              <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1">Cotizaciones</span>
+              <h2 class="text-sm font-bold text-white mb-2 uppercase">Lleva el Show a tu Evento</h2>
+              <p class="text-xs text-slate-300 leading-relaxed font-light">
+                Cotiza fechas para festivales municipales, eventos corporativos o matrimonios.
+              </p>
+            </div>
+            <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="w-full bg-gold-bruna hover:bg-gold-bruna-hover text-black py-2.5 rounded font-bold text-xs hover:scale-102 transition-all text-center flex items-center justify-center gap-2 uppercase mt-3">
+              COTIZAR EVENTO
+            </a>
+          </div>
+
+          <!-- Card 2: Instagram Featured Post -->
+          <a href="https://www.instagram.com/p/DZpvNd-uBjx/" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-5 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
+            <div>
+              <div class="flex items-center justify-between mb-2.5">
+                <div class="flex items-center gap-2">
+                  <!-- Small circular logo profile picture -->
+                  <div class="w-6 h-6 rounded-full overflow-hidden border border-white/20 bg-black flex items-center justify-center">
+                    <img src="/assets/images/logos/logo_3.webp" alt="Banda Bruna Profile" class="w-full h-full object-cover scale-150" />
+                  </div>
+                  <span class="text-[11px] font-bold text-white">banda_bruna</span>
+                </div>
+                <span class="text-[8px] bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  DESTACADO
+                </span>
+              </div>
+              <p class="text-xs text-slate-300 leading-normal font-light line-clamp-3 mb-2">
+                "¡Increíble noche de cumbia sureña y fiesta! Muchas gracias por toda la energía entregada en el escenario. Nos vemos pronto en las próximas fechas. 🎶🔥🕺"
+              </p>
+            </div>
+            <div class="flex items-center justify-between border-t border-white/5 pt-2.5 mt-auto">
+              <span class="text-[10px] text-slate-400 font-medium group-hover/insta:text-pink-400 transition-colors">Ver publicación en Instagram</span>
+              <span class="text-xs text-pink-500 group-hover/insta:translate-x-1 transition-transform">📸 →</span>
+            </div>
           </a>
         </div>
-      </div>
 
-      <!-- Featured Video Card (Right) -->
-      <div class="lg:col-span-5 flex justify-center lg:justify-end">
-        <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-950/80 border border-white/5 hover:border-gold-bruna rounded-xl p-4 w-full max-w-[360px] shadow-2xl shadow-black/90 hover:translate-y-[-5px] transition-all group block">
-          <div class="relative aspect-video rounded-lg overflow-hidden mb-4 bg-slate-900 border border-white/5">
-            <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-            <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-              <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-black shadow-lg group-hover:scale-110 transition-transform">
-                <span class="text-xs pl-0.5 text-black">▶</span>
+        <!-- Right Column: Featured YouTube Video -->
+        <div class="w-full lg:w-auto flex justify-center lg:justify-end">
+          <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-950/65 border border-white/10 hover:border-gold-bruna rounded-xl p-4 w-full max-w-[380px] shadow-2xl hover:translate-y-[-4px] transition-all group block backdrop-blur-md">
+            <div class="relative aspect-video rounded-lg overflow-hidden mb-3 bg-slate-900 border border-white/5">
+              <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+              <!-- Play overlay -->
+              <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/35 transition-colors">
+                <div class="w-12 h-12 rounded-full bg-gold-bruna text-black flex items-center justify-center font-bold text-lg shadow-lg group-hover:scale-110 transition-transform pl-0.5">▶</div>
+              </div>
+              <div class="absolute top-2 left-2 bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                MÚSICA
               </div>
             </div>
-            <span class="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">NUEVO</span>
-          </div>
-          <div>
-            <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase block">BANDA BRUNA</span>
-            <h2 class="text-white font-title font-extrabold text-base mt-0.5 group-hover:text-gold-bruna transition-colors uppercase">{latestVideo.title}</h2>
-            <p class="text-xs text-slate-400 mt-1">{latestVideo.type}</p>
-            <div class="flex items-center gap-1 text-[10px] text-slate-500 font-semibold mt-3 hover:underline">
-              <span>Ver en YouTube</span>
-              <span>📹</span>
-            </div>
-          </div>
-        </a>
-      </div>
+            <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">ÚLTIMO LANZAMIENTO YOUTUBE</span>
+            <h3 class="font-title font-bold text-sm text-white group-hover:text-gold-bruna transition-colors uppercase leading-snug line-clamp-2">
+              {latestVideo.title}
+            </h3>
+            <span class="text-[10px] text-slate-400 block mt-2">Ver en YouTube →</span>
+          </a>
+        </div>
 
+      </div>
     </div>
 
     <!-- Centered Down Arrow -->
@@ -652,6 +693,54 @@ const newsList = getNews();
         }, 1200);
       });
     }
+
+    // HERO BACKGROUND SLIDER LOGIC
+    const slides = document.querySelectorAll('.hero-slide');
+    const prevBtn = document.getElementById('hero-prev');
+    const nextBtn = document.getElementById('hero-next');
+    
+    let currentIndex = 0;
+    let autoplayInterval;
+    const slideDuration = 6000; // 6 seconds per slide
+    
+    function showSlide(index) {
+      if (index >= slides.length) currentIndex = 0;
+      else if (index < 0) currentIndex = slides.length - 1;
+      else currentIndex = index;
+      
+      slides.forEach((slide, idx) => {
+        if (idx === currentIndex) {
+          slide.classList.remove('opacity-0', 'scale-105');
+          slide.classList.add('opacity-100', 'scale-100');
+        } else {
+          slide.classList.remove('opacity-100', 'scale-100');
+          slide.classList.add('opacity-0', 'scale-105');
+        }
+      });
+    }
+    
+    function startAutoplay() {
+      clearInterval(autoplayInterval);
+      autoplayInterval = setInterval(() => {
+        showSlide(currentIndex + 1);
+      }, slideDuration);
+    }
+    
+    if (nextBtn && prevBtn) {
+      nextBtn.addEventListener('click', () => {
+        showSlide(currentIndex + 1);
+        startAutoplay();
+      });
+      
+      prevBtn.addEventListener('click', () => {
+        showSlide(currentIndex - 1);
+        startAutoplay();
+      });
+    }
+    
+    // Initialize slider
+    showSlide(0);
+    startAutoplay();
   </script>
 
 </Layout>
