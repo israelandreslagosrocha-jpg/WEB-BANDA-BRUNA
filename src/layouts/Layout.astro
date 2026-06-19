@@ -247,30 +247,27 @@ const getLinkClass = (path: string) => {
       });
     }
 
-    // INTERSECTIONOBSERVER FALLBACK FOR SCROLL REVEALS
-    const nativeScrollAnim = CSS.supports('(animation-timeline: view()) and (animation-range: entry)');
-    if (!nativeScrollAnim) {
-      const reveals = document.querySelectorAll('.scroll-reveal');
-      
-      const observerOptions = {
-        root: null,
-        threshold: 0.1,
-        rootMargin: '0px 0px -40px 0px'
-      };
+    // SCROLL REVEALS USING INTERSECTIONOBSERVER (UNIVERSAL)
+    const reveals = document.querySelectorAll('.scroll-reveal');
+    
+    const observerOptions = {
+      root: null,
+      threshold: 0.05, // Trigger slightly earlier for a better user experience
+      rootMargin: '0px 0px -40px 0px'
+    };
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-
-      reveals.forEach(el => {
-        observer.observe(el);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
       });
-    }
+    }, observerOptions);
+
+    reveals.forEach(el => {
+      observer.observe(el);
+    });
   </script>
 
 </body>
