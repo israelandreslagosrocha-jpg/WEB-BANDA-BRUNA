@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getSpotifyAlbum } from '../services/socialApi.js';
+
+const spotifyData = getSpotifyAlbum();
+---
+
+<Layout title="Música | Banda Bruna - Discografía y Plataformas de Streaming" description="Escucha a Banda Bruna. Catálogo de canciones, reproductor de Spotify oficial, y enlaces a YouTube Music, Apple Music y Deezer.">
+  <section class="max-w-5xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">DISCOGRAFÍA</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">NUESTRA MÚSICA</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      
+      <!-- Spotify Embed (Left) -->
+      <div class="lg:col-span-7 flex flex-col gap-6">
+        <h2 class="font-title font-bold text-2xl mb-2 text-white uppercase">Perfil de Artista en Spotify</h2>
+        <div class="bg-slate-900 border border-white/5 rounded-xl p-4 shadow-xl">
+          <iframe 
+            src={spotifyData.spotifyEmbedUrl} 
+            width="100%" 
+            height="380" 
+            allowfullscreen="" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+            loading="lazy"
+            style="border-radius: 8px; border: 0;"
+          ></iframe>
+        </div>
+      </div>
+
+      <!-- Top Tracks & Platforms (Right) -->
+      <div class="lg:col-span-5 flex flex-col gap-8">
+        
+        <div>
+          <h2 class="font-title font-bold text-2xl mb-4 text-white uppercase">Temas Más Escuchados</h2>
+          <ol class="flex flex-col gap-3 list-none p-0 m-0">
+            {spotifyData.topTracks.map((track, idx) => (
+              <li class="bg-slate-900 border border-white/5 hover:border-gold-bruna p-4 rounded-lg flex items-center justify-between transition-colors">
+                <div class="flex items-center gap-3">
+                  <span class="text-gold-bruna font-title font-bold text-sm">0{idx + 1}</span>
+                  <div>
+                    <span class="font-semibold text-white block text-sm">{track.title}</span>
+                    <span class="text-[10px] text-slate-500 font-medium">{track.playCount} reproducciones</span>
+                  </div>
+                </div>
+                <span class="text-xs text-slate-500 font-semibold">{track.duration}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div>
+          <h2 class="font-title font-bold text-lg mb-4 text-white uppercase">Plataformas Digitales</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <a href="https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-green-500 p-3 rounded text-center text-xs font-bold text-white transition-colors block">
+              SPOTIFY
+            </a>
+            <a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-red-500 p-3 rounded text-center text-xs font-bold text-white transition-colors block">
+              YOUTUBE MUSIC
+            </a>
+            <a href="https://apple.com" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-pink-500 p-3 rounded text-center text-xs font-bold text-white transition-colors block">
+              APPLE MUSIC
+            </a>
+            <a href="https://deezer.com" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-blue-500 p-3 rounded text-center text-xs font-bold text-white transition-colors block">
+              DEEZER
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+</Layout>

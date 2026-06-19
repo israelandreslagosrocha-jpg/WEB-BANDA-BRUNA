@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getBandMembers } from '../services/socialApi.js';
+
+const members = getBandMembers();
+---
+
+<Layout title="Integrantes | Banda Bruna - Miembros Oficiales de la Orquesta" description="Conoce a los músicos detrás del sonido de Banda Bruna: Bruna, Israel, Andrés y Rocha. Voz, guitarra, bajo y batería.">
+  <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">EL EQUIPO</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">INTEGRANTES</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <!-- Members Detailed Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {members.map(member => (
+        <div class="bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-start hover:border-gold-bruna transition-colors group">
+          
+          <!-- Avatar Placeholder with first letter of name -->
+          <div class="w-16 h-16 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center font-title text-2xl font-bold text-gold-bruna group-hover:bg-gold-bruna group-hover:text-black transition-all flex-shrink-0">
+            {member.name.charAt(0)}
+          </div>
+          
+          <div class="flex-grow">
+            <span class="text-xs font-bold text-gold-bruna uppercase tracking-wider block">{member.role}</span>
+            <h2 class="font-title font-bold text-2xl text-white mt-1 mb-3">{member.name}</h2>
+            <p class="text-sm text-slate-400 font-light leading-relaxed">
+              {member.bio}
+            </p>
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+    <!-- Booking CTA -->
+    <div class="text-center mt-16 max-w-lg mx-auto">
+      <p class="text-slate-400 text-sm mb-6">
+        ¿Quieres conversar con nuestro equipo de booking para coordinar una presentación en vivo?
+      </p>
+      <a href="/contacto" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-8 py-3 rounded font-bold hover:scale-105 transition-all inline-block cursor-pointer">
+        IR A CONTACTO
+      </a>
+    </div>
+
+  </section>
+</Layout>

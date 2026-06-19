@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getNews } from '../services/socialApi.js';
+
+const newsList = getNews();
+---
+
+<Layout title="Noticias | Banda Bruna - Blog y Novedades Oficiales" description="Entérate de las últimas noticias sobre Banda Bruna: nuevos lanzamientos, colaboraciones musicales, hitos y giras de conciertos.">
+  <section class="max-w-4xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">BOLETÍN</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">NOTICIAS</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <!-- Blog grid listing -->
+    <div class="flex flex-col gap-8">
+      {newsList.map(news => (
+        <article class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded-xl p-6 md:p-8 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-amber-500 text-black text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase font-title">
+              {news.category}
+            </span>
+            <span class="text-xs text-slate-500 font-semibold">{news.publishedAt}</span>
+          </div>
+          
+          <h2 class="font-title font-bold text-2xl text-white group-hover:text-gold-bruna transition-colors mb-3 leading-snug">
+            {news.title}
+          </h2>
+          
+          <p class="text-sm text-slate-400 font-light leading-relaxed mb-4">
+            {news.summary}
+          </p>
+
+          <div class="pt-4 border-t border-white/5 flex justify-end">
+            <span class="text-xs text-gold-bruna font-semibold group-hover:underline">Leer artículo completo →</span>
+          </div>
+        </article>
+      ))}
+    </div>
+
+  </section>
+</Layout>

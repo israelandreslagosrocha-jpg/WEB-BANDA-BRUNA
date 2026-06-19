@@ -1,0 +1,59 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Contacto | Banda Bruna - Datos de Reservas & Booking" description="Ponte en contacto con Banda Bruna. Emails de booking oficiales, fono, redes sociales, y formulario de contacto rápido para eventos.">
+  <section class="max-w-4xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">HABLEMOS</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">CONTACTAR</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+      
+      <!-- Contact card info -->
+      <div class="flex flex-col gap-6">
+        <h2 class="font-title font-bold text-2xl text-white uppercase">Información de Contacto</h2>
+        <p class="text-slate-400 font-light text-sm leading-relaxed mb-4">
+          Si deseas comunicarte directamente para temas relacionados a prensa, entrevistas, o consultas logísticas de conciertos agendados, utiliza los siguientes datos:
+        </p>
+
+        <ul class="flex flex-col gap-6 list-none p-0">
+          <li class="flex flex-col">
+            <span class="text-slate-500 text-[10px] font-bold tracking-wider uppercase mb-1">CONTRATACIONES & BOOKING</span>
+            <a href="mailto:booking@bandabruna.cl" class="text-white hover:text-gold-bruna font-semibold text-lg underline underline-offset-4">
+              booking@bandabruna.cl
+            </a>
+          </li>
+          <li class="flex flex-col">
+            <span class="text-slate-500 text-[10px] font-bold tracking-wider uppercase mb-1">PRENSA & COMUNICACIONES</span>
+            <a href="mailto:contacto@bandabruna.cl" class="text-white hover:text-gold-bruna font-semibold text-lg underline underline-offset-4">
+              contacto@bandabruna.cl
+            </a>
+          </li>
+          <li class="flex flex-col">
+            <span class="text-slate-500 text-[10px] font-bold tracking-wider uppercase mb-1">FONO / WHATSAPP DIRECTO</span>
+            <a href="tel:+56912345678" class="text-white hover:text-gold-bruna font-semibold text-lg underline underline-offset-4">
+              +56 9 1234 5678
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Quick message card -->
+      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-lg">
+        <h2 class="font-title font-bold text-xl text-white mb-4 uppercase">¿Buscas cotizar un show?</h2>
+        <p class="text-slate-400 text-xs font-light leading-relaxed mb-6">
+          Para solicitar un presupuesto formal con requerimientos de sonido, viáticos y fechas disponibles, te recomendamos utilizar nuestro formulario extendido de cotización.
+        </p>
+        <a href="/contrataciones" class="w-full text-center bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-bold py-3.5 rounded text-xs block hover:scale-102 transition-transform cursor-pointer">
+          IR A FORMULARIO DE COTIZACIÓN
+        </a>
+      </div>
+
+    </div>
+
+  </section>
+</Layout>

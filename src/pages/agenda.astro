@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getUpcomingEvents } from '../services/socialApi.js';
+
+const events = getUpcomingEvents();
+
+// Helper to generate Google Calendar links
+const getGoogleCalendarUrl = (event: any) => {
+  const dateStr = event.fullDate.replace(/-/g, '');
+  const title = encodeURIComponent(event.title + " - Banda Bruna");
+  const details = encodeURIComponent("Presentación en vivo de Banda Bruna. ¡Cumbia chilena y show familiar!");
+  const location = encodeURIComponent(event.venue + ", " + event.location);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}T200000/${dateStr}T230000&details=${details}&location=${location}&sf=true&output=xml`;
+};
+---
+
+<Layout title="Agenda de Conciertos | Banda Bruna - Fechas de Gira Oficial" description="Entérate de las próximas fechas de conciertos de Banda Bruna. Fiestas costumbristas, festivales y shows en vivo.">
+  <section class="max-w-5xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">PROGRAMACIÓN</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">FECHAS DE GIRA</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <!-- Concert schedule detailed timeline list -->
+    <div class="bg-slate-900 border border-white/5 rounded-xl overflow-hidden shadow-2xl">
+      <div class="p-6 md:p-8 bg-slate-950 border-b border-white/5">
+        <h2 class="font-title font-bold text-lg text-white">Listado oficial de presentaciones</h2>
+        <p class="text-xs text-slate-400 font-light mt-1">
+          Fechas sujetas a cambios de última hora. Las actualizaciones de agenda se coordinan directamente en tiempo real.
+        </p>
+      </div>
+
+      <div class="divide-y divide-white/5">
+        {events.map(event => (
+          <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/[0.01] transition-all">
+            
+            <div class="flex gap-6 items-center">
+              <!-- Calendar Date Block -->
+              <div class="w-16 h-16 bg-slate-950 border border-white/5 rounded-xl flex flex-col items-center justify-center text-center flex-shrink-0">
+                <span class="text-3xl font-extrabold font-title text-gold-bruna leading-none">{event.date}</span>
+                <span class="text-[10px] text-slate-500 font-semibold tracking-wider mt-1 uppercase">{event.month}</span>
+              </div>
+              
+              <div>
+                <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time} hrs</span>
+                <h3 class="font-title font-bold text-xl text-white mt-0.5 mb-1 tracking-wide">{event.title}</h3>
+                <p class="text-sm text-slate-400 font-light">
+                  Recinto: <a href={event.mapUrl} target="_blank" rel="noopener" class="underline hover:text-gold-bruna transition-colors">{event.venue}</a>, <strong>{event.location}</strong>
+                </p>
+              </div>
+            </div>
+
+            <!-- Actions and states -->
+            <div class="flex flex-wrap items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0 justify-between md:justify-end">
+              
+              <div class="flex items-center gap-3">
+                {event.statusType === 'confirmed' ? (
+                  <span class="bg-green-950/30 border border-green-500/20 text-green-400 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                    Confirmado
+                  </span>
+                ) : (
+                  <span class="bg-amber-950/30 border border-amber-500/20 text-amber-400 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                    Por Confirmar
+                  </span>
+                )}
+              </div>
+
+              <div class="flex gap-3">
+                <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded transition-colors cursor-pointer">
+                  Añadir a Google Calendar
+                </a>
+              </div>
+
+            </div>
+
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Booking promotion -->
+    <div class="bg-slate-900 border border-white/5 rounded-xl p-8 mt-12 text-center max-w-2xl mx-auto">
+      <h2 class="font-title font-bold text-xl text-white mb-2 uppercase">¿Quieres agendar una presentación?</h2>
+      <p class="text-sm text-slate-400 font-light mb-6">
+        Coordinamos fechas para festivales municipales, carnavales de verano, fiestas costumbristas y bodas. Realiza tu solicitud hoy para apartar tu cupo en nuestra gira 2026.
+      </p>
+      <a href="/contrataciones" class="bg-gold-bruna text-black px-8 py-3.5 rounded font-bold hover:scale-105 transition-all inline-block cursor-pointer">
+        SOLICITAR COTIZACIÓN
+      </a>
+    </div>
+
+  </section>
+</Layout>

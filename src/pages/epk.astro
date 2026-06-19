@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Electronic Press Kit (EPK) | Banda Bruna - Kit de Prensa Oficial" description="Kit de prensa digital (EPK) de Banda Bruna para productores, promotores y medios. Biografía corta, logos oficiales, fotos de prensa y rider técnico.">
+  <section class="max-w-4xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">PROMOTORES & PRENSA</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">ELECTRONIC PRESS KIT</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <div class="flex flex-col gap-12 text-slate-300 font-light">
+      
+      <!-- EPK Bio -->
+      <div class="bg-slate-900 border border-white/5 rounded-xl p-8 shadow-lg">
+        <h2 class="font-title font-bold text-2xl text-white mb-4 uppercase">Resumen Biográfico</h2>
+        <p class="text-sm leading-relaxed mb-4">
+          <strong>Banda Bruna</strong> es una agrupación originaria de Temuco, Chile, nacida con la misión de refrescar la escena tropical y tropical-rock del país. Fusionando riffs eléctricos enérgicos con sintetizadores espaciales y la base bailable indiscutible de la cumbia sureña, la banda ha consolidado un show de alto nivel técnico y visual que conecta con todo tipo de públicos en festivales, eventos corporativos y celebraciones municipales.
+        </p>
+        <p class="text-sm leading-relaxed">
+          Su sonido particular combina la alegría rítmica con letras nostálgicas que remiten a las atmósferas y paisajes del sur chileno. Ideal para escenarios masivos y eventos que busquen prender la fiesta con calidad y profesionalismo.
+        </p>
+      </div>
+
+      <!-- Downloads section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Brand Assets -->
+        <div class="bg-slate-900 border border-white/5 rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 class="font-title font-bold text-xl text-white mb-3 uppercase">Kit de Marca & Logos</h3>
+            <p class="text-xs text-slate-400 leading-relaxed mb-6">
+              Descarga logotipos oficiales de Banda Bruna en formatos vectoriales e imágenes de alta definición con fondo transparente para afiches publicitarios.
+            </p>
+          </div>
+          <button class="w-full bg-slate-950 border border-white/10 hover:border-gold-bruna text-gold-bruna font-semibold py-3 rounded text-xs transition-colors cursor-pointer">
+            DESCARGAR LOGOS (.ZIP)
+          </button>
+        </div>
+
+        <!-- Photos Asset -->
+        <div class="bg-slate-900 border border-white/5 rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 class="font-title font-bold text-xl text-white mb-3 uppercase">Fotografías Oficiales</h3>
+            <p class="text-xs text-slate-400 leading-relaxed mb-6">
+              Descarga la carpeta con fotos artísticas del grupo y de presentaciones en vivo listas para prensa, sitios web informativos e impresiones.
+            </p>
+          </div>
+          <button class="w-full bg-slate-950 border border-white/10 hover:border-gold-bruna text-gold-bruna font-semibold py-3 rounded text-xs transition-colors cursor-pointer">
+            DESCARGAR FOTOS (.ZIP)
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Technical Rider details -->
+      <div class="bg-slate-900 border border-white/5 rounded-xl p-8 shadow-lg">
+        <h2 class="font-title font-bold text-2xl text-white mb-4 uppercase">Rider Técnico & Ficha Técnica</h2>
+        <p class="text-xs text-slate-400 leading-relaxed mb-6">
+          Nuestra ficha técnica detalla el listado de canales (input list), requerimientos de monitoreo (in-ears), distribución de escenario (stage plot) e iluminación necesaria para el show.
+        </p>
+        
+        <div class="border border-white/5 rounded-lg overflow-hidden mb-6 text-xs">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr class="bg-slate-950 text-gold-bruna">
+                <th class="p-3 border-b border-white/5">Canal</th>
+                <th class="p-3 border-b border-white/5">Instrumento</th>
+                <th class="p-3 border-b border-white/5">Micrófono / DI</th>
+                <th class="p-3 border-b border-white/5">Soporte</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 text-slate-300">
+              <tr>
+                <td class="p-3">01</td>
+                <td class="p-3">Bombo (Rocha)</td>
+                <td class="p-3">Shure Beta 52A / EQ</td>
+                <td class="p-3">Brazo Corto</td>
+              </tr>
+              <tr>
+                <td class="p-3">02</td>
+                <td class="p-3">Caja (Rocha)</td>
+                <td class="p-3">Shure SM57</td>
+                <td class="p-3">Brazo Corto</td>
+              </tr>
+              <tr>
+                <td class="p-3">03</td>
+                <td class="p-3">Bajo (Andrés)</td>
+                <td class="p-3">Direct Box Activa (DI)</td>
+                <td class="p-3">Línea</td>
+              </tr>
+              <tr>
+                <td class="p-3">04</td>
+                <td class="p-3">Guitarra (Israel)</td>
+                <td class="p-3">Sennheiser e609 / DI</td>
+                <td class="p-3">Brazo Corto</td>
+              </tr>
+              <tr>
+                <td class="p-3">05</td>
+                <td class="p-3">Sintetizadores (Bruna)</td>
+                <td class="p-3">Direct Box Estéreo (DI x2)</td>
+                <td class="p-3">Línea</td>
+              </tr>
+              <tr>
+                <td class="p-3">06</td>
+                <td class="p-3">Voz Bruna</td>
+                <td class="p-3">Shure Beta 58A (Inalámbrico)</td>
+                <td class="p-3">Píe Jirafa</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button class="bg-gold-bruna text-black px-6 py-3 rounded font-bold hover:scale-105 transition-all text-xs cursor-pointer">
+          DESCARGAR RIDER TÉCNICO COMPLETO (PDF)
+        </button>
+      </div>
+
+    </div>
+
+  </section>
+</Layout>

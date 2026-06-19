@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-bruna: #d4af37;
+  --color-gold-bruna-hover: #e5a93b;
+  --color-bg-darkest: #040815;
+  --color-bg-card: #0b132b;
+  
+  --font-title: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* Base custom font properties */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  letter-spacing: -0.02em;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-darkest);
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* Custom Scroll progress bar animation */
+@keyframes progress-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.scroll-progress-bar {
+  transform-origin: 0% 50%;
+  animation: progress-grow linear;
+  animation-timeline: scroll(root);
+}
+
+/* Scroll reveal utility classes (CSS + Javascript fallback) */
+@utility scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@utility revealed {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Glassmorphism utility */
+@utility glassmorphism {
+  background-color: rgba(4, 8, 21, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}

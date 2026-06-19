@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getBandMembers } from '../services/socialApi.js';
+
+const members = getBandMembers();
+---
+
+<Layout title="La Banda | Banda Bruna - Historia y Biografía Oficial" description="Conoce la historia oficial de Banda Bruna, sus raíces en la cumbia chilena y rock alternativo, y su trayectoria musical en el sur de Chile.">
+  <section class="max-w-4xl mx-auto px-6 py-16 md:py-24">
+    
+    <div class="text-center mb-16">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">BIOGRAFÍA</span>
+      <h1 class="text-4xl font-extrabold font-title uppercase">LA BANDA</h1>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <!-- Biography block -->
+    <div class="prose prose-invert max-w-none text-slate-300 font-light space-y-6 text-base md:text-lg leading-relaxed">
+      <p>
+        Nacida en la ciudad de <strong>Temuco</strong>, en el corazón del sur de Chile, <strong>Banda Bruna</strong> es la colisión perfecta entre el ritmo contagioso de la cumbia chilena y la energía visceral del rock alternativo y el indie contemporáneo.
+      </p>
+      <p>
+        Desde sus inicios, la banda se propuso romper los moldes de la música tropical tradicional, inyectando guitarras eléctricas crudas, atmósferas espaciales de sintetizadores y un groove sólido que resuena con fuerza tanto en festivales masivos como en escenarios íntimos.
+      </p>
+      <p>
+        Con un repertorio cargado de letras que exploran el amor, la melancolía del sur y la alegría de la fiesta popular, Banda Bruna ha recorrido múltiples comunas de las regiones de La Araucanía, Biobío y Los Ríos, consolidándose como una de las agrupaciones con mayor proyección en la cumbia sureña moderna.
+      </p>
+      <p>
+        Cada concierto en vivo de Banda Bruna es planteado como un espectáculo audiovisual de alta intensidad, diseñado para hacer bailar al público mientras se sumergen en un viaje sónico sofisticado y bailable.
+      </p>
+    </div>
+
+    <!-- Highlight Callout -->
+    <div class="bg-slate-900 border border-white/5 rounded-xl p-8 mt-12 flex flex-col md:flex-row gap-6 items-center">
+      <div class="flex-grow">
+        <h2 class="font-title font-bold text-xl text-white mb-2">Nuestra Propuesta Artística</h2>
+        <p class="text-sm text-slate-400 font-light">
+          No somos solo un grupo musical; creamos un canal directo de alegría y energía bailable. Fusionamos instrumentación en vivo de alto calibre con una producción visual moderna que eleva cualquier evento corporativo, festival o celebración privada.
+        </p>
+      </div>
+      <a href="/contrataciones" class="bg-gold-bruna text-black px-6 py-3 rounded font-bold hover:scale-105 transition-all cursor-pointer whitespace-nowrap">
+        COTIZAR FECHA
+      </a>
+    </div>
+
+  </section>
+</Layout>
