@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banda Bruna | Sitio Oficial | Rock Alternativo & Indie</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Sitio oficial de Banda Bruna. Explora nuestra música, próximas fechas de gira, biografía de la banda y haz tus reservas para eventos.">
+  <meta name="keywords" content="Banda Bruna, Bruna, rock alternativo, musica indie, conciertos, booking musical, chile">
+  <meta name="author" content="Banda Bruna">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/israelandreslagosrocha-jpg/WEB-BANDA-BRUNA">
+  <meta property="og:title" content="Banda Bruna | Sitio Oficial">
+  <meta property="og:description" content="Escucha nuestra música y entérate de las próximas fechas de conciertos de Banda Bruna.">
+  <meta property="og:image" content="assets/images/album.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- App JS -->
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="main-header">
+    <nav class="nav-container" aria-label="Navegación principal">
+      <div class="logo">
+        <a href="#inicio" aria-label="Ir al inicio de Banda Bruna">BRUNA</a>
+      </div>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú de navegación">
+        <span class="hamburger"></span>
+      </button>
+      <ul id="nav-menu" class="nav-links">
+        <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+        <li><a href="#banda" class="nav-link">Banda</a></li>
+        <li><a href="#musica" class="nav-link">Música</a></li>
+        <li><a href="#gira" class="nav-link">Gira</a></li>
+        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+      </ul>
+    </nav>
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress" aria-hidden="true"></div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="inicio" class="hero-section" aria-label="Portada">
+      <div class="hero-bg">
+        <img 
+          src="assets/images/hero.png" 
+          alt="Banda Bruna tocando en vivo en un escenario con luces cálidas"
+          fetchpriority="high"
+          width="1200"
+          height="800"
+        >
+      </div>
+      <div class="hero-content">
+        <span class="hero-subtitle">SITIO OFICIAL</span>
+        <h1 class="hero-title">BANDA BRUNA</h1>
+        <p class="hero-tagline">Sonidos profundos. Atmósferas oscuras. Rock alternativo que trasciende.</p>
+        <div class="hero-actions">
+          <a href="#musica" class="btn btn-primary">Escuchar Ahora</a>
+          <a href="#gira" class="btn btn-secondary">Ver Gira</a>
+        </div>
+      </div>
+      <div class="scroll-down-indicator" aria-hidden="true">
+        <a href="#banda" aria-label="Desplazarse hacia abajo">
+          <span class="arrow"></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Bio / Band Section -->
+    <section id="banda" class="section-container bio-section" aria-labelledby="banda-heading">
+      <div class="section-header scroll-reveal">
+        <span class="section-subtitle">BIOGRAFÍA</span>
+        <h2 id="banda-heading" class="section-title">LA BANDA</h2>
+        <div class="section-divider"></div>
+      </div>
+      
+      <div class="bio-grid">
+        <div class="bio-text scroll-reveal">
+          <p>
+            Nacida en la penumbra del circuito indie, <strong>Banda Bruna</strong> fusiona la crudeza del rock alternativo de finales de los 90 con texturas sintéticas y atmósferas envolventes contemporáneas. Con un sonido que viaja entre melodías nostálgicas y riffs contundentes, la banda explora las complejidades de la experiencia humana, el misterio y la resiliencia.
+          </p>
+          <p>
+            Cada presentación en vivo es un viaje multisensorial de luces y sombras diseñado para conectar de manera visceral con la audiencia. Bruna representa la colisión del arte, la melodía y el ruido controlado.
+          </p>
+        </div>
+        
+        <div class="members-gallery scroll-reveal">
+          <h3 class="visually-hidden">Integrantes</h3>
+          <div class="members-grid">
+            <div class="member-card">
+              <div class="member-info">
+                <span class="member-name">Bruna</span>
+                <span class="member-role">Voz Principal & Sintetizadores</span>
+              </div>
+            </div>
+            <div class="member-card">
+              <div class="member-info">
+                <span class="member-name">Israel</span>
+                <span class="member-role">Guitarra & Coros</span>
+              </div>
+            </div>
+            <div class="member-card">
+              <div class="member-info">
+                <span class="member-name">Andrés</span>
+                <span class="member-role">Bajo</span>
+              </div>
+            </div>
+            <div class="member-card">
+              <div class="member-info">
+                <span class="member-name">Rocha</span>
+                <span class="member-role">Batería & Percusión</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Music / Discography Section -->
+    <section id="musica" class="section-container music-section" aria-labelledby="musica-heading">
+      <div class="section-header scroll-reveal">
+        <span class="section-subtitle">DISCOGRAFÍA</span>
+        <h2 id="musica-heading" class="section-title">REPRODUCTOR</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="music-grid scroll-reveal">
+        <!-- Custom Audio Player -->
+        <div class="audio-player-container">
+          <div class="album-art-wrapper">
+            <img 
+              src="assets/images/album.png" 
+              alt="Portada del álbum Elysian Echoes de Banda Bruna, arte dorado abstracto"
+              width="400"
+              height="400"
+              loading="lazy"
+            >
+          </div>
+          
+          <div class="player-controls-wrapper">
+            <div class="track-info">
+              <h3 id="current-track-title" class="track-title">Canción 1</h3>
+              <p id="current-track-album" class="track-album">Elysian Echoes (LP)</p>
+            </div>
+            
+            <div class="player-progress-bar">
+              <span id="current-time" class="time-label">0:00</span>
+              <div id="progress-slider" class="progress-track" role="slider" aria-label="Progreso de la canción" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                <div id="progress-fill" class="progress-fill"></div>
+                <div id="progress-thumb" class="progress-thumb"></div>
+              </div>
+              <span id="duration-time" class="time-label">0:00</span>
+            </div>
+            
+            <div class="player-buttons">
+              <button id="btn-prev" class="player-btn" aria-label="Canción anterior">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg>
+              </button>
+              <button id="btn-play-pause" class="player-btn btn-main-play" aria-label="Reproducir">
+                <svg id="play-icon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="pause-icon" class="hidden" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              </button>
+              <button id="btn-next" class="player-btn" aria-label="Siguiente canción">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 18l8.5-6L6 6zm9-12v12h2V6z"/></svg>
+              </button>
+            </div>
+
+            <div class="player-volume">
+              <button id="btn-mute" class="player-btn" aria-label="Silenciar">
+                <svg id="volume-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                <svg id="mute-icon" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+              <div id="volume-slider" class="progress-track volume-track" role="slider" aria-label="Control de volumen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" tabindex="0">
+                <div id="volume-fill" class="progress-fill" style="width: 80%;"></div>
+                <div id="volume-thumb" class="progress-thumb" style="left: 80%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track List / Playlist -->
+        <div class="playlist-container">
+          <h3 class="playlist-title">Temas Recomendados</h3>
+          <ul id="playlist" class="playlist-items">
+            <!-- Items generated or active in JS -->
+            <li class="playlist-item active" data-index="0" data-src="assets/audio/cancion1.wav">
+              <span class="track-number">01</span>
+              <div class="playlist-track-details">
+                <span class="playlist-track-title">Elysian Echoes</span>
+                <span class="playlist-track-duration">0:10</span>
+              </div>
+              <button class="playlist-play-btn" aria-label="Reproducir Elysian Echoes"></button>
+            </li>
+            <li class="playlist-item" data-index="1" data-src="assets/audio/cancion2.wav">
+              <span class="track-number">02</span>
+              <div class="playlist-track-details">
+                <span class="playlist-track-title">Amber Shadows</span>
+                <span class="playlist-track-duration">0:10</span>
+              </div>
+              <button class="playlist-play-btn" aria-label="Reproducir Amber Shadows"></button>
+            </li>
+            <li class="playlist-item" data-index="2" data-src="assets/audio/cancion3.wav">
+              <span class="track-number">03</span>
+              <div class="playlist-track-details">
+                <span class="playlist-track-title">Nocturnal Tide</span>
+                <span class="playlist-track-duration">0:10</span>
+              </div>
+              <button class="playlist-play-btn" aria-label="Reproducir Nocturnal Tide"></button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tour / Shows Section -->
+    <section id="gira" class="section-container tour-section" aria-labelledby="gira-heading">
+      <div class="section-header scroll-reveal">
+        <span class="section-subtitle">PRÓXIMOS CONCIERTOS</span>
+        <h2 id="gira-heading" class="section-title">FECHAS DE GIRA</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="tour-table-wrapper scroll-reveal">
+        <table class="tour-table">
+          <caption>Fechas de conciertos y disponibilidad de entradas para Banda Bruna</caption>
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Ciudad / País</th>
+              <th scope="col">Recinto</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><time datetime="2026-08-14">14 Ago, 2026</time></td>
+              <td>Santiago, Chile</td>
+              <td>Club Subterráneo</td>
+              <td><a href="#contacto" class="btn btn-sm btn-ticket">Entradas</a></td>
+            </tr>
+            <tr>
+              <td><time datetime="2026-08-28">28 Ago, 2026</time></td>
+              <td>Valparaíso, Chile</td>
+              <td>El Huevo</td>
+              <td><a href="#contacto" class="btn btn-sm btn-ticket">Entradas</a></td>
+            </tr>
+            <tr>
+              <td><time datetime="2026-09-12">12 Sep, 2026</time></td>
+              <td>Concepción, Chile</td>
+              <td>La Bodeguita de Nicanor</td>
+              <td><span class="badge badge-soldout">Agotado</span></td>
+            </tr>
+            <tr>
+              <td><time datetime="2026-10-05">05 Oct, 2026</time></td>
+              <td>Buenos Aires, Argentina</td>
+              <td>Niceto Club</td>
+              <td><a href="#contacto" class="btn btn-sm btn-ticket">Entradas</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Contact / Booking Section -->
+    <section id="contacto" class="section-container contact-section" aria-labelledby="contacto-heading">
+      <div class="section-header scroll-reveal">
+        <span class="section-subtitle">RESERVAS & BOOKING</span>
+        <h2 id="contacto-heading" class="section-title">CONTACTAR</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info scroll-reveal">
+          <h3>Hablemos</h3>
+          <p>¿Interesado en contratar a Banda Bruna para un festival, local o evento privado? ¿O simplemente quieres enviarnos un mensaje?</p>
+          <p>Completa el formulario y nos pondremos en contacto contigo a la brevedad.</p>
+          <ul class="contact-details-list">
+            <li>
+              <strong>Email de Booking:</strong>
+              <a href="mailto:booking@bandabruna.cl">booking@bandabruna.cl</a>
+            </li>
+            <li>
+              <strong>Prensa & Media:</strong>
+              <a href="mailto:contacto@bandabruna.cl">contacto@bandabruna.cl</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="contact-form-container scroll-reveal">
+          <form id="booking-form" class="booking-form" action="#" method="POST" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-name">Nombre Completo</label>
+                <input 
+                  type="text" 
+                  id="contact-name" 
+                  name="name" 
+                  placeholder="Tu nombre" 
+                  autocomplete="name" 
+                  required
+                >
+                <span class="error-message" id="name-error" aria-live="polite">Por favor ingresa tu nombre.</span>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-email">Correo Electrónico</label>
+                <input 
+                  type="email" 
+                  id="contact-email" 
+                  name="email" 
+                  placeholder="correo@ejemplo.com" 
+                  autocomplete="email" 
+                  inputmode="email"
+                  required
+                >
+                <span class="error-message" id="email-error" aria-live="polite">Por favor ingresa un correo válido.</span>
+              </div>
+              <div class="form-group">
+                <label for="contact-phone">Teléfono (Opcional)</label>
+                <input 
+                  type="tel" 
+                  id="contact-phone" 
+                  name="phone" 
+                  placeholder="+56 9 1234 5678" 
+                  autocomplete="tel"
+                  inputmode="tel"
+                >
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-date">Fecha Estimada del Evento (Si aplica)</label>
+                <input 
+                  type="date" 
+                  id="contact-date" 
+                  name="event-date"
+                >
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-message">Mensaje</label>
+                <textarea 
+                  id="contact-message" 
+                  name="message" 
+                  rows="5" 
+                  placeholder="Cuéntanos sobre tu propuesta o déjanos un mensaje..." 
+                  required
+                ></textarea>
+                <span class="error-message" id="message-error" aria-live="polite">Por favor escribe un mensaje.</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit">Enviar Mensaje</button>
+            <div id="form-feedback" class="form-feedback hidden" role="alert" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="footer-container">
+      <div class="footer-logo">BRUNA</div>
+      <div class="footer-socials">
+        <a href="https://spotify.com" target="_blank" rel="noopener" aria-label="Escucha Banda Bruna en Spotify">Spotify</a>
+        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Síguenos en Instagram">Instagram</a>
+        <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="Míranos en YouTube">YouTube</a>
+        <a href="https://apple.com" target="_blank" rel="noopener" aria-label="Escúchanos en Apple Music">Apple Music</a>
+      </div>
+      <div class="footer-copy">
+        <p>&copy; 2026 Banda Bruna. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
