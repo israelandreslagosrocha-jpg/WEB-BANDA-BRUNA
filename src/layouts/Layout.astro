@@ -17,7 +17,7 @@ const currentPath = Astro.url.pathname;
 const getLinkClass = (path: string) => {
   const isActive = currentPath === path || currentPath === `${path}/` || (path !== '/' && currentPath.startsWith(path));
   return isActive 
-    ? "text-gold-bruna font-semibold border-b-2 border-gold-bruna pb-1 transition-all" 
+    ? "text-gold-bruna font-extrabold border-b-2 border-gold-bruna pb-1 transition-all" 
     : "text-slate-300 hover:text-white pb-1 transition-all";
 };
 ---
@@ -44,63 +44,73 @@ const getLinkClass = (path: string) => {
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 </head>
 <body class="bg-bg-darkest text-white selection:bg-gold-bruna/30 selection:text-gold-bruna min-h-screen flex flex-col">
 
   <!-- Header / Nav -->
-  <header id="main-header" class="fixed top-0 left-0 w-100-percent z-50 glassmorphism transition-all duration-300 w-full">
-    <div class="max-w-7xl mx-auto px-6 py-4 md:py-5 flex justify-between items-center">
+  <header id="main-header" class="fixed top-0 left-0 w-full z-50 glassmorphism transition-all duration-300">
+    <div class="max-w-[1400px] mx-auto px-6 py-4 flex justify-between items-center">
       
-      <!-- Logo -->
-      <div class="logo">
-        <a href="/" class="font-title text-2xl font-extrabold tracking-wider bg-gradient-to-r from-gold-bruna to-gold-bruna-hover bg-clip-text text-transparent" aria-label="Ir al inicio de Banda Bruna">
-          BRUNA
-        </a>
-      </div>
+      <!-- Brand Logo in header -->
+      <a href="/" class="flex items-center gap-3 group" aria-label="Ir al inicio de Banda Bruna">
+        <!-- Monogram Logo Mark -->
+        <div class="w-10 h-10 rounded-full border-2 border-gold-bruna flex items-center justify-center text-gold-bruna font-title font-extrabold text-lg tracking-tighter shadow-md shadow-gold-bruna/10 group-hover:bg-gold-bruna group-hover:text-black transition-all">
+          B
+        </div>
+        <!-- Text Brand -->
+        <div class="flex flex-col text-left leading-[1.0]">
+          <span class="font-title text-sm font-extrabold text-white tracking-widest">BANDA</span>
+          <span class="font-title text-[10px] font-bold text-gold-bruna tracking-[0.2em]">BRUNA</span>
+        </div>
+      </a>
 
       <!-- Nav Toggle Button (Mobile) -->
-      <button id="nav-toggle" class="md:hidden text-white focus:outline-none p-1 z-50 cursor-pointer" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú de navegación">
+      <button id="nav-toggle" class="lg:hidden text-white focus:outline-none p-1 z-50 cursor-pointer" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú de navegación">
         <div class="w-6 h-0.5 bg-white mb-1.5 transition-all duration-300" id="bar1"></div>
         <div class="w-6 h-0.5 bg-white mb-1.5 transition-all duration-300" id="bar2"></div>
         <div class="w-6 h-0.5 bg-white transition-all duration-300" id="bar3"></div>
       </button>
 
       <!-- Nav Links -->
-      <nav class="hidden md:block">
-        <ul class="flex gap-8 items-center list-none">
-          <li><a href="/" class={getLinkClass('/')}>Inicio</a></li>
-          <li><a href="/banda" class={getLinkClass('/banda')}>Banda</a></li>
-          <li><a href="/integrantes" class={getLinkClass('/integrantes')}>Integrantes</a></li>
-          <li><a href="/musica" class={getLinkClass('/musica')}>Música</a></li>
-          <li><a href="/videos" class={getLinkClass('/videos')}>Videos</a></li>
-          <li><a href="/agenda" class={getLinkClass('/agenda')}>Agenda</a></li>
-          <li><a href="/noticias" class={getLinkClass('/noticias')}>Noticias</a></li>
-          <li><a href="/epk" class={getLinkClass('/epk')}>Prensa/EPK</a></li>
-          <li><a href="/contacto" class={getLinkClass('/contacto')}>Contacto</a></li>
-          <li>
-            <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-4 py-2 rounded font-semibold text-sm hover:scale-105 transition-all flex items-center gap-1.5 shadow-lg shadow-gold-bruna/10 cursor-pointer">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
-              COTIZAR EVENTO
-            </a>
-          </li>
+      <nav class="hidden lg:block">
+        <ul class="flex gap-6 items-center list-none text-xs font-title font-bold tracking-widest">
+          <li><a href="/" class={getLinkClass('/')}>INICIO</a></li>
+          <li><a href="/banda" class={getLinkClass('/banda')}>BANDA</a></li>
+          <li><a href="/integrantes" class={getLinkClass('/integrantes')}>INTEGRANTES</a></li>
+          <li><a href="/musica" class={getLinkClass('/musica')}>MÚSICA</a></li>
+          <li><a href="/videos" class={getLinkClass('/videos')}>VIDEOS</a></li>
+          <li><a href="/agenda" class={getLinkClass('/agenda')}>AGENDA</a></li>
+          <li><a href="/noticias" class={getLinkClass('/noticias')}>NOTICIAS</a></li>
+          <li><a href="/galeria" class={getLinkClass('/galeria')}>GALERÍA</a></li>
+          <li><a href="/epk" class={getLinkClass('/epk')}>PRENSA / EPK</a></li>
+          <li><a href="/contacto" class={getLinkClass('/contacto')}>CONTACTO</a></li>
         </ul>
       </nav>
 
+      <!-- CTA WhatsApp Header Button -->
+      <div class="hidden lg:block">
+        <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-4 py-2 rounded-sm font-bold text-xs hover:scale-105 transition-all flex items-center gap-1.5 shadow-lg shadow-gold-bruna/10 cursor-pointer uppercase">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
+          COTIZAR EVENTO
+        </a>
+      </div>
+
       <!-- Mobile Nav Links Drawer -->
-      <div id="nav-menu" class="fixed top-0 right-[-100%] w-[300px] h-screen bg-slate-950/98 backdrop-blur-xl border-l border-white/5 p-8 pt-24 flex flex-col gap-6 md:hidden z-40 transition-all duration-300 list-none">
-        <ul class="flex flex-col gap-6 list-none p-0 m-0">
-          <li><a href="/" class="block text-lg py-2 border-b border-white/5 active">Inicio</a></li>
-          <li><a href="/banda" class="block text-lg py-2 border-b border-white/5">Banda</a></li>
-          <li><a href="/integrantes" class="block text-lg py-2 border-b border-white/5">Integrantes</a></li>
-          <li><a href="/musica" class="block text-lg py-2 border-b border-white/5">Música</a></li>
-          <li><a href="/videos" class="block text-lg py-2 border-b border-white/5">Videos</a></li>
-          <li><a href="/agenda" class="block text-lg py-2 border-b border-white/5">Agenda</a></li>
-          <li><a href="/noticias" class="block text-lg py-2 border-b border-white/5">Noticias</a></li>
-          <li><a href="/epk" class="block text-lg py-2 border-b border-white/5">Prensa/EPK</a></li>
-          <li><a href="/contacto" class="block text-lg py-2 border-b border-white/5">Contacto</a></li>
-          <li class="mt-4">
-            <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="w-full bg-gold-bruna text-black text-center py-3 rounded font-bold text-sm block cursor-pointer">
+      <div id="nav-menu" class="fixed top-0 right-[-100%] w-[300px] h-screen bg-slate-950/98 backdrop-blur-xl border-l border-white/5 p-8 pt-24 flex flex-col gap-6 lg:hidden z-40 transition-all duration-300 list-none">
+        <ul class="flex flex-col gap-4 list-none p-0 m-0 font-title font-bold text-xs tracking-widest text-left">
+          <li><a href="/" class="block py-2.5 border-b border-white/5">INICIO</a></li>
+          <li><a href="/banda" class="block py-2.5 border-b border-white/5">BANDA</a></li>
+          <li><a href="/integrantes" class="block py-2.5 border-b border-white/5">INTEGRANTES</a></li>
+          <li><a href="/musica" class="block py-2.5 border-b border-white/5">MÚSICA</a></li>
+          <li><a href="/videos" class="block py-2.5 border-b border-white/5">VIDEOS</a></li>
+          <li><a href="/agenda" class="block py-2.5 border-b border-white/5">AGENDA</a></li>
+          <li><a href="/noticias" class="block py-2.5 border-b border-white/5">NOTICIAS</a></li>
+          <li><a href="/galeria" class="block py-2.5 border-b border-white/5">GALERÍA</a></li>
+          <li><a href="/epk" class="block py-2.5 border-b border-white/5">PRENSA / EPK</a></li>
+          <li><a href="/contacto" class="block py-2.5 border-b border-white/5">CONTACTO</a></li>
+          <li class="mt-6">
+            <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="w-full bg-gold-bruna text-black text-center py-3 rounded font-bold block cursor-pointer">
               COTIZAR VÍA WHATSAPP
             </a>
           </li>
@@ -119,39 +129,55 @@ const getLinkClass = (path: string) => {
   </main>
 
   <!-- Footer -->
-  <footer class="bg-slate-950 border-t border-white/5 py-12 md:py-16 text-slate-400">
+  <footer class="bg-[#040815] border-t border-white/5 py-12 md:py-16 text-slate-400">
     <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
       
-      <!-- Bio -->
+      <!-- Footer Logo & Bio -->
       <div class="flex flex-col gap-4">
-        <span class="font-title text-2xl font-extrabold tracking-wider bg-gradient-to-r from-gold-bruna to-gold-bruna-hover bg-clip-text text-transparent">
-          BRUNA
-        </span>
-        <p class="text-sm leading-relaxed">
-          Música en vivo de alta calidad para festivales, eventos corporativos, matrimonios y municipalidades en todo Chile. Cumbia, alegría y experiencia.
+        <a href="/" class="flex items-center gap-3" aria-label="Ir al inicio de Banda Bruna">
+          <div class="w-10 h-10 rounded-full border-2 border-gold-bruna flex items-center justify-center text-gold-bruna font-title font-extrabold text-lg tracking-tighter">
+            B
+          </div>
+          <div class="flex flex-col text-left leading-[1.0]">
+            <span class="font-title text-sm font-extrabold text-white tracking-widest">BANDA</span>
+            <span class="font-title text-[10px] font-bold text-gold-bruna tracking-[0.2em]">BRUNA</span>
+          </div>
+        </a>
+        <p class="text-xs leading-relaxed mt-2">
+          Música en vivo para eventos, festivales y celebraciones. Cumbia, alegría y experiencia.
         </p>
+        
+        <!-- Social links icons -->
+        <div class="flex gap-4 mt-2">
+          <a href="https://instagram.com/banda_bruna/" target="_blank" rel="noopener" aria-label="Síguenos en Instagram" class="hover:text-gold-bruna transition-colors text-lg">📸</a>
+          <a href="https://facebook.com/bandabruna" target="_blank" rel="noopener" aria-label="Síguenos en Facebook" class="hover:text-gold-bruna transition-colors text-lg">👤</a>
+          <a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" aria-label="Síguenos en YouTube" class="hover:text-gold-bruna transition-colors text-lg">📹</a>
+          <a href="https://www.tiktok.com/@bandabrunaoficial" target="_blank" rel="noopener" aria-label="Síguenos en TikTok" class="hover:text-gold-bruna transition-colors text-lg">🎵</a>
+        </div>
       </div>
 
       <!-- Navigation -->
-      <div class="flex flex-col gap-4">
-        <span class="font-title text-sm font-bold text-white tracking-widest uppercase">Navegación</span>
-        <ul class="flex flex-col gap-2.5 text-sm list-none p-0">
+      <div class="flex flex-col gap-4 text-left">
+        <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Navegación</span>
+        <ul class="flex flex-col gap-2 text-xs list-none p-0">
           <li><a href="/" class="hover:text-gold-bruna transition-colors">Inicio</a></li>
-          <li><a href="/banda" class="hover:text-gold-bruna transition-colors">La Banda</a></li>
+          <li><a href="/banda" class="hover:text-gold-bruna transition-colors">Banda</a></li>
           <li><a href="/integrantes" class="hover:text-gold-bruna transition-colors">Integrantes</a></li>
-          <li><a href="/videos" class="hover:text-gold-bruna transition-colors">Galería de Videos</a></li>
-          <li><a href="/agenda" class="hover:text-gold-bruna transition-colors">Agenda de Shows</a></li>
+          <li><a href="/musica" class="hover:text-gold-bruna transition-colors">Música</a></li>
+          <li><a href="/videos" class="hover:text-gold-bruna transition-colors">Videos</a></li>
+          <li><a href="/agenda" class="hover:text-gold-bruna transition-colors">Agenda</a></li>
           <li><a href="/noticias" class="hover:text-gold-bruna transition-colors">Noticias</a></li>
+          <li><a href="/galeria" class="hover:text-gold-bruna transition-colors">Galería</a></li>
           <li><a href="/epk" class="hover:text-gold-bruna transition-colors">Prensa / EPK</a></li>
           <li><a href="/contacto" class="hover:text-gold-bruna transition-colors">Contacto</a></li>
         </ul>
       </div>
 
       <!-- Platforms -->
-      <div class="flex flex-col gap-4">
-        <span class="font-title text-sm font-bold text-white tracking-widest uppercase">Escúchanos</span>
-        <ul class="flex flex-col gap-2.5 text-sm list-none p-0">
-          <li><a href="https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Spotify</a></li>
+      <div class="flex flex-col gap-4 text-left">
+        <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Música</span>
+        <ul class="flex flex-col gap-2.5 text-xs list-none p-0">
+          <li><a href="https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Escucha en Spotify</a></li>
           <li><a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">YouTube Music</a></li>
           <li><a href="https://apple.com" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Apple Music</a></li>
           <li><a href="https://deezer.com" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Deezer</a></li>
@@ -159,29 +185,21 @@ const getLinkClass = (path: string) => {
       </div>
 
       <!-- Booking / Info -->
-      <div class="flex flex-col gap-4">
-        <span class="font-title text-sm font-bold text-white tracking-widest uppercase">Contrataciones</span>
-        <ul class="flex flex-col gap-2.5 text-sm list-none p-0">
-          <li><strong>Booking:</strong> <a href="mailto:booking@bandabruna.cl" class="hover:text-gold-bruna transition-colors">booking@bandabruna.cl</a></li>
-          <li><strong>Prensa:</strong> <a href="mailto:contacto@bandabruna.cl" class="hover:text-gold-bruna transition-colors">contacto@bandabruna.cl</a></li>
-          <li><strong>Fono/WhatsApp:</strong> <a href="tel:+56912345678" class="hover:text-gold-bruna transition-colors">+56 9 1234 5678</a></li>
-          <li><strong>Ubicación:</strong> Temuco, Región de la Araucanía, Chile.</li>
+      <div class="flex flex-col gap-4 text-left">
+        <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Contrataciones</span>
+        <ul class="flex flex-col gap-2.5 text-xs list-none p-0">
+          <li><strong>Fono:</strong> <a href="tel:+56912345678" class="hover:text-gold-bruna transition-colors">+56 9 1234 5678</a></li>
+          <li><strong>Correo:</strong> <a href="mailto:contacto@bandabruna.cl" class="hover:text-gold-bruna transition-colors">contacto@bandabruna.cl</a></li>
+          <li><strong>Ubicación:</strong> Temuco, La Araucanía, Chile</li>
         </ul>
       </div>
 
     </div>
 
     <!-- Divider -->
-    <div class="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+    <div class="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-slate-500">
       <p>&copy; {new Date().getFullYear()} Banda Bruna. Todos los derechos reservados.</p>
-      
-      <!-- Social links icons -->
-      <div class="flex gap-6">
-        <a href="https://instagram.com/banda_bruna/" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Instagram</a>
-        <a href="https://facebook.com/bandabruna" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Facebook</a>
-        <a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">YouTube</a>
-        <a href="https://www.tiktok.com/@bandabrunaoficial" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">TikTok</a>
-      </div>
+      <p>Sitio desarrollado con ❤️</p>
     </div>
   </footer>
 
@@ -191,11 +209,11 @@ const getLinkClass = (path: string) => {
     const header = document.getElementById('main-header');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 40) {
-        header.classList.add('py-2', 'md:py-3', 'shadow-2xl', 'shadow-black/60');
-        header.classList.remove('py-4', 'md:py-5');
+        header.classList.add('py-2', 'shadow-2xl', 'shadow-black/60');
+        header.classList.remove('py-4');
       } else {
-        header.classList.remove('py-2', 'md:py-3', 'shadow-2xl', 'shadow-black/60');
-        header.classList.add('py-4', 'md:py-5');
+        header.classList.remove('py-2', 'shadow-2xl', 'shadow-black/60');
+        header.classList.add('py-4');
       }
     });
 

@@ -12,21 +12,21 @@ import {
 const latestVideo = getLatestVideo();
 const instagramFeed = getInstagramFeed();
 const facebookFeed = getFacebookFeed();
-const upcomingEvents = getUpcomingEvents().slice(0, 5); // Show first 5 events
-const latestNews = getNews()[0]; // Show latest news card
+const upcomingEvents = getUpcomingEvents(); // Show all 5 events
+const newsList = getNews();
 ---
 
-<Layout title="Banda Bruna 2.0 | Plataforma Oficial - Cumbia Chilena & Show en Vivo">
+<Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
   
   <!-- Hero Section with Background Video Loop -->
   <section class="relative h-screen flex items-center justify-center overflow-hidden bg-black px-6" aria-label="Portada Principal">
     
     <!-- Video background / Iframe container -->
-    <div class="absolute top-0 left-0 w-full h-full z-0 opacity-40 pointer-events-none overflow-hidden">
-      <!-- Fallback static hero image during load or if video fails -->
+    <div class="absolute top-0 left-0 w-full h-full z-0 opacity-30 pointer-events-none overflow-hidden">
+      <!-- Fallback static hero image during load -->
       <div class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat" style="background-image: url('assets/images/hero.png');"></div>
       
-      <!-- YouTube Embed in background simulating YouTube API automation -->
+      <!-- YouTube Embed in background simulating automated video loop -->
       <iframe 
         class="absolute top-1/2 left-1/2 w-[100vw] h-[56.25vw] min-h-screen min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2"
         src={latestVideo.embedUrl}
@@ -38,27 +38,28 @@ const latestNews = getNews()[0]; // Show latest news card
     </div>
 
     <!-- Radial backdrop gradient overlay -->
-    <div class="absolute top-0 left-0 w-full h-full z-1 bg-radial-gradient from-transparent via-bg-darkest/70 to-bg-darkest z-10" aria-hidden="true"></div>
+    <div class="absolute top-0 left-0 w-full h-full z-10 bg-radial-gradient from-transparent via-bg-darkest/65 to-bg-darkest" aria-hidden="true"></div>
 
     <!-- Hero Content Layout -->
     <div class="relative max-w-7xl mx-auto w-full z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-16">
       
       <!-- Text & Primary CTAs (Left) -->
       <div class="lg:col-span-7 text-left flex flex-col gap-6">
-        <span class="text-sm tracking-[0.4em] font-semibold text-gold-bruna uppercase block">
+        <span class="text-xs tracking-[0.4em] font-semibold text-gold-bruna uppercase block">
           CUMBIA · SHOW EN VIVO · EXPERIENCIA BRUNA
         </span>
         <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-none tracking-tight font-title">
-          MÚSICA EN VIVO PARA <span class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover bg-clip-text text-transparent">EVENTOS, FESTIVALES</span> Y CELEBRACIONES
+          MÚSICA EN VIVO PARA <br class="hidden md:inline"/>
+          <span class="text-gold-bruna uppercase">EVENTOS, FESTIVALES <br class="hidden md:inline"/>Y CELEBRACIONES</span>
         </h1>
-        <p class="text-slate-300 text-lg max-w-xl font-light">
-          Llevamos la mejor energía y sabor de la cumbia sureña a tus festivales municipales, eventos de empresas, bodas y fiestas costumbristas.
-        </p>
-        <div class="flex flex-wrap gap-4 mt-2">
-          <a href="#lanzamientos" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-8 py-3.5 rounded font-bold hover:scale-105 transition-all shadow-lg shadow-gold-bruna/20 cursor-pointer text-center">
+        <div class="flex flex-wrap gap-4 mt-4">
+          <a href="#lanzamientos" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-6 py-3.5 rounded-sm font-bold text-xs hover:scale-105 transition-all shadow-lg shadow-gold-bruna/20 cursor-pointer text-center flex items-center gap-2">
+            <!-- Inline play icon in a circle -->
+            <span class="w-4 h-4 bg-black text-gold-bruna rounded-full flex items-center justify-center text-[8px] pl-0.5">▶</span>
             VER ÚLTIMO VIDEOCLIP
           </a>
-          <a href="#contrataciones" class="border border-white/20 bg-white/5 hover:bg-white/10 hover:border-white px-8 py-3.5 rounded font-bold hover:scale-105 transition-all cursor-pointer text-center flex items-center gap-2 justify-center">
+          <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="border border-white/20 hover:border-white bg-white/5 hover:bg-white/10 px-6 py-3.5 rounded-sm font-bold text-xs hover:scale-105 transition-all cursor-pointer text-center flex items-center gap-2 justify-center uppercase">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
             COTIZAR EVENTO
           </a>
         </div>
@@ -66,452 +67,520 @@ const latestNews = getNews()[0]; // Show latest news card
 
       <!-- Featured Video Card (Right) -->
       <div class="lg:col-span-5 flex justify-center lg:justify-end">
-        <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-900/90 border border-white/10 hover:border-gold-bruna rounded-xl p-4 w-full max-w-[380px] shadow-2xl shadow-black/80 hover:translate-y-[-5px] transition-all group block">
-          <div class="relative aspect-video rounded-lg overflow-hidden mb-4 bg-slate-950 border border-white/5">
+        <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-950/80 border border-white/5 hover:border-gold-bruna rounded-xl p-4 w-full max-w-[360px] shadow-2xl shadow-black/90 hover:translate-y-[-5px] transition-all group block">
+          <div class="relative aspect-video rounded-lg overflow-hidden mb-4 bg-slate-900 border border-white/5">
             <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
             <div class="absolute inset-0 flex items-center justify-center bg-black/40">
-              <div class="w-12 h-12 bg-gold-bruna rounded-full flex items-center justify-center text-black shadow-lg group-hover:scale-110 transition-transform">
-                <span class="text-xs pl-0.5">▶</span>
+              <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-black shadow-lg group-hover:scale-110 transition-transform">
+                <span class="text-xs pl-0.5 text-black">▶</span>
               </div>
             </div>
-            <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">NUEVO</span>
+            <span class="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-widest uppercase">NUEVO</span>
           </div>
-          <div class="flex justify-between items-start gap-3">
-            <div>
-              <span class="text-[11px] text-slate-400 font-semibold tracking-wider uppercase block">BANDA BRUNA</span>
-              <h2 class="text-white font-title font-bold text-lg mt-0.5 group-hover:text-gold-bruna transition-colors">{latestVideo.title}</h2>
-              <p class="text-xs text-slate-400 mt-1">{latestVideo.type}</p>
+          <div>
+            <span class="text-[10px] text-slate-400 font-bold tracking-wider uppercase block">BANDA BRUNA</span>
+            <h2 class="text-white font-title font-extrabold text-base mt-0.5 group-hover:text-gold-bruna transition-colors uppercase">{latestVideo.title}</h2>
+            <p class="text-xs text-slate-400 mt-1">{latestVideo.type}</p>
+            <div class="flex items-center gap-1 text-[10px] text-slate-500 font-semibold mt-3 hover:underline">
+              <span>Ver en YouTube</span>
+              <span>📹</span>
             </div>
-            <svg class="w-5 h-5 text-slate-400 group-hover:text-gold-bruna transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.518 3.558 12 3.558 12 3.558s-7.518 0-9.388.497A3.003 3.003 0 0 0 .502 6.163C0 8.07 0 12 0 12s0 3.93.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.482 20.442 12 20.442 12 20.442s7.518 0 9.388-.497a3.003 3.003 0 0 0 2.11-2.108C24 15.93 24 12 24 12s0-3.93-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
           </div>
         </a>
       </div>
 
+    </div>
+
+    <!-- Centered Down Arrow -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 text-slate-400 text-xl font-bold animate-bounce" aria-hidden="true">
+      <a href="#lanzamientos" aria-label="Desplazarse abajo">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </a>
     </div>
   </section>
 
   <!-- Auto Content Badges Bar -->
   <div class="border-y border-white/5 bg-slate-950/60 py-6">
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-      <div class="flex flex-col md:flex-row items-center justify-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-950 flex items-center justify-center text-blue-400">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5M7.5 12h.01M12 12h.01M16.5 12h.01"/></svg>
+    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6 text-center md:text-left">
+      
+      <!-- Badge 1 -->
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-blue-950/50 border border-blue-500/10 flex items-center justify-center text-blue-400 flex-shrink-0">
+          <svg class="w-4 h-4 fill-blue-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </div>
-        <div class="text-left">
-          <span class="text-xs font-semibold text-slate-400 block tracking-wider uppercase">CONTENIDO AUTOMÁTICO</span>
-          <span class="text-[11px] text-slate-500">YouTube, Instagram & Facebook</span>
+        <div>
+          <span class="text-xs font-bold text-white block tracking-wider uppercase">CONTENIDO AUTOMÁTICO</span>
+          <span class="text-[11px] text-slate-400">Actualizamos nuestra web automáticamente desde YouTube, Instagram y Facebook.</span>
         </div>
       </div>
       
-      <div class="flex flex-col md:flex-row items-center justify-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-pink-950/50 flex items-center justify-center text-pink-400">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <!-- Badge 2 -->
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-pink-950/40 border border-pink-500/10 flex items-center justify-center text-pink-400 flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </div>
-        <div class="text-left">
-          <span class="text-xs font-semibold text-slate-400 block tracking-wider uppercase">REDES EN TIEMPO REAL</span>
-          <span class="text-[11px] text-slate-500">Últimas publicaciones al día</span>
-        </div>
-      </div>
-
-      <div class="flex flex-col md:flex-row items-center justify-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-amber-950/40 flex items-center justify-center text-gold-bruna">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        </div>
-        <div class="text-left">
-          <span class="text-xs font-semibold text-slate-400 block tracking-wider uppercase">AGENDA ACTUALIZADA</span>
-          <span class="text-[11px] text-slate-500">Fechas de conciertos confirmados</span>
+        <div>
+          <span class="text-xs font-bold text-white block tracking-wider uppercase">REDES EN TIEMPO REAL</span>
+          <span class="text-[11px] text-slate-400">Síguenos y mira nuestras últimas publicaciones en tiempo real.</span>
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row items-center justify-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-green-950/50 flex items-center justify-center text-green-400">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+      <!-- Badge 3 -->
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-950/40 border border-amber-500/10 flex items-center justify-center text-gold-bruna flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
         </div>
-        <div class="text-left">
-          <span class="text-xs font-semibold text-slate-400 block tracking-wider uppercase">ESCUCHA NUESTRA MÚSICA</span>
-          <span class="text-[11px] text-slate-500">Spotify, YouTube & Apple Music</span>
+        <div>
+          <span class="text-xs font-bold text-white block tracking-wider uppercase">AGENDA ACTUALIZADA</span>
+          <span class="text-[11px] text-slate-400">Nuestros próximos shows siempre al día. ¡No te pierdas ninguno!</span>
+        </div>
+      </div>
+
+      <!-- Badge 4 -->
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-yellow-950/30 border border-yellow-500/10 flex items-center justify-center text-yellow-400 flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+        </div>
+        <div>
+          <span class="text-xs font-bold text-white block tracking-wider uppercase">ESCUCHA NUESTRA MÚSICA</span>
+          <span class="text-[11px] text-slate-400">Disponible en Spotify, YouTube Music, Apple Music y más plataformas.</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Section: Últimos Lanzamientos (Dynamic integration) -->
-  <section id="lanzamientos" class="max-w-7xl mx-auto px-6 py-24 scroll-reveal">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
+  <!-- Section: Split Grid (ÚLTIMOS LANZAMIENTOS & PRÓXIMOS EVENTOS) -->
+  <section id="lanzamientos" class="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-reveal">
+    
+    <!-- LEFT SIDE: Últimos Lanzamientos (Col span 8) -->
+    <div class="lg:col-span-8 flex flex-col gap-6 w-full">
       <div>
-        <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">NOVEDADES</span>
-        <h2 class="text-3xl font-extrabold font-title uppercase">ÚLTIMOS LANZAMIENTOS</h2>
+        <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider mb-8">ÚLTIMOS LANZAMIENTOS</h2>
+      </div>
+
+      <!-- Grid of 3 columns of cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Card 1: YouTube -->
+        <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
+          <div class="relative aspect-video bg-black overflow-hidden">
+            <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
+              <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white">
+                <span class="text-xs pl-0.5">▶</span>
+              </div>
+            </a>
+            <span class="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">YOUTUBE</span>
+          </div>
+          <div class="p-5 flex-grow flex flex-col justify-between text-left">
+            <div>
+              <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase">{latestVideo.title}</h3>
+              <p class="text-xs text-slate-400 mt-2">Videoclip Oficial</p>
+            </div>
+            <span class="text-[10px] text-slate-500 font-semibold block mt-4">{latestVideo.publishedAt}</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Instagram -->
+        <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
+          <div class="relative aspect-video bg-black overflow-hidden">
+            <img src={instagramFeed[0].imageUrl} alt="Instagram" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
+              <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              </div>
+            </a>
+            <span class="absolute top-2.5 left-2.5 bg-pink-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">INSTAGRAM</span>
+          </div>
+          <div class="p-5 flex-grow flex flex-col justify-between text-left">
+            <div>
+              <h3 class="font-title font-bold text-xs text-white leading-relaxed line-clamp-2">Así vivimos el fin de semana en Los Ángeles 🔥🎶</h3>
+              <p class="text-xs text-slate-400 mt-2">Seguimos llevando el ritmo de la cumbia sureña a todos los rincones.</p>
+            </div>
+            <span class="text-[10px] text-slate-500 font-semibold block mt-4">Hace 1 día</span>
+          </div>
+        </div>
+
+        <!-- Card 3: News -->
+        <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
+          <div class="relative aspect-video bg-[#0b132b] overflow-hidden flex items-center justify-center border-b border-white/5">
+            <div class="w-12 h-12 bg-slate-950 rounded-full border border-white/5 flex items-center justify-center text-gold-bruna">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
+            </div>
+            <span class="absolute top-2.5 left-2.5 bg-amber-500 text-black text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">NOTICIAS</span>
+          </div>
+          <div class="p-5 flex-grow flex flex-col justify-between text-left">
+            <div>
+              <h3 class="font-title font-bold text-xs text-white leading-relaxed line-clamp-2">{newsList[0].title}</h3>
+              <p class="text-xs text-slate-400 mt-2">La organización confirmó a Banda Bruna en el horario estelar.</p>
+            </div>
+            <span class="text-[10px] text-slate-500 font-semibold block mt-4">{newsList[0].publishedAt}</span>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <!-- 3 Columns Feed: YouTube, Instagram, News -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      
-      <!-- Card 1: YouTube Video -->
-      <div class="bg-slate-900 border border-white/5 rounded-xl overflow-hidden hover:border-gold-bruna transition-all group flex flex-col">
-        <div class="relative aspect-video bg-black overflow-hidden border-b border-white/5">
-          <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
-            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg">
-              <span class="text-xs pl-0.5">▶</span>
-            </div>
-          </a>
-          <span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">YOUTUBE</span>
-        </div>
-        <div class="p-6 flex-grow flex flex-col justify-between">
-          <div>
-            <h3 class="font-title font-bold text-xl group-hover:text-gold-bruna transition-colors">{latestVideo.title}</h3>
-            <p class="text-xs text-slate-400 mt-2">Vídeoclip Oficial de cumbia sureña lanzado recientemente en nuestro canal de YouTube.</p>
-          </div>
-          <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/5 text-xs text-slate-500">
-            <span>{latestVideo.publishedAt}</span>
-            <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="text-gold-bruna hover:underline font-semibold cursor-pointer">Ver en YouTube →</a>
-          </div>
-        </div>
+    <!-- RIGHT SIDE: Próximos Eventos & Banner (Col span 4) -->
+    <div class="lg:col-span-4 flex flex-col gap-6 w-full">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">PRÓXIMOS EVENTOS</h2>
+        <a href="/agenda" class="text-gold-bruna text-[10px] font-bold hover:underline tracking-wider uppercase flex items-center gap-1 flex-shrink-0">
+          Ver agenda completa →
+        </a>
       </div>
 
-      <!-- Card 2: Instagram Post -->
-      <div class="bg-slate-900 border border-white/5 rounded-xl overflow-hidden hover:border-gold-bruna transition-all group flex flex-col">
-        <div class="relative aspect-video bg-black overflow-hidden border-b border-white/5">
-          <img src={instagramFeed[0].imageUrl} alt="Instagram Post" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-all cursor-pointer">
-            <div class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white shadow-lg">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-            </div>
-          </a>
-          <span class="absolute top-2 left-2 bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">INSTAGRAM</span>
-        </div>
-        <div class="p-6 flex-grow flex flex-col justify-between">
-          <div>
-            <h3 class="font-title font-bold text-xl group-hover:text-gold-bruna transition-colors">Así vivimos el fin de semana</h3>
-            <p class="text-xs text-slate-400 mt-2 line-clamp-3">{instagramFeed[0].caption}</p>
-          </div>
-          <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/5 text-xs text-slate-500">
-            <span>{instagramFeed[0].timeAgo}</span>
-            <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="text-gold-bruna hover:underline font-semibold cursor-pointer">Ver publicación →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3: Noticias / CMS -->
-      <div class="bg-slate-900 border border-white/5 rounded-xl overflow-hidden hover:border-gold-bruna transition-all group flex flex-col">
-        <div class="relative aspect-video bg-blue-950/20 overflow-hidden border-b border-white/5 flex items-center justify-center">
-          <!-- Decorative CMS background icon -->
-          <div class="w-20 h-20 rounded-full bg-slate-950 flex items-center justify-center border border-white/5 text-gold-bruna">
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
-          </div>
-          <span class="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">NOTICIAS</span>
-        </div>
-        <div class="p-6 flex-grow flex flex-col justify-between">
-          <div>
-            <h3 class="font-title font-bold text-xl group-hover:text-gold-bruna transition-colors leading-snug">{latestNews.title}</h3>
-            <p class="text-xs text-slate-400 mt-2 line-clamp-3">{latestNews.summary}</p>
-          </div>
-          <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/5 text-xs text-slate-500">
-            <span>{latestNews.publishedAt}</span>
-            <a href="/noticias" class="text-gold-bruna hover:underline font-semibold cursor-pointer">Leer noticia →</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Section: Próximos Eventos Timeline -->
-  <section class="border-t border-white/5 bg-slate-950/20 py-24 scroll-reveal">
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-      
-      <!-- Title & Text (Left) -->
-      <div class="lg:col-span-5">
-        <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">AGENDA DE CONCIERTOS</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold font-title uppercase mb-6">PRÓXIMOS EVENTOS</h2>
-        <p class="text-slate-400 font-light mb-8 leading-relaxed">
-          Nuestras próximas fechas en vivo confirmadas para municipalidades, festivales y fiestas costumbristas. ¡Ven a bailar con nosotros!
-        </p>
-        <a href="/agenda" class="inline-flex bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-6 py-3 rounded font-bold hover:scale-105 transition-all cursor-pointer">
+      <!-- Events List Timeline -->
+      <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-5 text-left">
+        <ul class="flex flex-col gap-4 list-none p-0 m-0">
+          {upcomingEvents.map(event => (
+            <li class="flex items-center justify-between gap-4 pb-4 border-b border-white/5 last:border-0 last:pb-0">
+              <div class="flex items-center gap-3">
+                <div class="flex flex-col text-left leading-none min-w-[32px]">
+                  <span class="text-2xl font-extrabold font-title text-white tracking-tighter">{event.date}</span>
+                  <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
+                </div>
+                <div>
+                  <h3 class="font-title font-bold text-xs text-white tracking-wide uppercase line-clamp-1">{event.title}</h3>
+                  <span class="text-[10px] text-slate-400">{event.location}</span>
+                </div>
+              </div>
+              
+              {event.statusType === 'confirmed' ? (
+                <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
+                  CONFIRMADO
+                </span>
+              ) : (
+                <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
+                  POR CONFIRMAR
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+        
+        <a href="/agenda" class="w-full text-center border border-white/10 hover:border-gold-bruna bg-slate-950 hover:bg-slate-950/80 text-white font-bold py-2.5 rounded-sm text-[10px] tracking-widest flex items-center justify-center gap-2 transition-colors uppercase cursor-pointer mt-1">
+          <span>📅</span>
           VER AGENDA COMPLETA
         </a>
       </div>
 
-      <!-- Timeline (Right) -->
-      <div class="lg:col-span-7 bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-xl">
-        <ul class="flex flex-col gap-6 list-none p-0">
-          {upcomingEvents.map(event => (
-            <li class="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center justify-between pb-6 border-b border-white/5 last:border-0 last:pb-0">
-              
-              <!-- Date Block -->
-              <div class="flex gap-4 items-center">
-                <div class="w-14 h-14 bg-slate-950 border border-white/5 rounded-lg flex flex-col items-center justify-center text-center">
-                  <span class="text-2xl font-bold font-title text-gold-bruna leading-none">{event.date}</span>
-                  <span class="text-[9px] text-slate-500 font-semibold tracking-wider mt-0.5 uppercase">{event.month}</span>
-                </div>
-                <div>
-                  <h3 class="font-title font-bold text-base text-white">{event.title}</h3>
-                  <span class="text-xs text-slate-400">{event.venue} — <strong>{event.location}</strong></span>
-                </div>
-              </div>
-              
-              <!-- Status / Action -->
-              <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 mt-2 sm:mt-0">
-                <span class="text-xs text-slate-400 font-semibold">{event.time} hrs</span>
-                {event.statusType === 'confirmed' ? (
-                  <span class="bg-green-950/30 border border-green-500/20 text-green-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    Confirmado
-                  </span>
-                ) : (
-                  <span class="bg-amber-950/30 border border-amber-500/20 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                    Por Confirmar
-                  </span>
-                )}
-              </div>
-
-            </li>
-          ))}
-        </ul>
+      <!-- Balancing Banner Image below the timeline -->
+      <div class="relative aspect-[21/9] rounded-xl overflow-hidden border border-white/5 bg-slate-900 group shadow-lg">
+        <img src="assets/images/hero.png" alt="Banda Bruna Show en vivo" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-80" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+          <span class="font-title font-bold text-xs text-gold-bruna tracking-widest uppercase">LA ORQUESTA DEL SUR</span>
+        </div>
       </div>
 
     </div>
+
   </section>
 
-  <!-- Section: La Experiencia Bruna (Gallery & Metrics) -->
-  <section class="max-w-7xl mx-auto px-6 py-24 scroll-reveal">
-    <div class="text-center max-w-2xl mx-auto mb-16">
-      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">MÁS DE BANDA BRUNA</span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold font-title uppercase">LA EXPERIENCIA BRUNA</h2>
-      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+  <!-- Section: La Experiencia Bruna (Carousel & Stats) -->
+  <section class="max-w-[1400px] mx-auto px-6 py-24 border-t border-white/5 scroll-reveal">
+    <div class="text-left mb-12">
+      <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider relative inline-block pb-3">
+        LA EXPERIENCIA BRUNA
+        <span class="absolute bottom-0 left-0 w-12 h-1 bg-gold-bruna"></span>
+      </h2>
     </div>
 
-    <!-- Metrics row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16 text-center">
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 hover:border-gold-bruna transition-colors">
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1">+10</span>
-        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">AÑOS DE TRAYECTORIA</span>
+    <!-- Images Carousel slider mock -->
+    <div class="relative flex items-center justify-center gap-4 mb-16">
+      
+      <!-- Left arrow -->
+      <button class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer flex-shrink-0" aria-label="Anterior">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+
+      <!-- Carousel Images Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
+          <img src="assets/images/hero.png" alt="Concierto Escenario Bruna 1" class="w-full h-full object-cover" />
+        </div>
+        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
+          <img src="assets/images/album.png" alt="Concierto Escenario Bruna 2" class="w-full h-full object-cover" />
+        </div>
+        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
+          <img src="assets/images/hero.png" alt="Concierto Escenario Bruna 3" class="w-full h-full object-cover" />
+        </div>
+        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
+          <img src="assets/images/album.png" alt="Concierto Escenario Bruna 4" class="w-full h-full object-cover" />
+        </div>
       </div>
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 hover:border-gold-bruna transition-colors">
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1">+300</span>
-        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">EVENTOS REALIZADOS</span>
+
+      <!-- Right arrow -->
+      <button class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer flex-shrink-0" aria-label="Siguiente">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+      
+    </div>
+
+    <!-- Centered Statistics row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center max-w-4xl mx-auto">
+      <div>
+        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">+10</span>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">AÑOS DE TRAYECTORIA</span>
       </div>
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 hover:border-gold-bruna transition-colors">
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1">+80K</span>
-        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">SEGUIDORES EN REDES</span>
+      <div>
+        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">+300</span>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">EVENTOS REALIZADOS</span>
       </div>
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 hover:border-gold-bruna transition-colors">
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1">5</span>
-        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">REGIONES DE CHILE</span>
+      <div>
+        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">+80K</span>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">SEGUIDORES EN REDES</span>
+      </div>
+      <div>
+        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">5</span>
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">REGIONES DE CHILE</span>
       </div>
     </div>
 
-    <!-- Images Showcase Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="relative aspect-[4/3] rounded-lg overflow-hidden border border-white/5 group">
-        <img src="assets/images/hero.png" alt="Banda Bruna Concierto 1" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-      </div>
-      <div class="relative aspect-[4/3] rounded-lg overflow-hidden border border-white/5 group">
-        <img src="assets/images/album.png" alt="Banda Bruna Concierto 2" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-      </div>
-      <div class="relative aspect-[4/3] rounded-lg overflow-hidden border border-white/5 group">
-        <img src="assets/images/hero.png" alt="Banda Bruna Concierto 3" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-      </div>
-      <div class="relative aspect-[4/3] rounded-lg overflow-hidden border border-white/5 group">
-        <img src="assets/images/album.png" alt="Banda Bruna Concierto 4" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-      </div>
-    </div>
   </section>
 
-  <!-- Section: Síguenos en Tiempo Real (Unified Social Feed) -->
-  <section class="border-t border-white/5 bg-slate-950/40 py-24 scroll-reveal">
-    <div class="max-w-7xl mx-auto px-6">
+  <!-- Section: Síguenos en Tiempo Real (Unified Social Feed Row) -->
+  <section class="bg-slate-950/40 border-t border-white/5 py-24 scroll-reveal">
+    <div class="max-w-[1400px] mx-auto px-6">
       
       <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
         <div>
-          <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">EN VIVO EN NUESTRAS REDES</span>
-          <h2 class="text-3xl font-extrabold font-title uppercase">SÍGUENOS EN TIEMPO REAL</h2>
+          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">SÍGUENOS EN TIEMPO REAL</h2>
         </div>
-        <div class="flex gap-4 mt-4 md:mt-0">
-          <span class="text-xs text-slate-400 flex items-center gap-1.5 font-semibold"><span class="w-2.5 h-2.5 bg-pink-600 rounded-full inline-block"></span>Instagram</span>
-          <span class="text-xs text-slate-400 flex items-center gap-1.5 font-semibold"><span class="w-2.5 h-2.5 bg-blue-600 rounded-full inline-block"></span>Facebook</span>
-          <span class="text-xs text-slate-400 flex items-center gap-1.5 font-semibold"><span class="w-2.5 h-2.5 bg-red-600 rounded-full inline-block"></span>YouTube</span>
+        
+        <div class="flex gap-5 mt-4 md:mt-0 font-title font-bold text-[10px] tracking-widest uppercase">
+          <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-pink-600 rounded-full inline-block"></span>Instagram</span>
+          <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block"></span>Facebook</span>
+          <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-red-600 rounded-full inline-block"></span>YouTube</span>
         </div>
       </div>
 
-      <!-- Unified Social Grid (Chronological feed) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Row of 5 social media cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         
-        {instagramFeed.map(post => (
-          <a href={post.link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded-xl p-5 shadow-lg group block transition-all hover:translate-y-[-4px]">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+        <!-- Card 1 (Instagram) -->
+        <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-white block">@banda.bruna</span>
+              <span class="text-[8px] text-slate-500 block">Hace 1 día</span>
+            </div>
+          </div>
+          <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
+            <img src={instagramFeed[0].imageUrl} alt="Instagram Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+          </div>
+          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[0].caption}</p>
+          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
+            <span>❤️ 342</span>
+            <span>💬 24</span>
+          </div>
+        </a>
+
+        <!-- Card 2 (Instagram Reels Mockup) -->
+        <a href={instagramFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-white block">@banda.bruna</span>
+              <span class="text-[8px] text-slate-500 block">Hace 2 días</span>
+            </div>
+          </div>
+          <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
+            <img src={instagramFeed[1].imageUrl} alt="Instagram Reels" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <span class="text-white text-lg">🎬</span>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[1].caption}</p>
+          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
+            <span>❤️ 512</span>
+            <span>💬 31</span>
+          </div>
+        </a>
+
+        <!-- Card 3 (Facebook) -->
+        <a href={facebookFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
               </div>
               <div>
-                <span class="text-xs font-bold text-white block">{post.username}</span>
-                <span class="text-[10px] text-slate-500 block">{post.timeAgo}</span>
+                <span class="text-[10px] font-bold text-white block">Banda Bruna</span>
+                <span class="text-[8px] text-slate-500 block">{facebookFeed[0].timeAgo}</span>
               </div>
             </div>
-            <div class="relative aspect-square rounded-lg overflow-hidden bg-slate-950 mb-4 border border-white/5">
-              <img src={post.imageUrl} alt="Instagram Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
+              <img src="assets/images/hero.png" alt="Facebook stage post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
             </div>
-            <p class="text-xs text-slate-300 line-clamp-3 mb-4 leading-relaxed">{post.caption}</p>
-            <div class="flex gap-4 border-t border-white/5 pt-3 text-[11px] text-slate-500">
-              <span class="flex items-center gap-1 font-semibold">❤️ {post.likes}</span>
-              <span class="flex items-center gap-1 font-semibold">💬 {post.comments}</span>
-            </div>
-          </a>
-        ))}
+            <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{facebookFeed[0].caption}</p>
+          </div>
+          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
+            <span>👍 128</span>
+            <span>💬 10</span>
+          </div>
+        </a>
 
-        {facebookFeed.map(post => (
-          <a href={post.link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded-xl p-5 shadow-lg group block transition-all hover:translate-y-[-4px] flex flex-col justify-between">
-            <div>
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
-                </div>
-                <div>
-                  <span class="text-xs font-bold text-white block">Banda Bruna</span>
-                  <span class="text-[10px] text-slate-500 block">{post.timeAgo}</span>
-                </div>
+        <!-- Card 4 (YouTube) -->
+        <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white">
+                <span class="text-[8px]">▶</span>
               </div>
-              <p class="text-xs text-slate-300 mb-6 leading-relaxed mt-2">{post.caption}</p>
+              <div>
+                <span class="text-[10px] font-bold text-white block">Banda Bruna Oficial</span>
+                <span class="text-[8px] text-slate-500 block">Hace 3 días</span>
+              </div>
             </div>
-            <div class="flex gap-4 border-t border-white/5 pt-3 text-[11px] text-slate-500">
-              <span class="flex items-center gap-1 font-semibold">👍 {post.likes}</span>
-              <span class="flex items-center gap-1 font-semibold">💬 {post.comments}</span>
+            <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
+              <img src={latestVideo.thumbnail} alt="YouTube thumbnail" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
             </div>
-          </a>
-        ))}
+            <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">Nuevo videoclip ya disponible en nuestro canal oficial! Escucha "A Fuego Lento".</p>
+          </div>
+          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
+            <span>❤️ 1.2K</span>
+            <span>💬 78</span>
+          </div>
+        </a>
+
+        <!-- Card 5 (Instagram) -->
+        <a href={instagramFeed[2].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-white block">@banda.bruna</span>
+              <span class="text-[8px] text-slate-500 block">Hace 4 días</span>
+            </div>
+          </div>
+          <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
+            <img src={instagramFeed[2].imageUrl} alt="Instagram Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+          </div>
+          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[2].caption}</p>
+          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
+            <span>❤️ 287</span>
+            <span>💬 18</span>
+          </div>
+        </a>
 
       </div>
 
     </div>
   </section>
 
-  <!-- Section: Contrataciones (CTA & Booking Form) -->
-  <section id="contrataciones" class="max-w-7xl mx-auto px-6 py-24 scroll-reveal">
-    
-    <div class="text-center max-w-2xl mx-auto mb-16">
-      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">COTIZACIONES</span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold font-title uppercase">¿QUIERES LLEVAR LA EXPERIENCIA BRUNA A TU EVENTO?</h2>
-      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
-    </div>
-
+  <!-- Section: Contrataciones (Form & Contact details) -->
+  <section id="contacto" class="max-w-[1400px] mx-auto px-6 py-24 scroll-reveal">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
       
-      <!-- Contact Direct details (Left) -->
-      <div class="lg:col-span-5 flex flex-col gap-6 justify-between py-2">
-        <div class="flex flex-col gap-4">
-          <h3 class="font-title font-bold text-2xl">Hablemos directamente</h3>
-          <p class="text-slate-400 font-light text-sm leading-relaxed">
-            Completa el formulario de presupuesto en el panel derecho o escríbenos directamente usando nuestros accesos rápidos para una respuesta inmediata.
-          </p>
+      <!-- Direct Contact Points (Left) -->
+      <div class="lg:col-span-5 flex flex-col gap-6 justify-between text-left py-2">
+        <div>
+          <h2 class="font-title font-extrabold text-3xl text-white leading-tight uppercase">
+            ¿QUIERES LLEVAR <br/>
+            <span class="text-gold-bruna">LA EXPERIENCIA BRUNA</span> <br/>
+            A TU EVENTO?
+          </h2>
         </div>
 
-        <!-- WhatsApp Badge Card -->
-        <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded-xl p-6 flex items-center justify-between hover:border-green-500 transition-colors group cursor-pointer">
+        <!-- WhatsApp Card -->
+        <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-green-500 transition-colors group cursor-pointer">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-950/50 border border-green-500/20 text-green-400 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
+            <div class="w-10 h-10 rounded-full bg-green-950/40 border border-green-500/20 text-green-400 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
             </div>
-            <div>
-              <span class="text-slate-400 text-xs block font-semibold">WHATSAPP</span>
-              <span class="text-white text-base font-bold tracking-wide">+56 9 1234 5678</span>
+            <div class="text-left flex-grow pl-3">
+              <span class="text-slate-500 text-[10px] font-bold block uppercase tracking-wider">WHATSAPP</span>
+              <span class="text-white text-sm font-bold tracking-wide">+56 9 1234 5678</span>
             </div>
           </div>
-          <span class="text-xs text-green-400 font-bold border border-green-500/20 px-3 py-1 rounded bg-green-950/20 group-hover:bg-green-500 group-hover:text-black transition-colors">ESCRIBIR AHORA</span>
+          <span class="text-[9px] text-green-400 font-bold border border-green-500/20 px-3 py-1 bg-green-950/20 group-hover:bg-green-500 group-hover:text-black transition-colors uppercase tracking-wider">ESCRIBIR AHORA</span>
         </a>
 
-        <!-- Mail Badge Card -->
-        <a href="mailto:booking@bandabruna.cl" class="bg-slate-900 border border-white/5 rounded-xl p-6 flex items-center justify-between hover:border-gold-bruna transition-colors group cursor-pointer">
+        <!-- Mail Card -->
+        <a href="mailto:contacto@bandabruna.cl" class="bg-slate-900 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-gold-bruna transition-colors group cursor-pointer">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-amber-950/40 border border-gold-bruna/20 text-gold-bruna rounded-full flex items-center justify-center">
+            <div class="w-10 h-10 rounded-full bg-amber-950/40 border border-gold-bruna/20 text-gold-bruna flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             </div>
-            <div>
-              <span class="text-slate-400 text-xs block font-semibold">CORREO ELECTRÓNICO</span>
-              <span class="text-white text-base font-bold tracking-wide">booking@bandabruna.cl</span>
+            <div class="text-left flex-grow">
+              <span class="text-slate-500 text-[10px] font-bold block uppercase tracking-wider">EMAIL</span>
+              <span class="text-white text-sm font-bold tracking-wide">contacto@bandabruna.cl</span>
             </div>
           </div>
-          <span class="text-xs text-gold-bruna font-bold border border-gold-bruna/20 px-3 py-1 rounded bg-amber-950/20 group-hover:bg-gold-bruna group-hover:text-black transition-colors">ENVIAR EMAIL</span>
+          <span class="text-[9px] text-gold-bruna font-bold border border-gold-bruna/20 px-3 py-1 bg-amber-950/20 group-hover:bg-gold-bruna group-hover:text-black transition-colors uppercase tracking-wider">ENVIAR EMAIL</span>
         </a>
       </div>
 
-      <!-- Booking Form (Right) -->
-      <div class="lg:col-span-7 bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-xl">
-        <form id="home-quote-form" class="flex flex-col gap-6" novalidate>
+      <!-- Quotation Form (Right) -->
+      <div class="lg:col-span-7 bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-2xl flex flex-col justify-center">
+        <form id="quote-form-home-mock" class="flex flex-col gap-5 text-left" novalidate>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="flex flex-col gap-2">
-              <label for="q-name" class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Nombre Completo</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
               <input 
                 type="text" 
-                id="q-name" 
+                id="qh-name" 
                 name="name" 
-                placeholder="Ingresa tu nombre" 
+                placeholder="Nombre" 
                 required
-                class="bg-slate-950 border border-white/5 rounded p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
               />
-              <span class="text-[10px] text-red-400 hidden" id="q-name-err">Por favor ingresa tu nombre.</span>
+              <span class="text-[9px] text-red-400 hidden" id="qh-name-err">Ingresa tu nombre.</span>
             </div>
-            
-            <div class="flex flex-col gap-2">
-              <label for="q-email" class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Tu Correo</label>
+            <div class="flex flex-col gap-1.5">
               <input 
                 type="email" 
-                id="q-email" 
+                id="qh-email" 
                 name="email" 
-                placeholder="correo@ejemplo.com" 
+                placeholder="Tu correo" 
                 required
                 inputmode="email"
-                class="bg-slate-950 border border-white/5 rounded p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
               />
-              <span class="text-[10px] text-red-400 hidden" id="q-email-err">Por favor ingresa un correo válido.</span>
+              <span class="text-[9px] text-red-400 hidden" id="qh-email-err">Ingresa un correo válido.</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="flex flex-col gap-2">
-              <label for="q-type" class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Tipo de Evento</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
               <select 
-                id="q-type" 
+                id="qh-type" 
                 name="event-type"
-                class="bg-slate-950 border border-white/5 rounded p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
               >
-                <option value="matrimonio">Matrimonio</option>
+                <option value="" disabled selected>Tipo de evento</option>
+                <option value="matrimonio">Matrimonio / Boda</option>
                 <option value="costumbrista">Fiesta Costumbrista</option>
                 <option value="corporativo">Evento Corporativo</option>
-                <option value="municipal">Festival Municipal / Show Público</option>
-                <option value="otro">Otro tipo de evento</option>
+                <option value="municipal">Festival Municipal</option>
+                <option value="otro">Otro</option>
               </select>
+              <span class="text-[9px] text-red-400 hidden" id="qh-type-err">Selecciona tipo de evento.</span>
             </div>
-            
-            <div class="flex flex-col gap-2">
-              <label for="q-date" class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Fecha del Evento</label>
+            <div class="flex flex-col gap-1.5">
               <input 
                 type="date" 
-                id="q-date" 
+                id="qh-date" 
                 name="event-date"
                 required
-                class="bg-slate-950 border border-white/5 rounded p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
               />
-              <span class="text-[10px] text-red-400 hidden" id="q-date-err">Por favor selecciona la fecha.</span>
+              <span class="text-[9px] text-red-400 hidden" id="qh-date-err">Selecciona la fecha.</span>
             </div>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <label for="q-message" class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Mensaje / Requerimientos Especiales (Opcional)</label>
-            <textarea 
-              id="q-message" 
-              name="message" 
-              rows="4" 
-              placeholder="Cuéntanos más sobre el show en vivo que buscas..."
-              class="bg-slate-950 border border-white/5 rounded p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
-            ></textarea>
-          </div>
-
-          <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-bold py-3.5 rounded text-sm hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer">
+          <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-title font-bold py-3.5 rounded-sm text-xs transition-colors cursor-pointer uppercase tracking-widest mt-2 w-full">
             ENVIAR SOLICITUD
           </button>
           
-          <div id="q-form-feedback" class="hidden text-center text-sm py-2.5 px-4 rounded border" role="alert"></div>
+          <div id="qh-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border" role="alert"></div>
 
         </form>
       </div>
@@ -519,49 +588,55 @@ const latestNews = getNews()[0]; // Show latest news card
     </div>
   </section>
 
-  <!-- Script for Booking Form submission simulation -->
+  <!-- Script for form submission -->
   <script>
-    const form = document.getElementById('home-quote-form');
-    const feedback = document.getElementById('q-form-feedback');
-    const nameInput = document.getElementById('q-name');
-    const emailInput = document.getElementById('q-email');
-    const dateInput = document.getElementById('q-date');
+    const formH = document.getElementById('quote-form-home-mock');
+    const feedbackH = document.getElementById('qh-form-feedback');
+    const nameInputH = document.getElementById('qh-name');
+    const emailInputH = document.getElementById('qh-email');
+    const typeInputH = document.getElementById('qh-type');
+    const dateInputH = document.getElementById('qh-date');
 
-    const nameErr = document.getElementById('q-name-err');
-    const emailErr = document.getElementById('q-email-err');
-    const dateErr = document.getElementById('q-date-err');
+    const nameErrH = document.getElementById('qh-name-err');
+    const emailErrH = document.getElementById('qh-email-err');
+    const typeErrH = document.getElementById('qh-type-err');
+    const dateErrH = document.getElementById('qh-date-err');
 
-    if (form) {
-      form.addEventListener('submit', (e) => {
+    if (formH) {
+      formH.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Reset errors
-        nameErr.classList.add('hidden');
-        emailErr.classList.add('hidden');
-        dateErr.classList.add('hidden');
-        feedback.classList.add('hidden');
+        nameErrH.classList.add('hidden');
+        emailErrH.classList.add('hidden');
+        typeErrH.classList.add('hidden');
+        dateErrH.classList.add('hidden');
+        feedbackH.classList.add('hidden');
 
         let valid = true;
 
-        if (!nameInput.value.trim()) {
-          nameErr.classList.remove('hidden');
+        if (!nameInputH.value.trim()) {
+          nameErrH.classList.remove('hidden');
           valid = false;
         }
 
-        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
-          emailErr.classList.remove('hidden');
+        if (!emailInputH.value.trim() || !emailInputH.checkValidity()) {
+          emailErrH.classList.remove('hidden');
           valid = false;
         }
 
-        if (!dateInput.value) {
-          dateErr.classList.remove('hidden');
+        if (!typeInputH.value) {
+          typeErrH.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!dateInputH.value) {
+          dateErrH.classList.remove('hidden');
           valid = false;
         }
 
         if (!valid) return;
 
-        // Simulate API call
-        const btn = form.querySelector('button[type="submit"]');
+        const btn = formH.querySelector('button[type="submit"]');
         const origText = btn.textContent;
         btn.textContent = 'Enviando...';
         btn.disabled = true;
@@ -570,11 +645,11 @@ const latestNews = getNews()[0]; // Show latest news card
           btn.textContent = origText;
           btn.disabled = false;
 
-          feedback.textContent = '¡Gracias! Hemos recibido tu solicitud de cotización. Nos contactaremos contigo a la brevedad.';
-          feedback.className = 'text-center text-sm py-2.5 px-4 rounded border bg-green-950/20 border-green-500/20 text-green-400 block';
+          feedbackH.textContent = '¡Tu solicitud ha sido enviada con éxito!';
+          feedbackH.className = 'text-center text-xs py-2.5 px-4 rounded border bg-green-950/20 border-green-500/20 text-green-400 block';
           
-          form.reset();
-        }, 1500);
+          formH.reset();
+        }, 1200);
       });
     }
   </script>
