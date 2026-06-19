@@ -62,7 +62,7 @@ body {
     }
     
     .scroll-reveal {
-      animation: fade-in-up auto linear;
+      animation: fade-in-up auto linear both;
       animation-timeline: view();
       animation-range: entry 10% cover 30%;
       /* Override the transition property to prevent conflicts with keyframe animation */
