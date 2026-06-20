@@ -32,52 +32,62 @@ const getGoogleCalendarUrl = (event: any) => {
         </p>
       </div>
 
-      <div class="divide-y divide-white/5">
-        {events.map(event => (
-          <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/[0.01] transition-all">
-            
-            <div class="flex gap-6 items-center">
-              <!-- Calendar Date Block -->
-              <div class="w-16 h-16 bg-slate-950 border border-white/5 rounded-xl flex flex-col items-center justify-center text-center flex-shrink-0">
-                <span class="text-3xl font-extrabold font-title text-gold-bruna leading-none">{event.date}</span>
-                <span class="text-[10px] text-slate-500 font-semibold tracking-wider mt-1 uppercase">{event.month}</span>
-              </div>
+      {events.length > 0 ? (
+        <div class="divide-y divide-white/5">
+          {events.map(event => (
+            <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/[0.01] transition-all">
               
-              <div>
-                <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time} hrs</span>
-                <h3 class="font-title font-bold text-xl text-white mt-0.5 mb-1 tracking-wide">{event.title}</h3>
-                <p class="text-sm text-slate-400 font-light">
-                  Recinto: <a href={event.mapUrl} target="_blank" rel="noopener" class="underline hover:text-gold-bruna transition-colors">{event.venue}</a>, <strong>{event.location}</strong>
-                </p>
+              <div class="flex gap-6 items-center">
+                <!-- Calendar Date Block -->
+                <div class="w-16 h-16 bg-slate-950 border border-white/5 rounded-xl flex flex-col items-center justify-center text-center flex-shrink-0">
+                  <span class="text-3xl font-extrabold font-title text-gold-bruna leading-none">{event.date}</span>
+                  <span class="text-[10px] text-slate-500 font-semibold tracking-wider mt-1 uppercase">{event.month}</span>
+                </div>
+                
+                <div>
+                  <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time} hrs</span>
+                  <h3 class="font-title font-bold text-xl text-white mt-0.5 mb-1 tracking-wide">{event.title}</h3>
+                  <p class="text-sm text-slate-400 font-light">
+                    Recinto: <a href={event.mapUrl} target="_blank" rel="noopener" class="underline hover:text-gold-bruna transition-colors">{event.venue}</a>, <strong>{event.location}</strong>
+                  </p>
+                </div>
               </div>
+
+              <!-- Actions and states -->
+              <div class="flex flex-wrap items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0 justify-between md:justify-end">
+                
+                <div class="flex items-center gap-3">
+                  {event.statusType === 'confirmed' ? (
+                    <span class="bg-green-950/30 border border-green-500/20 text-green-400 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                      Confirmado
+                    </span>
+                  ) : (
+                    <span class="bg-amber-950/30 border border-amber-500/20 text-amber-400 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                      Por Confirmar
+                    </span>
+                  )}
+                </div>
+
+                <div class="flex gap-3">
+                  <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded transition-colors cursor-pointer">
+                    Añadir a Google Calendar
+                  </a>
+                </div>
+
+              </div>
+
             </div>
-
-            <!-- Actions and states -->
-            <div class="flex flex-wrap items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0 justify-between md:justify-end">
-              
-              <div class="flex items-center gap-3">
-                {event.statusType === 'confirmed' ? (
-                  <span class="bg-green-950/30 border border-green-500/20 text-green-400 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                    Confirmado
-                  </span>
-                ) : (
-                  <span class="bg-amber-950/30 border border-amber-500/20 text-amber-400 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                    Por Confirmar
-                  </span>
-                )}
-              </div>
-
-              <div class="flex gap-3">
-                <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded transition-colors cursor-pointer">
-                  Añadir a Google Calendar
-                </a>
-              </div>
-
-            </div>
-
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div class="p-12 text-center text-slate-400 flex flex-col items-center justify-center gap-4 min-h-[250px]">
+          <span class="text-4xl">✨</span>
+          <h3 class="font-title font-bold text-lg text-white uppercase tracking-wider">Próximas fechas muy pronto</h3>
+          <p class="text-xs text-slate-400 max-w-md mx-auto font-light leading-relaxed">
+            Actualmente nos encontramos preparando nuestro nuevo show y producciones. ¡Mantente atento a nuestras redes sociales para enterarte de las próximas fechas de conciertos en tu ciudad!
+          </p>
+        </div>
+      )}
     </div>
 
     <!-- Booking promotion -->

@@ -18,24 +18,20 @@ const playlists = getVideoPlaylists();
     <div class="mb-20">
       <div class="bg-slate-900/60 border border-white/5 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl flex flex-col lg:flex-row gap-8 items-center">
         
-        <!-- Facebook Reel Embed (aspect-[9/16] vertical mobile frame) -->
-        <div class="w-full lg:w-1/2 flex justify-center">
-          <div class="w-full max-w-[340px] aspect-[9/16] rounded-xl overflow-hidden bg-black border border-white/10 shadow-lg relative">
-            <iframe 
-              src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F918184277458701&show_text=0&width=340" 
-              width="100%" 
-              height="100%" 
-              style="border:none;overflow:hidden;position:absolute;top:0;left:0;" 
-              scrolling="no" 
-              frameborder="0" 
-              allowfullscreen="true" 
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            ></iframe>
-          </div>
+        <!-- Large Video Player (HTML5 video using Cloudinary MP4) -->
+        <div class="w-full lg:w-3/5 aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-lg relative flex items-center justify-center">
+          <video 
+            src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
+            class="w-full h-full object-contain bg-slate-950" 
+            controls 
+            preload="metadata"
+            playsinline
+            aria-label="Presentación en vivo de Banda Bruna"
+          ></video>
         </div>
 
         <!-- Description Box -->
-        <div class="w-full lg:w-1/2 flex flex-col justify-center text-left">
+        <div class="w-full lg:w-2/5 flex flex-col justify-center text-left">
           <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1.5">PRESENTACIÓN DESTACADA</span>
           <h2 class="font-title font-bold text-2xl text-white uppercase leading-snug mb-3">
             La Energía del Show en Vivo
@@ -135,25 +131,34 @@ const playlists = getVideoPlaylists();
           </a>
         </div>
 
-        <!-- Vertical Reels Cards Grid (Portrait aspect-[9/16] simulating mobile screens) -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {playlists.facebook.slice(1).map(reel => (
+        <!-- Vertical Reels Cards Grid (Portrait aspect-[9/15] simulating mobile screens) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {playlists.facebook.map(reel => (
             <a 
               href={reel.url} 
               target="_blank" 
               rel="noopener" 
               class="bg-slate-900/60 border border-white/5 hover:border-blue-500 rounded-xl overflow-hidden group block transition-all hover:translate-y-[-4px] shadow-lg relative flex flex-col justify-end aspect-[9/15]"
             >
-              <!-- Reel Cover/Placeholder with Gradient -->
-              <div class="absolute inset-0 bg-slate-950 flex items-center justify-center">
-                <!-- Decorative Icon simulating Reel background -->
-                <svg class="w-12 h-12 text-white/5 group-hover:scale-110 transition-transform duration-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm3 2.5l5 3.5-5 3.5v-7z"/>
-                </svg>
-              </div>
+              <!-- Reel Cover Image -->
+              <img 
+                src={reel.thumbnail} 
+                alt={reel.title} 
+                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                loading="lazy"
+              />
               
               <!-- Dark gradient mask over image -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent z-10"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10 z-10"></div>
+              
+              <!-- Play button overlay in the center -->
+              <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                <div class="w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/25 text-white rounded-full flex items-center justify-center font-bold shadow-lg group-hover:scale-110 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all duration-300">
+                  <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
               
               <!-- Floating play icon and category badge -->
               <div class="absolute top-3 left-3 z-20 bg-blue-600/90 text-white font-bold text-[8px] px-2 py-0.5 rounded-sm tracking-wider uppercase">
@@ -169,8 +174,148 @@ const playlists = getVideoPlaylists();
                   <span>🎬</span>
                   <span class="truncate">banda_bruna</span>
                 </div>
-                <h3 class="font-semibold text-white group-hover:text-blue-400 transition-colors text-xs line-clamp-2 leading-snug">{reel.title}</h3>
+                <h3 class="font-semibold text-white group-hover:text-blue-400 transition-colors text-xs line-clamp-3 leading-snug">{reel.title}</h3>
                 <span class="text-[9px] text-slate-400 block mt-2">Ver Reel en Facebook →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- 4. Instagram Reels & Clips -->
+      <div>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-white/5 pb-4">
+          <div>
+            <span class="text-gold-bruna text-[10px] tracking-widest font-bold uppercase block mb-1">REELS & CONTENIDO VERTICAL</span>
+            <h2 class="font-title font-bold text-2xl text-white uppercase tracking-wide">
+              Instagram Reels & Clips
+            </h2>
+          </div>
+          <a 
+            href="https://www.instagram.com/banda_bruna/" 
+            target="_blank" 
+            rel="noopener" 
+            class="text-[#E1306C] hover:text-[#f7528a] text-xs font-bold hover:underline tracking-wider uppercase mt-3 md:mt-0 flex items-center gap-1.5"
+          >
+            Ver Reels en Instagram →
+          </a>
+        </div>
+
+        <!-- Vertical Reels Cards Grid (Portrait aspect-[9/15] simulating mobile screens) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {playlists.instagram.map(reel => (
+            <a 
+              href={reel.url} 
+              target="_blank" 
+              rel="noopener" 
+              class="bg-slate-900/60 border border-white/5 hover:border-[#E1306C] rounded-xl overflow-hidden group block transition-all hover:translate-y-[-4px] shadow-lg relative flex flex-col justify-end aspect-[9/15]"
+            >
+              <!-- Reel Cover Image -->
+              <img 
+                src={reel.thumbnail} 
+                alt={reel.title} 
+                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                loading="lazy"
+              />
+              
+              <!-- Dark gradient mask over image -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10 z-10"></div>
+              
+              <!-- Play button overlay in the center -->
+              <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                <div class="w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/25 text-white rounded-full flex items-center justify-center font-bold shadow-lg group-hover:scale-110 group-hover:bg-[#E1306C] group-hover:border-[#E1306C] transition-all duration-300">
+                  <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Floating play icon and category badge -->
+              <div class="absolute top-3 left-3 z-20 bg-[#E1306C]/90 text-white font-bold text-[8px] px-2 py-0.5 rounded-sm tracking-wider uppercase">
+                REEL
+              </div>
+              <div class="absolute top-3 right-3 z-20 text-[10px] text-white/80 bg-black/40 px-1.5 py-0.5 rounded font-mono">
+                {reel.duration}
+              </div>
+
+              <!-- Content Box aligned to the bottom -->
+              <div class="p-4 z-20 text-left">
+                <div class="flex items-center gap-1.5 text-white/90 text-[10px] font-bold mb-1">
+                  <span>📸</span>
+                  <span class="truncate">banda_bruna</span>
+                </div>
+                <h3 class="font-semibold text-white group-hover:text-[#E1306C] transition-colors text-xs line-clamp-3 leading-snug">{reel.title}</h3>
+                <span class="text-[9px] text-slate-400 block mt-2">Ver Reel en Instagram →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- 5. TikTok Oficial & Clips Cortos -->
+      <div>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-white/5 pb-4">
+          <div>
+            <span class="text-gold-bruna text-[10px] tracking-widest font-bold uppercase block mb-1">TIKTOK VIDEOS & TRENDS</span>
+            <h2 class="font-title font-bold text-2xl text-white uppercase tracking-wide">
+              TikTok Oficial & Clips
+            </h2>
+          </div>
+          <a 
+            href="https://www.tiktok.com/@bandabrunaoficial" 
+            target="_blank" 
+            rel="noopener" 
+            class="text-[#FE2C55] hover:text-[#ff4e72] text-xs font-bold hover:underline tracking-wider uppercase mt-3 md:mt-0 flex items-center gap-1.5"
+          >
+            Ver en TikTok →
+          </a>
+        </div>
+
+        <!-- Vertical TikTok Cards Grid (Portrait aspect-[9/15] simulating mobile screens) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {playlists.tiktok.map(video => (
+            <a 
+              href={video.url} 
+              target="_blank" 
+              rel="noopener" 
+              class="bg-slate-900/60 border border-white/5 hover:border-[#FE2C55] rounded-xl overflow-hidden group block transition-all hover:translate-y-[-4px] shadow-lg relative flex flex-col justify-end aspect-[9/15]"
+            >
+              <!-- Video Cover Image -->
+              <img 
+                src={video.thumbnail} 
+                alt={video.title} 
+                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                loading="lazy"
+              />
+              
+              <!-- Dark gradient mask over image -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10 z-10"></div>
+              
+              <!-- Play button overlay in the center -->
+              <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                <div class="w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/25 text-white rounded-full flex items-center justify-center font-bold shadow-lg group-hover:scale-110 group-hover:bg-[#FE2C55] group-hover:border-[#FE2C55] transition-all duration-300">
+                  <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Floating play icon and category badge -->
+              <div class="absolute top-3 left-3 z-20 bg-[#FE2C55]/90 text-white font-bold text-[8px] px-2 py-0.5 rounded-sm tracking-wider uppercase">
+                TIKTOK
+              </div>
+              <div class="absolute top-3 right-3 z-20 text-[10px] text-white/80 bg-black/40 px-1.5 py-0.5 rounded font-mono">
+                {video.duration}
+              </div>
+
+              <!-- Content Box aligned to the bottom -->
+              <div class="p-4 z-20 text-left">
+                <div class="flex items-center gap-1.5 text-white/90 text-[10px] font-bold mb-1">
+                  <span>🎵</span>
+                  <span class="truncate">bandabrunaoficial</span>
+                </div>
+                <h3 class="font-semibold text-white group-hover:text-[#FE2C55] transition-colors text-xs line-clamp-3 leading-snug">{video.title}</h3>
+                <span class="text-[9px] text-slate-400 block mt-2">Ver Video en TikTok →</span>
               </div>
             </a>
           ))}

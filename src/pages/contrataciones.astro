@@ -15,25 +15,25 @@ import Layout from '../layouts/Layout.astro';
       
       <!-- Aggressive CTAs cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-green-500 rounded-xl p-6 flex justify-between items-center transition-colors group cursor-pointer">
+        <a href="https://wa.me/56990021689" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-green-500 rounded-xl p-6 flex justify-between items-center transition-colors group cursor-pointer">
           <div>
             <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">WHATSAPP DIRECTO</span>
-            <span class="text-white font-bold text-lg block">+56 9 1234 5678</span>
+            <span class="text-white font-bold text-lg block">+56 9 9002 1689</span>
           </div>
           <span class="text-xs text-green-400 font-bold border border-green-500/20 px-3 py-1.5 rounded bg-green-950/20 group-hover:bg-green-500 group-hover:text-black transition-colors">COTIZAR POR WHATSAPP</span>
         </a>
 
-        <a href="mailto:booking@bandabruna.cl" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded-xl p-6 flex justify-between items-center transition-colors group cursor-pointer">
+        <a href="mailto:contacto@bandabruna.cl" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded-xl p-6 flex justify-between items-center transition-colors group cursor-pointer">
           <div>
             <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1">CORREO BOOKING</span>
-            <span class="text-white font-bold text-lg block">booking@bandabruna.cl</span>
+            <span class="text-white font-bold text-lg block">contacto@bandabruna.cl</span>
           </div>
           <span class="text-xs text-gold-bruna font-bold border border-gold-bruna/20 px-3 py-1.5 rounded bg-amber-950/20 group-hover:bg-gold-bruna group-hover:text-black transition-colors">COTIZAR POR EMAIL</span>
         </a>
       </div>
 
-      <!-- Extended booking Form -->
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-xl">
+      <!-- Extended booking Form Wrapper -->
+      <div id="booking-form-container" class="bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-xl">
         <h2 class="font-title font-bold text-2xl text-white mb-6 uppercase border-b border-white/5 pb-3">Formulario de Cotización de Shows</h2>
         
         <form id="quote-form-extended" class="flex flex-col gap-6" novalidate>
@@ -147,81 +147,190 @@ import Layout from '../layouts/Layout.astro';
         </form>
       </div>
 
+      <!-- Success Panel (Hidden by default) -->
+      <div id="success-panel" class="hidden bg-slate-900 border border-white/5 rounded-xl p-8 md:p-10 shadow-2xl text-center flex flex-col items-center gap-6">
+        <div class="w-16 h-16 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-3xl animate-bounce">
+          ✓
+        </div>
+        <div>
+          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wide">¡Cotización Procesada!</h2>
+          <p class="text-slate-300 text-sm font-light mt-2 max-w-lg mx-auto">
+            Hemos enviado un correo electrónico con todos los detalles de tu cotización a <strong class="text-white">contacto@bandabruna.cl</strong>.
+          </p>
+          <p class="text-slate-450 text-[10px] font-light mt-2 max-w-lg mx-auto italic">
+            (Nota: Si es el primer envío desde el sitio, recuerda revisar tu bandeja de contacto@bandabruna.cl para confirmar la activación del formulario de FormSubmit.co).
+          </p>
+        </div>
+
+        <div class="w-full max-w-md border-t border-white/5 pt-6 mt-2 flex flex-col gap-4">
+          <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">AVISAR INMEDIATAMENTE POR WHATSAPP</span>
+          <p class="text-slate-400 text-xs font-light leading-relaxed">
+            Hemos intentado abrir la ventana de WhatsApp para enviar el aviso a Jaime Cárdenas. Si no se abrió o deseas notificar también a César Bruna, haz clic en cualquiera de los siguientes botones para abrir el chat con el mensaje listo para enviar:
+          </p>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+            <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
+              💬 Jaime Cárdenas
+            </a>
+            <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
+              💬 César Bruna
+            </a>
+          </div>
+        </div>
+
+        <a href="/contrataciones" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-2 px-6 rounded transition-colors uppercase font-bold tracking-wider">
+          Cotizar Otro Show
+        </a>
+      </div>
+
     </div>
 
   </section>
 
-  <script>
-    const form = document.getElementById('quote-form-extended');
-    const feedback = document.getElementById('ext-form-feedback');
-    const nameInput = document.getElementById('ext-name');
-    const phoneInput = document.getElementById('ext-phone');
-    const emailInput = document.getElementById('ext-email');
-    const dateInput = document.getElementById('ext-date');
-    const cityInput = document.getElementById('ext-city');
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('quote-form-extended');
+      const feedback = document.getElementById('ext-form-feedback');
+      const nameInput = document.getElementById('ext-name');
+      const phoneInput = document.getElementById('ext-phone');
+      const emailInput = document.getElementById('ext-email');
+      const dateInput = document.getElementById('ext-date');
+      const cityInput = document.getElementById('ext-city');
 
-    const nameErr = document.getElementById('ext-name-err');
-    const phoneErr = document.getElementById('ext-phone-err');
-    const emailErr = document.getElementById('ext-email-err');
-    const dateErr = document.getElementById('ext-date-err');
-    const cityErr = document.getElementById('ext-city-err');
+      const nameErr = document.getElementById('ext-name-err');
+      const phoneErr = document.getElementById('ext-phone-err');
+      const emailErr = document.getElementById('ext-email-err');
+      const dateErr = document.getElementById('ext-date-err');
+      const cityErr = document.getElementById('ext-city-err');
 
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        nameErr.classList.add('hidden');
-        phoneErr.classList.add('hidden');
-        emailErr.classList.add('hidden');
-        dateErr.classList.add('hidden');
-        cityErr.classList.add('hidden');
-        feedback.classList.add('hidden');
+      // Pre-fill fields from URL query parameters if available
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('name') && nameInput) nameInput.value = decodeURIComponent(urlParams.get('name'));
+      if (urlParams.has('email') && emailInput) emailInput.value = decodeURIComponent(urlParams.get('email'));
+      if (urlParams.has('type')) {
+        const typeSelect = document.getElementById('ext-type');
+        if (typeSelect) typeSelect.value = decodeURIComponent(urlParams.get('type'));
+      }
+      if (urlParams.has('date') && dateInput) dateInput.value = decodeURIComponent(urlParams.get('date'));
 
-        let valid = true;
-
-        if (!nameInput.value.trim()) {
-          nameErr.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!phoneInput.value.trim()) {
-          phoneErr.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
-          emailErr.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!dateInput.value) {
-          dateErr.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!cityInput.value.trim()) {
-          cityErr.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!valid) return;
-
-        const btn = form.querySelector('button[type="submit"]');
-        const origText = btn.textContent;
-        btn.textContent = 'Procesando...';
-        btn.disabled = true;
-
-        setTimeout(() => {
-          btn.textContent = origText;
-          btn.disabled = false;
-
-          feedback.textContent = '¡Tu solicitud ha sido enviada con éxito! Nuestro departamento de booking se pondrá en contacto contigo en las próximas horas.';
-          feedback.className = 'text-center text-sm py-2.5 px-4 rounded border bg-green-950/20 border-green-500/20 text-green-400 block';
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
           
-          form.reset();
-        }, 1500);
-      });
-    }
+          nameErr.classList.add('hidden');
+          phoneErr.classList.add('hidden');
+          emailErr.classList.add('hidden');
+          dateErr.classList.add('hidden');
+          cityErr.classList.add('hidden');
+          feedback.classList.add('hidden');
+
+          let valid = true;
+
+          if (!nameInput.value.trim()) {
+            nameErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!phoneInput.value.trim()) {
+            phoneErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+            emailErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!dateInput.value) {
+            dateErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!cityInput.value.trim()) {
+            cityErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!valid) return;
+
+          const btn = form.querySelector('button[type="submit"]');
+          const origText = btn.textContent;
+          btn.textContent = 'Enviando...';
+          btn.disabled = true;
+
+          const nameVal = nameInput.value.trim();
+          const phoneVal = phoneInput.value.trim();
+          const emailVal = emailInput.value.trim();
+          const typeSelect = document.getElementById('ext-type');
+          const typeVal = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '';
+          const dateVal = dateInput.value;
+          const cityVal = cityInput.value.trim();
+          const msgVal = document.getElementById('ext-message').value.trim() || 'Sin detalles adicionales.';
+
+          // Send email asynchronously using FormSubmit.co
+          fetch("https://formsubmit.co/ajax/contacto@bandabruna.cl", {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({
+              "Asunto": "Nueva Cotización desde Sitio Web",
+              "Nombre": nameVal,
+              "Teléfono": phoneVal,
+              "Email": emailVal,
+              "Tipo de Evento": typeVal,
+              "Fecha Tentativa": dateVal,
+              "Ciudad/Comuna": cityVal,
+              "Detalles/Mensaje": msgVal
+            })
+          })
+          .then(response => {
+            if (!response.ok) throw new Error('Error de envío.');
+            return response.json();
+          })
+          .then(() => {
+            btn.textContent = origText;
+            btn.disabled = false;
+
+            // Formulate WhatsApp notification message
+            const waMessage = `*Nueva Solicitud de Cotización - Banda Bruna*\n\n` +
+              `👤 *Contacto:* ${nameVal}\n` +
+              `📞 *Fono:* ${phoneVal}\n` +
+              `📧 *Email:* ${emailVal}\n` +
+              `🎭 *Evento:* ${typeVal}\n` +
+              `📅 *Fecha:* ${dateVal}\n` +
+              `📍 *Ciudad/Comuna:* ${cityVal}\n` +
+              `📝 *Detalles:* ${msgVal}`;
+            
+            const encodedMessage = encodeURIComponent(waMessage);
+
+            // Configure Jaime and Cesar WhatsApp links
+            const btnJaime = document.getElementById('btn-wa-jaime');
+            const btnCesar = document.getElementById('btn-wa-cesar');
+            if (btnJaime) btnJaime.href = `https://wa.me/56990021689?text=${encodedMessage}`;
+            if (btnCesar) btnCesar.href = `https://wa.me/56976149408?text=${encodedMessage}`;
+
+            // Try opening Jaime's WhatsApp window automatically
+            window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
+
+            // Hide the form wrapper and show success panel
+            const formContainer = document.getElementById('booking-form-container');
+            const successPanel = document.getElementById('success-panel');
+            if (formContainer) formContainer.classList.add('hidden');
+            if (successPanel) successPanel.classList.remove('hidden');
+
+            form.reset();
+          })
+          .catch(() => {
+            btn.textContent = origText;
+            btn.disabled = false;
+            feedback.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos directamente a través de WhatsApp.';
+            feedback.className = 'text-center text-sm py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-450 block';
+          });
+        });
+      }
+    });
   </script>
 
 </Layout>

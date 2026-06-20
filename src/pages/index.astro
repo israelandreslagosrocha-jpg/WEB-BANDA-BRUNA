@@ -7,6 +7,7 @@ import {
   getUpcomingEvents, 
   getNews 
 } from '../services/socialApi.js';
+import socialStats from '../data/socialStats.json';
 
 // Fetch mock social data at build time
 const latestVideo = getLatestVideo();
@@ -14,6 +15,14 @@ const instagramFeed = getInstagramFeed();
 const facebookFeed = getFacebookFeed();
 const upcomingEvents = getUpcomingEvents(); // Show all 5 events
 const newsList = getNews();
+
+const experienciaImages = [
+  "/assets/images/experiencia/experiencia_1.webp",
+  "/assets/images/experiencia/experiencia_2.webp",
+  "/assets/images/experiencia/experiencia_3.webp",
+  "/assets/images/experiencia/experiencia_4.webp",
+  "/assets/images/experiencia/experiencia_5.webp"
+];
 ---
 
 <Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
@@ -77,33 +86,40 @@ const newsList = getNews();
                 Cotiza fechas para festivales municipales, eventos corporativos o matrimonios.
               </p>
             </div>
-            <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="w-full bg-gold-bruna hover:bg-gold-bruna-hover text-black py-2.5 rounded font-bold text-xs hover:scale-102 transition-all text-center flex items-center justify-center gap-2 uppercase mt-3">
+            <a href="/contrataciones" class="w-full bg-gold-bruna hover:bg-gold-bruna-hover text-black py-2.5 rounded font-bold text-xs hover:scale-102 transition-all text-center flex items-center justify-center gap-2 uppercase mt-3">
               COTIZAR EVENTO
             </a>
           </div>
 
           <!-- Card 2: Instagram Featured Post -->
-          <a href="https://www.instagram.com/p/DZpvNd-uBjx/" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-5 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
-            <div>
-              <div class="flex items-center justify-between mb-2.5">
-                <div class="flex items-center gap-2">
-                  <!-- Small circular logo profile picture -->
-                  <div class="w-6 h-6 rounded-full overflow-hidden border border-white/20 bg-black flex items-center justify-center">
-                    <img src="/assets/images/logos/logo_3.webp" alt="Banda Bruna Profile" class="w-full h-full object-cover scale-150" />
+          <a href="https://www.instagram.com/reel/DZpvNd-uBjx/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-4 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
+            <div class="flex gap-3.5 items-stretch h-full overflow-hidden">
+              <!-- Video Thumbnail aspect-video 16:9 -->
+              <div class="relative w-5/12 aspect-video rounded-lg overflow-hidden bg-slate-900 border border-white/10 flex-shrink-0 self-start">
+                <img src="/assets/images/instagram/reel_cover.webp" alt="Instagram Video" class="w-full h-full object-cover object-center group-hover/insta:scale-105 transition-transform duration-500" />
+                <!-- Play icon overlay -->
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 text-white flex items-center justify-center text-xs shadow-md">
+                    <span class="pl-0.5">▶</span>
                   </div>
-                  <span class="text-[11px] font-bold text-white">banda_bruna</span>
                 </div>
-                <span class="text-[8px] bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  DESTACADO
-                </span>
               </div>
-              <p class="text-xs text-slate-300 leading-normal font-light line-clamp-3 mb-2">
-                "¡Increíble noche de cumbia sureña y fiesta! Muchas gracias por toda la energía entregada en el escenario. Nos vemos pronto en las próximas fechas. 🎶🔥🕺"
-              </p>
+              <!-- Content -->
+              <div class="flex flex-col justify-between flex-grow h-full text-left overflow-hidden">
+                <div class="overflow-hidden">
+                  <div class="flex items-center gap-1.5 mb-1.5">
+                    <span class="text-[8px] bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider">INSTAGRAM</span>
+                    <span class="text-[9px] text-slate-400 font-bold">@banda_bruna</span>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed font-light line-clamp-6">
+                    "Un pequeño resumen del proceso de grabación de nuestro siguiente videoclip junto a nuestros queridos amigos de @agenciack.cl 🔥!! Queremos agradecer la notable participación de @melvaruizg y @alejandrostefanini 🫂!! Agradecemos profundamente a @cervezamaquehue 🍻 por la buena atención y por su colaboración para la realización de este vídeoclip!!🎸 BANDA BRUNA BB!!🎶♥️ #bandabruna #cumbia #chile #musica #viral"
+                  </p>
+                </div>
+              </div>
             </div>
-            <div class="flex items-center justify-between border-t border-white/5 pt-2.5 mt-auto">
-              <span class="text-[10px] text-slate-400 font-medium group-hover/insta:text-pink-400 transition-colors">Ver publicación en Instagram</span>
-              <span class="text-xs text-pink-500 group-hover/insta:translate-x-1 transition-transform">📸 →</span>
+            <div class="flex items-center justify-between border-t border-white/5 pt-2 mt-auto">
+              <span class="text-[9px] text-slate-400 font-medium group-hover/insta:text-pink-400 transition-colors">Ver en Instagram</span>
+              <span class="text-[10px] text-pink-500 group-hover/insta:translate-x-1 transition-transform">📸 →</span>
             </div>
           </a>
         </div>
@@ -191,7 +207,7 @@ const newsList = getNews();
   </div>
 
   <!-- Section: Split Grid (ÚLTIMOS LANZAMIENTOS & PRÓXIMOS EVENTOS) -->
-  <section id="lanzamientos" class="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-reveal">
+  <section id="lanzamientos" class="max-w-[1400px] mx-auto px-6 pt-24 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-reveal">
     
     <!-- LEFT SIDE: Últimos Lanzamientos (Col span 8) -->
     <div class="lg:col-span-8 flex flex-col gap-6 w-full">
@@ -222,42 +238,57 @@ const newsList = getNews();
           </div>
         </div>
 
-        <!-- Card 2: Instagram -->
-        <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
+        <!-- Card 2: Instagram (Video Post) -->
+        <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
           <div class="relative aspect-video bg-black overflow-hidden">
-            <img src={instagramFeed[0].imageUrl} alt="Instagram" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
-              <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            <img src={instagramFeed[0].imageUrl} alt="Instagram Video" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/25 transition-all">
+              <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <span class="text-xs pl-0.5">▶</span>
               </div>
-            </a>
+            </div>
             <span class="absolute top-2.5 left-2.5 bg-pink-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">INSTAGRAM</span>
           </div>
           <div class="p-5 flex-grow flex flex-col justify-between text-left">
             <div>
-              <h3 class="font-title font-bold text-xs text-white leading-relaxed line-clamp-2">Así vivimos el fin de semana en Los Ángeles 🔥🎶</h3>
-              <p class="text-xs text-slate-400 mt-2">Seguimos llevando el ritmo de la cumbia sureña a todos los rincones.</p>
+              <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">ÚLTIMO LANZAMIENTO INSTAGRAM</span>
+              <p class="text-xs text-slate-300 leading-relaxed font-light line-clamp-5 mb-2 whitespace-pre-line">
+                {instagramFeed[0].caption}
+              </p>
             </div>
-            <span class="text-[10px] text-slate-500 font-semibold block mt-4">Hace 1 día</span>
+            <span class="text-[10px] text-slate-500 font-semibold block mt-4">{instagramFeed[0].timeAgo}</span>
           </div>
-        </div>
+        </a>
 
         <!-- Card 3: News -->
-        <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
-          <div class="relative aspect-video bg-[#0b132b] overflow-hidden flex items-center justify-center border-b border-white/5">
-            <div class="w-12 h-12 bg-slate-950 rounded-full border border-white/5 flex items-center justify-center text-gold-bruna">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
-            </div>
+        <a href={`/noticias/${newsList[0].slug}`} class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
+          <div class="relative aspect-video bg-black overflow-hidden border-b border-white/5">
+            {newsList[0].image ? (
+              <img 
+                src={newsList[0].image} 
+                alt={newsList[0].title} 
+                class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" 
+              />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center bg-[#0b132b]">
+                <div class="w-12 h-12 bg-slate-950 rounded-full border border-white/5 flex items-center justify-center text-gold-bruna">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
+                </div>
+              </div>
+            )}
             <span class="absolute top-2.5 left-2.5 bg-amber-500 text-black text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">NOTICIAS</span>
           </div>
           <div class="p-5 flex-grow flex flex-col justify-between text-left">
             <div>
-              <h3 class="font-title font-bold text-xs text-white leading-relaxed line-clamp-2">{newsList[0].title}</h3>
-              <p class="text-xs text-slate-400 mt-2">La organización confirmó a Banda Bruna en el horario estelar.</p>
+              <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase line-clamp-2">{newsList[0].title}</h3>
+              <p class="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed font-light">{newsList[0].summary}</p>
             </div>
-            <span class="text-[10px] text-slate-500 font-semibold block mt-4">{newsList[0].publishedAt}</span>
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5">
+              <span class="text-[10px] text-slate-500 font-semibold">{newsList[0].publishedAt}</span>
+              <span class="text-[10px] text-gold-bruna font-semibold group-hover:underline">Leer más →</span>
+            </div>
           </div>
-        </div>
+        </a>
 
       </div>
     </div>
@@ -273,32 +304,42 @@ const newsList = getNews();
 
       <!-- Events List Timeline -->
       <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-5 text-left">
-        <ul class="flex flex-col gap-4 list-none p-0 m-0">
-          {upcomingEvents.map(event => (
-            <li class="flex items-center justify-between gap-4 pb-4 border-b border-white/5 last:border-0 last:pb-0">
-              <div class="flex items-center gap-3">
-                <div class="flex flex-col text-left leading-none min-w-[32px]">
-                  <span class="text-2xl font-extrabold font-title text-white tracking-tighter">{event.date}</span>
-                  <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
+        {upcomingEvents.length > 0 ? (
+          <ul class="flex flex-col gap-4 list-none p-0 m-0">
+            {upcomingEvents.map(event => (
+              <li class="flex items-center justify-between gap-4 pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                <div class="flex items-center gap-3">
+                  <div class="flex flex-col text-left leading-none min-w-[32px]">
+                    <span class="text-2xl font-extrabold font-title text-white tracking-tighter">{event.date}</span>
+                    <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
+                  </div>
+                  <div>
+                    <h3 class="font-title font-bold text-xs text-white tracking-wide uppercase line-clamp-1">{event.title}</h3>
+                    <span class="text-[10px] text-slate-400">{event.location}</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 class="font-title font-bold text-xs text-white tracking-wide uppercase line-clamp-1">{event.title}</h3>
-                  <span class="text-[10px] text-slate-400">{event.location}</span>
-                </div>
-              </div>
-              
-              {event.statusType === 'confirmed' ? (
-                <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
-                  CONFIRMADO
-                </span>
-              ) : (
-                <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
-                  POR CONFIRMAR
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+                
+                {event.statusType === 'confirmed' ? (
+                  <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
+                    CONFIRMADO
+                  </span>
+                ) : (
+                  <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
+                    POR CONFIRMAR
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div class="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
+            <span class="text-2xl">✨</span>
+            <h3 class="font-title font-bold text-xs text-white uppercase tracking-wider">Próximas fechas pronto</h3>
+            <p class="text-[10px] text-slate-400 max-w-[240px] mx-auto font-light leading-relaxed">
+              Estamos preparando nuestro nuevo show. ¡Pronto anunciaremos las fechas!
+            </p>
+          </div>
+        )}
         
         <a href="/agenda" class="w-full text-center border border-white/10 hover:border-gold-bruna bg-slate-950 hover:bg-slate-950/80 text-white font-bold py-2.5 rounded-sm text-[10px] tracking-widest flex items-center justify-center gap-2 transition-colors uppercase cursor-pointer mt-1">
           <span>📅</span>
@@ -308,7 +349,7 @@ const newsList = getNews();
 
       <!-- Balancing Banner Image below the timeline -->
       <div class="relative aspect-[21/9] rounded-xl overflow-hidden border border-white/5 bg-slate-900 group shadow-lg">
-        <img src="assets/images/hero.png" alt="Banda Bruna Show en vivo" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-80" />
+        <img src="/assets/images/orquesta_sur.webp" alt="Banda Bruna Show en vivo" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-80" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
           <span class="font-title font-bold text-xs text-gold-bruna tracking-widest uppercase">LA ORQUESTA DEL SUR</span>
         </div>
@@ -319,7 +360,7 @@ const newsList = getNews();
   </section>
 
   <!-- Section: Presentación Destacada En Vivo (Facebook Video Showcase) -->
-  <section class="bg-slate-950/40 border-t border-white/5 py-24 scroll-reveal">
+  <section class="bg-slate-950/40 border-t border-white/5 pt-12 pb-24 scroll-reveal">
     <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-left">
       
       <!-- Left side: Description -->
@@ -351,20 +392,16 @@ const newsList = getNews();
         </div>
       </div>
 
-      <!-- Right side: Video Player (Facebook Reel - Vertical) -->
-      <div class="lg:col-span-7 flex justify-center w-full">
-        <div class="w-full max-w-[340px] aspect-[9/16] rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative">
-          <iframe 
-            src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F918184277458701&show_text=0&width=340" 
-            width="100%" 
-            height="100%" 
-            style="border:none;overflow:hidden;position:absolute;top:0;left:0;" 
-            scrolling="no" 
-            frameborder="0" 
-            allowfullscreen="true" 
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          ></iframe>
-        </div>
+      <!-- Right side: Video Player (HTML5 video using Cloudinary MP4) -->
+      <div class="lg:col-span-7 w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative flex items-center justify-center">
+        <video 
+          src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
+          class="w-full h-full object-contain bg-slate-950" 
+          controls 
+          preload="metadata"
+          playsinline
+          aria-label="Presentación en vivo de Banda Bruna"
+        ></video>
       </div>
 
     </div>
@@ -379,55 +416,104 @@ const newsList = getNews();
       </h2>
     </div>
 
-    <!-- Images Carousel slider mock -->
+    <!-- Images Carousel slider -->
     <div class="relative flex items-center justify-center gap-4 mb-16">
       
       <!-- Left arrow -->
-      <button class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer flex-shrink-0" aria-label="Anterior">
+      <button id="exp-prev" class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer flex-shrink-0 select-none" aria-label="Anterior">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
 
-      <!-- Carousel Images Row -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
-        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
-          <img src="assets/images/hero.png" alt="Concierto Escenario Bruna 1" class="w-full h-full object-cover" />
-        </div>
-        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
-          <img src="assets/images/album.png" alt="Concierto Escenario Bruna 2" class="w-full h-full object-cover" />
-        </div>
-        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
-          <img src="assets/images/hero.png" alt="Concierto Escenario Bruna 3" class="w-full h-full object-cover" />
-        </div>
-        <div class="relative aspect-[4/3] rounded overflow-hidden border border-white/5 bg-slate-900">
-          <img src="assets/images/album.png" alt="Concierto Escenario Bruna 4" class="w-full h-full object-cover" />
+      <!-- Carousel Container -->
+      <div id="exp-slider-container" class="overflow-hidden w-full rounded-xl">
+        <div id="exp-slider-track" class="flex gap-4 transition-transform duration-500 ease-out" style="transform: translateX(0px);">
+          {experienciaImages.map((imgUrl, index) => (
+            <div class="relative aspect-[4/3] rounded-lg overflow-hidden border border-white/5 bg-slate-900 shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)] group/item">
+              <img 
+                src={imgUrl} 
+                alt={`Experiencia Banda Bruna ${index + 1}`} 
+                class="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-500" 
+                loading="lazy" 
+              />
+              <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+            </div>
+          ))}
         </div>
       </div>
 
       <!-- Right arrow -->
-      <button class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer flex-shrink-0" aria-label="Siguiente">
+      <button id="exp-next" class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer flex-shrink-0 select-none" aria-label="Siguiente">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
       
     </div>
 
     <!-- Centered Statistics row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center max-w-4xl mx-auto">
-      <div>
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">+10</span>
-        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">AÑOS DE TRAYECTORIA</span>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 text-center max-w-6xl mx-auto">
+      
+      <!-- Trayectoria -->
+      <div class="flex flex-col items-center">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.musiciansTrajectory} data-count-prefix="+">0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Músicos con + de 15 años de trayectoria musical</span>
       </div>
-      <div>
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">+300</span>
-        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">EVENTOS REALIZADOS</span>
+
+      <!-- Escenarios -->
+      <div class="flex flex-col items-center">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.stageYears} data-count-prefix="+">0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Años en escenarios</span>
       </div>
-      <div>
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">+80K</span>
-        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">SEGUIDORES EN REDES</span>
+
+      <!-- Instagram -->
+      <a href="https://www.instagram.com/banda_bruna/" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.instagramFollowers}>0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores Instagram</span>
+      </a>
+
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/bandabruna" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 320 512" fill="currentColor"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.facebookFriends / 1000} data-count-suffix=" mil" data-count-decimal>0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Amigos Facebook</span>
+      </a>
+
+      <!-- YouTube -->
+      <a href="https://www.youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 576 512" fill="currentColor"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.youtubeSubscribers}>0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Suscriptores YouTube</span>
+      </a>
+
+      <!-- TikTok -->
+      <a href="https://www.tiktok.com/@bandabrunaoficial" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.tiktokFollowers}>0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores TikTok</span>
+      </a>
+
+      <!-- Regiones -->
+      <div class="flex flex-col items-center">
+        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.regions}>0</span>
+        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Regiones de Chile</span>
       </div>
-      <div>
-        <span class="text-4xl sm:text-5xl font-extrabold font-title text-gold-bruna block mb-1.5">5</span>
-        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">REGIONES DE CHILE</span>
-      </div>
+
     </div>
 
   </section>
@@ -458,7 +544,7 @@ const newsList = getNews();
               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
             </div>
             <div>
-              <span class="text-[10px] font-bold text-white block">@banda.bruna</span>
+              <span class="text-[10px] font-bold text-white block">{instagramFeed[0].username}</span>
               <span class="text-[8px] text-slate-500 block">Hace 1 día</span>
             </div>
           </div>
@@ -479,7 +565,7 @@ const newsList = getNews();
               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
             </div>
             <div>
-              <span class="text-[10px] font-bold text-white block">@banda.bruna</span>
+              <span class="text-[10px] font-bold text-white block">{instagramFeed[1].username}</span>
               <span class="text-[8px] text-slate-500 block">Hace 2 días</span>
             </div>
           </div>
@@ -509,7 +595,7 @@ const newsList = getNews();
               </div>
             </div>
             <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-              <img src="assets/images/hero.png" alt="Facebook stage post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+              <img src={facebookFeed[0].imageUrl} alt="Facebook stage post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
             </div>
             <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{facebookFeed[0].caption}</p>
           </div>
@@ -549,7 +635,7 @@ const newsList = getNews();
               <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
             </div>
             <div>
-              <span class="text-[10px] font-bold text-white block">@banda.bruna</span>
+              <span class="text-[10px] font-bold text-white block">{instagramFeed[2].username}</span>
               <span class="text-[8px] text-slate-500 block">Hace 4 días</span>
             </div>
           </div>
@@ -583,14 +669,14 @@ const newsList = getNews();
         </div>
 
         <!-- WhatsApp Card -->
-        <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-green-500 transition-colors group cursor-pointer">
+        <a href="https://wa.me/56990021689" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-green-500 transition-colors group cursor-pointer">
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-full bg-green-950/40 border border-green-500/20 text-green-400 flex items-center justify-center">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
             </div>
             <div class="text-left flex-grow pl-3">
               <span class="text-slate-500 text-[10px] font-bold block uppercase tracking-wider">WHATSAPP</span>
-              <span class="text-white text-sm font-bold tracking-wide">+56 9 1234 5678</span>
+              <span class="text-white text-sm font-bold tracking-wide">+56 9 9002 1689</span>
             </div>
           </div>
           <span class="text-[9px] text-green-400 font-bold border border-green-500/20 px-3 py-1 bg-green-950/20 group-hover:bg-green-500 group-hover:text-black transition-colors uppercase tracking-wider">ESCRIBIR AHORA</span>
@@ -613,69 +699,148 @@ const newsList = getNews();
 
       <!-- Quotation Form (Right) -->
       <div class="lg:col-span-7 bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-2xl flex flex-col justify-center">
-        <form id="quote-form-home-mock" class="flex flex-col gap-5 text-left" novalidate>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="flex flex-col gap-1.5">
-              <input 
-                type="text" 
-                id="qh-name" 
-                name="name" 
-                placeholder="Nombre" 
-                required
-                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
-              />
-              <span class="text-[9px] text-red-400 hidden" id="qh-name-err">Ingresa tu nombre.</span>
+        
+        <!-- Form Container -->
+        <div id="booking-form-container-home">
+          <form id="quote-form-home" class="flex flex-col gap-5 text-left" novalidate>
+            
+            <!-- Row 1: Nombre & Teléfono -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="flex flex-col gap-1.5">
+                <input 
+                  type="text" 
+                  id="qh-name" 
+                  name="name" 
+                  placeholder="Nombre completo" 
+                  required
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                />
+                <span class="text-[9px] text-red-400 hidden" id="qh-name-err">Ingresa tu nombre.</span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <input 
+                  type="tel" 
+                  id="qh-phone" 
+                  name="phone" 
+                  placeholder="Teléfono de contacto" 
+                  required
+                  autocomplete="tel"
+                  inputmode="tel"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                />
+                <span class="text-[9px] text-red-400 hidden" id="qh-phone-err">Ingresa tu teléfono.</span>
+              </div>
             </div>
+
+            <!-- Row 2: Correo & Tipo de Evento -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="flex flex-col gap-1.5">
+                <input 
+                  type="email" 
+                  id="qh-email" 
+                  name="email" 
+                  placeholder="Tu correo" 
+                  required
+                  inputmode="email"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                />
+                <span class="text-[9px] text-red-400 hidden" id="qh-email-err">Ingresa un correo válido.</span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <select 
+                  id="qh-type" 
+                  name="event-type"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
+                >
+                  <option value="" disabled selected>Tipo de evento</option>
+                  <option value="municipal">Festival Municipal / Show Público</option>
+                  <option value="costumbrista">Fiesta Costumbrista</option>
+                  <option value="corporativo">Evento Corporativo / Empresa</option>
+                  <option value="matrimonio">Matrimonio / Fiesta Privada</option>
+                  <option value="otro">Otro</option>
+                </select>
+                <span class="text-[9px] text-red-400 hidden" id="qh-type-err">Selecciona tipo de evento.</span>
+              </div>
+            </div>
+
+            <!-- Row 3: Fecha & Ciudad/Comuna -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="flex flex-col gap-1.5">
+                <input 
+                  type="date" 
+                  id="qh-date" 
+                  name="event-date"
+                  required
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
+                />
+                <span class="text-[9px] text-red-400 hidden" id="qh-date-err">Selecciona la fecha.</span>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <input 
+                  type="text" 
+                  id="qh-city" 
+                  name="city" 
+                  placeholder="Ciudad / Comuna del evento" 
+                  required
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                />
+                <span class="text-[9px] text-red-400 hidden" id="qh-city-err">Ingresa la comuna.</span>
+              </div>
+            </div>
+
+            <!-- Textarea: Requerimientos/Detalles -->
             <div class="flex flex-col gap-1.5">
-              <input 
-                type="email" 
-                id="qh-email" 
-                name="email" 
-                placeholder="Tu correo" 
-                required
-                inputmode="email"
-                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
-              />
-              <span class="text-[9px] text-red-400 hidden" id="qh-email-err">Ingresa un correo válido.</span>
+              <textarea 
+                id="qh-message" 
+                name="message" 
+                rows="4" 
+                placeholder="Detalles adicionales del show (escenario, horarios, duración, etc.)"
+                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors resize-none"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-title font-bold py-3.5 rounded-sm text-xs transition-colors cursor-pointer uppercase tracking-widest mt-2 w-full">
+              ENVIAR SOLICITUD DE COTIZACIÓN
+            </button>
+            
+            <div id="qh-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border" role="alert"></div>
+
+          </form>
+        </div>
+
+        <!-- Success Panel (Hidden by default) -->
+        <div id="success-panel-home" class="hidden text-center flex flex-col items-center gap-5 py-4">
+          <div class="w-14 h-14 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-2xl animate-bounce">
+            ✓
+          </div>
+          <div>
+            <h3 class="font-title font-extrabold text-xl text-white uppercase tracking-wide">¡Cotización Procesada!</h3>
+            <p class="text-slate-300 text-xs font-light mt-1.5 max-w-md mx-auto leading-relaxed">
+              Hemos enviado un correo electrónico con todos los detalles de tu cotización a <strong class="text-white">contacto@bandabruna.cl</strong>.
+            </p>
+          </div>
+
+          <div class="w-full max-w-md border-t border-white/5 pt-4 mt-1 flex flex-col gap-3">
+            <span class="text-[9px] font-bold text-slate-500 tracking-widest uppercase">Notificar por WhatsApp</span>
+            <p class="text-slate-400 text-[10px] font-light leading-relaxed">
+              Hemos intentado abrir WhatsApp para avisar a Jaime Cárdenas. Si no se abrió, haz clic en el siguiente botón para abrir el chat con el mensaje:
+            </p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+              <a id="btn-wa-jaime-home" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] py-2.5 px-3 rounded transition-all flex items-center justify-center gap-1.5 uppercase tracking-wide">
+                Jaime Cárdenas
+              </a>
+              <a id="btn-wa-cesar-home" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] py-2.5 px-3 rounded transition-all flex items-center justify-center gap-1.5 uppercase tracking-wide">
+                César Bruna
+              </a>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="flex flex-col gap-1.5">
-              <select 
-                id="qh-type" 
-                name="event-type"
-                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
-              >
-                <option value="" disabled selected>Tipo de evento</option>
-                <option value="matrimonio">Matrimonio / Boda</option>
-                <option value="costumbrista">Fiesta Costumbrista</option>
-                <option value="corporativo">Evento Corporativo</option>
-                <option value="municipal">Festival Municipal</option>
-                <option value="otro">Otro</option>
-              </select>
-              <span class="text-[9px] text-red-400 hidden" id="qh-type-err">Selecciona tipo de evento.</span>
-            </div>
-            <div class="flex flex-col gap-1.5">
-              <input 
-                type="date" 
-                id="qh-date" 
-                name="event-date"
-                required
-                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
-              />
-              <span class="text-[9px] text-red-400 hidden" id="qh-date-err">Selecciona la fecha.</span>
-            </div>
-          </div>
-
-          <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-title font-bold py-3.5 rounded-sm text-xs transition-colors cursor-pointer uppercase tracking-widest mt-2 w-full">
-            ENVIAR SOLICITUD
+          <button id="btn-reset-home-form" class="mt-2 text-slate-400 hover:text-gold-bruna text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
+            Cotizar otro show
           </button>
-          
-          <div id="qh-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border" role="alert"></div>
+        </div>
 
-        </form>
       </div>
 
     </div>
@@ -683,32 +848,47 @@ const newsList = getNews();
 
   <!-- Script for form submission -->
   <script>
-    const formH = document.getElementById('quote-form-home-mock');
+    const formH = document.getElementById('quote-form-home');
+    const formContainerH = document.getElementById('booking-form-container-home');
+    const successPanelH = document.getElementById('success-panel-home');
     const feedbackH = document.getElementById('qh-form-feedback');
     const nameInputH = document.getElementById('qh-name');
+    const phoneInputH = document.getElementById('qh-phone');
     const emailInputH = document.getElementById('qh-email');
     const typeInputH = document.getElementById('qh-type');
     const dateInputH = document.getElementById('qh-date');
+    const cityInputH = document.getElementById('qh-city');
+    const messageInputH = document.getElementById('qh-message');
 
     const nameErrH = document.getElementById('qh-name-err');
+    const phoneErrH = document.getElementById('qh-phone-err');
     const emailErrH = document.getElementById('qh-email-err');
     const typeErrH = document.getElementById('qh-type-err');
     const dateErrH = document.getElementById('qh-date-err');
+    const cityErrH = document.getElementById('qh-city-err');
+    const btnResetH = document.getElementById('btn-reset-home-form');
 
     if (formH) {
       formH.addEventListener('submit', (e) => {
         e.preventDefault();
         
         nameErrH.classList.add('hidden');
+        phoneErrH.classList.add('hidden');
         emailErrH.classList.add('hidden');
         typeErrH.classList.add('hidden');
         dateErrH.classList.add('hidden');
+        cityErrH.classList.add('hidden');
         feedbackH.classList.add('hidden');
 
         let valid = true;
 
         if (!nameInputH.value.trim()) {
           nameErrH.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!phoneInputH.value.trim()) {
+          phoneErrH.classList.remove('hidden');
           valid = false;
         }
 
@@ -727,6 +907,11 @@ const newsList = getNews();
           valid = false;
         }
 
+        if (!cityInputH.value.trim()) {
+          cityErrH.classList.remove('hidden');
+          valid = false;
+        }
+
         if (!valid) return;
 
         const btn = formH.querySelector('button[type="submit"]');
@@ -734,15 +919,80 @@ const newsList = getNews();
         btn.textContent = 'Enviando...';
         btn.disabled = true;
 
-        setTimeout(() => {
+        const nameVal = nameInputH.value.trim();
+        const phoneVal = phoneInputH.value.trim();
+        const emailVal = emailInputH.value.trim();
+        const typeVal = typeInputH.options[typeInputH.selectedIndex].text;
+        const dateVal = dateInputH.value;
+        const cityVal = cityInputH.value.trim();
+        const msgVal = messageInputH.value.trim() || 'Sin detalles adicionales.';
+
+        // Send email asynchronously using FormSubmit.co
+        fetch("https://formsubmit.co/ajax/contacto@bandabruna.cl", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            "Asunto": "Nueva Cotización desde Home del Sitio Web",
+            "Nombre": nameVal,
+            "Teléfono": phoneVal,
+            "Email": emailVal,
+            "Tipo de Evento": typeVal,
+            "Fecha Tentativa": dateVal,
+            "Ciudad/Comuna": cityVal,
+            "Detalles/Mensaje": msgVal
+          })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Error de envío.');
+          return response.json();
+        })
+        .then(() => {
           btn.textContent = origText;
           btn.disabled = false;
 
-          feedbackH.textContent = '¡Tu solicitud ha sido enviada con éxito!';
-          feedbackH.className = 'text-center text-xs py-2.5 px-4 rounded border bg-green-950/20 border-green-500/20 text-green-400 block';
+          // Formulate WhatsApp notification message
+          const waMessage = `*Nueva Solicitud de Cotización - Banda Bruna*\n\n` +
+            `👤 *Contacto:* ${nameVal}\n` +
+            `📞 *Fono:* ${phoneVal}\n` +
+            `📧 *Email:* ${emailVal}\n` +
+            `🎭 *Evento:* ${typeVal}\n` +
+            `📅 *Fecha:* ${dateVal}\n` +
+            `📍 *Ciudad/Comuna:* ${cityVal}\n` +
+            `📝 *Detalles:* ${msgVal}`;
           
+          const encodedMessage = encodeURIComponent(waMessage);
+
+          // Configure Jaime and Cesar WhatsApp links for Home success panel
+          const btnJaimeH = document.getElementById('btn-wa-jaime-home');
+          const btnCesarH = document.getElementById('btn-wa-cesar-home');
+          if (btnJaimeH) btnJaimeH.href = `https://wa.me/56990021689?text=${encodedMessage}`;
+          if (btnCesarH) btnCesarH.href = `https://wa.me/56976149408?text=${encodedMessage}`;
+
+          // Try opening Jaime's WhatsApp window automatically
+          window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
+
+          // Hide form container and show success panel
+          if (formContainerH) formContainerH.classList.add('hidden');
+          if (successPanelH) successPanelH.classList.remove('hidden');
+
           formH.reset();
-        }, 1200);
+        })
+        .catch((err) => {
+          btn.textContent = origText;
+          btn.disabled = false;
+          feedbackH.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos por WhatsApp.';
+          feedbackH.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 mt-2 block';
+        });
+      });
+    }
+
+    if (btnResetH) {
+      btnResetH.addEventListener('click', () => {
+        if (successPanelH) successPanelH.classList.add('hidden');
+        if (formContainerH) formContainerH.classList.remove('hidden');
       });
     }
 
@@ -793,6 +1043,144 @@ const newsList = getNews();
     // Initialize slider
     showSlide(0);
     startAutoplay();
+
+    // EXPERIENCIA BRUNA SLIDER LOGIC
+    function setupExperienciaSlider() {
+      const prevBtn = document.getElementById('exp-prev');
+      const nextBtn = document.getElementById('exp-next');
+      const track = document.getElementById('exp-slider-track');
+      const container = document.getElementById('exp-slider-container');
+      
+      if (!track || !container || !prevBtn || !nextBtn) return;
+      
+      const items = track.children;
+      if (items.length === 0) return;
+      
+      let expIndex = 0;
+      
+      function getVisibleItemsCount() {
+        const width = window.innerWidth;
+        if (width >= 768) return 4;
+        if (width >= 640) return 3;
+        return 2;
+      }
+      
+      function updateSlider() {
+        const visibleCount = getVisibleItemsCount();
+        const maxIndex = items.length - visibleCount;
+        
+        if (expIndex < 0) expIndex = 0;
+        if (expIndex > maxIndex) expIndex = maxIndex;
+        
+        const itemWidth = items[0].getBoundingClientRect().width;
+        const gap = 16; // gap-4 is 16px
+        const offset = expIndex * (itemWidth + gap);
+        
+        track.style.transform = `translateX(-${offset}px)`;
+        
+        prevBtn.disabled = expIndex === 0;
+        nextBtn.disabled = expIndex === maxIndex;
+      }
+      
+      const newPrev = prevBtn.cloneNode(true);
+      prevBtn.parentNode.replaceChild(newPrev, prevBtn);
+      newPrev.addEventListener('click', () => {
+        expIndex--;
+        updateSlider();
+      });
+      
+      const newNext = nextBtn.cloneNode(true);
+      nextBtn.parentNode.replaceChild(newNext, nextBtn);
+      newNext.addEventListener('click', () => {
+        expIndex++;
+        updateSlider();
+      });
+      
+      window.removeEventListener('resize', updateSlider);
+      window.addEventListener('resize', updateSlider);
+      
+      let startX = 0;
+      container.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      container.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].clientX;
+        const diff = startX - endX;
+        const visibleCount = getVisibleItemsCount();
+        const maxIndex = items.length - visibleCount;
+        
+        if (Math.abs(diff) > 40) {
+          if (diff > 0 && expIndex < maxIndex) {
+            expIndex++;
+          } else if (diff < 0 && expIndex > 0) {
+            expIndex--;
+          }
+          updateSlider();
+        }
+      }, { passive: true });
+      
+      updateSlider();
+    }
+
+    setupExperienciaSlider();
+    document.addEventListener('astro:after-swap', setupExperienciaSlider);
+
+    // COUNT UP ANIMATION LOGIC FOR STATISTICS
+    function setupCountUp() {
+      const counters = document.querySelectorAll('[data-count-target]');
+      if (counters.length === 0) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const counter = entry.target;
+            const target = parseFloat(counter.getAttribute('data-count-target'));
+            const duration = 2000; // 2 seconds animation
+            const startTime = performance.now();
+            const prefix = counter.getAttribute('data-count-prefix') || '';
+            const suffix = counter.getAttribute('data-count-suffix') || '';
+            const isDecimal = counter.hasAttribute('data-count-decimal');
+
+            function animate(currentTime) {
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              
+              // Easing function outQuad
+              const easeProgress = progress * (2 - progress);
+              
+              let currentVal = easeProgress * target;
+              
+              if (isDecimal) {
+                counter.textContent = prefix + currentVal.toFixed(1).replace('.', ',') + suffix;
+              } else {
+                counter.textContent = prefix + Math.floor(currentVal).toLocaleString('es-CL') + suffix;
+              }
+
+              if (progress < 1) {
+                requestAnimationFrame(animate);
+              } else {
+                if (isDecimal) {
+                  counter.textContent = prefix + target.toFixed(1).replace('.', ',') + suffix;
+                } else {
+                  counter.textContent = prefix + target.toLocaleString('es-CL') + suffix;
+                }
+              }
+            }
+
+            requestAnimationFrame(animate);
+            observer.unobserve(counter);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      counters.forEach(counter => {
+        observer.observe(counter);
+      });
+    }
+
+    setupCountUp();
+    document.addEventListener('astro:after-swap', setupCountUp);
   </script>
 
 </Layout>

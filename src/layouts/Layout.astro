@@ -41,10 +41,42 @@ const getLinkClass = (path: string) => {
   <meta property="og:description" content={description}>
   <meta property="og:image" content="/assets/images/album.png">
 
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/webp" href="/favicon.webp" />
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Structured Data JSON-LD (SEO & AI Search Engine Optimization) -->
+  <script type="application/ld+json" is:inline>
+    {
+      "@context": "https://schema.org",
+      "@type": "MusicGroup",
+      "name": "Banda Bruna",
+      "url": "https://bandabruna.cl",
+      "logo": "https://bandabruna.cl/assets/images/logos/logo_main.webp",
+      "image": "https://bandabruna.cl/assets/images/orquesta_sur.webp",
+      "description": "Orquesta y banda de cumbia tropical chilena para eventos, festivales, matrimonios y fiestas costumbristas en la Región de La Araucanía y todo Chile.",
+      "genre": ["Cumbia", "Música Tropical"],
+      "sameAs": [
+        "https://www.instagram.com/banda_bruna/",
+        "https://www.facebook.com/bandabruna",
+        "https://www.youtube.com/@bandabrunaoficial",
+        "https://www.tiktok.com/@bandabrunaoficial",
+        "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+56990021689",
+        "contactType": "sales",
+        "email": "contacto@bandabruna.cl",
+        "areaServed": "CL"
+      }
+    }
+  </script>
 </head>
 <body class="bg-bg-darkest text-white selection:bg-gold-bruna/30 selection:text-gold-bruna min-h-screen flex flex-col">
 
@@ -82,7 +114,7 @@ const getLinkClass = (path: string) => {
 
       <!-- CTA WhatsApp Header Button -->
       <div class="hidden lg:block">
-        <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-4 py-2 rounded-sm font-bold text-xs hover:scale-105 transition-all flex items-center gap-1.5 shadow-lg shadow-gold-bruna/10 cursor-pointer uppercase">
+        <a href="/contrataciones" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-4 py-2 rounded-sm font-bold text-xs hover:scale-105 transition-all flex items-center gap-1.5 shadow-lg shadow-gold-bruna/10 cursor-pointer uppercase">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
           COTIZAR EVENTO
         </a>
@@ -102,8 +134,8 @@ const getLinkClass = (path: string) => {
           <li><a href="/epk" class="block py-2.5 border-b border-white/5">PRENSA / EPK</a></li>
           <li><a href="/contacto" class="block py-2.5 border-b border-white/5">CONTACTO</a></li>
           <li class="mt-6">
-            <a href="https://wa.me/56912345678" target="_blank" rel="noopener" class="w-full bg-gold-bruna text-black text-center py-3 rounded font-bold block cursor-pointer">
-              COTIZAR VÍA WHATSAPP
+            <a href="/contrataciones" class="w-full bg-gold-bruna text-black text-center py-3 rounded font-bold block cursor-pointer">
+              COTIZAR EVENTO
             </a>
           </li>
         </ul>
@@ -165,8 +197,8 @@ const getLinkClass = (path: string) => {
         <ul class="flex flex-col gap-2.5 text-xs list-none p-0">
           <li><a href="https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Escucha en Spotify</a></li>
           <li><a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">YouTube Music</a></li>
-          <li><a href="https://apple.com" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Apple Music</a></li>
-          <li><a href="https://deezer.com" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Deezer</a></li>
+          <li><a href="https://music.apple.com/cl/artist/banda-bruna/1828449193" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Apple Music</a></li>
+          <li><a href="https://www.deezer.com/mx/artist/337478561" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Deezer</a></li>
         </ul>
       </div>
 
@@ -174,7 +206,8 @@ const getLinkClass = (path: string) => {
       <div class="flex flex-col gap-4 text-left">
         <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Contrataciones</span>
         <ul class="flex flex-col gap-2.5 text-xs list-none p-0">
-          <li><strong>Fono:</strong> <a href="tel:+56912345678" class="hover:text-gold-bruna transition-colors">+56 9 1234 5678</a></li>
+          <li><strong>Jaime Cárdenas:</strong> <a href="tel:+56990021689" class="hover:text-gold-bruna transition-colors">+56 9 9002 1689</a></li>
+          <li><strong>César Bruna:</strong> <a href="tel:+56976149408" class="hover:text-gold-bruna transition-colors">+56 9 7614 9408</a></li>
           <li><strong>Correo:</strong> <a href="mailto:contacto@bandabruna.cl" class="hover:text-gold-bruna transition-colors">contacto@bandabruna.cl</a></li>
           <li><strong>Ubicación:</strong> Temuco, La Araucanía, Chile</li>
         </ul>
