@@ -146,6 +146,7 @@ const { news } = Astro.props;
                   class="w-full h-full rounded-xl object-cover"
                   title={`Video de detrás de cámaras ${index + 1}`}
                 >
+                  <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
                   Tu navegador no soporta la reproducción de video.
                 </video>
               </div>

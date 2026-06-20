@@ -401,7 +401,9 @@ const experienciaImages = [
           preload="metadata"
           playsinline
           aria-label="Presentación en vivo de Banda Bruna"
-        ></video>
+        >
+          <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+        </video>
       </div>
 
     </div>
@@ -707,6 +709,7 @@ const experienciaImages = [
             <!-- Row 1: Nombre & Teléfono -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div class="flex flex-col gap-1.5">
+                <label for="qh-name" class="sr-only">Nombre completo</label>
                 <input 
                   type="text" 
                   id="qh-name" 
@@ -718,6 +721,7 @@ const experienciaImages = [
                 <span class="text-[9px] text-red-400 hidden" id="qh-name-err">Ingresa tu nombre.</span>
               </div>
               <div class="flex flex-col gap-1.5">
+                <label for="qh-phone" class="sr-only">Teléfono de contacto</label>
                 <input 
                   type="tel" 
                   id="qh-phone" 
@@ -735,6 +739,7 @@ const experienciaImages = [
             <!-- Row 2: Correo & Tipo de Evento -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div class="flex flex-col gap-1.5">
+                <label for="qh-email" class="sr-only">Tu correo electrónico</label>
                 <input 
                   type="email" 
                   id="qh-email" 
@@ -747,6 +752,7 @@ const experienciaImages = [
                 <span class="text-[9px] text-red-400 hidden" id="qh-email-err">Ingresa un correo válido.</span>
               </div>
               <div class="flex flex-col gap-1.5">
+                <label for="qh-type" class="sr-only">Tipo de evento</label>
                 <select 
                   id="qh-type" 
                   name="event-type"
@@ -766,6 +772,7 @@ const experienciaImages = [
             <!-- Row 3: Fecha & Ciudad/Comuna -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div class="flex flex-col gap-1.5">
+                <label for="qh-date" class="sr-only">Fecha tentativa del evento</label>
                 <input 
                   type="date" 
                   id="qh-date" 
@@ -776,6 +783,7 @@ const experienciaImages = [
                 <span class="text-[9px] text-red-400 hidden" id="qh-date-err">Selecciona la fecha.</span>
               </div>
               <div class="flex flex-col gap-1.5">
+                <label for="qh-city" class="sr-only">Ciudad o comuna del evento</label>
                 <input 
                   type="text" 
                   id="qh-city" 
@@ -790,6 +798,7 @@ const experienciaImages = [
 
             <!-- Textarea: Requerimientos/Detalles -->
             <div class="flex flex-col gap-1.5">
+              <label for="qh-message" class="sr-only">Detalles adicionales del show</label>
               <textarea 
                 id="qh-message" 
                 name="message" 
