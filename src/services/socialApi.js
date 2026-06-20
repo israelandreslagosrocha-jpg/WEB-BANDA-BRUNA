@@ -9,7 +9,7 @@ export const getLatestVideo = () => {
     type: "Sesión En Vivo",
     youtubeUrl: "https://www.youtube.com/watch?v=p_zdcQEEOFY",
     embedUrl: "https://www.youtube.com/embed/p_zdcQEEOFY?autoplay=1&mute=1&loop=1&playlist=p_zdcQEEOFY&controls=0&showinfo=0&rel=0&modestbranding=1",
-    thumbnail: "https://img.youtube.com/vi/p_zdcQEEOFY/maxresdefault.jpg",
+    thumbnail: "/assets/images/youtube/latest_yt_cover.webp",
     publishedAt: "Reciente"
   };
 };
