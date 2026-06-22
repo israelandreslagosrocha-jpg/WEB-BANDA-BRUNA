@@ -20,14 +20,25 @@ const { data: dbStaff } = await supabase
 const defaultMembers = getBandMembers();
 
 const members = dbMembers && dbMembers.length > 0
-  ? dbMembers.map((m: any) => ({
-      id: m.id,
-      name: m.nombre,
-      role: m.cargo || '',
-      instagram: m.instagram || '',
-      image: m.foto || '/assets/images/placeholder_musico.webp',
-      bio: m.biografia || 'Integrante oficial de Banda Bruna.'
-    }))
+  ? dbMembers.map((m: any) => {
+      let imgPath = m.foto || '/assets/images/placeholder_musico.webp';
+      if (imgPath.startsWith('/assets/images/members/')) {
+        const file = imgPath.split('/').pop();
+        if (file === 'jaime_cardenas.webp') {
+          imgPath = '/assets/images/banda/jaime_sanhueza.webp';
+        } else {
+          imgPath = `/assets/images/banda/${file}`;
+        }
+      }
+      return {
+        id: m.id,
+        name: m.nombre,
+        role: m.cargo || '',
+        instagram: m.instagram || '',
+        image: imgPath,
+        bio: m.biografia || 'Integrante oficial de Banda Bruna.'
+      };
+    })
   : defaultMembers;
 
 const staff = (dbStaff || []).map((s: any) => ({
