@@ -120,14 +120,40 @@ import Layout from '../../layouts/Layout.astro';
           </div>
 
           <form id="rider-form" class="flex flex-col gap-6">
-            <div class="flex flex-col gap-2">
-              <label class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Listado de Canales / Microfonía (Input List)</label>
-              <textarea id="rider-input-list" rows="6" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna resize-none" placeholder="1. Bombo - Shure Beta 52&#10;2. Caja - Shure SM57..."></textarea>
+            <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Lista de Canales (Input List)</h3>
+              <div class="max-h-[350px] overflow-y-auto pr-2 flex flex-col gap-2" id="canales-container">
+                <!-- Se inyectarán dinámicamente -->
+              </div>
             </div>
 
-            <div class="flex flex-col gap-2">
-              <label class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Requerimientos de Monitoreo / Mezclas</label>
-              <textarea id="rider-monitores" rows="4" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna resize-none" placeholder="Mezcla 1: Bronces (In-ears)&#10;Mezcla 2: Voz Principal (Wedge)..."></textarea>
+            <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Mezclas de Monitoreo</h3>
+              <div class="flex flex-col gap-2.5" id="monitores-container">
+                <!-- Se inyectarán dinámicamente -->
+              </div>
+            </div>
+
+            <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Requerimientos Técnicos</h3>
+              <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Requerimientos de Audio (P.A. & FOH) - Salto de línea por ítem</label>
+                  <textarea id="req-audio" rows="3" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Requerimientos de Monitoreo - Salto de línea por ítem</label>
+                  <textarea id="req-monitores" rows="3" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Requerimientos de Iluminación - Salto de línea por ítem</label>
+                  <textarea id="req-luces" rows="2" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Requerimientos de Logística & Camarín - Salto de línea por ítem</label>
+                  <textarea id="req-logistica" rows="2" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna resize-none"></textarea>
+                </div>
+              </div>
             </div>
 
             <button type="submit" class="bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white font-title font-bold py-3 rounded text-xs uppercase tracking-widest transition-all w-full cursor-pointer">
@@ -230,14 +256,16 @@ import Layout from '../../layouts/Layout.astro';
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. AUTENTICACIÓN: Verificar acceso seguro y correo exacto
       const { data: { session } } = await supabase.auth.getSession();
+      const emailsAutorizados = ['contacto@bandabruna.cl', 'tecnico@bandabruna.cl'];
       
-      if (!session || !session.user || session.user.email !== 'contacto@bandabruna.cl') {
+      if (!session || !session.user || !session.user.email || !emailsAutorizados.includes(session.user.email)) {
         // Redirigir a login
         window.location.href = '/admin';
         return;
       }
 
       loggedInUserEmail = session.user.email;
+      const isTecnico = loggedInUserEmail === 'tecnico@bandabruna.cl';
       
       // Mostrar Panel
       const gateLoading = document.getElementById('admin-gate-loading');
@@ -287,8 +315,30 @@ import Layout from '../../layouts/Layout.astro';
         });
       });
 
-      // Cargar primera pestaña al iniciar
-      loadNoticias();
+      // Cargar primera pestaña según el rol
+      if (isTecnico) {
+        // Ocultar botones de pestañas que no corresponden
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          const target = btn.getAttribute('data-tab-target');
+          if (target !== 'rider') {
+            (btn as HTMLElement).style.display = 'none';
+          }
+        });
+
+        // Forzar a activar pestaña de rider
+        const riderBtn = document.querySelector('[data-tab-target="rider"]') as HTMLButtonElement | null;
+        if (riderBtn) {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-gold-bruna', 'text-gold-bruna'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+          
+          riderBtn.classList.add('active', 'border-gold-bruna', 'text-gold-bruna');
+          const tabRider = document.getElementById('tab-rider');
+          if (tabRider) tabRider.classList.remove('hidden');
+        }
+        loadRider();
+      } else {
+        loadNoticias();
+      }
 
       // 3. UTILERÍAS: Conversor de imágenes a WebP en el navegador
       async function convertToWebp(file: File): Promise<Blob> {
@@ -935,43 +985,136 @@ import Layout from '../../layouts/Layout.astro';
       // LÓGICA DE PESTAÑA: RIDER TÉCNICO (CON PDF)
       // ==========================================
       async function loadRider() {
-        const inputList = document.getElementById('rider-input-list') as HTMLTextAreaElement;
-        const monitores = document.getElementById('rider-monitores') as HTMLTextAreaElement;
-
-        // Recuperar configuraciones desde la tabla configuracion (la usamos como bolsa global)
-        const { data } = await supabase.from('configuracion').select('instagram, facebook').eq('id', 1).single();
+        const canalesContainer = document.getElementById('canales-container');
+        const monitoresContainer = document.getElementById('monitores-container');
         
-        // Guardaremos en variables temporales o utilizaremos campos personalizados en la tabla si decidimos ampliarlos.
-        // De momento, utilizaremos campos por defecto guardados en LocalStorage como fallback o en la tabla si existen.
-        if (data) {
-          // Utilizaremos un registro simulado en local para no alterar el esquema inicial,
-          // o cargamos de variables pre-definidas.
-          inputList.value = localStorage.getItem('rider_input_list') || 
-            "1. Bombo - Shure Beta 91A\n2. Caja Top - Shure SM57\n3. Caja Bottom - Shure SM57\n4. Hi-Hat - AKG C451\n5. Tom 1 - Sennheiser e604\n6. Tom 2 - Sennheiser e604\n7. Tom Floor - Sennheiser e604\n8. Bajo - Caja Directa BSS (DI)\n9. Guitarra - Shure SM57\n10. Teclado L - Caja Directa (DI)\n11. Teclado R - Caja Directa (DI)\n12. Voz Principal - Shure Beta 58A\n13. Coros - Shure SM58";
-          monitores.value = localStorage.getItem('rider_monitores') || 
-            "Mezcla 1: Bronces (Sistema In-Ear Inalámbrico)\nMezcla 2: Voz Principal (Monitor de piso Wedge)\nMezcla 3: Batería (Monitor Drumfill + Sub)\nMezcla 4: Bajista y Guitarra (In-Ears)";
+        const reqAudio = document.getElementById('req-audio') as HTMLTextAreaElement;
+        const reqMonitores = document.getElementById('req-monitores') as HTMLTextAreaElement;
+        const reqLuces = document.getElementById('req-luces') as HTMLTextAreaElement;
+        const reqLogistica = document.getElementById('req-logistica') as HTMLTextAreaElement;
+
+        if (!canalesContainer || !monitoresContainer || !reqAudio || !reqMonitores || !reqLuces || !reqLogistica) return;
+
+        canalesContainer.innerHTML = '<p class="text-xs text-slate-400 animate-pulse">Cargando canales...</p>';
+        monitoresContainer.innerHTML = '<p class="text-xs text-slate-400 animate-pulse">Cargando mezclas...</p>';
+
+        // Cargar Canales
+        const { data: canales, error: errCanales } = await supabase
+          .from('rider_canales')
+          .select('*')
+          .order('canal', { ascending: true });
+
+        // Cargar Monitores
+        const { data: monitores, error: errMonitores } = await supabase
+          .from('rider_monitores')
+          .select('*')
+          .order('mezcla', { ascending: true });
+
+        // Cargar Requerimientos
+        const { data: reqs, error: errReqs } = await supabase
+          .from('rider_requerimientos')
+          .select('*');
+
+        if (errCanales || !canales) {
+          canalesContainer.innerHTML = '<p class="text-xs text-red-400">Error al cargar canales.</p>';
+        } else {
+          canalesContainer.innerHTML = canales.map((ch: any) => `
+            <div class="flex items-center gap-3 bg-slate-900 border border-white/5 p-2 rounded-lg" data-channel-row="${ch.canal}" data-channel-id="${ch.id}">
+              <span class="w-8 font-title font-bold text-xs text-gold-bruna pl-2">${ch.canal}</span>
+              <input type="text" value="${ch.instrumento}" placeholder="Instrumento" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="instrumento" />
+              <input type="text" value="${ch.conexion}" placeholder="Micrófono / DI" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="conexion" />
+              <input type="hidden" value="${ch.categoria}" data-field="categoria" />
+            </div>
+          `).join('');
+        }
+
+        if (errMonitores || !monitores) {
+          monitoresContainer.innerHTML = '<p class="text-xs text-red-400">Error al cargar mezclas de monitoreo.</p>';
+        } else {
+          monitoresContainer.innerHTML = monitores.map((m: any) => `
+            <div class="flex items-center gap-3 bg-slate-900 border border-white/5 p-2 rounded-lg" data-monitor-row="${m.mezcla}" data-monitor-id="${m.id}">
+              <span class="w-8 font-title font-bold text-xs text-gold-bruna pl-2">Mix ${m.mezcla}</span>
+              <input type="text" value="${m.envio}" placeholder="Asignación" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="envio" />
+              <input type="text" value="${m.sistema}" placeholder="Sistema (ej: IN EAR)" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="sistema" />
+            </div>
+          `).join('');
+        }
+
+        if (errReqs || !reqs) {
+          reqAudio.value = '';
+          reqMonitores.value = '';
+          reqLuces.value = '';
+          reqLogistica.value = '';
+        } else {
+          reqs.forEach((r: any) => {
+            const val = (r.items || []).join('\n');
+            if (r.categoria === 'audio') reqAudio.value = val;
+            if (r.categoria === 'monitores') reqMonitores.value = val;
+            if (r.categoria === 'luces') reqLuces.value = val;
+            if (r.categoria === 'logistica') reqLogistica.value = val;
+          });
         }
       }
 
-      document.getElementById('rider-form')?.addEventListener('submit', (e) => {
+      document.getElementById('rider-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const inputList = (document.getElementById('rider-input-list') as HTMLTextAreaElement).value;
-        const monitores = (document.getElementById('rider-monitores') as HTMLTextAreaElement).value;
-
-        localStorage.setItem('rider_input_list', inputList);
-        localStorage.setItem('rider_monitores', monitores);
         
-        logAction('Actualizó las especificaciones del Rider Técnico');
-        alert('Rider Técnico guardado localmente con éxito.');
+        const submitBtn = e.target.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const origText = submitBtn.textContent;
+        submitBtn.textContent = 'Guardando cambios...';
+        submitBtn.disabled = true;
+
+        try {
+          // 1. Guardar Canales
+          const channelRows = document.querySelectorAll('[data-channel-row]');
+          for (const row of channelRows) {
+            const id = row.getAttribute('data-channel-id');
+            const instrumento = (row.querySelector('[data-field="instrumento"]') as HTMLInputElement).value;
+            const conexion = (row.querySelector('[data-field="conexion"]') as HTMLInputElement).value;
+            const categoria = (row.querySelector('[data-field="categoria"]') as HTMLInputElement).value;
+
+            if (id) {
+              await supabase.from('rider_canales').update({ instrumento, conexion, categoria }).eq('id', id);
+            }
+          }
+
+          // 2. Guardar Monitores
+          const monitorRows = document.querySelectorAll('[data-monitor-row]');
+          for (const row of monitorRows) {
+            const id = row.getAttribute('data-monitor-id');
+            const envio = (row.querySelector('[data-field="envio"]') as HTMLInputElement).value;
+            const sistema = (row.querySelector('[data-field="sistema"]') as HTMLInputElement).value;
+
+            if (id) {
+              await supabase.from('rider_monitores').update({ envio, sistema }).eq('id', id);
+            }
+          }
+
+          // 3. Guardar Requerimientos
+          const reqAudio = (document.getElementById('req-audio') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
+          const reqMonitores = (document.getElementById('req-monitores') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
+          const reqLuces = (document.getElementById('req-luces') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
+          const reqLogistica = (document.getElementById('req-logistica') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
+
+          await supabase.from('rider_requerimientos').update({ items: reqAudio }).eq('categoria', 'audio');
+          await supabase.from('rider_requerimientos').update({ items: reqMonitores }).eq('categoria', 'monitores');
+          await supabase.from('rider_requerimientos').update({ items: reqLuces }).eq('categoria', 'luces');
+          await supabase.from('rider_requerimientos').update({ items: reqLogistica }).eq('categoria', 'logistica');
+
+          await logAction('Actualizó especificaciones del Rider Técnico en Supabase');
+          alert('¡Rider Técnico guardado exitosamente en Supabase!');
+        } catch (err) {
+          console.error("Error al guardar rider:", err);
+          alert('Ocurrió un error al guardar los cambios.');
+        } finally {
+          submitBtn.textContent = origText;
+          submitBtn.disabled = false;
+        }
       });
 
       document.getElementById('btn-pdf-rider')?.addEventListener('click', () => {
-        // Generador de PDF en el cliente usando jsPDF
         const { jsPDF } = (window as any).jspdf;
         const doc = new jsPDF();
-        
-        const inputList = (document.getElementById('rider-input-list') as HTMLTextAreaElement).value;
-        const monitores = (document.getElementById('rider-monitores') as HTMLTextAreaElement).value;
 
         // Estilos PDF Premium
         doc.setFillColor(9, 13, 22); // Fondo oscuro
@@ -980,42 +1123,95 @@ import Layout from '../../layouts/Layout.astro';
         doc.setTextColor(212, 175, 55); // Color dorado Bruna
         doc.setFont('Helvetica', 'bold');
         doc.setFontSize(22);
-        doc.text("BANDA BRUNA 2.0", 20, 30);
+        doc.text("BANDA BRUNA 2.0", 20, 25);
         
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(14);
-        doc.text("RIDER TÉCNICO OFICIAL & INPUT LIST", 20, 40);
-        doc.setFontSize(10);
+        doc.text("RIDER TÉCNICO OFICIAL & INPUT LIST", 20, 35);
+        doc.setFontSize(9);
         doc.setFont('Helvetica', 'normal');
         doc.setTextColor(150, 150, 150);
-        doc.text("Este documento detalla los requerimientos oficiales de sonido y monitores en escenario.", 20, 48);
-        doc.line(20, 52, 190, 52); // Divider
+        doc.text("Documento oficial de requerimientos de sonido, mezclas e input list de escenario.", 20, 42);
+        doc.line(20, 46, 190, 46); // Divider
 
         // Seccion Input List
         doc.setTextColor(212, 175, 55);
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setFont('Helvetica', 'bold');
-        doc.text("INPUT LIST (CANALES Y MICROFONÍA)", 20, 62);
+        doc.text("INPUT LIST (CANALES DE ENTRADA)", 20, 55);
         
         doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
         doc.setFont('Helvetica', 'normal');
-        doc.setFontSize(9);
-        
-        const inputLines = doc.splitTextToSize(inputList, 170);
-        doc.text(inputLines, 20, 70);
 
-        // Seccion Monitores
-        const nextY = 70 + (inputLines.length * 4) + 10;
+        const channelRows = document.querySelectorAll('[data-channel-row]');
+        let yPos = 62;
+        channelRows.forEach((row) => {
+          const ch = row.getAttribute('data-channel-row');
+          const instrumento = (row.querySelector('[data-field="instrumento"]') as HTMLInputElement).value;
+          const conexion = (row.querySelector('[data-field="conexion"]') as HTMLInputElement).value;
+          
+          if (yPos < 280) {
+            doc.text(`${ch}. ${instrumento} - ${conexion}`, 20, yPos);
+            yPos += 4.5;
+          }
+        });
+
+        // Crear una nueva página para monitores y requerimientos
+        doc.addPage();
+        doc.setFillColor(9, 13, 22); // Fondo oscuro
+        doc.rect(0, 0, 210, 297, 'F');
+        
         doc.setTextColor(212, 175, 55);
         doc.setFont('Helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("REQUERIMIENTOS DE MONITOREO Y MEZCLAS", 20, nextY);
+        doc.text("MEZCLAS DE MONITOREO Y RETORNO", 20, 25);
 
         doc.setTextColor(255, 255, 255);
         doc.setFont('Helvetica', 'normal');
         doc.setFontSize(9);
-        const monitorLines = doc.splitTextToSize(monitores, 170);
-        doc.text(monitorLines, 20, nextY + 8);
+        let yMon = 35;
+        const monitorRows = document.querySelectorAll('[data-monitor-row]');
+        monitorRows.forEach((row) => {
+          const mezcla = row.getAttribute('data-monitor-row');
+          const envio = (row.querySelector('[data-field="envio"]') as HTMLInputElement).value;
+          const sistema = (row.querySelector('[data-field="sistema"]') as HTMLInputElement).value;
+          
+          doc.text(`Mezcla ${mezcla}: ${envio} (${sistema})`, 20, yMon);
+          yMon += 6;
+        });
+
+        yMon += 10;
+        doc.setTextColor(212, 175, 55);
+        doc.setFont('Helvetica', 'bold');
+        doc.text("REQUERIMIENTOS TÉCNICOS ADICIONALES", 20, yMon);
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(8);
+        yMon += 8;
+
+        const reqAudio = (document.getElementById('req-audio') as HTMLTextAreaElement).value;
+        const reqMonitores = (document.getElementById('req-monitores') as HTMLTextAreaElement).value;
+
+        doc.setTextColor(212, 175, 55);
+        doc.setFont('Helvetica', 'bold');
+        doc.text("AUDIO (P.A. & FOH):", 20, yMon);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'normal');
+        yMon += 5;
+        const audioLines = doc.splitTextToSize(reqAudio, 170);
+        doc.text(audioLines, 20, yMon);
+
+        yMon += (audioLines.length * 4) + 5;
+        doc.setTextColor(212, 175, 55);
+        doc.setFont('Helvetica', 'bold');
+        doc.text("MONITORES & ILUMINACION:", 20, yMon);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'normal');
+        yMon += 5;
+        const monLines = doc.splitTextToSize(reqMonitores, 170);
+        doc.text(monLines, 20, yMon);
 
         // Descarga
         doc.save("Rider_Tecnico_Banda_Bruna.pdf");

@@ -1,5 +1,121 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { supabase } from '../services/supabaseClient.js';
+
+// Cargar Canales
+const { data: dbCanales } = await supabase
+  .from('rider_canales')
+  .select('*')
+  .order('canal', { ascending: true });
+
+// Cargar Monitores
+const { data: dbMonitores } = await supabase
+  .from('rider_monitores')
+  .select('*')
+  .order('mezcla', { ascending: true });
+
+// Cargar Requerimientos
+const { data: dbReqs } = await supabase
+  .from('rider_requerimientos')
+  .select('*');
+
+// Fallback estático en caso de que las tablas en Supabase estén vacías
+const defaultCanales = [
+  { canal: 1, instrumento: 'KICK', conexion: 'SHURE PGA52', categoria: 'bateria' },
+  { canal: 2, instrumento: 'SNARE', conexion: 'SHURE PGA57', categoria: 'bateria' },
+  { canal: 3, instrumento: 'TIMBAL HIGH', conexion: 'SHURE PGA56', categoria: 'bateria' },
+  { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE PGA56', categoria: 'bateria' },
+  { canal: 5, instrumento: 'OCTAPAD', conexion: 'CAJA DIRECTA', categoria: 'bateria' },
+  { canal: 6, instrumento: 'OH L', conexion: 'SHURE PGA81', categoria: 'bateria' },
+  { canal: 7, instrumento: 'OH R', conexion: 'SHURE PGA81', categoria: 'bateria' },
+  { canal: 8, instrumento: 'CONGA HIGH', conexion: 'SHURE PGA56', categoria: 'percusion' },
+  { canal: 9, instrumento: 'CONGA LOW', conexion: 'SHURE PGA56', categoria: 'percusion' },
+  { canal: 10, instrumento: 'BONGOS', conexion: 'SHURE SM57', categoria: 'percusion' },
+  { canal: 11, instrumento: 'CHIMES', conexion: 'SHURE SM57', categoria: 'percusion' },
+  { canal: 12, instrumento: 'HUIRO', conexion: 'CAJA DIRECTA', categoria: 'percusion' },
+  { canal: 13, instrumento: 'BAJO', conexion: 'XLR DIRECTO', categoria: 'cuerdas' },
+  { canal: 14, instrumento: 'GTR', conexion: 'SHURE SM57', categoria: 'cuerdas' },
+  { canal: 15, instrumento: 'KEY L', conexion: 'CAJA DIRECTA', categoria: 'teclados' },
+  { canal: 16, instrumento: 'KEY R', conexion: 'CAJA DIRECTA', categoria: 'teclados' },
+  { canal: 17, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'voces' },
+  { canal: 18, instrumento: 'VOZ BAJO', conexion: 'SHURE SM58', categoria: 'voces' },
+  { canal: 19, instrumento: 'VOZ BATERIA', conexion: 'SHURE SM58', categoria: 'voces' },
+  { canal: 20, instrumento: 'VOZ GTR', conexion: 'SHURE SM58', categoria: 'voces' },
+  { canal: 21, instrumento: 'VOZ PRINCIPAL', conexion: 'SHURE SM58', categoria: 'voces' },
+  { canal: 22, instrumento: 'TALBACK', conexion: 'SHURE SM58', categoria: 'voces' },
+  { canal: 23, instrumento: 'SECUENCIA L', conexion: 'CAJA DIRECTA', categoria: 'teclados' },
+  { canal: 24, instrumento: 'SECUENCIA R', conexion: 'CAJA DIRECTA', categoria: 'teclados' }
+];
+
+const defaultMonitores = [
+  { mezcla: 1, envio: 'MONITOR BATERIA', sistema: 'IN EAR' },
+  { mezcla: 2, envio: 'MONITOR CONGAS', sistema: 'IN EAR' },
+  { mezcla: 3, envio: 'MONITOR TECLADO', sistema: 'IN EAR' },
+  { mezcla: 4, envio: 'MONITOR GTR', sistema: 'IN EAR' },
+  { mezcla: 5, envio: 'MONITOR BAJO', sistema: 'IN EAR' },
+  { mezcla: 6, envio: 'MONITOR DE PISO', sistema: 'PISO (FLOOR)' }
+];
+
+const defaultReqs = [
+  {
+    categoria: 'audio',
+    titulo: 'SISTEMA DE AUDIO (P.A. & FOH)',
+    items: [
+      'P.A.: Refuerzo sonoro profesional (Line Array o similar) de marcas reconocidas, con cobertura uniforme para todo el recinto y excelente respuesta en bajas frecuencias.',
+      'Presión: Mínimo de 100 dB SPL sostenidos en la mesa de control sin distorsión.',
+      'Consola FOH: Consola digital profesional (Midas M32, Behringer X32, A&H SQ/Avantis, Yamaha CL/QL o similar) con mín. 24 canales libres y efectos integrados (Reverb/Delay).'
+    ]
+  },
+  {
+    categoria: 'monitores',
+    titulo: 'MONITOREO (MONITORS)',
+    items: [
+      'Sistemas In-Ear: 6 vías independientes (inalámbricas/cableadas) para Voces, Teclados, Secuencia, etc.',
+      'Monitores de Piso: Mínimo 3 monitores profesionales de alta calidad.',
+      'Drum-Fill / Side-Fill: Sistema de monitoreo con Subwoofer potente para la sección rítmica.'
+    ]
+  },
+  {
+    categoria: 'luces',
+    titulo: 'ILUMINACIÓN Y ESCENARIO',
+    items: [
+      'Diseño de Luces: Dinámico y festivo. Uso de focos LED móviles, cegadores para interacción con el público y máquina de humo constante de manera controlada.',
+      'Alimentación Eléctrica: Puntos de corriente 220V regulados y estabilizados con toma de tierra en: Teclados, Bajo, Guitarra y Percusión.'
+    ]
+  },
+  {
+    categoria: 'logistica',
+    titulo: 'LOGÍSTICA Y HOSPITALIDAD',
+    items: [
+      'Camarines: Espacio privado, limpio, con llave y espejo de cuerpo entero, apto para 10 personas (músicos y staff).',
+      'Catering: Agua mineral sin gas abundante (fría y ambiente), bebidas, jugos, energéticas, sándwiches, snacks salados y frutos secos.',
+      'Estacionamiento: Cupos reservados y seguros cerca de la zona de carga y descarga para vehículos del equipo.'
+    ]
+  }
+];
+
+const canales = dbCanales && dbCanales.length > 0 ? dbCanales : defaultCanales;
+const monitores = dbMonitores && dbMonitores.length > 0 ? dbMonitores : defaultMonitores;
+
+const reqsMap: Record<string, any> = {};
+const finalReqs = dbReqs && dbReqs.length > 0 ? dbReqs : defaultReqs;
+finalReqs.forEach((r: any) => {
+  reqsMap[r.categoria] = r;
+});
+
+// Función auxiliar para obtener el canal de un instrumento en el Stage Plot
+const getCh = (instrumentoName: string): string => {
+  const ch = canales.find((c: any) => c.instrumento.toUpperCase() === instrumentoName.toUpperCase());
+  return ch ? `CH ${ch.canal}` : 'CH —';
+};
+
+// Función auxiliar para obtener el rango de canales de una categoría
+const getChRange = (category: string): string => {
+  const matches = canales.filter((c: any) => c.categoria === category).map((c: any) => c.canal);
+  if (matches.length === 0) return 'CH —';
+  if (matches.length === 1) return `CH ${matches[0]}`;
+  return `CH ${Math.min(...matches)} - ${Math.max(...matches)}`;
+};
 ---
 
 <Layout title="Electronic Press Kit (EPK) | Banda Bruna - Kit de Prensa Oficial" description="Kit de prensa digital (EPK) de Banda Bruna para productores, promotores y medios. Biografía corta, logos oficiales, fotos de prensa y rider técnico.">
@@ -90,47 +206,48 @@ import Layout from '../layouts/Layout.astro';
             <!-- Audio Reqs -->
             <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
               <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
-                <span>🔊</span> SISTEMA DE AUDIO (P.A. & FOH)
+                <span>🔊</span> {reqsMap.audio?.titulo || 'SISTEMA DE AUDIO (P.A. & FOH)'}
               </h3>
               <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
-                <li><strong>P.A.:</strong> Refuerzo sonoro profesional (Line Array o similar) de marcas reconocidas, con cobertura uniforme para todo el recinto y excelente respuesta en bajas frecuencias.</li>
-                <li><strong>Presión:</strong> Mínimo de 100 dB SPL sostenidos en la mesa de control sin distorsión.</li>
-                <li><strong>Consola FOH:</strong> Consola digital profesional (Midas M32, Behringer X32, A&H SQ/Avantis, Yamaha CL/QL o similar) con mín. 24 canales libres y efectos integrados (Reverb/Delay).</li>
+                {(reqsMap.audio?.items || defaultReqs[0].items).map((item: string) => (
+                  <li>{item}</li>
+                ))}
               </ul>
             </div>
 
             <!-- Monitoreo Reqs -->
             <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
               <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
-                <span>🎧</span> MONITOREO (MONITORS)
+                <span>🎧</span> {reqsMap.monitores?.titulo || 'MONITOREO (MONITORS)'}
               </h3>
               <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
-                <li><strong>Sistemas In-Ear:</strong> 6 vías independientes (inalámbricas/cableadas) para Voces, Teclados, Secuencia, etc.</li>
-                <li><strong>Monitores de Piso:</strong> Mínimo 3 monitores profesionales de alta calidad.</li>
-                <li><strong>Drum-Fill / Side-Fill:</strong> Sistema de monitoreo con Subwoofer potente para la sección rítmica.</li>
+                {(reqsMap.monitores?.items || defaultReqs[1].items).map((item: string) => (
+                  <li>{item}</li>
+                ))}
               </ul>
             </div>
 
             <!-- Iluminacion Reqs -->
             <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
               <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
-                <span>💡</span> ILUMINACIÓN Y ESCENARIO
+                <span>💡</span> {reqsMap.luces?.titulo || 'ILUMINACIÓN Y ESCENARIO'}
               </h3>
               <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
-                <li><strong>Diseño de Luces:</strong> Dinámico y festivo. Uso de focos LED móviles, cegadores para interacción con el público y máquina de humo constante de manera controlada.</li>
-                <li><strong>Alimentación Eléctrica:</strong> Puntos de corriente 220V regulados y estabilizados con toma de tierra en: Teclados, Bajo, Guitarra y Percusión.</li>
+                {(reqsMap.luces?.items || defaultReqs[2].items).map((item: string) => (
+                  <li>{item}</li>
+                ))}
               </ul>
             </div>
 
             <!-- Logística Reqs -->
             <div class="bg-slate-950/40 border border-white/5 p-5 rounded-lg">
               <h3 class="text-white font-title font-bold text-sm mb-3 text-gold-bruna flex items-center gap-2">
-                <span>🏥</span> LOGÍSTICA Y HOSPITALIDAD
+                <span>🏥</span> {reqsMap.logistica?.titulo || 'LOGÍSTICA Y HOSPITALIDAD'}
               </h3>
               <ul class="list-disc list-inside text-xs text-slate-300 space-y-2 leading-relaxed pl-1">
-                <li><strong>Camarines:</strong> Espacio privado, limpio, con llave y espejo de cuerpo entero, apto para 10 personas (músicos y staff).</li>
-                <li><strong>Catering:</strong> Agua mineral sin gas abundante (fría y ambiente), bebidas, jugos, energéticas, sándwiches, snacks salados y frutos secos.</li>
-                <li><strong>Estacionamiento:</strong> Cupos reservados y seguros cerca de la zona de carga y descarga para vehículos del equipo.</li>
+                {(reqsMap.logistica?.items || defaultReqs[3].items).map((item: string) => (
+                  <li>{item}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -160,30 +277,13 @@ import Layout from '../layouts/Layout.astro';
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-white/5 text-slate-300">
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">1</td><td class="p-2.5">KICK</td><td class="p-2.5">SHURE PGA52</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">2</td><td class="p-2.5">SNARE</td><td class="p-2.5">SHURE PGA57</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">3</td><td class="p-2.5">TIMBAL HIGH</td><td class="p-2.5">SHURE PGA56</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">4</td><td class="p-2.5">TIMBAL LOW</td><td class="p-2.5">SHURE PGA56</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">5</td><td class="p-2.5">OCTAPAD</td><td class="p-2.5">CAJA DIRECTA</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">6</td><td class="p-2.5">OH L</td><td class="p-2.5">SHURE PGA81</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">7</td><td class="p-2.5">OH R</td><td class="p-2.5">SHURE PGA81</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">8</td><td class="p-2.5">CONGA HIGH</td><td class="p-2.5">SHURE PGA56</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">9</td><td class="p-2.5">CONGA LOW</td><td class="p-2.5">SHURE PGA56</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">10</td><td class="p-2.5">BONGOS</td><td class="p-2.5">SHURE SM57</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">11</td><td class="p-2.5">CHIMES</td><td class="p-2.5">SHURE SM57</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">12</td><td class="p-2.5">HUIRO</td><td class="p-2.5">CAJA DIRECTA</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">13</td><td class="p-2.5">BAJO</td><td class="p-2.5">XLR DIRECTO</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">14</td><td class="p-2.5">GTR</td><td class="p-2.5">SHURE SM57</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">15</td><td class="p-2.5">KEY L</td><td class="p-2.5">CAJA DIRECTA</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">16</td><td class="p-2.5">KEY R</td><td class="p-2.5">CAJA DIRECTA</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">17</td><td class="p-2.5">VOZ CONGA</td><td class="p-2.5">SHURE SM58</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">18</td><td class="p-2.5">VOZ BAJO</td><td class="p-2.5">SHURE SM58</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">19</td><td class="p-2.5">VOZ BATERIA</td><td class="p-2.5">SHURE SM58</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">20</td><td class="p-2.5">VOZ GTR</td><td class="p-2.5">SHURE SM58</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">21</td><td class="p-2.5">VOZ PRINCIPAL</td><td class="p-2.5">SHURE SM58</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">22</td><td class="p-2.5">TALBACK</td><td class="p-2.5">SHURE SM58</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">23</td><td class="p-2.5">SECUENCIA L</td><td class="p-2.5">CAJA DIRECTA</td></tr>
-                    <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">24</td><td class="p-2.5">SECUENCIA R</td><td class="p-2.5">CAJA DIRECTA</td></tr>
+                    {canales.map((c: any) => (
+                      <tr>
+                        <td class="p-2.5 pl-4 font-bold text-gold-bruna">{c.canal}</td>
+                        <td class="p-2.5">{c.instrumento}</td>
+                        <td class="p-2.5">{c.conexion}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -203,12 +303,13 @@ import Layout from '../layouts/Layout.astro';
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5 text-slate-300">
-                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">1</td><td class="p-2.5">MONITOR BATERIA</td><td class="p-2.5">IN EAR</td></tr>
-                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">2</td><td class="p-2.5">MONITOR CONGAS</td><td class="p-2.5">IN EAR</td></tr>
-                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">3</td><td class="p-2.5">MONITOR TECLADO</td><td class="p-2.5">IN EAR</td></tr>
-                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">4</td><td class="p-2.5">MONITOR GTR</td><td class="p-2.5">IN EAR</td></tr>
-                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">5</td><td class="p-2.5">MONITOR BAJO</td><td class="p-2.5">IN EAR</td></tr>
-                  <tr><td class="p-2.5 pl-4 font-bold text-gold-bruna">6</td><td class="p-2.5">MONITOR DE PISO</td><td class="p-2.5">PISO (FLOOR)</td></tr>
+                  {monitores.map((m: any) => (
+                    <tr>
+                      <td class="p-2.5 pl-4 font-bold text-gold-bruna">{m.mezcla}</td>
+                      <td class="p-2.5">{m.envio}</td>
+                      <td class="p-2.5">{m.sistema}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -241,10 +342,10 @@ import Layout from '../layouts/Layout.astro';
                   <div>
                     <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🥁 Percusión</span>
                     <span class="text-[10px] text-slate-400 block mt-1">Congas, Bongos y Chimes</span>
-                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">CH 8, 9, 10, 11</span>
+                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">{getChRange('percusion')}</span>
                   </div>
                   <div class="border-t border-white/5 pt-2 mt-2">
-                    <span class="text-[10px] text-white block font-bold">Voz Conga (CH 17)</span>
+                    <span class="text-[10px] text-white block font-bold">Voz Conga ({getCh('VOZ CONGA')})</span>
                     <span class="text-[9px] text-slate-500 italic">Mon 2 (In-Ear) + Monitor Piso</span>
                   </div>
                 </div>
@@ -254,10 +355,10 @@ import Layout from '../layouts/Layout.astro';
                   <div>
                     <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🥁 Batería & Timbales</span>
                     <span class="text-[10px] text-slate-400 block mt-1">Kick, Snare, Timbales, Octapad y Overheads</span>
-                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">CH 1, 2, 3, 4, 5, 6, 7</span>
+                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">{getChRange('bateria')}</span>
                   </div>
                   <div class="border-t border-white/5 pt-2 mt-2">
-                    <span class="text-[10px] text-white block font-bold">Voz Batería (CH 19)</span>
+                    <span class="text-[10px] text-white block font-bold">Voz Batería ({getCh('VOZ BATERIA')})</span>
                     <span class="text-[9px] text-slate-500 italic">Mon 1 (In-Ear) + Drum-Fill</span>
                   </div>
                 </div>
@@ -267,10 +368,10 @@ import Layout from '../layouts/Layout.astro';
                   <div>
                     <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🎹 Teclados</span>
                     <span class="text-[10px] text-slate-400 block mt-1">Sintetizadores & Secuencias</span>
-                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">CH 15, 16 (L/R)</span>
+                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">{getCh('KEY L')}, {getCh('KEY R')}</span>
                   </div>
                   <div class="border-t border-white/5 pt-2 mt-2">
-                    <span class="text-[10px] text-white block font-bold">Secuencias (CH 23, 24)</span>
+                    <span class="text-[10px] text-white block font-bold">Secuencias ({getCh('SECUENCIA L')}, {getCh('SECUENCIA R')})</span>
                     <span class="text-[9px] text-slate-500 italic">Mon 3 (In-Ear)</span>
                   </div>
                 </div>
@@ -282,10 +383,10 @@ import Layout from '../layouts/Layout.astro';
                 <div class="md:col-span-4 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28">
                   <div>
                     <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🎸 Bajo Eléctrico</span>
-                    <span class="text-[9px] text-slate-400 block">Línea Directa (CH 13)</span>
+                    <span class="text-[9px] text-slate-400 block">Línea Directa ({getCh('BAJO')})</span>
                   </div>
                   <div class="border-t border-white/5 pt-1.5">
-                    <span class="text-[10px] text-white block font-semibold">Voz Bajo (CH 18)</span>
+                    <span class="text-[10px] text-white block font-semibold">Voz Bajo ({getCh('VOZ BAJO')})</span>
                     <span class="text-[9px] text-slate-500 italic">Mon 5 (In-Ear)</span>
                   </div>
                 </div>
@@ -294,7 +395,7 @@ import Layout from '../layouts/Layout.astro';
                 <div class="md:col-span-3 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28">
                   <div>
                     <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🪵 Huiro / Güiro</span>
-                    <span class="text-[9px] text-slate-400 block">Línea Directa (CH 12)</span>
+                    <span class="text-[9px] text-slate-400 block">Línea Directa ({getCh('HUIRO')})</span>
                   </div>
                   <div class="border-t border-white/5 pt-1.5">
                     <span class="text-[9px] text-slate-400 block">Percusión Menor</span>
@@ -309,10 +410,10 @@ import Layout from '../layouts/Layout.astro';
                 <div class="md:col-span-4 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28 relative">
                   <div>
                     <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🎸 Guitarra & Amp</span>
-                    <span class="text-[9px] text-slate-400 block">Micro SM57 (CH 14) + GTR Amp</span>
+                    <span class="text-[9px] text-slate-400 block">Micro SM57 ({getCh('GTR')}) + GTR Amp</span>
                   </div>
                   <div class="border-t border-white/5 pt-1.5">
-                    <span class="text-[10px] text-white block font-semibold">Voz GTR (CH 20)</span>
+                    <span class="text-[10px] text-white block font-semibold">Voz GTR ({getCh('VOZ GTR')})</span>
                     <span class="text-[9px] text-slate-500 italic">Mon 4 (In-Ear)</span>
                   </div>
                   <!-- Amp visual icon placeholder on right side -->
@@ -329,10 +430,10 @@ import Layout from '../layouts/Layout.astro';
                 <div class="bg-gold-bruna/10 border border-gold-bruna/30 rounded-xl p-4 shadow-lg shadow-gold-bruna/5 flex flex-col justify-between h-28">
                   <div>
                     <span class="block text-gold-bruna font-bold text-xs uppercase tracking-widest">🎤 Voz Principal</span>
-                    <span class="text-[10px] text-white block mt-1">Micrófono SM58 (CH 21)</span>
+                    <span class="text-[10px] text-white block mt-1">Micrófono SM58 ({getCh('VOZ PRINCIPAL')})</span>
                   </div>
                   <div class="border-t border-gold-bruna/20 pt-1.5">
-                    <span class="text-[9px] text-slate-300 block font-semibold">Talkback (CH 22)</span>
+                    <span class="text-[9px] text-slate-300 block font-semibold">Talkback ({getCh('TALBACK')})</span>
                     <span class="text-[9px] text-slate-500 italic">Mon 6 (In-Ear)</span>
                   </div>
                 </div>

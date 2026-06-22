@@ -63,9 +63,10 @@ import Layout from '../../layouts/Layout.astro';
       const emailErr = document.getElementById('email-err') as HTMLSpanElement | null;
       const passwordErr = document.getElementById('password-err') as HTMLSpanElement | null;
 
-      // Verificar si ya hay una sesión activa del administrador
+      // Verificar si ya hay una sesión activa del administrador o técnico
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && session.user && session.user.email === 'contacto@bandabruna.cl') {
+      const emailsAutorizados = ['contacto@bandabruna.cl', 'tecnico@bandabruna.cl'];
+      if (session && session.user && session.user.email && emailsAutorizados.includes(session.user.email)) {
         window.location.href = '/admin/dashboard';
         return;
       }
@@ -95,9 +96,10 @@ import Layout from '../../layouts/Layout.astro';
 
           if (!valid) return;
 
-          // BLOQUEO EXCLUSIVO FRONTEND: Solo permite contacto@bandabruna.cl
-          if (emailVal !== 'contacto@bandabruna.cl') {
-            feedback.textContent = 'Acceso Denegado. Solo el correo principal autorizado tiene permitido el ingreso.';
+          // BLOQUEO EXCLUSIVO FRONTEND: Solo permite correos autorizados
+          const emailsAutorizados = ['contacto@bandabruna.cl', 'tecnico@bandabruna.cl'];
+          if (!emailsAutorizados.includes(emailVal)) {
+            feedback.textContent = 'Acceso Denegado. Este correo no está autorizado para ingresar al sistema.';
             feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 mt-2 block';
             return;
           }
