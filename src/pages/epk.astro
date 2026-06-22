@@ -19,6 +19,12 @@ const { data: dbReqs } = await supabase
   .from('rider_requerimientos')
   .select('*');
 
+// Cargar Stage Plot
+const { data: dbStageplot } = await supabase
+  .from('rider_stageplot')
+  .select('*');
+
+
 // Fallback estático en caso de que las tablas en Supabase estén vacías
 const defaultCanales = [
   { canal: 1, instrumento: 'KICK', conexion: 'SHURE PGA52', categoria: 'bateria' },
@@ -116,6 +122,49 @@ const getChRange = (category: string): string => {
   if (matches.length === 1) return `CH ${matches[0]}`;
   return `CH ${Math.min(...matches)} - ${Math.max(...matches)}`;
 };
+
+const defaultStageplot = [
+  { nombre: 'Batería & Timbales', tipo: 'bateria', pos_x: 50.0, pos_y: 20.0, canal: 'CH 1-7', retorno: 'Mon 1 (In-Ear)' },
+  { nombre: 'Percusión', tipo: 'congas', pos_x: 15.0, pos_y: 20.0, canal: 'CH 8-11', retorno: 'Mon 2 (In-Ear)' },
+  { nombre: 'Teclados', tipo: 'teclado', pos_x: 85.0, pos_y: 20.0, canal: 'CH 15-16', retorno: 'Mon 3 (In-Ear)' },
+  { nombre: 'Bajo Eléctrico', tipo: 'bajo', pos_x: 20.0, pos_y: 50.0, canal: 'CH 13', retorno: 'Mon 5 (In-Ear)' },
+  { nombre: 'Huiro / Güiro', tipo: 'guiro', pos_x: 40.0, pos_y: 50.0, canal: 'CH 12', retorno: 'Retorno P.A.' },
+  { nombre: 'Guitarra & Amp', tipo: 'gtr', pos_x: 80.0, pos_y: 50.0, canal: 'CH 14', retorno: 'Mon 4 (In-Ear)' },
+  { nombre: 'Voz Principal', tipo: 'vocal', pos_x: 50.0, pos_y: 75.0, canal: 'CH 21', retorno: 'Mon 6 (In-Ear)' },
+  { nombre: 'Monitores de Piso', tipo: 'monitor', pos_x: 50.0, pos_y: 92.0, canal: '—', retorno: 'MON 6 (L/R)' }
+];
+
+const stageplot = dbStageplot && dbStageplot.length > 0 ? dbStageplot : defaultStageplot;
+
+// Iconos SVG del Stage Plot
+function getStageIconSvg(type: string): string {
+  const gold = 'currentColor';
+  if (type === 'bateria') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M4 10h16v6H4zM7 6v4M17 6v4M12 10v6M2 16h20M5 16v4M19 16v4"/></svg>`;
+  }
+  if (type === 'congas') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><ellipse cx="7" cy="7" rx="3" ry="2"/><ellipse cx="17" cy="7" rx="3" ry="2"/><path d="M4 7v10M10 7v10M14 7v10M20 7v10M4 17h6M14 17h6"/></svg>`;
+  }
+  if (type === 'guiro') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M7 6h10M7 9h10M7 12h10M7 15h10M7 18h10"/></svg>`;
+  }
+  if (type === 'teclado') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="1"/><path d="M6 7v6M10 7v6M14 7v6M18 7v6M2 13h20"/></svg>`;
+  }
+  if (type === 'gtr') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M8 16.5L18 6.5M16 4.5l3.5 3.5M14 8.5l1.5-1.5M11.5 11l1.5-1.5"/><circle cx="20" cy="4" r="1"/></svg>`;
+  }
+  if (type === 'bajo') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M9 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M8 17.5L20 5.5M17 3.5l3.5 3.5M13.5 12l1.5-1.5"/><circle cx="21" cy="3" r="1"/></svg>`;
+  }
+  if (type === 'vocal') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><rect x="9" y="2" width="6" height="8" rx="3"/><path d="M12 10v9M9 19h6M6 22h12M12 10a4 4 0 0 0 4-4"/></svg>`;
+  }
+  if (type === 'monitor') {
+    return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M3 6l18-2v14l-18 2V6z"/><circle cx="10" cy="11" r="3"/><circle cx="16" cy="10" r="1"/></svg>`;
+  }
+  return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 11h8M12 7v8M10 15h4"/></svg>`;
+}
 ---
 
 <Layout title="Electronic Press Kit (EPK) | Banda Bruna - Kit de Prensa Oficial" description="Kit de prensa digital (EPK) de Banda Bruna para productores, promotores y medios. Biografía corta, logos oficiales, fotos de prensa y rider técnico.">
@@ -326,136 +375,41 @@ const getChRange = (category: string): string => {
               Distribución física exacta del escenario, adaptada al mapa gráfico oficial de Banda Bruna.
             </p>
             
-            <!-- CSS Grid Visual Stage Map (Exactly matching the uploaded image) -->
-            <div class="border border-white/10 rounded-lg p-6 bg-slate-950 flex flex-col gap-6 text-center max-w-3xl mx-auto mb-6 shadow-inner shadow-black relative overflow-hidden">
+            <!-- CSS Grid Visual Stage Map (Exactly matching the uploaded image, dynamically powered by Supabase) -->
+            <div class="w-full aspect-[16/10] max-w-3xl mx-auto bg-slate-950 border border-white/10 rounded-lg relative overflow-hidden select-none min-h-[350px] shadow-inner shadow-black mb-6">
               
               <!-- Background grid lines decoration -->
               <div class="absolute inset-0 bg-[radial-gradient(#e5a72b05_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" aria-hidden="true"></div>
 
               <!-- ESCENARIO FONDO -->
-              <div class="text-[9px] text-slate-500 uppercase tracking-[0.2em] border-b border-white/5 pb-2 z-10">FONDO DEL ESCENARIO (BACK LINE)</div>
+              <div class="absolute top-2 left-1/2 -translate-x-1/2 text-[8px] text-slate-600 uppercase tracking-widest pointer-events-none z-10">FONDO DEL ESCENARIO (BACK LINE)</div>
               
-              <!-- Fila Posterior: Percusión (L), Batería (C), Teclados (R) -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 z-10">
-                <!-- Lado Izquierdo: Percusión -->
-                <div class="bg-slate-900/90 border border-white/15 rounded-lg p-4 shadow-md flex flex-col justify-between h-36">
-                  <div>
-                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🥁 Percusión</span>
-                    <span class="text-[10px] text-slate-400 block mt-1">Congas, Bongos y Chimes</span>
-                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">{getChRange('percusion')}</span>
-                  </div>
-                  <div class="border-t border-white/5 pt-2 mt-2">
-                    <span class="text-[10px] text-white block font-bold">Voz Conga ({getCh('VOZ CONGA')})</span>
-                    <span class="text-[9px] text-slate-500 italic">Mon 2 (In-Ear) + Monitor Piso</span>
-                  </div>
-                </div>
-
-                <!-- Centro: Batería -->
-                <div class="bg-slate-900/95 border border-gold-bruna/30 rounded-lg p-4 shadow-lg shadow-gold-bruna/5 flex flex-col justify-between h-36">
-                  <div>
-                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🥁 Batería & Timbales</span>
-                    <span class="text-[10px] text-slate-400 block mt-1">Kick, Snare, Timbales, Octapad y Overheads</span>
-                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">{getChRange('bateria')}</span>
-                  </div>
-                  <div class="border-t border-white/5 pt-2 mt-2">
-                    <span class="text-[10px] text-white block font-bold">Voz Batería ({getCh('VOZ BATERIA')})</span>
-                    <span class="text-[9px] text-slate-500 italic">Mon 1 (In-Ear) + Drum-Fill</span>
-                  </div>
-                </div>
-
-                <!-- Lado Derecho: Teclados -->
-                <div class="bg-slate-900/90 border border-white/15 rounded-lg p-4 shadow-md flex flex-col justify-between h-36">
-                  <div>
-                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-wider">🎹 Teclados</span>
-                    <span class="text-[10px] text-slate-400 block mt-1">Sintetizadores & Secuencias</span>
-                    <span class="text-[10px] text-slate-300 font-semibold block mt-1">{getCh('KEY L')}, {getCh('KEY R')}</span>
-                  </div>
-                  <div class="border-t border-white/5 pt-2 mt-2">
-                    <span class="text-[10px] text-white block font-bold">Secuencias ({getCh('SECUENCIA L')}, {getCh('SECUENCIA R')})</span>
-                    <span class="text-[9px] text-slate-500 italic">Mon 3 (In-Ear)</span>
-                  </div>
-                </div>
+              <!-- Elementos dinámicos del escenario -->
+              <div class="absolute inset-0 z-20">
+                {stageplot.map((el: any) => {
+                  const icon = getStageIconSvg(el.tipo);
+                  return (
+                    <div class="absolute flex flex-col items-center group" 
+                         style={`left: ${el.pos_x}%; top: ${el.pos_y}%; transform: translate(-50%, -50%);`}>
+                      <!-- Icono en círculo de fondo gradiente y bordes dorados en hover -->
+                      <div class="w-10 h-10 rounded-full bg-slate-900 border border-white/10 hover:border-gold-bruna flex items-center justify-center p-1.5 shadow transition-all duration-200 bg-gradient-to-b from-slate-900 to-slate-950 group-hover:scale-110">
+                        <Fragment set:html={icon} />
+                      </div>
+                      <span class="text-[8px] text-white font-bold bg-black/80 px-1.5 rounded mt-1 truncate max-w-[85px] uppercase font-title leading-tight shadow border border-white/5">{el.nombre}</span>
+                      {el.canal && <span class="text-[7px] text-gold-bruna font-semibold mt-0.5 leading-none bg-slate-950/80 px-1 rounded border border-white/5">{el.canal}</span>}
+                      {el.retorno && (
+                        <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none bg-slate-900/95 border border-gold-bruna/30 text-white text-[9px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-20 flex flex-col items-center">
+                          <span class="text-gold-bruna font-bold text-[7px] uppercase tracking-wider leading-none">Monitoreo / Retorno</span>
+                          <span class="mt-0.5 font-semibold text-[8px]">{el.retorno}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              <!-- Fila Media: Bajo (L), Güiro (C-L), Guitarra (R) + Amp (Far Right) -->
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center z-10">
-                <!-- Lado Izquierdo: Bajo (4 cols) -->
-                <div class="md:col-span-4 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28">
-                  <div>
-                    <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🎸 Bajo Eléctrico</span>
-                    <span class="text-[9px] text-slate-400 block">Línea Directa ({getCh('BAJO')})</span>
-                  </div>
-                  <div class="border-t border-white/5 pt-1.5">
-                    <span class="text-[10px] text-white block font-semibold">Voz Bajo ({getCh('VOZ BAJO')})</span>
-                    <span class="text-[9px] text-slate-500 italic">Mon 5 (In-Ear)</span>
-                  </div>
-                </div>
-
-                <!-- Centro-Izquierda: Güiro / Percusión Menor (3 cols) -->
-                <div class="md:col-span-3 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28">
-                  <div>
-                    <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🪵 Huiro / Güiro</span>
-                    <span class="text-[9px] text-slate-400 block">Línea Directa ({getCh('HUIRO')})</span>
-                  </div>
-                  <div class="border-t border-white/5 pt-1.5">
-                    <span class="text-[9px] text-slate-400 block">Percusión Menor</span>
-                    <span class="text-[9px] text-slate-500 italic">Retorno por P.A. / In-Ear</span>
-                  </div>
-                </div>
-
-                <!-- Spacer (1 col) -->
-                <div class="hidden md:block md:col-span-1"></div>
-
-                <!-- Lado Derecho: Guitarra & Amplificador (4 cols) -->
-                <div class="md:col-span-4 bg-slate-900/80 border border-white/10 rounded-lg p-3.5 shadow flex flex-col justify-between h-28 relative">
-                  <div>
-                    <span class="block text-white font-bold text-[11px] uppercase tracking-wide">🎸 Guitarra & Amp</span>
-                    <span class="text-[9px] text-slate-400 block">Micro SM57 ({getCh('GTR')}) + GTR Amp</span>
-                  </div>
-                  <div class="border-t border-white/5 pt-1.5">
-                    <span class="text-[10px] text-white block font-semibold">Voz GTR ({getCh('VOZ GTR')})</span>
-                    <span class="text-[9px] text-slate-500 italic">Mon 4 (In-Ear)</span>
-                  </div>
-                  <!-- Amp visual icon placeholder on right side -->
-                  <div class="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-12 bg-slate-800 border border-white/20 rounded-sm flex items-center justify-center text-[7px] text-slate-500 rotate-90 md:rotate-0" title="Guitar Amp Cabinet">AMP</div>
-                </div>
-              </div>
-
-              <!-- Fila Frontal: Vocalista Principal y Monitores de Piso -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center z-10">
-                <!-- Left spacer -->
-                <div></div>
-
-                <!-- Center: Lead Vocal -->
-                <div class="bg-gold-bruna/10 border border-gold-bruna/30 rounded-xl p-4 shadow-lg shadow-gold-bruna/5 flex flex-col justify-between h-28">
-                  <div>
-                    <span class="block text-gold-bruna font-bold text-xs uppercase tracking-widest">🎤 Voz Principal</span>
-                    <span class="text-[10px] text-white block mt-1">Micrófono SM58 ({getCh('VOZ PRINCIPAL')})</span>
-                  </div>
-                  <div class="border-t border-gold-bruna/20 pt-1.5">
-                    <span class="text-[9px] text-slate-300 block font-semibold">Talkback ({getCh('TALBACK')})</span>
-                    <span class="text-[9px] text-slate-500 italic">Mon 6 (In-Ear)</span>
-                  </div>
-                </div>
-
-                <!-- Right spacer -->
-                <div></div>
-              </div>
-
-              <!-- Monitores de Piso del Frente (Wedges facing the singer) -->
-              <div class="flex justify-center gap-12 mt-2 z-10">
-                <div class="flex flex-col items-center gap-1">
-                  <div class="w-8 h-4 bg-slate-800 border border-white/30 rounded-sm transform -rotate-12 shadow" title="Monitor de Piso Izquierdo (Singer)"></div>
-                  <span class="text-[8px] text-slate-500">MON 6 (L)</span>
-                </div>
-                <div class="flex flex-col items-center gap-1">
-                  <div class="w-8 h-4 bg-slate-800 border border-white/30 rounded-sm transform rotate-12 shadow" title="Monitor de Piso Derecho (Singer)"></div>
-                  <span class="text-[8px] text-slate-500">MON 6 (R)</span>
-                </div>
-              </div>
-              
               <!-- ESCENARIO FRENTE -->
-              <div class="text-[9px] text-slate-500 uppercase tracking-[0.2em] border-t border-white/5 pt-2 mt-2 z-10">FRENTE DEL ESCENARIO (PÚBLICO)</div>
+              <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[8px] text-slate-600 uppercase tracking-widest pointer-events-none z-10">FRENTE DEL ESCENARIO (PÚBLICO)</div>
             </div>
             
             <p class="text-center text-slate-400 text-[11px] leading-relaxed max-w-lg mx-auto">

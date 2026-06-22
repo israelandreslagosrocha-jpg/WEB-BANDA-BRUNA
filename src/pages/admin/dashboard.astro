@@ -156,6 +156,75 @@ import Layout from '../../layouts/Layout.astro';
               </div>
             </div>
 
+            <!-- DISEÑADOR DE STAGE PLOT -->
+            <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5 flex flex-col gap-4">
+              <div class="flex justify-between items-center">
+                <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Distribución del Escenario (Stage Plot)</h3>
+                <div class="flex gap-2">
+                  <select id="stage-element-type" class="bg-slate-950 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer">
+                    <option value="bateria">🥁 Batería / Timbales</option>
+                    <option value="congas">🥁 Congas / Bongos</option>
+                    <option value="guiro">🪵 Güiro</option>
+                    <option value="teclado">🎹 Teclados</option>
+                    <option value="gtr">🎸 Guitarra</option>
+                    <option value="bajo">🎸 Bajo</option>
+                    <option value="vocal">🎤 Vocal / Micrófono</option>
+                    <option value="monitor">🔊 Monitor de Piso</option>
+                    <option value="power">⚡ Toma de Corriente</option>
+                  </select>
+                  <button type="button" id="btn-add-stage-element" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer">
+                    + Añadir
+                  </button>
+                </div>
+              </div>
+              
+              <p class="text-[10px] text-slate-400">
+                Arrastra y coloca los elementos en la cuadrícula para definir su posición exacta en el escenario. Haz clic en un elemento para editar sus detalles (nombre, canal, retorno) o eliminarlo. Los cambios de posición se guardarán al guardar todo el Rider Técnico.
+              </p>
+
+              <!-- Escenario Interactivo -->
+              <div id="stage-designer-canvas" class="w-full aspect-[16/10] bg-slate-950 border border-white/10 rounded-lg relative overflow-hidden select-none min-h-[300px] shadow-inner shadow-black">
+                <!-- Líneas decorativas de fondo -->
+                <div class="absolute inset-0 bg-[radial-gradient(#e5a72b05_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" aria-hidden="true"></div>
+                
+                <!-- Fondo -->
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 text-[8px] text-slate-600 uppercase tracking-widest pointer-events-none">FONDO DEL ESCENARIO (BACK LINE)</div>
+                
+                <!-- Elementos dinámicos del escenario -->
+                <div id="stage-designer-elements" class="absolute inset-0 z-10"></div>
+                
+                <!-- Frente -->
+                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[8px] text-slate-600 uppercase tracking-widest pointer-events-none">FRENTE DEL ESCENARIO (PÚBLICO)</div>
+              </div>
+
+              <!-- Panel de Edición Rápida de Elemento (Oculto por defecto) -->
+              <div id="stage-element-editor" class="bg-slate-900 border border-white/5 rounded-lg p-4 hidden flex flex-col gap-3">
+                <h4 class="font-title font-bold text-xs uppercase text-white flex justify-between items-center">
+                  <span>Propiedades del Elemento</span>
+                  <button type="button" id="btn-delete-stage-element" class="text-[9px] border border-red-500/20 text-red-400 hover:border-red-500 hover:text-red-300 font-bold py-1 px-2.5 rounded uppercase cursor-pointer">Eliminar Elemento</button>
+                </h4>
+                
+                <input type="hidden" id="edit-el-id" />
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Nombre del Elemento</label>
+                    <input type="text" id="edit-el-name" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none focus:border-gold-bruna" />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Asignación Canal (Input)</label>
+                    <input type="text" id="edit-el-canal" placeholder="ej: CH 13" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none focus:border-gold-bruna" />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Mezcla Retorno / Monitor</label>
+                    <input type="text" id="edit-el-retorno" placeholder="ej: Mon 5" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none focus:border-gold-bruna" />
+                  </div>
+                </div>
+                <div class="flex justify-end mt-1">
+                  <button type="button" id="btn-save-stage-element-props" class="bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white font-title font-bold py-1.5 px-4 rounded text-[10px] uppercase tracking-wider cursor-pointer">Aplicar Cambios</button>
+                </div>
+              </div>
+            </div>
+
             <button type="submit" class="bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white font-title font-bold py-3 rounded text-xs uppercase tracking-widest transition-all w-full cursor-pointer">
               GUARDAR CAMBIOS RIDER TÉCNICO
             </button>
@@ -252,6 +321,7 @@ import Layout from '../../layouts/Layout.astro';
     import { supabase } from '../../services/supabaseClient.js';
 
     let loggedInUserEmail = '';
+    let stageElements = [] as any[];
 
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. AUTENTICACIÓN: Verificar acceso seguro y correo exacto
@@ -1015,6 +1085,11 @@ import Layout from '../../layouts/Layout.astro';
           .from('rider_requerimientos')
           .select('*');
 
+        // Cargar Stage Plot
+        const { data: stageData, error: errStage } = await supabase
+          .from('rider_stageplot')
+          .select('*');
+
         if (errCanales || !canales) {
           canalesContainer.innerHTML = '<p class="text-xs text-red-400">Error al cargar canales.</p>';
         } else {
@@ -1054,8 +1129,224 @@ import Layout from '../../layouts/Layout.astro';
             if (r.categoria === 'logistica') reqLogistica.value = val;
           });
         }
+
+        // Cargar Stageplot a la variable global y renderizar
+        if (!errStage && stageData) {
+          stageElements = stageData;
+        } else {
+          stageElements = [];
+        }
+        renderStageElements();
       }
 
+      // Iconos SVG del Stage Plot
+      function getStageIconSvg(type: string): string {
+        const gold = 'currentColor';
+        if (type === 'bateria') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M4 10h16v6H4zM7 6v4M17 6v4M12 10v6M2 16h20M5 16v4M19 16v4"/></svg>`;
+        }
+        if (type === 'congas') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><ellipse cx="7" cy="7" rx="3" ry="2"/><ellipse cx="17" cy="7" rx="3" ry="2"/><path d="M4 7v10M10 7v10M14 7v10M20 7v10M4 17h6M14 17h6"/></svg>`;
+        }
+        if (type === 'guiro') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M7 6h10M7 9h10M7 12h10M7 15h10M7 18h10"/></svg>`;
+        }
+        if (type === 'teclado') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="1"/><path d="M6 7v6M10 7v6M14 7v6M18 7v6M2 13h20"/></svg>`;
+        }
+        if (type === 'gtr') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M8 16.5L18 6.5M16 4.5l3.5 3.5M14 8.5l1.5-1.5M11.5 11l1.5-1.5"/><circle cx="20" cy="4" r="1"/></svg>`;
+        }
+        if (type === 'bajo') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M9 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M8 17.5L20 5.5M17 3.5l3.5 3.5M13.5 12l1.5-1.5"/><circle cx="21" cy="3" r="1"/></svg>`;
+        }
+        if (type === 'vocal') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><rect x="9" y="2" width="6" height="8" rx="3"/><path d="M12 10v9M9 19h6M6 22h12M12 10a4 4 0 0 0 4-4"/></svg>`;
+        }
+        if (type === 'monitor') {
+          return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><path d="M3 6l18-2v14l-18 2V6z"/><circle cx="10" cy="11" r="3"/><circle cx="16" cy="10" r="1"/></svg>`;
+        }
+        return `<svg class="w-full h-full text-gold-bruna" viewBox="0 0 24 24" fill="none" stroke="${gold}" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 11h8M12 7v8M10 15h4"/></svg>`;
+      }
+
+      // Renderizar elementos del Stage Plot
+      function renderStageElements() {
+        const container = document.getElementById('stage-designer-elements');
+        if (!container) return;
+        
+        container.innerHTML = stageElements.map(el => {
+          const icon = getStageIconSvg(el.tipo);
+          return `
+            <div class="absolute cursor-move flex flex-col items-center group touch-none" 
+                 data-stage-el-id="${el.id}" 
+                 style="left: ${el.pos_x}%; top: ${el.pos_y}%; transform: translate(-50%, -50%);">
+              <div class="w-10 h-10 rounded-full bg-slate-900 border border-white/10 hover:border-gold-bruna flex items-center justify-center p-1.5 shadow transition-colors bg-gradient-to-b from-slate-900 to-slate-950">
+                ${icon}
+              </div>
+              <span class="text-[8px] text-white font-bold bg-black/80 px-1.5 rounded mt-1 truncate max-w-[85px] uppercase font-title leading-tight shadow border border-white/5">${el.nombre}</span>
+              ${el.canal ? `<span class="text-[7px] text-gold-bruna font-semibold mt-0.5 leading-none bg-slate-950/80 px-1 rounded border border-white/5">${el.canal}</span>` : ''}
+            </div>
+          `;
+        }).join('');
+        
+        bindStageDesignerEvents();
+      }
+
+      // Eventos de arrastre y edición del Stage Plot
+      function bindStageDesignerEvents() {
+        const elements = document.querySelectorAll('[data-stage-el-id]');
+        const canvas = document.getElementById('stage-designer-canvas');
+        if (!canvas) return;
+
+        elements.forEach(el => {
+          const handleDragStart = (clientX: number, clientY: number, e: Event) => {
+            e.stopPropagation();
+            
+            const rect = canvas.getBoundingClientRect();
+            const targetId = el.getAttribute('data-stage-el-id');
+            const item = stageElements.find(item => item.id === targetId);
+            if (!item) return;
+
+            const onDragMove = (moveEvent: MouseEvent | TouchEvent) => {
+              let moveClientX = 0;
+              let moveClientY = 0;
+              if (moveEvent instanceof MouseEvent) {
+                moveClientX = moveEvent.clientX;
+                moveClientY = moveEvent.clientY;
+              } else if (moveEvent.touches && moveEvent.touches.length > 0) {
+                moveClientX = moveEvent.touches[0].clientX;
+                moveClientY = moveEvent.touches[0].clientY;
+              }
+
+              // Calcular coordenadas de forma relativa en porcentaje
+              let newX = ((moveClientX - rect.left) / rect.width) * 100;
+              let newY = ((moveClientY - rect.top) / rect.height) * 100;
+
+              // Limitar bordes
+              newX = Math.max(3, Math.min(97, newX));
+              newY = Math.max(3, Math.min(97, newY));
+
+              item.pos_x = parseFloat(newX.toFixed(2));
+              item.pos_y = parseFloat(newY.toFixed(2));
+
+              // Actualizar estilo
+              (el as HTMLElement).style.left = `${item.pos_x}%`;
+              (el as HTMLElement).style.top = `${item.pos_y}%`;
+            };
+
+            const onDragEnd = () => {
+              document.removeEventListener('mousemove', onDragMove);
+              document.removeEventListener('mouseup', onDragEnd);
+              document.removeEventListener('touchmove', onDragMove);
+              document.removeEventListener('touchend', onDragEnd);
+            };
+
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+            document.addEventListener('touchmove', onDragMove, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+          };
+
+          el.addEventListener('mousedown', (e) => {
+            const mouseEvent = e as MouseEvent;
+            handleDragStart(mouseEvent.clientX, mouseEvent.clientY, e);
+          });
+
+          el.addEventListener('touchstart', (e) => {
+            const touchEvent = e as TouchEvent;
+            if (touchEvent.touches && touchEvent.touches.length > 0) {
+              handleDragStart(touchEvent.touches[0].clientX, touchEvent.touches[0].clientY, e);
+            }
+          });
+
+          // Al hacer clic, abrir propiedades
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const targetId = el.getAttribute('data-stage-el-id');
+            openStageElementEditor(targetId);
+          });
+        });
+
+        // Click en fondo del canvas cierra editor
+        canvas.addEventListener('click', () => {
+          const editor = document.getElementById('stage-element-editor');
+          if (editor) editor.classList.add('hidden');
+        });
+      }
+
+      function openStageElementEditor(id: string | null) {
+        const editor = document.getElementById('stage-element-editor');
+        const inputId = document.getElementById('edit-el-id') as HTMLInputElement;
+        const inputName = document.getElementById('edit-el-name') as HTMLInputElement;
+        const inputCanal = document.getElementById('edit-el-canal') as HTMLInputElement;
+        const inputRetorno = document.getElementById('edit-el-retorno') as HTMLInputElement;
+
+        if (!editor || !inputId || !inputName || !inputCanal || !inputRetorno) return;
+
+        const item = stageElements.find(el => el.id === id);
+        if (!item) return;
+
+        inputId.value = item.id;
+        inputName.value = item.nombre;
+        inputCanal.value = item.canal || '';
+        inputRetorno.value = item.retorno || '';
+
+        editor.classList.remove('hidden');
+      }
+
+      // Guardar propiedades del elemento en caliente
+      document.getElementById('btn-save-stage-element-props')?.addEventListener('click', () => {
+        const editor = document.getElementById('stage-element-editor');
+        const id = (document.getElementById('edit-el-id') as HTMLInputElement).value;
+        const nombre = (document.getElementById('edit-el-name') as HTMLInputElement).value;
+        const canal = (document.getElementById('edit-el-canal') as HTMLInputElement).value;
+        const retorno = (document.getElementById('edit-el-retorno') as HTMLInputElement).value;
+
+        const item = stageElements.find(el => el.id === id);
+        if (item) {
+          item.nombre = nombre;
+          item.canal = canal;
+          item.retorno = retorno;
+          renderStageElements();
+        }
+        if (editor) editor.classList.add('hidden');
+      });
+
+      // Eliminar elemento del canvas
+      document.getElementById('btn-delete-stage-element')?.addEventListener('click', () => {
+        if (!confirm('¿Estás seguro de que deseas eliminar este instrumento del escenario?')) return;
+        const editor = document.getElementById('stage-element-editor');
+        const id = (document.getElementById('edit-el-id') as HTMLInputElement).value;
+
+        stageElements = stageElements.filter(el => el.id !== id);
+        renderStageElements();
+        if (editor) editor.classList.add('hidden');
+      });
+
+      // Añadir nuevo elemento al canvas
+      document.getElementById('btn-add-stage-element')?.addEventListener('click', () => {
+        const selectType = document.getElementById('stage-element-type') as HTMLSelectElement;
+        if (!selectType) return;
+        
+        const type = selectType.value;
+        const label = selectType.options[selectType.selectedIndex].text.replace(/^[^\s]+\s+/, ''); // Quitar emoji
+
+        const newItem = {
+          id: 'new-' + Math.random().toString(36).substr(2, 9),
+          nombre: label,
+          tipo: type,
+          pos_x: 50.00,
+          pos_y: 50.00,
+          canal: '',
+          retorno: ''
+        };
+
+        stageElements.push(newItem);
+        renderStageElements();
+        openStageElementEditor(newItem.id);
+      });
+
+      // Evento submit de todo el Rider Técnico
       document.getElementById('rider-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -1101,11 +1392,38 @@ import Layout from '../../layouts/Layout.astro';
           await supabase.from('rider_requerimientos').update({ items: reqLuces }).eq('categoria', 'luces');
           await supabase.from('rider_requerimientos').update({ items: reqLogistica }).eq('categoria', 'logistica');
 
-          await logAction('Actualizó especificaciones del Rider Técnico en Supabase');
-          alert('¡Rider Técnico guardado exitosamente en Supabase!');
+          // 4. Guardar Stageplot (Re-inserción limpia en bloque)
+          // Borrar todos los elementos actuales
+          await supabase.from('rider_stageplot').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          
+          // Insertar los elementos actuales sin el prefijo "new-" en el ID si lo tuvieran
+          const itemsToInsert = stageElements.map(el => {
+            const item: any = {
+              nombre: el.nombre,
+              tipo: el.tipo,
+              pos_x: el.pos_x,
+              pos_y: el.pos_y,
+              canal: el.canal || null,
+              retorno: el.retorno || null
+            };
+            // Si el id es un UUID válido y no autogenerado localmente
+            if (el.id && !el.id.startsWith('new-')) {
+              item.id = el.id;
+            }
+            return item;
+          });
+
+          if (itemsToInsert.length > 0) {
+            const { error: insertErr } = await supabase.from('rider_stageplot').insert(itemsToInsert);
+            if (insertErr) throw insertErr;
+          }
+
+          await logAction('Actualizó especificaciones del Rider Técnico y Stage Plot en Supabase');
+          alert('¡Rider Técnico y Stage Plot guardados exitosamente en Supabase!');
+          loadRider(); // Recargar datos limpios
         } catch (err) {
           console.error("Error al guardar rider:", err);
-          alert('Ocurrió un error al guardar los cambios.');
+          alert('Ocurrió un error al guardar los cambios en Supabase.');
         } finally {
           submitBtn.textContent = origText;
           submitBtn.disabled = false;
