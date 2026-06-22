@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Iniciar Sesión | Panel de Control Banda Bruna" description="Acceso exclusivo para administradores de Banda Bruna.">
+  <section class="min-h-[80vh] flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-md bg-slate-900 border border-white/5 rounded-2xl p-8 shadow-2xl relative">
+      <!-- Glow effect -->
+      <div class="absolute -top-10 -left-10 w-40 h-40 bg-gold-bruna/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center mb-8">
+        <span class="text-gold-bruna text-[10px] tracking-widest font-extrabold uppercase block mb-1">ACCESO SEGURO</span>
+        <h1 class="text-2xl font-extrabold font-title uppercase text-white">PANEL DE CONTROL</h1>
+        <div class="w-8 h-0.5 bg-gold-bruna mx-auto mt-3"></div>
+      </div>
+
+      <form id="login-form" class="flex flex-col gap-5" novalidate>
+        <div class="flex flex-col gap-1.5">
+          <label for="admin-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Correo Autorizado</label>
+          <input 
+            type="email" 
+            id="admin-email" 
+            placeholder="contacto@bandabruna.cl" 
+            required
+            autocomplete="email"
+            class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+          />
+          <span class="text-[10px] text-red-400 hidden" id="email-err">Por favor ingresa un correo válido.</span>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="admin-password" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Contraseña</label>
+          <input 
+            type="password" 
+            id="admin-password" 
+            placeholder="••••••••" 
+            required
+            autocomplete="current-password"
+            class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+          />
+          <span class="text-[10px] text-red-400 hidden" id="password-err">Ingresa tu contraseña.</span>
+        </div>
+
+        <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-title font-bold py-3.5 rounded text-xs transition-colors cursor-pointer uppercase tracking-widest mt-2 w-full">
+          ENTRAR AL SISTEMA
+        </button>
+
+        <div id="login-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border" role="alert"></div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    import { supabase } from '../../services/supabaseClient.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const form = document.getElementById('login-form') as HTMLFormElement | null;
+      const emailInput = document.getElementById('admin-email') as HTMLInputElement | null;
+      const passwordInput = document.getElementById('admin-password') as HTMLInputElement | null;
+      const feedback = document.getElementById('login-feedback') as HTMLDivElement | null;
+
+      const emailErr = document.getElementById('email-err') as HTMLSpanElement | null;
+      const passwordErr = document.getElementById('password-err') as HTMLSpanElement | null;
+
+      // Verificar si ya hay una sesión activa del administrador
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user && session.user.email === 'contacto@bandabruna.cl') {
+        window.location.href = '/admin/dashboard';
+        return;
+      }
+
+      if (form && emailInput && passwordInput && feedback && emailErr && passwordErr) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          emailErr.classList.add('hidden');
+          passwordErr.classList.add('hidden');
+          feedback.classList.add('hidden');
+
+          let valid = true;
+
+          const emailVal = emailInput.value.trim();
+          const passwordVal = passwordInput.value;
+
+          if (!emailVal || !emailInput.checkValidity()) {
+            emailErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!passwordVal) {
+            passwordErr.classList.remove('hidden');
+            valid = false;
+          }
+
+          if (!valid) return;
+
+          // BLOQUEO EXCLUSIVO FRONTEND: Solo permite contacto@bandabruna.cl
+          if (emailVal !== 'contacto@bandabruna.cl') {
+            feedback.textContent = 'Acceso Denegado. Solo el correo principal autorizado tiene permitido el ingreso.';
+            feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 mt-2 block';
+            return;
+          }
+
+          const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+          const origText = btn.textContent;
+          btn.textContent = 'Verificando...';
+          btn.disabled = true;
+
+          // Autenticar con Supabase Auth
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: emailVal,
+            password: passwordVal
+          });
+
+          if (error) {
+            btn.textContent = origText;
+            btn.disabled = false;
+            feedback.textContent = 'Contraseña o credenciales inválidas. Intenta de nuevo.';
+            feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 mt-2 block';
+          } else {
+            // Guardar registro de auditoría de inicio de sesión exitoso
+            try {
+              await supabase.from('logs_actividad').insert([
+                {
+                  usuario_email: emailVal,
+                  accion: 'Inició sesión en el Panel de Administración'
+                }
+              ]);
+            } catch (auditErr) {
+              console.error('No se pudo escribir el log de auditoría:', auditErr);
+            }
+
+            feedback.textContent = '¡Acceso Concedido! Redirigiendo...';
+            feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-green-950/20 border-green-500/20 text-green-400 mt-2 block';
+            
+            setTimeout(() => {
+              window.location.href = '/admin/dashboard';
+            }, 1000);
+          }
+        });
+      }
+    });
+  </script>
+</Layout>

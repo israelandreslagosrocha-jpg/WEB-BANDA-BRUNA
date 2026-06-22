@@ -1,8 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getUpcomingEvents } from '../services/socialApi.js';
+import { supabase } from '../services/supabaseClient.js';
 
-const events = getUpcomingEvents();
+// Cargar eventos activos desde Supabase ordenados por fecha ascendente
+const { data: rawEvents } = await supabase
+  .from('eventos')
+  .select('*')
+  .eq('publicado', true)
+  .order('fecha', { ascending: true });
+
+const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SET", "OCT", "NOV", "DIC"];
+
+const events = (rawEvents || []).map((event: any) => {
+  const d = new Date(event.fecha + 'T12:00:00'); // Evitar descalces de zona horaria
+  const day = d.getDate();
+  const monthName = months[d.getMonth()];
+  const year = d.getFullYear();
+  const fullDateStr = event.fecha.replace(/-/g, '');
+
+  return {
+    id: event.id,
+    date: day,
+    month: monthName,
+    year: year,
+    time: "20:00", // Hora por defecto
+    title: event.nombre,
+    venue: event.lugar || 'Por confirmar',
+    location: event.ciudad || '',
+    mapUrl: '#',
+    statusType: 'confirmed',
+    fullDate: fullDateStr
+  };
+});
 
 // Helper to generate Google Calendar links
 const getGoogleCalendarUrl = (event: any) => {

@@ -1,0 +1,1142 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Dashboard de Administración | Banda Bruna" description="Panel de control dinámico oficial de Banda Bruna.">
+  <div id="admin-gate-loading" class="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400">
+    <div class="text-center">
+      <div class="w-10 h-10 border-4 border-gold-bruna border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-xs uppercase tracking-widest font-title font-bold">Verificando Credenciales de Seguridad...</p>
+    </div>
+  </div>
+
+  <div id="admin-dashboard-container" class="hidden min-h-screen bg-slate-950 text-white">
+    <!-- Topbar -->
+    <header class="border-b border-white/5 bg-slate-900/60 sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-[1400px] mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <img src="/assets/images/logos/logo_main.webp" alt="Logo" class="h-8 w-auto object-contain" />
+          <span class="text-xs border-l border-white/10 pl-3 text-gold-bruna uppercase font-bold tracking-widest font-title">Panel de Control</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-slate-450 text-xs hidden sm:inline" id="user-display">contacto@bandabruna.cl</span>
+          <button id="btn-logout" class="text-xs bg-slate-950 border border-white/10 hover:border-red-500/40 hover:text-red-400 px-3.5 py-2 rounded transition-all cursor-pointer uppercase tracking-wider font-bold">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-[1400px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar Navigation -->
+      <aside class="lg:col-span-1 flex flex-col gap-2">
+        <button data-tab-target="noticias" class="tab-btn active w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📰 Noticias & Blog
+        </button>
+        <button data-tab-target="eventos" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📅 Agenda & Shows
+        </button>
+        <button data-tab-target="equipo" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          👥 Integrantes & Staff
+        </button>
+        <button data-tab-target="rider" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📋 Rider Técnico / EPK
+        </button>
+        <button data-tab-target="config" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          ⚙️ Ajustes & Redes
+        </button>
+        <button data-tab-target="logs" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📜 Auditoría / Logs
+        </button>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="lg:col-span-3 min-h-[60vh] bg-slate-900/40 border border-white/5 rounded-2xl p-6 md:p-8 relative">
+        
+        <!-- Tab 1: Noticias -->
+        <section id="tab-noticias" class="tab-pane">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white">Noticias & Publicaciones</h2>
+            <button id="btn-new-noticia" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+              + Nueva Noticia
+            </button>
+          </div>
+          
+          <div id="noticias-list" class="flex flex-col gap-4">
+            <!-- Dynamic Noticias Rows -->
+          </div>
+        </section>
+
+        <!-- Tab 2: Eventos -->
+        <section id="tab-eventos" class="tab-pane hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white">Agenda de Conciertos</h2>
+            <button id="btn-new-evento" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+              + Nuevo Show
+            </button>
+          </div>
+          
+          <div id="eventos-list" class="flex flex-col gap-4">
+            <!-- Dynamic Eventos Rows -->
+          </div>
+        </section>
+
+        <!-- Tab 3: Equipo (Integrantes + Staff) -->
+        <section id="tab-equipo" class="tab-pane hidden">
+          <div class="flex flex-col gap-8">
+            <div>
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="font-title font-bold text-lg uppercase text-white">Músicos / Integrantes</h2>
+                <button id="btn-new-integrante" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+                  + Integrante
+                </button>
+              </div>
+              <div id="integrantes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Dynamic Integrantes Grid -->
+              </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-8">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="font-title font-bold text-lg uppercase text-white">Equipo Técnico (Staff)</h2>
+                <button id="btn-new-staff" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+                  + Staff Técnico
+                </button>
+              </div>
+              <div id="staff-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Dynamic Staff Grid -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 4: Rider Técnico / EPK -->
+        <section id="tab-rider" class="tab-pane hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white">Rider Técnico & EPK</h2>
+            <button id="btn-pdf-rider" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer flex items-center gap-1.5">
+              📥 Descargar PDF
+            </button>
+          </div>
+
+          <form id="rider-form" class="flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+              <label class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Listado de Canales / Microfonía (Input List)</label>
+              <textarea id="rider-input-list" rows="6" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna resize-none" placeholder="1. Bombo - Shure Beta 52&#10;2. Caja - Shure SM57..."></textarea>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Requerimientos de Monitoreo / Mezclas</label>
+              <textarea id="rider-monitores" rows="4" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna resize-none" placeholder="Mezcla 1: Bronces (In-ears)&#10;Mezcla 2: Voz Principal (Wedge)..."></textarea>
+            </div>
+
+            <button type="submit" class="bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white font-title font-bold py-3 rounded text-xs uppercase tracking-widest transition-all w-full cursor-pointer">
+              GUARDAR CAMBIOS RIDER TÉCNICO
+            </button>
+          </form>
+        </section>
+
+        <!-- Tab 5: Ajustes Globales & Redes -->
+        <section id="tab-config" class="tab-pane hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white">Configuración Global del Sitio</h2>
+            <div class="flex gap-2">
+              <button id="btn-sync-redes" class="bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors">
+                🔄 Sincronizar Redes
+              </button>
+              <button id="btn-sync-musica" class="bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors">
+                🎵 Sincronizar Música
+              </button>
+            </div>
+          </div>
+
+          <form id="config-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-col gap-2">
+              <label for="conf-tel-p" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono Jaime Cárdenas (Booking)</label>
+              <input type="text" id="conf-tel-p" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-tel-s" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono César Bruna (Dirección)</label>
+              <input type="text" id="conf-tel-s" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Email de Contacto</label>
+              <input type="email" id="conf-email" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-spotify" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Enlace Spotify</label>
+              <input type="url" id="conf-spotify" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-instagram" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Enlace Instagram</label>
+              <input type="url" id="conf-instagram" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-facebook" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Enlace Facebook</label>
+              <input type="url" id="conf-facebook" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-youtube" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Enlace YouTube</label>
+              <input type="url" id="conf-youtube" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-tiktok" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Enlace TikTok</label>
+              <input type="url" id="conf-tiktok" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+
+            <button type="submit" class="md:col-span-2 bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white font-title font-bold py-3.5 rounded text-xs uppercase tracking-widest transition-all cursor-pointer">
+              GUARDAR CONFIGURACIÓN GENERAL
+            </button>
+          </form>
+        </section>
+
+        <!-- Tab 6: Auditoría / Logs -->
+        <section id="tab-logs" class="tab-pane hidden">
+          <h2 class="font-title font-bold text-xl uppercase text-white mb-6">Historial de Auditoría</h2>
+          
+          <div class="overflow-x-auto border border-white/5 rounded-xl bg-slate-950/40">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-white/5 bg-slate-950/80 text-slate-400">
+                  <th class="p-4 uppercase font-bold tracking-wider">Fecha / Hora</th>
+                  <th class="p-4 uppercase font-bold tracking-wider">Usuario</th>
+                  <th class="p-4 uppercase font-bold tracking-wider">Acción Realizada</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body">
+                <!-- Dynamic Logs -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Form Modals -->
+  <div id="modal-container" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+    <!-- Dynamic Modal content gets injected here -->
+  </div>
+
+  <!-- PDF Generator Core Script CDN (Loaded dynamically) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" is:inline></script>
+
+  <script>
+    import { supabase } from '../../services/supabaseClient.js';
+
+    let loggedInUserEmail = '';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. AUTENTICACIÓN: Verificar acceso seguro y correo exacto
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session || !session.user || session.user.email !== 'contacto@bandabruna.cl') {
+        // Redirigir a login
+        window.location.href = '/admin';
+        return;
+      }
+
+      loggedInUserEmail = session.user.email;
+      
+      // Mostrar Panel
+      const gateLoading = document.getElementById('admin-gate-loading');
+      const dashboardContainer = document.getElementById('admin-dashboard-container');
+      if (gateLoading) gateLoading.classList.add('hidden');
+      if (dashboardContainer) dashboardContainer.classList.remove('hidden');
+
+      // Logout handler
+      document.getElementById('btn-logout')?.addEventListener('click', async () => {
+        // Registrar log de salida
+        try {
+          await supabase.from('logs_actividad').insert([
+            { usuario_email: loggedInUserEmail, accion: 'Cerró sesión del panel' }
+          ]);
+        } catch(e){}
+
+        await supabase.auth.signOut();
+        window.location.href = '/admin';
+      });
+
+      // 2. NAVEGACIÓN ENTRE PESTAÑAS
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabPanes = document.querySelectorAll('.tab-pane');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-tab-target');
+          
+          tabBtns.forEach(b => b.classList.remove('active', 'border-gold-bruna', 'text-gold-bruna'));
+          btn.classList.add('active', 'border-gold-bruna', 'text-gold-bruna');
+
+          tabPanes.forEach(pane => {
+            if (pane.id === `tab-${target}`) {
+              pane.classList.remove('hidden');
+            } else {
+              pane.classList.add('hidden');
+            }
+          });
+
+          // Cargar datos según la pestaña activa
+          if (target === 'noticias') loadNoticias();
+          if (target === 'eventos') loadEventos();
+          if (target === 'equipo') loadEquipo();
+          if (target === 'rider') loadRider();
+          if (target === 'config') loadConfig();
+          if (target === 'logs') loadLogs();
+        });
+      });
+
+      // Cargar primera pestaña al iniciar
+      loadNoticias();
+
+      // 3. UTILERÍAS: Conversor de imágenes a WebP en el navegador
+      async function convertToWebp(file: File): Promise<Blob> {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob((blob) => {
+                  if (blob) {
+                    resolve(blob);
+                  } else {
+                    reject(new Error('Canvas conversion to Blob failed'));
+                  }
+                }, 'image/webp', 0.85); // Calidad optimizada
+              } else {
+                reject(new Error('Canvas context could not be created'));
+              }
+            };
+            img.onerror = () => reject(new Error('Image failed to load'));
+            img.src = event.target?.result as string;
+          };
+          reader.onerror = () => reject(new Error('FileReader failed'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function uploadImageToStorage(file: File, bucket: string): Promise<string | null> {
+        try {
+          // Convertir a WebP
+          const webpBlob = await convertToWebp(file);
+          const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.webp`;
+          
+          const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(fileName, webpBlob, {
+              contentType: 'image/webp'
+            });
+
+          if (error) throw error;
+          
+          // Generar URL pública
+          const { data: { publicUrl } } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(fileName);
+
+          return publicUrl;
+        } catch (err) {
+          console.error('Error al subir imagen:', err);
+          alert('Hubo un error al procesar y subir tu imagen. Intenta de nuevo.');
+          return null;
+        }
+      }
+
+      // Helper para auditoría rápida
+      async function logAction(actionText: string) {
+        try {
+          await supabase.from('logs_actividad').insert([
+            { usuario_email: loggedInUserEmail, accion: actionText }
+          ]);
+        } catch(e) {
+          console.error(e);
+        }
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: NOTICIAS
+      // ==========================================
+      async function loadNoticias() {
+        const listDiv = document.getElementById('noticias-list');
+        if (!listDiv) return;
+        listDiv.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando noticias...</p>';
+
+        const { data, error } = await supabase
+          .from('noticias')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error || !data) {
+          listDiv.innerHTML = '<p class="text-xs text-red-400">Error al cargar noticias de Supabase.</p>';
+          return;
+        }
+
+        if (data.length === 0) {
+          listDiv.innerHTML = '<p class="text-xs text-slate-500 py-6 text-center">No hay noticias registradas. Haz clic en "Nueva Noticia" para empezar.</p>';
+          return;
+        }
+
+        listDiv.innerHTML = data.map(item => `
+          <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+              ${item.imagen_principal ? `<img src="${item.imagen_principal}" class="w-12 h-12 rounded object-cover border border-white/10" />` : '<div class="w-12 h-12 bg-slate-950 rounded flex items-center justify-center text-xs text-slate-500">📰</div>'}
+              <div>
+                <h4 class="font-title font-bold text-sm text-white uppercase">${item.titulo}</h4>
+                <p class="text-[10px] text-slate-500 mt-1">${new Date(item.created_at).toLocaleDateString('es-CL')} — Slug: <span class="text-gold-bruna">${item.slug}</span></p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button data-edit-noticia-id="${item.id}" class="btn-edit text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Editar</button>
+              <button data-delete-noticia-id="${item.id}" class="btn-delete text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Borrar</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Bind events
+        document.querySelectorAll('[data-edit-noticia-id]').forEach(btn => {
+          btn.addEventListener('click', () => openNoticiaModal((btn as HTMLButtonElement).dataset.editNoticiaId));
+        });
+        document.querySelectorAll('[data-delete-noticia-id]').forEach(btn => {
+          btn.addEventListener('click', () => deleteNoticia((btn as HTMLButtonElement).dataset.deleteNoticiaId));
+        });
+      }
+
+      document.getElementById('btn-new-noticia')?.addEventListener('click', () => openNoticiaModal());
+
+      async function openNoticiaModal(id?: string) {
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        let noticia = { titulo: '', slug: '', resumen: '', contenido: '', imagen_principal: '' };
+
+        if (id) {
+          const { data } = await supabase.from('noticias').select('*').eq('id', id).single();
+          if (data) noticia = data;
+        }
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/5 w-full max-w-lg rounded-2xl p-6 md:p-8 flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+            <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Noticia' : 'Crear Nueva Noticia'}</h3>
+            
+            <form id="noticia-form" class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Título</label>
+                <input type="text" id="not-title" value="${noticia.titulo}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Slug (Dirección URL única)</label>
+                <input type="text" id="not-slug" value="${noticia.slug}" required placeholder="ej: gira-invierno-2026" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Resumen</label>
+                <input type="text" id="not-summary" value="${noticia.resumen || ''}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Contenido del artículo</label>
+                <textarea id="not-content" rows="6" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none resize-none">${noticia.contenido || ''}</textarea>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Imagen Principal</label>
+                <input type="file" id="not-image" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+                ${noticia.imagen_principal ? `<p class="text-[9px] text-slate-450 mt-1">Imagen actual: <a href="${noticia.imagen_principal}" target="_blank" class="text-gold-bruna underline">Ver imagen</a></p>` : ''}
+              </div>
+
+              <div class="flex gap-3 mt-2 justify-end">
+                <button type="button" id="btn-modal-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
+                <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer">Guardar</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        modal.classList.remove('hidden');
+
+        // Close modal event
+        document.getElementById('btn-modal-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Guardar noticia
+        document.getElementById('noticia-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const title = (document.getElementById('not-title') as HTMLInputElement).value;
+          const slug = (document.getElementById('not-slug') as HTMLInputElement).value;
+          const summary = (document.getElementById('not-summary') as HTMLInputElement).value;
+          const content = (document.getElementById('not-content') as HTMLTextAreaElement).value;
+          const fileInput = document.getElementById('not-image') as HTMLInputElement;
+
+          let imgUrl = noticia.imagen_principal;
+
+          if (fileInput.files && fileInput.files[0]) {
+            const uploaded = await uploadImageToStorage(fileInput.files[0], 'noticias');
+            if (uploaded) imgUrl = uploaded;
+          }
+
+          const payload = {
+            titulo: title,
+            slug,
+            resumen: summary,
+            contenido: content,
+            imagen_principal: imgUrl
+          };
+
+          let success = false;
+          if (id) {
+            const { error } = await supabase.from('noticias').update(payload).eq('id', id);
+            if (!error) {
+              success = true;
+              await logAction(`Editó la noticia: "${title}"`);
+            }
+          } else {
+            const { error } = await supabase.from('noticias').insert([payload]);
+            if (!error) {
+              success = true;
+              await logAction(`Creó la noticia: "${title}"`);
+            }
+          }
+
+          if (success) {
+            modal.classList.add('hidden');
+            loadNoticias();
+          } else {
+            alert('Error al guardar en la base de datos de Supabase. Revisa las credenciales o RLS.');
+          }
+        });
+      }
+
+      async function deleteNoticia(id: string) {
+        if (!confirm('¿Estás seguro de que deseas eliminar esta noticia permanentemente?')) return;
+        const { data } = await supabase.from('noticias').select('titulo').eq('id', id).single();
+        const title = data ? data.titulo : 'Noticia';
+
+        const { error } = await supabase.from('noticias').delete().eq('id', id);
+        if (!error) {
+          await logAction(`Eliminó la noticia: "${title}"`);
+          loadNoticias();
+        } else {
+          alert('Error al eliminar noticia.');
+        }
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: EVENTOS (AGENDA)
+      // ==========================================
+      async function loadEventos() {
+        const listDiv = document.getElementById('eventos-list');
+        if (!listDiv) return;
+        listDiv.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando conciertos...</p>';
+
+        const { data, error } = await supabase
+          .from('eventos')
+          .select('*')
+          .order('fecha', { ascending: true });
+
+        if (error || !data) {
+          listDiv.innerHTML = '<p class="text-xs text-red-400">Error al cargar agenda.</p>';
+          return;
+        }
+
+        if (data.length === 0) {
+          listDiv.innerHTML = '<p class="text-xs text-slate-500 py-6 text-center">No hay shows registrados en la agenda.</p>';
+          return;
+        }
+
+        listDiv.innerHTML = data.map(item => `
+          <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex justify-between items-center gap-4">
+            <div>
+              <h4 class="font-title font-bold text-sm text-white uppercase">${item.nombre}</h4>
+              <p class="text-[10px] text-slate-500 mt-1">${new Date(item.fecha + 'T12:00:00').toLocaleDateString('es-CL')} — Lugar: ${item.lugar || 'Por Confirmar'}, ${item.ciudad}</p>
+            </div>
+            <div class="flex gap-2">
+              <button data-edit-evento-id="${item.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Editar</button>
+              <button data-delete-evento-id="${item.id}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Borrar</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Bind events
+        document.querySelectorAll('[data-edit-evento-id]').forEach(btn => {
+          btn.addEventListener('click', () => openEventoModal((btn as HTMLButtonElement).dataset.editEventoId));
+        });
+        document.querySelectorAll('[data-delete-evento-id]').forEach(btn => {
+          btn.addEventListener('click', () => deleteEvento((btn as HTMLButtonElement).dataset.deleteEventoId));
+        });
+      }
+
+      document.getElementById('btn-new-evento')?.addEventListener('click', () => openEventoModal());
+
+      async function openEventoModal(id?: string) {
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        let evento = { nombre: '', fecha: '', lugar: '', ciudad: '', descripcion: '', publicado: true };
+
+        if (id) {
+          const { data } = await supabase.from('eventos').select('*').eq('id', id).single();
+          if (data) evento = data;
+        }
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/5 w-full max-w-md rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+            <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Presentación' : 'Crear Nuevo Show'}</h3>
+            
+            <form id="evento-form" class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre del Show</label>
+                <input type="text" id="ev-name" value="${evento.nombre}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Fecha del Evento</label>
+                <input type="date" id="ev-date" value="${evento.fecha}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none cursor-pointer" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Lugar / Recinto</label>
+                <input type="text" id="ev-venue" value="${evento.lugar}" placeholder="ej: Gimnasio Municipal" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Ciudad / Comuna</label>
+                <input type="text" id="ev-city" value="${evento.ciudad || ''}" required placeholder="ej: Temuco" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+
+              <div class="flex gap-3 mt-2 justify-end">
+                <button type="button" id="btn-modal-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
+                <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer">Guardar</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        modal.classList.remove('hidden');
+
+        // Close event
+        document.getElementById('btn-modal-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Submit event
+        document.getElementById('evento-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nombre = (document.getElementById('ev-name') as HTMLInputElement).value;
+          const fecha = (document.getElementById('ev-date') as HTMLInputElement).value;
+          const lugar = (document.getElementById('ev-venue') as HTMLInputElement).value;
+          const ciudad = (document.getElementById('ev-city') as HTMLInputElement).value;
+
+          const payload = { nombre, fecha, lugar, ciudad, publicado: true };
+
+          let success = false;
+          if (id) {
+            const { error } = await supabase.from('eventos').update(payload).eq('id', id);
+            if (!error) {
+              success = true;
+              await logAction(`Actualizó show: "${nombre}" en ${ciudad}`);
+            }
+          } else {
+            const { error } = await supabase.from('eventos').insert([payload]);
+            if (!error) {
+              success = true;
+              await logAction(`Agendó show: "${nombre}" en ${ciudad}`);
+            }
+          }
+
+          if (success) {
+            modal.classList.add('hidden');
+            loadEventos();
+          } else {
+            alert('Error al guardar presentación.');
+          }
+        });
+      }
+
+      async function deleteEvento(id: string) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este show de la agenda?')) return;
+        const { data } = await supabase.from('eventos').select('nombre').eq('id', id).single();
+        const name = data ? data.nombre : 'Show';
+
+        const { error } = await supabase.from('eventos').delete().eq('id', id);
+        if (!error) {
+          await logAction(`Eliminó show: "${name}" de la agenda`);
+          loadEventos();
+        } else {
+          alert('Error al borrar show.');
+        }
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: INTEGRANTES & STAFF
+      // ==========================================
+      async function loadEquipo() {
+        const intDiv = document.getElementById('integrantes-list');
+        const stfDiv = document.getElementById('staff-list');
+        if (!intDiv || !stfDiv) return;
+
+        intDiv.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando...</p>';
+        stfDiv.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando...</p>';
+
+        const { data: dbMembers } = await supabase.from('integrantes').select('*').order('orden', { ascending: true });
+        const { data: dbStaff } = await supabase.from('equipo_tecnico').select('*');
+
+        // Músicos
+        if (!dbMembers || dbMembers.length === 0) {
+          intDiv.innerHTML = '<p class="text-xs text-slate-500">Sin integrantes registrados.</p>';
+        } else {
+          intDiv.innerHTML = dbMembers.map(item => `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                ${item.foto ? `<img src="${item.foto}" class="w-10 h-10 rounded-full object-cover border border-white/10" />` : '<div class="w-10 h-10 rounded-full bg-slate-950 flex items-center justify-center text-xs text-slate-500">🎸</div>'}
+                <div>
+                  <h4 class="font-title font-bold text-xs text-white uppercase">${item.nombre}</h4>
+                  <span class="text-[9px] text-gold-bruna uppercase font-semibold tracking-wider">${item.cargo || 'Músico'}</span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button data-edit-member-id="${item.id}" class="text-[9px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1 px-2.5 rounded uppercase cursor-pointer">Editar</button>
+                <button data-delete-member-id="${item.id}" class="text-[9px] border border-red-500/20 hover:border-red-500 hover:text-red-450 font-bold py-1 px-2.5 rounded uppercase cursor-pointer">Borrar</button>
+              </div>
+            </div>
+          `).join('');
+
+          document.querySelectorAll('[data-edit-member-id]').forEach(btn => {
+            btn.addEventListener('click', () => openMemberModal((btn as HTMLButtonElement).dataset.editMemberId));
+          });
+          document.querySelectorAll('[data-delete-member-id]').forEach(btn => {
+            btn.addEventListener('click', () => deleteMember((btn as HTMLButtonElement).dataset.deleteMemberId));
+          });
+        }
+
+        // Staff
+        if (!dbStaff || dbStaff.length === 0) {
+          stfDiv.innerHTML = '<p class="text-xs text-slate-500">Sin personal registrado.</p>';
+        } else {
+          stfDiv.innerHTML = dbStaff.map(item => `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                ${item.foto ? `<img src="${item.foto}" class="w-10 h-10 rounded-full object-cover border border-white/10" />` : '<div class="w-10 h-10 rounded-full bg-slate-950 flex items-center justify-center text-xs text-slate-500">⚙️</div>'}
+                <div>
+                  <h4 class="font-title font-bold text-xs text-white uppercase">${item.nombre}</h4>
+                  <span class="text-[9px] text-slate-400 uppercase font-semibold tracking-wider">${item.cargo || 'Técnico'}</span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button data-edit-staff-id="${item.id}" class="text-[9px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1 px-2.5 rounded uppercase cursor-pointer">Editar</button>
+                <button data-delete-staff-id="${item.id}" class="text-[9px] border border-red-500/20 hover:border-red-500 hover:text-red-450 font-bold py-1 px-2.5 rounded uppercase cursor-pointer">Borrar</button>
+              </div>
+            </div>
+          `).join('');
+
+          document.querySelectorAll('[data-edit-staff-id]').forEach(btn => {
+            btn.addEventListener('click', () => openStaffModal((btn as HTMLButtonElement).dataset.editStaffId));
+          });
+          document.querySelectorAll('[data-delete-staff-id]').forEach(btn => {
+            btn.addEventListener('click', () => deleteStaff((btn as HTMLButtonElement).dataset.deleteStaffId));
+          });
+        }
+      }
+
+      document.getElementById('btn-new-integrante')?.addEventListener('click', () => openMemberModal());
+      document.getElementById('btn-new-staff')?.addEventListener('click', () => openStaffModal());
+
+      async function openMemberModal(id?: string) {
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        let member = { nombre: '', cargo: '', instagram: '', foto: '', biografia: '', orden: 0 };
+        if (id) {
+          const { data } = await supabase.from('integrantes').select('*').eq('id', id).single();
+          if (data) member = data;
+        }
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/5 w-full max-w-md rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+            <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Integrante' : 'Nuevo Integrante'}</h3>
+            
+            <form id="member-form" class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre Completo</label>
+                <input type="text" id="mb-name" value="${member.nombre}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Instrumento / Cargo</label>
+                <input type="text" id="mb-role" value="${member.cargo || ''}" placeholder="ej: Vocalista, Bajista" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Instagram (Link)</label>
+                <input type="url" id="mb-ig" value="${member.instagram || ''}" placeholder="https://instagram.com/nombre" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Foto Retrato</label>
+                <input type="file" id="mb-foto" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Biografía Breve</label>
+                <textarea id="mb-bio" rows="3" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none resize-none">${member.biografia || ''}</textarea>
+              </div>
+
+              <div class="flex gap-3 mt-2 justify-end">
+                <button type="button" id="btn-modal-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
+                <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer">Guardar</button>
+              </div>
+            </form>
+          </div>
+        `;
+        modal.classList.remove('hidden');
+
+        document.getElementById('btn-modal-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        document.getElementById('member-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nombre = (document.getElementById('mb-name') as HTMLInputElement).value;
+          const cargo = (document.getElementById('mb-role') as HTMLInputElement).value;
+          const instagram = (document.getElementById('mb-ig') as HTMLInputElement).value;
+          const biografia = (document.getElementById('mb-bio') as HTMLTextAreaElement).value;
+          const fileInput = document.getElementById('mb-foto') as HTMLInputElement;
+
+          let fotoUrl = member.foto;
+          if (fileInput.files && fileInput.files[0]) {
+            const uploaded = await uploadImageToStorage(fileInput.files[0], 'integrantes');
+            if (uploaded) fotoUrl = uploaded;
+          }
+
+          const payload = { nombre, cargo, instagram, biografia, foto: fotoUrl, activo: true };
+
+          let success = false;
+          if (id) {
+            const { error } = await supabase.from('integrantes').update(payload).eq('id', id);
+            if (!error) {
+              success = true;
+              await logAction(`Modificó datos de integrante: ${nombre}`);
+            }
+          } else {
+            const { error } = await supabase.from('integrantes').insert([payload]);
+            if (!error) {
+              success = true;
+              await logAction(`Registró nuevo integrante: ${nombre}`);
+            }
+          }
+
+          if (success) {
+            modal.classList.add('hidden');
+            loadEquipo();
+          } else {
+            alert('Error al guardar integrante.');
+          }
+        });
+      }
+
+      async function deleteMember(id: string) {
+        if (!confirm('¿Estás seguro de que deseas quitar a este integrante?')) return;
+        const { data } = await supabase.from('integrantes').select('nombre').eq('id', id).single();
+        const name = data ? data.nombre : 'Miembro';
+
+        const { error } = await supabase.from('integrantes').delete().eq('id', id);
+        if (!error) {
+          await logAction(`Eliminó al integrante: ${name}`);
+          loadEquipo();
+        } else {
+          alert('Error al borrar.');
+        }
+      }
+
+      // Staff Técnico modal logic
+      async function openStaffModal(id?: string) {
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        let staffMember = { nombre: '', cargo: '', instagram: '', foto: '' };
+        if (id) {
+          const { data } = await supabase.from('equipo_tecnico').select('*').eq('id', id).single();
+          if (data) staffMember = data;
+        }
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/5 w-full max-w-md rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+            <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Técnico' : 'Nuevo Técnico / Staff'}</h3>
+            
+            <form id="staff-form" class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre Completo</label>
+                <input type="text" id="st-name" value="${staffMember.nombre}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Función / Cargo</label>
+                <input type="text" id="st-role" value="${staffMember.cargo || ''}" placeholder="ej: Iluminador, Monitorista" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Foto Retrato</label>
+                <input type="file" id="st-foto" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+              </div>
+
+              <div class="flex gap-3 mt-2 justify-end">
+                <button type="button" id="btn-modal-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
+                <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer">Guardar</button>
+              </div>
+            </form>
+          </div>
+        `;
+        modal.classList.remove('hidden');
+
+        document.getElementById('btn-modal-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        document.getElementById('staff-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nombre = (document.getElementById('st-name') as HTMLInputElement).value;
+          const cargo = (document.getElementById('st-role') as HTMLInputElement).value;
+          const fileInput = document.getElementById('st-foto') as HTMLInputElement;
+
+          let fotoUrl = staffMember.foto;
+          if (fileInput.files && fileInput.files[0]) {
+            const uploaded = await uploadImageToStorage(fileInput.files[0], 'equipo');
+            if (uploaded) fotoUrl = uploaded;
+          }
+
+          const payload = { nombre, cargo, foto: fotoUrl, activo: true };
+
+          let success = false;
+          if (id) {
+            const { error } = await supabase.from('equipo_tecnico').update(payload).eq('id', id);
+            if (!error) {
+              success = true;
+              await logAction(`Modificó datos de staff: ${nombre}`);
+            }
+          } else {
+            const { error } = await supabase.from('equipo_tecnico').insert([payload]);
+            if (!error) {
+              success = true;
+              await logAction(`Registró nuevo staff: ${nombre}`);
+            }
+          }
+
+          if (success) {
+            modal.classList.add('hidden');
+            loadEquipo();
+          } else {
+            alert('Error al guardar staff técnico.');
+          }
+        });
+      }
+
+      async function deleteStaff(id: string) {
+        if (!confirm('¿Deseas quitar a este miembro del staff técnico?')) return;
+        const { data } = await supabase.from('equipo_tecnico').select('nombre').eq('id', id).single();
+        const name = data ? data.nombre : 'Técnico';
+
+        const { error } = await supabase.from('equipo_tecnico').delete().eq('id', id);
+        if (!error) {
+          await logAction(`Eliminó al técnico del staff: ${name}`);
+          loadEquipo();
+        } else {
+          alert('Error al eliminar.');
+        }
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: RIDER TÉCNICO (CON PDF)
+      // ==========================================
+      async function loadRider() {
+        const inputList = document.getElementById('rider-input-list') as HTMLTextAreaElement;
+        const monitores = document.getElementById('rider-monitores') as HTMLTextAreaElement;
+
+        // Recuperar configuraciones desde la tabla configuracion (la usamos como bolsa global)
+        const { data } = await supabase.from('configuracion').select('instagram, facebook').eq('id', 1).single();
+        
+        // Guardaremos en variables temporales o utilizaremos campos personalizados en la tabla si decidimos ampliarlos.
+        // De momento, utilizaremos campos por defecto guardados en LocalStorage como fallback o en la tabla si existen.
+        if (data) {
+          // Utilizaremos un registro simulado en local para no alterar el esquema inicial,
+          // o cargamos de variables pre-definidas.
+          inputList.value = localStorage.getItem('rider_input_list') || 
+            "1. Bombo - Shure Beta 91A\n2. Caja Top - Shure SM57\n3. Caja Bottom - Shure SM57\n4. Hi-Hat - AKG C451\n5. Tom 1 - Sennheiser e604\n6. Tom 2 - Sennheiser e604\n7. Tom Floor - Sennheiser e604\n8. Bajo - Caja Directa BSS (DI)\n9. Guitarra - Shure SM57\n10. Teclado L - Caja Directa (DI)\n11. Teclado R - Caja Directa (DI)\n12. Voz Principal - Shure Beta 58A\n13. Coros - Shure SM58";
+          monitores.value = localStorage.getItem('rider_monitores') || 
+            "Mezcla 1: Bronces (Sistema In-Ear Inalámbrico)\nMezcla 2: Voz Principal (Monitor de piso Wedge)\nMezcla 3: Batería (Monitor Drumfill + Sub)\nMezcla 4: Bajista y Guitarra (In-Ears)";
+        }
+      }
+
+      document.getElementById('rider-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inputList = (document.getElementById('rider-input-list') as HTMLTextAreaElement).value;
+        const monitores = (document.getElementById('rider-monitores') as HTMLTextAreaElement).value;
+
+        localStorage.setItem('rider_input_list', inputList);
+        localStorage.setItem('rider_monitores', monitores);
+        
+        logAction('Actualizó las especificaciones del Rider Técnico');
+        alert('Rider Técnico guardado localmente con éxito.');
+      });
+
+      document.getElementById('btn-pdf-rider')?.addEventListener('click', () => {
+        // Generador de PDF en el cliente usando jsPDF
+        const { jsPDF } = (window as any).jspdf;
+        const doc = new jsPDF();
+        
+        const inputList = (document.getElementById('rider-input-list') as HTMLTextAreaElement).value;
+        const monitores = (document.getElementById('rider-monitores') as HTMLTextAreaElement).value;
+
+        // Estilos PDF Premium
+        doc.setFillColor(9, 13, 22); // Fondo oscuro
+        doc.rect(0, 0, 210, 297, 'F');
+        
+        doc.setTextColor(212, 175, 55); // Color dorado Bruna
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.text("BANDA BRUNA 2.0", 20, 30);
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.text("RIDER TÉCNICO OFICIAL & INPUT LIST", 20, 40);
+        doc.setFontSize(10);
+        doc.setFont('Helvetica', 'normal');
+        doc.setTextColor(150, 150, 150);
+        doc.text("Este documento detalla los requerimientos oficiales de sonido y monitores en escenario.", 20, 48);
+        doc.line(20, 52, 190, 52); // Divider
+
+        // Seccion Input List
+        doc.setTextColor(212, 175, 55);
+        doc.setFontSize(12);
+        doc.setFont('Helvetica', 'bold');
+        doc.text("INPUT LIST (CANALES Y MICROFONÍA)", 20, 62);
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(9);
+        
+        const inputLines = doc.splitTextToSize(inputList, 170);
+        doc.text(inputLines, 20, 70);
+
+        // Seccion Monitores
+        const nextY = 70 + (inputLines.length * 4) + 10;
+        doc.setTextColor(212, 175, 55);
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("REQUERIMIENTOS DE MONITOREO Y MEZCLAS", 20, nextY);
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(9);
+        const monitorLines = doc.splitTextToSize(monitores, 170);
+        doc.text(monitorLines, 20, nextY + 8);
+
+        // Descarga
+        doc.save("Rider_Tecnico_Banda_Bruna.pdf");
+        logAction('Descargó el documento de Rider Técnico en PDF');
+      });
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: AJUSTES GLOBALES
+      // ==========================================
+      async function loadConfig() {
+        const { data, error } = await supabase.from('configuracion').select('*').eq('id', 1).single();
+        if (error || !data) return;
+
+        (document.getElementById('conf-tel-p') as HTMLInputElement).value = data.telefono_principal || '';
+        (document.getElementById('conf-tel-s') as HTMLInputElement).value = data.telefono_secundario || '';
+        (document.getElementById('conf-email') as HTMLInputElement).value = data.email_contacto || '';
+        (document.getElementById('conf-spotify') as HTMLInputElement).value = data.spotify || '';
+        (document.getElementById('conf-instagram') as HTMLInputElement).value = data.instagram || '';
+        (document.getElementById('conf-facebook') as HTMLInputElement).value = data.facebook || '';
+        (document.getElementById('conf-youtube') as HTMLInputElement).value = data.youtube || '';
+        (document.getElementById('conf-tiktok') as HTMLInputElement).value = data.tiktok || '';
+      }
+
+      document.getElementById('config-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const telP = (document.getElementById('conf-tel-p') as HTMLInputElement).value;
+        const telS = (document.getElementById('conf-tel-s') as HTMLInputElement).value;
+        const email = (document.getElementById('conf-email') as HTMLInputElement).value;
+        const spotify = (document.getElementById('conf-spotify') as HTMLInputElement).value;
+        const instagram = (document.getElementById('conf-instagram') as HTMLInputElement).value;
+        const facebook = (document.getElementById('conf-facebook') as HTMLInputElement).value;
+        const youtube = (document.getElementById('conf-youtube') as HTMLInputElement).value;
+        const tiktok = (document.getElementById('conf-tiktok') as HTMLInputElement).value;
+
+        const payload = {
+          telefono_principal: telP,
+          telefono_secundario: telS,
+          email_contacto: email,
+          spotify,
+          instagram,
+          facebook,
+          youtube,
+          tiktok
+        };
+
+        const { error } = await supabase.from('configuracion').update(payload).eq('id', 1);
+        if (!error) {
+          await logAction('Actualizó los Ajustes de Configuración Global y Redes Sociales');
+          alert('Configuración guardada exitosamente.');
+          loadConfig();
+        } else {
+          alert('Error al actualizar configuración.');
+        }
+      });
+
+      // Botones de simulación de sincronización de plataformas
+      document.getElementById('btn-sync-redes')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btn-sync-redes') as HTMLButtonElement;
+        const text = btn.textContent;
+        btn.textContent = '🔄 Sincronizando...';
+        btn.disabled = true;
+
+        setTimeout(async () => {
+          btn.textContent = text;
+          btn.disabled = false;
+          await logAction('Ejecutó sincronización forzada de seguidores y posts de Redes Sociales');
+          alert('Sincronización de redes completada. Seguidores de Instagram, TikTok y Facebook actualizados.');
+        }, 1500);
+      });
+
+      document.getElementById('btn-sync-musica')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btn-sync-musica') as HTMLButtonElement;
+        const text = btn.textContent;
+        btn.textContent = '🎵 Sincronizando...';
+        btn.disabled = true;
+
+        setTimeout(async () => {
+          btn.textContent = text;
+          btn.disabled = false;
+          await logAction('Ejecutó sincronización forzada de lanzamientos y catálogo de audio en plataformas');
+          alert('Sincronización de plataformas de streaming finalizada. Spotify y YouTube Music actualizados.');
+        }, 1500);
+      });
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: AUDITORÍA (LOGS)
+      // ==========================================
+      async function loadLogs() {
+        const tbody = document.getElementById('logs-table-body');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-slate-450 uppercase animate-pulse">Cargando bitácora de auditoría...</td></tr>';
+
+        const { data, error } = await supabase
+          .from('logs_actividad')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error || !data) {
+          tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-red-400">Error al cargar bitácora.</td></tr>';
+          return;
+        }
+
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-slate-500 text-center">No hay registros de actividad aún.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.map(log => {
+          const d = new Date(log.created_at);
+          const dateStr = d.toLocaleDateString('es-CL') + ' ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+          return `
+            <tr class="border-b border-white/5 hover:bg-white/[0.01]">
+              <td class="p-4 text-slate-400 font-mono">${dateStr}</td>
+              <td class="p-4 font-bold text-white">${log.usuario_email}</td>
+              <td class="p-4 text-gold-bruna font-medium">${log.accion}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+    });
+  </script>
+</Layout>

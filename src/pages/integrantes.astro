@@ -1,8 +1,42 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { supabase } from '../services/supabaseClient.js';
 import { getBandMembers } from '../services/socialApi.js';
 
-const members = getBandMembers();
+// Cargar integrantes activos desde Supabase
+const { data: dbMembers } = await supabase
+  .from('integrantes')
+  .select('*')
+  .eq('activo', true)
+  .order('orden', { ascending: true });
+
+// Cargar equipo técnico activo desde Supabase
+const { data: dbStaff } = await supabase
+  .from('equipo_tecnico')
+  .select('*')
+  .eq('activo', true);
+
+// Fallback por defecto si no hay integrantes en la base de datos
+const defaultMembers = getBandMembers();
+
+const members = dbMembers && dbMembers.length > 0
+  ? dbMembers.map((m: any) => ({
+      id: m.id,
+      name: m.nombre,
+      role: m.cargo || '',
+      instagram: m.instagram || '',
+      image: m.foto || '/assets/images/placeholder_musico.webp',
+      bio: m.biografia || 'Integrante oficial de Banda Bruna.'
+    }))
+  : defaultMembers;
+
+const staff = (dbStaff || []).map((s: any) => ({
+  id: s.id,
+  name: s.nombre,
+  role: s.cargo || '',
+  instagram: s.instagram || '',
+  image: s.foto || '/assets/images/placeholder_staff.webp'
+}));
 ---
 
 <Layout title="Integrantes | Banda Bruna - Miembros Oficiales de la Orquesta" description="Conoce a los músicos detrás del sonido de Banda Bruna: Cesar Bruna, Jaime Cárdenas, Vicente Nuñez, Gerson Ulloa, Fabián Garrido e Israel Lagos.">
@@ -88,6 +122,40 @@ const members = getBandMembers();
       </button>
 
     </div>
+
+    <!-- Sección de Staff Técnico -->
+    {staff.length > 0 && (
+      <div class="mt-24 pt-16 border-t border-white/5">
+        <div class="text-center mb-16">
+          <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">DETRÁS DE ESCENA</span>
+          <h2 class="text-3xl font-extrabold font-title uppercase text-white">EQUIPO TÉCNICO</h2>
+          <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto px-4">
+          {staff.map(s => (
+            <div class="bg-slate-900/30 border border-white/5 rounded-xl p-5 text-center flex flex-col items-center group hover:border-gold-bruna/20 transition-all duration-300">
+              <div class="w-20 h-20 rounded-full overflow-hidden bg-slate-950 border border-white/10 mb-4 flex items-center justify-center">
+                <img 
+                  src={s.image} 
+                  alt={s.name} 
+                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+              <h3 class="font-title font-bold text-sm text-white group-hover:text-gold-bruna transition-colors uppercase leading-tight mb-1">{s.name}</h3>
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-2">{s.role}</span>
+              
+              {s.instagram && (
+                <a href={s.instagram} target="_blank" rel="noopener" class="text-slate-500 hover:text-gold-bruna transition-colors p-1" aria-label={`Instagram de ${s.name}`}>
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
 
     <!-- Booking CTA -->
     <div class="text-center mt-20 max-w-lg mx-auto bg-slate-900/40 border border-white/5 p-8 rounded-xl">

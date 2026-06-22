@@ -187,7 +187,9 @@ import Layout from '../layouts/Layout.astro';
 
   </section>
 
-  <script is:inline>
+  <script>
+    import { supabase } from '../services/supabaseClient.js';
+
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('quote-form-extended');
       const feedback = document.getElementById('ext-form-feedback');
@@ -266,6 +268,25 @@ import Layout from '../layouts/Layout.astro';
           const dateVal = dateInput.value;
           const cityVal = cityInput.value.trim();
           const msgVal = document.getElementById('ext-message').value.trim() || 'Sin detalles adicionales.';
+
+          // Guardar cotización en Supabase
+          supabase.from('cotizaciones').insert([
+            {
+              nombre: nameVal,
+              telefono: phoneVal,
+              email: emailVal,
+              fecha_evento: dateVal || null,
+              ciudad: cityVal,
+              tipo_evento: typeVal,
+              mensaje: msgVal
+            }
+          ]).then(({ error }) => {
+            if (error) {
+              console.error('Error al guardar en Supabase:', error);
+            } else {
+              console.log('Cotización guardada exitosamente en Supabase');
+            }
+          });
 
           // Send email asynchronously using FormSubmit.co
           fetch("https://formsubmit.co/ajax/contacto@bandabruna.cl", {

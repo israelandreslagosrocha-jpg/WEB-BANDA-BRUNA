@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { supabase } from '../services/supabaseClient.js';
 
 interface Props {
   title?: string;
@@ -19,6 +20,49 @@ const getLinkClass = (path: string) => {
   return isActive 
     ? "text-gold-bruna font-extrabold border-b-2 border-gold-bruna pb-1 transition-all" 
     : "text-slate-300 hover:text-white pb-1 transition-all";
+};
+
+// Cargar la configuración global
+let config = {
+  telefono_principal: "+56 9 9002 1689",
+  telefono_secundario: "+56 9 7614 9408",
+  email_contacto: "contacto@bandabruna.cl",
+  instagram: "https://www.instagram.com/banda_bruna/",
+  facebook: "https://www.facebook.com/bandabruna",
+  youtube: "https://www.youtube.com/@bandabrunaoficial",
+  spotify: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+  tiktok: "https://www.tiktok.com/@bandabrunaoficial",
+  logo_principal: "/assets/images/logos/logo_main.webp",
+  favicon: "/favicon.ico"
+};
+
+try {
+  const { data, error } = await supabase
+    .from('configuracion')
+    .select('*')
+    .limit(1);
+    
+  if (data && data.length > 0) {
+    const dbConfig = data[0];
+    config = {
+      telefono_principal: dbConfig.telefono_principal || config.telefono_principal,
+      telefono_secundario: dbConfig.telefono_secundario || config.telefono_secundario,
+      email_contacto: dbConfig.email_contacto || config.email_contacto,
+      instagram: dbConfig.instagram || config.instagram,
+      facebook: dbConfig.facebook || config.facebook,
+      youtube: dbConfig.youtube || config.youtube,
+      spotify: dbConfig.spotify || config.spotify,
+      tiktok: dbConfig.tiktok || config.tiktok,
+      logo_principal: dbConfig.logo_principal || config.logo_principal,
+      favicon: dbConfig.favicon || config.favicon
+    };
+  }
+} catch (err) {
+  console.error("Error al cargar la configuración de Supabase:", err);
+}
+
+const getWhatsAppLink = (phone: string) => {
+  return `https://wa.me/${phone.replace(/\+/g, '').replace(/\s+/g, '')}`;
 };
 ---
 
@@ -42,8 +86,8 @@ const getLinkClass = (path: string) => {
   <meta property="og:image" content="/assets/images/album.png">
 
   <!-- Favicons -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-  <link rel="icon" type="image/webp" href="/favicon.webp" />
+  <link rel="icon" type="image/x-icon" href={config.favicon} />
+  <link rel="icon" type="image/webp" href={config.favicon} />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,28 +98,28 @@ const getLinkClass = (path: string) => {
   </noscript>
 
   <!-- Structured Data JSON-LD (SEO & AI Search Engine Optimization) -->
-  <script type="application/ld+json" is:inline>
+  <script type="application/ld+json" is:inline define:vars={{ config }}>
     {
       "@context": "https://schema.org",
       "@type": "MusicGroup",
       "name": "Banda Bruna",
       "url": "https://bandabruna.cl",
-      "logo": "https://bandabruna.cl/assets/images/logos/logo_main.webp",
+      "logo": "https://bandabruna.cl" + config.logo_principal,
       "image": "https://bandabruna.cl/assets/images/orquesta_sur.webp",
       "description": "Orquesta y banda de cumbia tropical chilena para eventos, festivales, matrimonios y fiestas costumbristas en la Región de La Araucanía y todo Chile.",
       "genre": ["Cumbia", "Música Tropical"],
       "sameAs": [
-        "https://www.instagram.com/banda_bruna/",
-        "https://www.facebook.com/bandabruna",
-        "https://www.youtube.com/@bandabrunaoficial",
-        "https://www.tiktok.com/@bandabrunaoficial",
-        "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+        config.instagram,
+        config.facebook,
+        config.youtube,
+        config.tiktok,
+        config.spotify
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+56990021689",
+        "telephone": config.telefono_principal,
         "contactType": "sales",
-        "email": "contacto@bandabruna.cl",
+        "email": config.email_contacto,
         "areaServed": "CL"
       }
     }
@@ -90,7 +134,7 @@ const getLinkClass = (path: string) => {
       
       <!-- Brand Logo in header -->
       <a href="/" class="flex items-center group" aria-label="Ir al inicio de Banda Bruna">
-        <img src="/assets/images/logos/logo_main.webp" alt="Banda Bruna Logo" class="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
+        <img src={config.logo_principal} alt="Banda Bruna Logo" class="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
       </a>
 
       <!-- Nav Toggle Button (Mobile) -->
@@ -163,7 +207,7 @@ const getLinkClass = (path: string) => {
       <!-- Footer Logo & Bio -->
       <div class="flex flex-col gap-4">
         <a href="/" class="flex items-center group" aria-label="Ir al inicio de Banda Bruna">
-          <img src="/assets/images/logos/logo_main.webp" alt="Banda Bruna Logo" class="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
+          <img src={config.logo_principal} alt="Banda Bruna Logo" class="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" />
         </a>
         <p class="text-xs leading-relaxed mt-2">
           Música en vivo para eventos, festivales y celebraciones. Cumbia, alegría y experiencia.
@@ -171,10 +215,10 @@ const getLinkClass = (path: string) => {
         
         <!-- Social links icons -->
         <div class="flex gap-4 mt-2">
-          <a href="https://instagram.com/banda_bruna/" target="_blank" rel="noopener" aria-label="Síguenos en Instagram" class="hover:text-gold-bruna transition-colors text-lg">📸</a>
-          <a href="https://facebook.com/bandabruna" target="_blank" rel="noopener" aria-label="Síguenos en Facebook" class="hover:text-gold-bruna transition-colors text-lg">👤</a>
-          <a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" aria-label="Síguenos en YouTube" class="hover:text-gold-bruna transition-colors text-lg">📹</a>
-          <a href="https://www.tiktok.com/@bandabrunaoficial" target="_blank" rel="noopener" aria-label="Síguenos en TikTok" class="hover:text-gold-bruna transition-colors text-lg">🎵</a>
+          <a href={config.instagram} target="_blank" rel="noopener" aria-label="Síguenos en Instagram" class="hover:text-gold-bruna transition-colors text-lg">📸</a>
+          <a href={config.facebook} target="_blank" rel="noopener" aria-label="Síguenos en Facebook" class="hover:text-gold-bruna transition-colors text-lg">👤</a>
+          <a href={config.youtube} target="_blank" rel="noopener" aria-label="Síguenos en YouTube" class="hover:text-gold-bruna transition-colors text-lg">📹</a>
+          <a href={config.tiktok} target="_blank" rel="noopener" aria-label="Síguenos en TikTok" class="hover:text-gold-bruna transition-colors text-lg">🎵</a>
         </div>
       </div>
 
@@ -199,8 +243,8 @@ const getLinkClass = (path: string) => {
       <div class="flex flex-col gap-4 text-left">
         <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Música</span>
         <ul class="flex flex-col gap-2.5 text-xs list-none p-0">
-          <li><a href="https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Escucha en Spotify</a></li>
-          <li><a href="https://youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">YouTube Music</a></li>
+          <li><a href={config.spotify} target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Escucha en Spotify</a></li>
+          <li><a href={config.youtube} target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">YouTube Music</a></li>
           <li><a href="https://music.apple.com/cl/artist/banda-bruna/1828449193" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Apple Music</a></li>
           <li><a href="https://www.deezer.com/mx/artist/337478561" target="_blank" rel="noopener" class="hover:text-gold-bruna transition-colors">Deezer</a></li>
         </ul>
@@ -210,9 +254,9 @@ const getLinkClass = (path: string) => {
       <div class="flex flex-col gap-4 text-left">
         <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Contrataciones</span>
         <ul class="flex flex-col gap-2.5 text-xs list-none p-0">
-          <li><strong>Jaime Cárdenas:</strong> <a href="tel:+56990021689" class="hover:text-gold-bruna transition-colors">+56 9 9002 1689</a></li>
-          <li><strong>César Bruna:</strong> <a href="tel:+56976149408" class="hover:text-gold-bruna transition-colors">+56 9 7614 9408</a></li>
-          <li><strong>Correo:</strong> <a href="mailto:contacto@bandabruna.cl" class="hover:text-gold-bruna transition-colors">contacto@bandabruna.cl</a></li>
+          <li><strong>Jaime Cárdenas:</strong> <a href={`tel:${config.telefono_principal.replace(/\s+/g, '')}`} class="hover:text-gold-bruna transition-colors">{config.telefono_principal}</a></li>
+          <li><strong>César Bruna:</strong> <a href={`tel:${config.telefono_secundario.replace(/\s+/g, '')}`} class="hover:text-gold-bruna transition-colors">{config.telefono_secundario}</a></li>
+          <li><strong>Correo:</strong> <a href={`mailto:${config.email_contacto}`} class="hover:text-gold-bruna transition-colors">{config.email_contacto}</a></li>
           <li><strong>Ubicación:</strong> Temuco, La Araucanía, Chile</li>
         </ul>
       </div>

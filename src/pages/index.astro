@@ -858,6 +858,8 @@ const experienciaImages = [
 
   <!-- Script for form submission -->
   <script>
+    import { supabase } from '../services/supabaseClient.js';
+
     const formH = document.getElementById('quote-form-home');
     const formContainerH = document.getElementById('booking-form-container-home');
     const successPanelH = document.getElementById('success-panel-home');
@@ -936,6 +938,25 @@ const experienciaImages = [
         const dateVal = dateInputH.value;
         const cityVal = cityInputH.value.trim();
         const msgVal = messageInputH.value.trim() || 'Sin detalles adicionales.';
+
+        // Guardar cotización en Supabase
+        supabase.from('cotizaciones').insert([
+          {
+            nombre: nameVal,
+            telefono: phoneVal,
+            email: emailVal,
+            fecha_evento: dateVal || null,
+            ciudad: cityVal,
+            tipo_evento: typeVal,
+            mensaje: msgVal
+          }
+        ]).then(({ error }) => {
+          if (error) {
+            console.error('Error al guardar en Supabase:', error);
+          } else {
+            console.log('Cotización guardada exitosamente en Supabase (desde Home)');
+          }
+        });
 
         // Send email asynchronously using FormSubmit.co
         fetch("https://formsubmit.co/ajax/contacto@bandabruna.cl", {

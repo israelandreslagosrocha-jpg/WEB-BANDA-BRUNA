@@ -1,13 +1,39 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getNews } from '../../services/socialApi.js';
+import { supabase } from '../../services/supabaseClient.js';
 
 export async function getStaticPaths() {
-  const newsList = getNews();
-  return newsList.map((news) => ({
-    params: { slug: news.slug },
-    props: { news },
-  }));
+  const { data: newsList } = await supabase
+    .from('noticias')
+    .select('*')
+    .eq('publicado', true);
+
+  return (newsList || []).map((news: any) => {
+    const d = new Date(news.created_at);
+    const formattedDate = d.toLocaleDateString('es-CL', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+
+    const mappedNews = {
+      id: news.id,
+      slug: news.slug,
+      title: news.titulo,
+      summary: news.resumen || '',
+      content: news.contenido || '',
+      image: news.imagen_principal || '/assets/images/default_news.webp',
+      category: news.enlace_externo ? 'Externo' : 'Noticia',
+      publishedAt: formattedDate,
+      gallery: [],
+      videos: []
+    };
+
+    return {
+      params: { slug: news.slug },
+      props: { news: mappedNews },
+    };
+  });
 }
 
 const { news } = Astro.props;
