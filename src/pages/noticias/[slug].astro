@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { supabase } from '../../services/supabaseClient.js';
+import { getNews } from '../../services/socialApi.js';
 
 export async function getStaticPaths() {
   const { data: newsList } = await supabase
@@ -8,32 +9,36 @@ export async function getStaticPaths() {
     .select('*')
     .eq('publicado', true);
 
-  return (newsList || []).map((news: any) => {
-    const d = new Date(news.created_at);
-    const formattedDate = d.toLocaleDateString('es-CL', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+  const defaultNews = getNews();
 
-    const mappedNews = {
-      id: news.id,
-      slug: news.slug,
-      title: news.titulo,
-      summary: news.resumen || '',
-      content: news.contenido || '',
-      image: news.imagen_principal || '/assets/images/default_news.webp',
-      category: news.enlace_externo ? 'Externo' : 'Noticia',
-      publishedAt: formattedDate,
-      gallery: [],
-      videos: []
-    };
+  const allNews = newsList && newsList.length > 0
+    ? newsList.map((news: any) => {
+        const d = new Date(news.created_at);
+        const formattedDate = d.toLocaleDateString('es-CL', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
 
-    return {
-      params: { slug: news.slug },
-      props: { news: mappedNews },
-    };
-  });
+        return {
+          id: news.id,
+          slug: news.slug,
+          title: news.titulo,
+          summary: news.resumen || '',
+          content: news.contenido || '',
+          image: news.imagen_principal || '/assets/images/default_news.webp',
+          category: news.enlace_externo ? 'Externo' : 'Noticia',
+          publishedAt: formattedDate,
+          gallery: news.gallery || [],
+          videos: news.videos || []
+        };
+      })
+    : defaultNews;
+
+  return allNews.map((news: any) => ({
+    params: { slug: news.slug },
+    props: { news },
+  }));
 }
 
 const { news } = Astro.props;

@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../services/supabaseClient.js';
+import { getNews } from '../services/socialApi.js';
 
 // Cargar noticias publicadas desde Supabase, ordenadas por fecha descendente
 const { data: dbNews } = await supabase
@@ -9,24 +10,36 @@ const { data: dbNews } = await supabase
   .eq('publicado', true)
   .order('created_at', { ascending: false });
 
-const newsList = (dbNews || []).map((item: any) => {
-  const d = new Date(item.created_at);
-  const formattedDate = d.toLocaleDateString('es-CL', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  });
+const defaultNews = getNews().map(item => ({
+  id: item.slug,
+  slug: item.slug,
+  title: item.title,
+  summary: item.summary,
+  image: item.image,
+  category: item.category,
+  publishedAt: item.publishedAt
+}));
 
-  return {
-    id: item.id,
-    slug: item.slug,
-    title: item.titulo,
-    summary: item.resumen || '',
-    image: item.imagen_principal || '/assets/images/default_news.webp',
-    category: item.enlace_externo ? 'Externo' : 'Noticia',
-    publishedAt: formattedDate
-  };
-});
+const newsList = dbNews && dbNews.length > 0
+  ? dbNews.map((item: any) => {
+      const d = new Date(item.created_at);
+      const formattedDate = d.toLocaleDateString('es-CL', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      return {
+        id: item.id,
+        slug: item.slug,
+        title: item.titulo,
+        summary: item.resumen || '',
+        image: item.imagen_principal || '/assets/images/default_news.webp',
+        category: item.enlace_externo ? 'Externo' : 'Noticia',
+        publishedAt: formattedDate
+      };
+    })
+  : defaultNews;
 ---
 
 <Layout title="Noticias | Banda Bruna - Blog y Novedades Oficiales" description="Entérate de las últimas noticias sobre Banda Bruna: nuevos lanzamientos, colaboraciones musicales, hitos y giras de conciertos.">
