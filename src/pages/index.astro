@@ -8,6 +8,7 @@ import {
   getNews 
 } from '../services/socialApi.js';
 import socialStats from '../data/socialStats.json';
+import { supabase } from '../services/supabaseClient.js';
 
 // Fetch mock social data at build time
 const latestVideo = getLatestVideo();
@@ -23,6 +24,24 @@ const experienciaImages = [
   "/assets/images/experiencia/experiencia_4.webp",
   "/assets/images/experiencia/experiencia_5.webp"
 ];
+
+// Cargar estadísticas desde Supabase
+const { data: dbConfig } = await supabase
+  .from('configuracion')
+  .select('*')
+  .eq('id', 1)
+  .single();
+
+const config = dbConfig || {};
+const stats = {
+  musiciansTrajectory: config.cant_trayectoria !== undefined && config.cant_trayectoria !== null ? config.cant_trayectoria : socialStats.musiciansTrajectory,
+  stageYears: config.cant_escenarios !== undefined && config.cant_escenarios !== null ? config.cant_escenarios : socialStats.stageYears,
+  instagramFollowers: config.cant_instagram !== undefined && config.cant_instagram !== null ? config.cant_instagram : socialStats.instagramFollowers,
+  facebookFriends: config.cant_facebook !== undefined && config.cant_facebook !== null ? config.cant_facebook : socialStats.facebookFriends,
+  youtubeSubscribers: config.cant_youtube !== undefined && config.cant_youtube !== null ? config.cant_youtube : socialStats.youtubeSubscribers,
+  tiktokFollowers: config.cant_tiktok !== undefined && config.cant_tiktok !== null ? config.cant_tiktok : socialStats.tiktokFollowers,
+  regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : socialStats.regions
+};
 ---
 
 <Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
@@ -459,7 +478,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.musiciansTrajectory} data-count-prefix="+">0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Músicos con + de 15 años de trayectoria musical</span>
       </div>
 
@@ -468,7 +487,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.stageYears} data-count-prefix="+">0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.stageYears} data-count-prefix="+">0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Años en escenarios</span>
       </div>
 
@@ -477,7 +496,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.instagramFollowers}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.instagramFollowers}>0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores Instagram</span>
       </a>
 
@@ -486,7 +505,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 320 512" fill="currentColor"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.facebookFriends / 1000} data-count-suffix=" mil" data-count-decimal>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.facebookFriends / 1000} data-count-suffix=" mil" data-count-decimal>0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Amigos Facebook</span>
       </a>
 
@@ -495,7 +514,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 576 512" fill="currentColor"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.youtubeSubscribers}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.youtubeSubscribers}>0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Suscriptores YouTube</span>
       </a>
 
@@ -504,7 +523,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.tiktokFollowers}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.tiktokFollowers}>0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores TikTok</span>
       </a>
 
@@ -513,7 +532,7 @@ const experienciaImages = [
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={socialStats.regions}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.regions}>0</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Regiones de Chile</span>
       </div>
 

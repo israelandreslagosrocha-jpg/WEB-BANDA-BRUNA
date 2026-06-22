@@ -279,6 +279,42 @@ import Layout from '../../layouts/Layout.astro';
               <input type="url" id="conf-tiktok" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
             </div>
 
+            <!-- Contadores de Estadísticas de Redes / Home -->
+            <div class="md:col-span-2 border-t border-white/5 pt-4 mt-2">
+              <h3 class="font-title font-bold text-xs uppercase text-gold-bruna mb-1">Métricas y Estadísticas del Sitio (Contadores)</h3>
+              <p class="text-[9px] text-slate-450 mb-3">Ajusta los números que se muestran en la sección de estadísticas en la página de inicio. El contador de Facebook se ingresa como número entero (ej: 4900 para mostrar "4,9 mil").</p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-instagram" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Seguidores Instagram</label>
+              <input type="number" id="conf-stats-instagram" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-facebook" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Amigos / Seguidores Facebook</label>
+              <input type="number" id="conf-stats-facebook" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-youtube" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Suscriptores YouTube</label>
+              <input type="number" id="conf-stats-youtube" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-tiktok" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Seguidores TikTok</label>
+              <input type="number" id="conf-stats-tiktok" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-trayectoria" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Trayectoria (Cantidad Músicos)</label>
+              <input type="number" id="conf-stats-trayectoria" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-escenarios" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Años en Escenarios</label>
+              <input type="number" id="conf-stats-escenarios" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="conf-stats-regiones" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Regiones Recorridas</label>
+              <input type="number" id="conf-stats-regiones" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+            <div class="hidden md:block"></div>
+
             <button type="submit" class="md:col-span-2 bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-white font-title font-bold py-3.5 rounded text-xs uppercase tracking-widest transition-all cursor-pointer">
               GUARDAR CONFIGURACIÓN GENERAL
             </button>
@@ -1554,6 +1590,15 @@ import Layout from '../../layouts/Layout.astro';
         (document.getElementById('conf-facebook') as HTMLInputElement).value = data.facebook || '';
         (document.getElementById('conf-youtube') as HTMLInputElement).value = data.youtube || '';
         (document.getElementById('conf-tiktok') as HTMLInputElement).value = data.tiktok || '';
+
+        // Nuevos campos de estadísticas
+        (document.getElementById('conf-stats-instagram') as HTMLInputElement).value = data.cant_instagram !== undefined && data.cant_instagram !== null ? data.cant_instagram : 3157;
+        (document.getElementById('conf-stats-facebook') as HTMLInputElement).value = data.cant_facebook !== undefined && data.cant_facebook !== null ? data.cant_facebook : 4900;
+        (document.getElementById('conf-stats-youtube') as HTMLInputElement).value = data.cant_youtube !== undefined && data.cant_youtube !== null ? data.cant_youtube : 576;
+        (document.getElementById('conf-stats-tiktok') as HTMLInputElement).value = data.cant_tiktok !== undefined && data.cant_tiktok !== null ? data.cant_tiktok : 1092;
+        (document.getElementById('conf-stats-trayectoria') as HTMLInputElement).value = data.cant_trayectoria !== undefined && data.cant_trayectoria !== null ? data.cant_trayectoria : 15;
+        (document.getElementById('conf-stats-escenarios') as HTMLInputElement).value = data.cant_escenarios !== undefined && data.cant_escenarios !== null ? data.cant_escenarios : 10;
+        (document.getElementById('conf-stats-regiones') as HTMLInputElement).value = data.cant_regiones !== undefined && data.cant_regiones !== null ? data.cant_regiones : 5;
       }
 
       document.getElementById('config-form')?.addEventListener('submit', async (e) => {
@@ -1567,6 +1612,15 @@ import Layout from '../../layouts/Layout.astro';
         const youtube = (document.getElementById('conf-youtube') as HTMLInputElement).value;
         const tiktok = (document.getElementById('conf-tiktok') as HTMLInputElement).value;
 
+        // Nuevos campos de estadísticas
+        const cantInstagram = parseInt((document.getElementById('conf-stats-instagram') as HTMLInputElement).value, 10);
+        const cantFacebook = parseInt((document.getElementById('conf-stats-facebook') as HTMLInputElement).value, 10);
+        const cantYoutube = parseInt((document.getElementById('conf-stats-youtube') as HTMLInputElement).value, 10);
+        const cantTiktok = parseInt((document.getElementById('conf-stats-tiktok') as HTMLInputElement).value, 10);
+        const cantTrayectoria = parseInt((document.getElementById('conf-stats-trayectoria') as HTMLInputElement).value, 10);
+        const cantEscenarios = parseInt((document.getElementById('conf-stats-escenarios') as HTMLInputElement).value, 10);
+        const cantRegiones = parseInt((document.getElementById('conf-stats-regiones') as HTMLInputElement).value, 10);
+
         const payload = {
           telefono_principal: telP,
           telefono_secundario: telS,
@@ -1575,12 +1629,20 @@ import Layout from '../../layouts/Layout.astro';
           instagram,
           facebook,
           youtube,
-          tiktok
+          tiktok,
+          // Nuevos campos
+          cant_instagram: isNaN(cantInstagram) ? 3157 : cantInstagram,
+          cant_facebook: isNaN(cantFacebook) ? 4900 : cantFacebook,
+          cant_youtube: isNaN(cantYoutube) ? 576 : cantYoutube,
+          cant_tiktok: isNaN(cantTiktok) ? 1092 : cantTiktok,
+          cant_trayectoria: isNaN(cantTrayectoria) ? 15 : cantTrayectoria,
+          cant_escenarios: isNaN(cantEscenarios) ? 10 : cantEscenarios,
+          cant_regiones: isNaN(cantRegiones) ? 5 : cantRegiones
         };
 
         const { error } = await supabase.from('configuracion').update(payload).eq('id', 1);
         if (!error) {
-          await logAction('Actualizó los Ajustes de Configuración Global y Redes Sociales');
+          await logAction('Actualizó los Ajustes de Configuración Global, Redes Sociales y Estadísticas');
           alert('Configuración guardada exitosamente.');
           loadConfig();
         } else {
