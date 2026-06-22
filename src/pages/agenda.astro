@@ -18,17 +18,22 @@ const events = (rawEvents || []).map((event: any) => {
   const year = d.getFullYear();
   const fullDateStr = event.fecha.replace(/-/g, '');
 
+  const isNegociacion = (event.lugar && event.lugar.toLowerCase().includes('negociación')) || 
+                        (event.lugar && event.lugar.toLowerCase().includes('negociacion')) ||
+                        (event.nombre && event.nombre.toLowerCase().includes('negociación')) ||
+                        (event.nombre && event.nombre.toLowerCase().includes('negociacion'));
+
   return {
     id: event.id,
-    date: day,
+    date: isNegociacion ? '—' : day,
     month: monthName,
     year: year,
-    time: "20:00", // Hora por defecto
+    time: isNegociacion ? 'Por confirmar' : "20:00", // Hora por defecto
     title: event.nombre,
     venue: event.lugar || 'Por confirmar',
     location: event.ciudad || '',
     mapUrl: '#',
-    statusType: 'confirmed',
+    statusType: isNegociacion ? 'pending' : 'confirmed',
     fullDate: fullDateStr
   };
 });
@@ -74,7 +79,7 @@ const getGoogleCalendarUrl = (event: any) => {
                 </div>
                 
                 <div>
-                  <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time} hrs</span>
+                  <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time === 'Por confirmar' ? 'Por confirmar' : `${event.time} hrs`}</span>
                   <h3 class="font-title font-bold text-xl text-white mt-0.5 mb-1 tracking-wide">{event.title}</h3>
                   <p class="text-sm text-slate-400 font-light">
                     Recinto: <a href={event.mapUrl} target="_blank" rel="noopener" class="underline hover:text-gold-bruna transition-colors">{event.venue}</a>, <strong>{event.location}</strong>
@@ -97,11 +102,13 @@ const getGoogleCalendarUrl = (event: any) => {
                   )}
                 </div>
 
-                <div class="flex gap-3">
-                  <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded transition-colors cursor-pointer">
-                    Añadir a Google Calendar
-                  </a>
-                </div>
+                {event.statusType === 'confirmed' && (
+                  <div class="flex gap-3">
+                    <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded transition-colors cursor-pointer">
+                      Añadir a Google Calendar
+                    </a>
+                  </div>
+                )}
 
               </div>
 
