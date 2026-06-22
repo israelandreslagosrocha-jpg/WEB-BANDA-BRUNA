@@ -337,6 +337,9 @@ import Layout from '../../layouts/Layout.astro';
       loggedInUserEmail = session.user.email;
       const isTecnico = loggedInUserEmail === 'tecnico@bandabruna.cl';
       
+      const userDisplay = document.getElementById('user-display');
+      if (userDisplay) userDisplay.textContent = loggedInUserEmail;
+      
       // Mostrar Panel
       const gateLoading = document.getElementById('admin-gate-loading');
       const dashboardContainer = document.getElementById('admin-dashboard-container');
