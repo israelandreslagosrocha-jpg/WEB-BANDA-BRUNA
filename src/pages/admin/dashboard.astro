@@ -602,9 +602,13 @@ import Layout from '../../layouts/Layout.astro';
                 <textarea id="not-content" rows="6" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none resize-none">${noticia.contenido || ''}</textarea>
               </div>
               <div class="flex flex-col gap-1">
-                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Imagen Principal</label>
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Imagen Principal (Subir Archivo)</label>
                 <input type="file" id="not-image" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
                 ${noticia.imagen_principal ? `<p class="text-[9px] text-slate-450 mt-1">Imagen actual: <a href="${noticia.imagen_principal}" target="_blank" class="text-gold-bruna underline">Ver imagen</a></p>` : ''}
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">O URL de la Imagen</label>
+                <input type="url" id="not-image-url" value="${noticia.imagen_principal || ''}" placeholder="https://ejemplo.com/imagen.webp" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
 
               <div class="flex gap-3 mt-2 justify-end">
@@ -628,12 +632,17 @@ import Layout from '../../layouts/Layout.astro';
           const summary = (document.getElementById('not-summary') as HTMLInputElement).value;
           const content = (document.getElementById('not-content') as HTMLTextAreaElement).value;
           const fileInput = document.getElementById('not-image') as HTMLInputElement;
+          const urlInput = document.getElementById('not-image-url') as HTMLInputElement;
 
-          let imgUrl = noticia.imagen_principal;
+          let imgUrl = urlInput.value.trim() || noticia.imagen_principal;
 
           if (fileInput.files && fileInput.files[0]) {
             const uploaded = await uploadImageToStorage(fileInput.files[0], 'noticias');
-            if (uploaded) imgUrl = uploaded;
+            if (uploaded) {
+              imgUrl = uploaded;
+            } else {
+              return;
+            }
           }
 
           const payload = {
@@ -925,8 +934,12 @@ import Layout from '../../layouts/Layout.astro';
                 <input type="url" id="mb-ig" value="${member.instagram || ''}" placeholder="https://instagram.com/nombre" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
               <div class="flex flex-col gap-1">
-                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Foto Retrato</label>
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Foto Retrato (Subir Archivo)</label>
                 <input type="file" id="mb-foto" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">O URL de la Foto</label>
+                <input type="url" id="mb-foto-url" value="${member.foto || ''}" placeholder="https://ejemplo.com/foto.jpg" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Biografía Breve</label>
@@ -951,11 +964,16 @@ import Layout from '../../layouts/Layout.astro';
           const instagram = (document.getElementById('mb-ig') as HTMLInputElement).value;
           const biografia = (document.getElementById('mb-bio') as HTMLTextAreaElement).value;
           const fileInput = document.getElementById('mb-foto') as HTMLInputElement;
+          const urlInput = document.getElementById('mb-foto-url') as HTMLInputElement;
 
-          let fotoUrl = member.foto;
+          let fotoUrl = urlInput.value.trim() || member.foto;
           if (fileInput.files && fileInput.files[0]) {
             const uploaded = await uploadImageToStorage(fileInput.files[0], 'integrantes');
-            if (uploaded) fotoUrl = uploaded;
+            if (uploaded) {
+              fotoUrl = uploaded;
+            } else {
+              return;
+            }
           }
 
           const payload = { nombre, cargo, instagram, biografia, foto: fotoUrl, activo: true };
@@ -1023,8 +1041,12 @@ import Layout from '../../layouts/Layout.astro';
                 <input type="text" id="st-role" value="${staffMember.cargo || ''}" placeholder="ej: Iluminador, Monitorista" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
               <div class="flex flex-col gap-1">
-                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Foto Retrato</label>
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Foto Retrato (Subir Archivo)</label>
                 <input type="file" id="st-foto" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">O URL de la Foto</label>
+                <input type="url" id="st-foto-url" value="${staffMember.foto || ''}" placeholder="https://ejemplo.com/foto.jpg" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
 
               <div class="flex gap-3 mt-2 justify-end">
@@ -1043,11 +1065,16 @@ import Layout from '../../layouts/Layout.astro';
           const nombre = (document.getElementById('st-name') as HTMLInputElement).value;
           const cargo = (document.getElementById('st-role') as HTMLInputElement).value;
           const fileInput = document.getElementById('st-foto') as HTMLInputElement;
+          const urlInput = document.getElementById('st-foto-url') as HTMLInputElement;
 
-          let fotoUrl = staffMember.foto;
+          let fotoUrl = urlInput.value.trim() || staffMember.foto;
           if (fileInput.files && fileInput.files[0]) {
             const uploaded = await uploadImageToStorage(fileInput.files[0], 'equipo');
-            if (uploaded) fotoUrl = uploaded;
+            if (uploaded) {
+              fotoUrl = uploaded;
+            } else {
+              return;
+            }
           }
 
           const payload = { nombre, cargo, foto: fotoUrl, activo: true };
