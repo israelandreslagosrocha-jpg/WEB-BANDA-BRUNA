@@ -4,7 +4,6 @@ import {
   getLatestVideo, 
   getInstagramFeed, 
   getFacebookFeed, 
-  getUpcomingEvents, 
   getNews 
 } from '../services/socialApi.js';
 import socialStats from '../data/socialStats.json';
@@ -14,8 +13,43 @@ import { supabase } from '../services/supabaseClient.js';
 const latestVideo = getLatestVideo();
 const instagramFeed = getInstagramFeed();
 const facebookFeed = getFacebookFeed();
-const upcomingEvents = getUpcomingEvents(); // Show all 5 events
 const newsList = getNews();
+
+// Cargar eventos activos desde Supabase ordenados por fecha ascendente
+const { data: rawEvents } = await supabase
+  .from('eventos')
+  .select('*')
+  .eq('publicado', true)
+  .order('fecha', { ascending: true });
+
+const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SET", "OCT", "NOV", "DIC"];
+
+const upcomingEvents = (rawEvents || []).map((event: any) => {
+  const d = new Date(event.fecha + 'T12:00:00'); // Evitar descalces de zona horaria
+  const day = d.getDate();
+  const monthName = months[d.getMonth()];
+  const year = d.getFullYear();
+  const fullDateStr = event.fecha.replace(/-/g, '');
+
+  const isNegociacion = (event.lugar && event.lugar.toLowerCase().includes('negociación')) || 
+                        (event.lugar && event.lugar.toLowerCase().includes('negociacion')) ||
+                        (event.nombre && event.nombre.toLowerCase().includes('negociación')) ||
+                        (event.nombre && event.nombre.toLowerCase().includes('negociacion'));
+
+  return {
+    id: event.id,
+    date: isNegociacion ? '—' : day,
+    month: monthName,
+    year: year,
+    time: isNegociacion ? 'Por confirmar' : "20:00", // Hora por defecto
+    title: event.nombre,
+    venue: event.lugar || 'Por confirmar',
+    location: event.ciudad || '',
+    mapUrl: '#',
+    statusType: isNegociacion ? 'pending' : 'confirmed',
+    fullDate: fullDateStr
+  };
+}).slice(0, 5);
 
 const experienciaImages = [
   "/assets/images/experiencia/experiencia_1.webp",
