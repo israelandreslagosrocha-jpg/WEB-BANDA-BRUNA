@@ -76,10 +76,180 @@ const stats = {
   tiktokFollowers: config.cant_tiktok !== undefined && config.cant_tiktok !== null ? config.cant_tiktok : socialStats.tiktokFollowers,
   regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : socialStats.regions
 };
+
+// Cargar testimonios aprobados
+const { data: dbTestimonios } = await supabase
+  .from('testimonios')
+  .select('*')
+  .eq('aprobado', true)
+  .order('created_at', { ascending: false });
+
+const testimonios = dbTestimonios || [];
+
+// Cargar lanzamiento activo desde Supabase para la campaña musical
+let activeLanzamiento = null;
+try {
+  const { data: dbLanzamientos } = await supabase
+    .from('lanzamientos')
+    .select('*')
+    .eq('estado', 'publicado')
+    .eq('mostrar_home', true)
+    .lte('fecha_inicio', new Date().toISOString())
+    .order('orden', { ascending: true })
+    .order('fecha_lanzamiento', { ascending: true })
+    .limit(1);
+
+  if (dbLanzamientos && dbLanzamientos.length > 0) {
+    activeLanzamiento = dbLanzamientos[0];
+  }
+} catch (err) {
+  console.error("Error al cargar lanzamiento activo:", err);
+}
 ---
 
 <Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
   <link rel="preload" href="/assets/images/hero/hero_1.webp" as="image" fetchpriority="high" slot="head" />
+
+  {activeLanzamiento && (
+    <div 
+      id="homepage-lanzamiento-block" 
+      class="relative w-full overflow-hidden border-b border-white/10 py-6 px-6 md:px-12 z-30 transition-all duration-500"
+      style={`background: linear-gradient(135deg, ${activeLanzamiento.color_secundario || '#090707'} 0%, #151111 50%, ${activeLanzamiento.color_principal || '#e21c1c'}22 100%);`}
+      data-launch-date={activeLanzamiento.fecha_lanzamiento}
+    >
+      <!-- Background glow effects -->
+      <div class="absolute inset-0 z-0 pointer-events-none select-none">
+        <div class="absolute top-1/2 -translate-y-1/2 right-12 w-96 h-96 rounded-full blur-[120px] opacity-25" style={`background-color: ${activeLanzamiento.color_principal};`}></div>
+      </div>
+
+      <!-- Main Layout -->
+      <div class="relative z-10 max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-12">
+        
+        <!-- Left: Text info -->
+        <div class="flex-grow flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 text-center md:text-left">
+          <!-- Release Image Thumbnail -->
+          {activeLanzamiento.imagen_desktop ? (
+            <img 
+              src={activeLanzamiento.imagen_desktop} 
+              alt={activeLanzamiento.nombre} 
+              class="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover border border-white/10 shadow-lg shadow-black/40 hover:scale-[1.03] transition-transform duration-300 shrink-0" 
+            />
+          ) : (
+            <div class="w-16 h-16 md:w-20 md:h-20 bg-slate-950 border border-white/10 rounded-lg flex items-center justify-center text-2xl shrink-0">
+              🚀
+            </div>
+          )}
+          
+          <div class="flex-grow">
+            <div class="flex items-center justify-center md:justify-start gap-2.5 mb-1.5 flex-wrap">
+              <span 
+                class="text-[9px] font-extrabold tracking-widest px-2.5 py-0.5 rounded-sm uppercase font-title"
+                style={`background-color: ${activeLanzamiento.color_principal}; color: #ffffff;`}
+              >
+                {activeLanzamiento.tipo === 'videoclip' ? 'Videoclip Oficial' : activeLanzamiento.tipo === 'album' ? 'Nuevo Álbum / EP' : 'Nuevo Single'}
+              </span>
+              <span id="lanzamiento-badge-estado" class="text-gold-bruna text-[10px] font-extrabold tracking-widest uppercase font-title animate-pulse">
+                PRÓXIMO ESTRENO
+              </span>
+            </div>
+            <h3 class="text-lg md:text-xl font-extrabold font-title tracking-wide text-white uppercase mb-1 leading-tight">
+              {activeLanzamiento.titulo}
+            </h3>
+            <p class="text-xs text-slate-350 font-light max-w-2xl leading-relaxed">
+              <strong class="text-white font-medium">{activeLanzamiento.bold_text}</strong> {activeLanzamiento.descripcion}
+            </p>
+          </div>
+        </div>
+
+        <!-- Middle/Right: Countdown & CTA -->
+        <div class="flex flex-col sm:flex-row items-center gap-6 shrink-0 w-full lg:w-auto justify-end">
+          
+          <!-- Countdown container -->
+          <div id="lanzamiento-countdown-container" class="flex items-center gap-3">
+            <div class="flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-lg px-3 py-2 w-14 backdrop-blur-sm">
+              <span id="countdown-days" class="text-lg md:text-xl font-extrabold text-white font-mono leading-none">00</span>
+              <span class="text-[8px] text-slate-500 uppercase tracking-widest font-bold mt-1">Días</span>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-lg px-3 py-2 w-14 backdrop-blur-sm">
+              <span id="countdown-hours" class="text-lg md:text-xl font-extrabold text-white font-mono leading-none">00</span>
+              <span class="text-[8px] text-slate-500 uppercase tracking-widest font-bold mt-1">Horas</span>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-lg px-3 py-2 w-14 backdrop-blur-sm">
+              <span id="countdown-minutes" class="text-lg md:text-xl font-extrabold text-white font-mono leading-none">00</span>
+              <span class="text-[8px] text-slate-500 uppercase tracking-widest font-bold mt-1">Min</span>
+            </div>
+            <div class="flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-lg px-3 py-2 w-14 backdrop-blur-sm">
+              <span id="countdown-seconds" class="text-lg md:text-xl font-extrabold text-white font-mono leading-none" style={`color: ${activeLanzamiento.color_principal};`}>00</span>
+              <span class="text-[8px] text-slate-500 uppercase tracking-widest font-bold mt-1">Seg</span>
+            </div>
+          </div>
+
+          <!-- Buttons / CTA -->
+          <div class="flex flex-col gap-2 w-full sm:w-auto shrink-0">
+            <a 
+              href={`/${activeLanzamiento.slug}`} 
+              class="w-full sm:w-auto bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-6 py-3 rounded-md font-extrabold text-xs tracking-widest hover:scale-105 active:scale-95 transition-all text-center uppercase shadow-lg shadow-gold-bruna/10 cursor-pointer block"
+            >
+              IR AL LANZAMIENTO
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Countdown Javascript Client-side Script -->
+    <script is:inline>
+      (function() {
+        const block = document.getElementById('homepage-lanzamiento-block');
+        if (!block) return;
+
+        const launchDateStr = block.getAttribute('data-launch-date');
+        if (!launchDateStr) return;
+
+        const launchDate = new Date(launchDateStr).getTime();
+        const countdownContainer = document.getElementById('lanzamiento-countdown-container');
+        const badgeEstado = document.getElementById('lanzamiento-badge-estado');
+        
+        const daysEl = document.getElementById('countdown-days');
+        const hoursEl = document.getElementById('countdown-hours');
+        const minutesEl = document.getElementById('countdown-minutes');
+        const secondsEl = document.getElementById('countdown-seconds');
+
+        function updateTimer() {
+          const now = new Date().getTime();
+          const distance = launchDate - now;
+
+          if (distance <= 0) {
+            // Lanzado
+            if (countdownContainer) countdownContainer.style.display = 'none';
+            if (badgeEstado) {
+              badgeEstado.textContent = '¡YA DISPONIBLE!';
+              badgeEstado.className = 'text-green-400 text-[10px] font-extrabold tracking-widest uppercase font-title border border-green-500/20 bg-green-950/40 px-2 py-0.5 rounded-sm';
+            }
+            clearInterval(timerInterval);
+            return;
+          }
+
+          // Calcular tiempos
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          // Mostrar
+          if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+          if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+          if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+          if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateTimer();
+        const timerInterval = setInterval(updateTimer, 1000);
+      })();
+    </script>
+  )}
   
   <!-- Hero Section with Background Image Slider -->
   <section class="relative min-h-screen lg:h-screen flex flex-col justify-between overflow-hidden bg-black px-6 md:px-12 pt-24 pb-12 lg:py-0" aria-label="Portada Principal">
@@ -446,18 +616,47 @@ const stats = {
         </div>
       </div>
 
-      <!-- Right side: Video Player (HTML5 video using Cloudinary MP4) -->
-      <div class="lg:col-span-7 w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative flex items-center justify-center">
-        <video 
-          src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
-          class="w-full h-full object-contain bg-slate-950" 
-          controls 
-          preload="metadata"
-          playsinline
-          aria-label="Presentación en vivo de Banda Bruna"
-        >
-          <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
-        </video>
+      <!-- Right side: Video Player Carousel Container -->
+      <div class="lg:col-span-7 w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative group">
+        <!-- Slide wrapper -->
+        <div id="home-video-carousel" class="flex w-full h-full transition-transform duration-500 ease-in-out" style="transform: translateX(0%);">
+          <!-- Slide 1 -->
+          <div class="w-full h-full shrink-0 relative flex items-center justify-center">
+            <video 
+              src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
+              class="w-full h-full object-cover bg-slate-950" 
+              controls 
+              preload="metadata"
+              playsinline
+              aria-label="Presentación en vivo de Banda Bruna - Puerto Saavedra"
+            >
+              <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+            </video>
+          </div>
+          <!-- Slide 2 -->
+          <div class="w-full h-full shrink-0 relative flex items-center justify-center">
+            <video 
+              src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4" 
+              class="w-full h-full object-cover bg-slate-950" 
+              controls 
+              preload="metadata"
+              playsinline
+              aria-label="Presentación en vivo de Banda Bruna - Show en Vivo 2"
+            >
+              <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+            </video>
+          </div>
+        </div>
+
+        <!-- Carousel Controls (Arrows) -->
+        <button id="home-prev-video" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none font-sans" aria-label="Video anterior">❮</button>
+        <button id="home-next-video" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none font-sans" aria-label="Siguiente video">❯</button>
+        
+        <!-- Slide indicators (dots) -->
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="0" aria-label="Video 1"></button>
+          <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="1" aria-label="Video 2"></button>
+        </div>
       </div>
 
     </div>
@@ -709,6 +908,47 @@ const stats = {
 
     </div>
   </section>
+
+  <!-- Section: Testimonios / Reseñas (Dynamic from Supabase) -->
+  {testimonios.length > 0 && (
+    <section class="bg-gradient-to-b from-bg-darkest via-slate-950/20 to-bg-darkest py-24 px-6 border-t border-white/5 scroll-reveal">
+      <div class="max-w-[1400px] mx-auto">
+        <div class="text-center mb-16">
+          <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">RESPALDO</span>
+          <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">Opiniones de Nuestros Clientes</h2>
+          <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+          <p class="text-xs text-slate-400 font-light mt-4 max-w-md mx-auto">
+            La experiencia de productores, municipalidades y particulares que ya han vivido la potencia de Banda Bruna.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {testimonios.map((item, idx) => (
+            <blockquote class="bg-slate-900/60 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
+              <div>
+                <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
+                <!-- Stars -->
+                <div class="flex gap-0.5 text-gold-bruna text-xs mb-3.5 pl-3">
+                  {'★'.repeat(item.calificacion)}{'☆'.repeat(5 - item.calificacion)}
+                </div>
+                <p class="text-xs text-slate-350 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
+                  "{item.contenido}"
+                </p>
+              </div>
+              <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
+                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
+                {item.cargo_cliente || item.organizacion_cliente ? (
+                  <span class="text-[9.5px] text-slate-500 uppercase tracking-wide block mt-1 leading-tight">
+                    {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
+                  </span>
+                ) : null}
+              </cite>
+            </blockquote>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 
   <!-- Section: Contrataciones (Form & Contact details) -->
   <section id="contacto" class="max-w-[1400px] mx-auto px-6 py-24 scroll-reveal">
@@ -1268,7 +1508,67 @@ const stats = {
     }
 
     setupCountUp();
-    document.addEventListener('astro:after-swap', setupCountUp);
-  </script>
 
+    // CONTROL DEL CARRUSEL DE VIDEOS DESTACADOS DEL HOME
+    function setupHomeVideoCarousel() {
+      const carousel = document.getElementById('home-video-carousel');
+      const prevBtn = document.getElementById('home-prev-video');
+      const nextBtn = document.getElementById('home-next-video');
+      const dots = document.querySelectorAll('[data-home-slide]');
+      const videos = document.querySelectorAll('#home-video-carousel video') as NodeListOf<HTMLVideoElement>;
+
+      if (!carousel || videos.length === 0) return;
+
+      let currentSlide = 0;
+
+      function updateCarousel(index: number) {
+        // Pausar todos los videos de este carrusel
+        videos.forEach(vid => vid.pause());
+
+        currentSlide = index;
+        carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+        // Actualizar dots
+        dots.forEach((dot, idx) => {
+          if (idx === currentSlide) {
+            dot.classList.add('bg-white');
+            dot.classList.remove('bg-white/40');
+          } else {
+            dot.classList.remove('bg-white');
+            dot.classList.add('bg-white/40');
+          }
+        });
+      }
+
+      if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+          let index = currentSlide - 1;
+          if (index < 0) index = videos.length - 1;
+          updateCarousel(index);
+        });
+
+        nextBtn.addEventListener('click', () => {
+          let index = currentSlide + 1;
+          if (index >= videos.length) index = 0;
+          updateCarousel(index);
+        });
+      }
+
+      dots.forEach((dot, idx) => {
+        dot.addEventListener('click', () => {
+          updateCarousel(idx);
+        });
+      });
+
+      // Inicializar primer estado
+      updateCarousel(0);
+    }
+
+    setupHomeVideoCarousel();
+
+    document.addEventListener('astro:after-swap', () => {
+      setupCountUp();
+      setupHomeVideoCarousel();
+    });
+  </script>
 </Layout>

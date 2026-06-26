@@ -1,0 +1,638 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { supabase } from '../services/supabaseClient.js';
+import { getNews } from '../services/socialApi.js';
+
+export async function getStaticPaths() {
+  try {
+    const { data } = await supabase
+      .from('lanzamientos')
+      .select('slug')
+      .eq('estado', 'publicado');
+
+    if (data && data.length > 0) {
+      return data.map((item: any) => ({
+        params: { slug: item.slug }
+      }));
+    }
+  } catch (err) {
+    console.error("Error al generar getStaticPaths para lanzamientos:", err);
+  }
+  
+  // Fallback para compilar sin errores en build
+  return [
+    { params: { slug: 'ahogado-en-un-bar' } }
+  ];
+}
+
+const { slug } = Astro.params;
+
+// Cargar datos de la campaña desde Supabase
+let lanzamiento: any = null;
+try {
+  const { data, error } = await supabase
+    .from('lanzamientos')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (data) {
+    lanzamiento = data;
+  }
+} catch (err) {
+  console.error("Error al cargar detalles del lanzamiento:", err);
+}
+
+// Redirigir si no existe
+if (!lanzamiento) {
+  return Astro.redirect('/404');
+}
+
+// Cargar noticias relacionadas
+const newsList = getNews();
+const relatedNews = newsList.filter(news => {
+  const slugMatch = news.slug && news.slug.includes(slug || '');
+  const titleMatch = news.title && news.title.toLowerCase().includes(lanzamiento.nombre.toLowerCase());
+  const summaryMatch = news.summary && news.summary.toLowerCase().includes(lanzamiento.nombre.toLowerCase());
+  return slugMatch || titleMatch || summaryMatch;
+});
+
+// Extraer ID de YouTube
+function getYouTubeId(url: string) {
+  if (!url) return '';
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
+}
+
+const youtubeId = getYouTubeId(lanzamiento.plataformas_links?.youtube || '');
+const hasYoutube = !!youtubeId;
+
+// SEO Variables
+const pageTitle = lanzamiento.meta_title || `${lanzamiento.titulo} - Banda Bruna | Próximo Estreno`;
+const pageDescription = lanzamiento.meta_description || lanzamiento.descripcion;
+const keywords = lanzamiento.keywords || 'banda bruna, lanzamiento musical, cumbia';
+const shareImage = lanzamiento.imagen_compartir || lanzamiento.imagen_desktop;
+const canonicalUrl = `https://bandabruna.cl/${lanzamiento.slug}`;
+
+// Generar JSON-LD
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://bandabruna.cl"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": lanzamiento.nombre,
+      "item": canonicalUrl
+    }
+  ]
+};
+
+const musicRecordingSchema = {
+  "@context": "https://schema.org",
+  "@type": "MusicRecording",
+  "name": lanzamiento.nombre,
+  "byArtist": {
+    "@type": "MusicGroup",
+    "name": "Banda Bruna",
+    "url": "https://bandabruna.cl"
+  },
+  "datePublished": lanzamiento.fecha_lanzamiento,
+  "description": lanzamiento.descripcion,
+  "genre": "Cumbia / Tropical",
+  "image": lanzamiento.imagen_desktop
+};
+
+const videoSchema = hasYoutube ? {
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": `${lanzamiento.titulo} - Videoclip Oficial`,
+  "description": lanzamiento.descripcion,
+  "thumbnailUrl": [lanzamiento.imagen_desktop],
+  "uploadDate": lanzamiento.fecha_lanzamiento,
+  "embedUrl": `https://www.youtube.com/embed/${youtubeId}`
+} : null;
+---
+
+<Layout 
+  title={pageTitle} 
+  description={pageDescription}
+>
+  <!-- SEO Tags in Head slot -->
+  <Fragment slot="head">
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="keywords" content={keywords} />
+    <meta property="og:type" content="music.song" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={shareImage} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)}></script>
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(musicRecordingSchema)}></script>
+    {videoSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(videoSchema)}></script>}
+  </Fragment>
+
+  <div 
+    class="min-h-screen text-white pb-20 relative overflow-hidden" 
+    style={`background-color: ${lanzamiento.color_secundario || '#0d0a0a'}`}
+    id="lanzamiento-root"
+    data-launch-date={lanzamiento.fecha_lanzamiento}
+    data-youtube-id={youtubeId}
+  >
+    <!-- Background blurred ambient glow -->
+    <div class="absolute inset-0 pointer-events-none z-0">
+      <div 
+        class="absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full blur-[150px] opacity-20"
+        style={`background-color: ${lanzamiento.color_principal}`}
+      ></div>
+      <div 
+        class="absolute top-1/2 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px] opacity-15"
+        style={`background-color: ${lanzamiento.color_principal}`}
+      ></div>
+    </div>
+
+    <!-- 1. HERO SECTION & EXPECTACIÓN -->
+    <section class="relative pt-32 pb-16 md:py-24 z-10 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[85vh]">
+      <!-- Left side: Text info & Expectation -->
+      <div class="lg:col-span-7 text-left flex flex-col gap-6">
+        <div class="flex items-center gap-3">
+          <span 
+            class="text-[10px] font-extrabold tracking-widest px-3 py-1 rounded-sm uppercase font-title"
+            style={`background-color: ${lanzamiento.color_principal}`}
+          >
+            {lanzamiento.tipo === 'videoclip' ? 'Videoclip Oficial' : lanzamiento.tipo === 'album' ? 'Nuevo Álbum' : 'Nuevo Sencillo'}
+          </span>
+          <span 
+            id="badge-estado-lanzamiento" 
+            class="text-xs font-bold tracking-wider uppercase font-title text-gold-bruna animate-pulse"
+          >
+            PRÓXIMO ESTRENO
+          </span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-extrabold font-title uppercase tracking-wide leading-none">
+          {lanzamiento.titulo}
+        </h1>
+
+        {lanzamiento.subtitulo && (
+          <h2 class="text-lg md:text-xl font-medium text-slate-300 font-title italic tracking-wide">
+            {lanzamiento.subtitulo}
+          </h2>
+        )}
+
+        <div class="h-[1px] w-24 bg-white/20"></div>
+
+        <p class="text-base text-slate-300 font-light leading-relaxed max-w-2xl">
+          <strong class="text-white font-medium block text-lg mb-2">{lanzamiento.bold_text}</strong>
+          {lanzamiento.descripcion}
+        </p>
+
+        <!-- Countdown / Ya disponible block -->
+        <div class="mt-4 flex flex-col gap-4">
+          <!-- Countdown Timer -->
+          <div id="countdown-landing" class="flex flex-col gap-2">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cuenta Regresiva para el Estreno</span>
+            <div class="flex items-center gap-4">
+              <div class="flex flex-col items-center bg-black/40 border border-white/5 rounded-xl px-4 py-3 min-w-16 md:min-w-20 backdrop-blur-md">
+                <span id="days" class="text-2xl md:text-4xl font-extrabold text-white font-mono leading-none">00</span>
+                <span class="text-[8px] md:text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-1.5">Días</span>
+              </div>
+              <div class="flex flex-col items-center bg-black/40 border border-white/5 rounded-xl px-4 py-3 min-w-16 md:min-w-20 backdrop-blur-md">
+                <span id="hours" class="text-2xl md:text-4xl font-extrabold text-white font-mono leading-none">00</span>
+                <span class="text-[8px] md:text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-1.5">Horas</span>
+              </div>
+              <div class="flex flex-col items-center bg-black/40 border border-white/5 rounded-xl px-4 py-3 min-w-16 md:min-w-20 backdrop-blur-md">
+                <span id="minutes" class="text-2xl md:text-4xl font-extrabold text-white font-mono leading-none">00</span>
+                <span class="text-[8px] md:text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-1.5">Minutos</span>
+              </div>
+              <div class="flex flex-col items-center bg-black/40 border border-white/5 rounded-xl px-4 py-3 min-w-16 md:min-w-20 backdrop-blur-md">
+                <span id="seconds" class="text-2xl md:text-4xl font-extrabold font-mono leading-none" style={`color: ${lanzamiento.color_principal}`}>00</span>
+                <span class="text-[8px] md:text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-1.5">Segundos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Share section -->
+          <div class="flex flex-col gap-2 mt-4 text-left">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Comparte este lanzamiento</span>
+            <div class="flex flex-wrap gap-2">
+              <a 
+                href={`https://api.whatsapp.com/send?text=¡Mira el próximo lanzamiento de Banda Bruna! ${encodeURIComponent(canonicalUrl)}`} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-[#128c7e]/20 border border-[#128c7e]/30 hover:bg-[#128c7e]/30 hover:border-[#128c7e]/50 text-white text-[10px] font-bold py-2 px-4 rounded transition-colors flex items-center gap-2"
+              >
+                🟢 WHATSAPP
+              </a>
+              <a 
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonicalUrl)}`} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-[#3b5998]/20 border border-[#3b5998]/30 hover:bg-[#3b5998]/30 hover:border-[#3b5998]/50 text-white text-[10px] font-bold py-2 px-4 rounded transition-colors flex items-center gap-2"
+              >
+                🔵 FACEBOOK
+              </a>
+              <button 
+                id="btn-copy-link" 
+                class="bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white text-[10px] font-bold py-2 px-4 rounded transition-all cursor-pointer flex items-center gap-2"
+              >
+                🔗 COPIAR ENLACE
+              </button>
+            </div>
+            <span id="copy-toast" class="text-[10px] text-green-400 font-bold opacity-0 transition-opacity duration-300">¡Enlace copiado al portapapeles!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: Video player / Cover graphic -->
+      <div class="lg:col-span-5 w-full relative group">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 z-10 rounded-2xl pointer-events-none"></div>
+        
+        <!-- Video/Image Display Container -->
+        <div id="media-frame" class="w-full aspect-video bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/80 relative flex items-center justify-center">
+          <!-- Cover Image -->
+          <img 
+            id="cover-media" 
+            src={lanzamiento.imagen_desktop} 
+            alt={lanzamiento.nombre} 
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+          />
+          
+          <!-- Locked overlay for video -->
+          <div 
+            id="locked-video-overlay" 
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-3 p-6 text-center"
+          >
+            <div class="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-2xl text-slate-355">
+              🔒
+            </div>
+            <span class="text-xs font-bold tracking-widest text-slate-350 uppercase">El Videoclip Oficial se desbloqueará en el estreno</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. STREAMING & PLATFORM CARDS -->
+    {lanzamiento.mostrar_plataformas && (
+      <section class="relative z-10 px-6 max-w-4xl mx-auto py-16 text-center">
+        <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Escucha / Guarda en Plataformas</h2>
+        <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Disponible en todos los servicios de streaming</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="platforms-grid">
+          <!-- Spotify -->
+          <a 
+            href={lanzamiento.plataformas_links?.spotify || '#'} 
+            target="_blank" 
+            rel="noopener"
+            data-platform="spotify" 
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#1DB954]/40 hover:bg-[#1DB954]/5 transition-all duration-300 relative group overflow-hidden"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#1DB954]/10 flex items-center justify-center text-[#1DB954] text-2xl group-hover:scale-110 transition-transform">
+              🎧
+            </div>
+            <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Spotify</span>
+            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
+            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">PRE-SAVE</div>
+          </a>
+
+          <!-- YouTube -->
+          <a 
+            href={lanzamiento.plataformas_links?.youtube || '#'} 
+            target="_blank" 
+            rel="noopener"
+            data-platform="youtube"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] text-2xl group-hover:scale-110 transition-transform">
+              📺
+            </div>
+            <span class="font-bold text-xs tracking-wider uppercase font-title text-white">YouTube</span>
+            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
+            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESTRENO</div>
+          </a>
+
+          <!-- Apple Music -->
+          <a 
+            href={lanzamiento.plataformas_links?.apple_music || '#'} 
+            target="_blank" 
+            rel="noopener"
+            data-platform="apple_music"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FA243C]/40 hover:bg-[#FA243C]/5 transition-all duration-300 relative group overflow-hidden"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#FA243C]/10 flex items-center justify-center text-[#FA243C] text-2xl group-hover:scale-110 transition-transform">
+              🍎
+            </div>
+            <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Apple Music</span>
+            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
+            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">PRE-ADD</div>
+          </a>
+
+          <!-- YouTube Music -->
+          <a 
+            href={lanzamiento.plataformas_links?.youtube_music || '#'} 
+            target="_blank" 
+            rel="noopener"
+            data-platform="youtube_music"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] text-2xl group-hover:scale-110 transition-transform">
+              🎵
+            </div>
+            <span class="font-bold text-xs tracking-wider uppercase font-title text-white">YT Music</span>
+            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
+            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESCUCHAR</div>
+          </a>
+
+          <!-- Amazon Music -->
+          <a 
+            href={lanzamiento.plataformas_links?.amazon_music || '#'} 
+            target="_blank" 
+            rel="noopener"
+            data-platform="amazon_music"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#00A8E1]/40 hover:bg-[#00A8E1]/5 transition-all duration-300 relative group overflow-hidden"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#00A8E1]/10 flex items-center justify-center text-[#00A8E1] text-2xl group-hover:scale-110 transition-transform">
+              ☁️
+            </div>
+            <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Amazon Music</span>
+            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
+            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESCUCHAR</div>
+          </a>
+
+          <!-- Deezer -->
+          <a 
+            href={lanzamiento.plataformas_links?.deezer || '#'} 
+            target="_blank" 
+            rel="noopener"
+            data-platform="deezer"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#EF5466]/40 hover:bg-[#EF5466]/5 transition-all duration-300 relative group overflow-hidden"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#EF5466]/10 flex items-center justify-center text-[#EF5466] text-2xl group-hover:scale-110 transition-transform">
+              🎧
+            </div>
+            <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Deezer</span>
+            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
+            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESCUCHAR</div>
+          </a>
+        </div>
+      </section>
+    )}
+
+    <!-- 3. LA HISTORIA DETRÁS DEL LANZAMIENTO -->
+    {lanzamiento.historia && (
+      <section class="relative z-10 px-6 max-w-6xl mx-auto py-16 border-t border-white/5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="font-title font-extrabold text-3xl uppercase tracking-wide mb-6 text-left">La Historia</h2>
+            <div class="text-slate-300 font-light leading-relaxed space-y-4 text-sm md:text-base text-left">
+              {lanzamiento.historia.split('\n\n').map((paragraph: string) => (
+                <p>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+          <div class="w-full aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-xl shadow-black/40">
+            <img 
+              src={lanzamiento.imagen_banner || lanzamiento.imagen_desktop} 
+              alt="Detrás de cámaras" 
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- 4. GALERÍA DE IMÁGENES & MAKING OF -->
+    {lanzamiento.galeria_images && lanzamiento.galeria_images.length > 0 && (
+      <section class="relative z-10 px-6 max-w-7xl mx-auto py-16 border-t border-white/5 text-center">
+        <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Galería de Rodaje</h2>
+        <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Registros exclusivos de la filmación</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {lanzamiento.galeria_images.map((img: string, idx: number) => (
+            <div class="aspect-square bg-slate-900 border border-white/5 rounded-xl overflow-hidden hover:scale-[1.02] hover:border-white/20 transition-all duration-300 cursor-zoom-in group">
+              <img 
+                src={img} 
+                alt={`Galería ${idx + 1}`} 
+                class="w-full h-full object-cover lazy-img"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- 5. VIDEOS DETRÁS DE CÁMARAS (SHORTS/REELS) -->
+    {lanzamiento.detras_camaras_videos && lanzamiento.detras_camaras_videos.length > 0 && (
+      <section class="relative z-10 px-6 max-w-7xl mx-auto py-16 border-t border-white/5 text-center">
+        <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Detrás de Cámaras</h2>
+        <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Registros de preparación y backstage</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
+          {lanzamiento.detras_camaras_videos.map((vid: any) => {
+            const isVertical = vid.tipo === 'vertical';
+            return (
+              <div 
+                class="bg-slate-950 border border-white/5 p-3 rounded-2xl flex flex-col gap-3 mx-auto w-full max-w-[280px] shadow-lg hover:border-white/10 transition-colors"
+              >
+                <!-- Video player -->
+                <div class={`relative w-full overflow-hidden rounded-xl bg-black ${isVertical ? 'aspect-[9/16]' : 'aspect-video'}`}>
+                  <video 
+                    src={vid.url} 
+                    controls 
+                    preload="none"
+                    class="w-full h-full object-cover"
+                  ></video>
+                </div>
+                <!-- Caption -->
+                {vid.caption && (
+                  <p class="text-xs text-slate-350 font-medium px-1 text-left leading-tight">
+                    {vid.caption}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
+    <!-- 6. NOTICIAS RELACIONADAS -->
+    {relatedNews.length > 0 && (
+      <section class="relative z-10 px-6 max-w-5xl mx-auto py-16 border-t border-white/5 text-center">
+        <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Noticias Relacionadas</h2>
+        <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Cobertura del proceso de producción</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {relatedNews.map((news) => (
+            <div class="bg-slate-900/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col text-left hover:border-white/10 hover:bg-slate-900/60 transition-all duration-300 group">
+              <div class="aspect-video w-full overflow-hidden bg-slate-950 relative border-b border-white/5">
+                <img 
+                  src={news.image} 
+                  alt={news.title} 
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]" 
+                />
+              </div>
+              <div class="p-6 flex flex-col gap-3">
+                <span class="text-[9px] font-bold text-gold-bruna uppercase tracking-widest">{news.publishedAt}</span>
+                <h3 class="font-title font-bold text-base text-white uppercase group-hover:text-gold-bruna transition-colors line-clamp-1">{news.title}</h3>
+                <p class="text-xs text-slate-355 font-light leading-relaxed line-clamp-2">{news.summary}</p>
+                <a 
+                  href={`/noticias/${news.slug}`} 
+                  class="text-[10px] font-bold text-white uppercase tracking-wider hover:underline mt-2 inline-flex items-center gap-1.5"
+                >
+                  Leer noticia completa ➔
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+
+  <!-- Countdown, lock, copy link & Youtube iframe Script -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('lanzamiento-root');
+      if (!root) return;
+
+      const launchDateStr = root.getAttribute('data-launch-date');
+      const youtubeId = root.getAttribute('data-youtube-id');
+      if (!launchDateStr) return;
+
+      const launchDate = new Date(launchDateStr).getTime();
+      const badgeEstado = document.getElementById('badge-estado-lanzamiento');
+      const countdownSection = document.getElementById('countdown-landing');
+      
+      const daysEl = document.getElementById('days');
+      const hoursEl = document.getElementById('hours');
+      const minutesEl = document.getElementById('minutes');
+      const secondsEl = document.getElementById('seconds');
+
+      // Elements for locked media & links
+      const mediaFrame = document.getElementById('media-frame');
+      const lockedOverlay = document.getElementById('locked-video-overlay');
+      const coverMedia = document.getElementById('cover-media');
+      const platformCards = document.querySelectorAll('.platform-card');
+
+      let unlocked = false;
+
+      function updateTimer() {
+        const now = new Date().getTime();
+        const distance = launchDate - now;
+
+        if (distance <= 0) {
+          // Desbloqueado / Ya Disponible
+          if (badgeEstado) {
+            badgeEstado.textContent = '¡YA DISPONIBLE!';
+            badgeEstado.className = 'text-green-400 text-xs font-extrabold tracking-widest uppercase font-title border border-green-500/20 bg-green-950/40 px-2 py-0.5 rounded-sm animate-bounce';
+          }
+          if (countdownSection) {
+            countdownSection.style.display = 'none';
+          }
+
+          if (!unlocked) {
+            unlockMediaAndLinks();
+          }
+          clearInterval(timerInterval);
+          return;
+        }
+
+        // Calcular tiempos
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Mostrar
+        if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+        if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+        if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+        if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+      }
+
+      function unlockMediaAndLinks() {
+        unlocked = true;
+
+        // 1. Quitar overlay de video bloqueado
+        if (lockedOverlay) {
+          lockedOverlay.style.opacity = '0';
+          setTimeout(() => lockedOverlay.style.display = 'none', 300);
+        }
+
+        // 2. Si hay video de youtube, inyectar el iframe
+        if (youtubeId && mediaFrame) {
+          mediaFrame.innerHTML = `
+            <iframe 
+              src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=0" 
+              title="YouTube video player" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowfullscreen 
+              class="w-full h-full absolute inset-0"
+            ></iframe>
+          `;
+        }
+
+        // 3. Activar y cambiar texto en tarjetas de plataformas
+        platformCards.forEach(card => {
+          card.classList.remove('pointer-events-none');
+          const badge = card.querySelector('.badge-plat');
+          if (badge) {
+            badge.textContent = 'ESCUCHAR AHORA';
+            badge.className = 'badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-green-500/20 text-green-400 bg-green-950/40 uppercase';
+          }
+          const lockOver = card.querySelector('.locked-overlay');
+          if (lockOver) lockOver.style.display = 'none';
+        });
+      }
+
+      const initialDistance = launchDate - new Date().getTime();
+      if (initialDistance > 0) {
+        platformCards.forEach(card => {
+          card.addEventListener('click', (e) => {
+            if (!unlocked) {
+              e.preventDefault();
+              alert(`Este lanzamiento estará disponible el ${new Date(launchDateStr).toLocaleDateString('es-CL')} a las ${new Date(launchDateStr).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })} hrs.`);
+            }
+          });
+        });
+      }
+
+      updateTimer();
+      const timerInterval = setInterval(updateTimer, 1000);
+
+      const copyBtn = document.getElementById('btn-copy-link');
+      const copyToast = document.getElementById('copy-toast');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            if (copyToast) {
+              copyToast.classList.remove('opacity-0');
+              copyToast.classList.add('opacity-100');
+              setTimeout(() => {
+                copyToast.classList.remove('opacity-100');
+                copyToast.classList.add('opacity-0');
+              }, 2000);
+            }
+          }).catch(err => {
+            console.error('Error al copiar el enlace:', err);
+          });
+        });
+      }
+    });
+  </script>
+</Layout>

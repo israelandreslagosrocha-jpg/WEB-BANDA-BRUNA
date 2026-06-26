@@ -45,6 +45,12 @@ import Layout from '../../layouts/Layout.astro';
         <button data-tab-target="config" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           ⚙️ Ajustes & Redes
         </button>
+        <button data-tab-target="testimonios" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          ⭐ Testimonios / Reseñas
+        </button>
+        <button data-tab-target="lanzamientos" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          🚀 Lanzamientos
+        </button>
         <button data-tab-target="logs" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📜 Auditoría / Logs
         </button>
@@ -321,6 +327,54 @@ import Layout from '../../layouts/Layout.astro';
           </form>
         </section>
 
+        <!-- Tab 6: Testimonios / Reseñas de Clientes -->
+        <section id="tab-testimonios" class="tab-pane hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white font-title">Testimonios & Reseñas</h2>
+            <div class="text-[10px] text-slate-450 uppercase tracking-widest font-bold bg-slate-900 border border-white/5 py-1.5 px-3.5 rounded-md">
+              Autoadministrable
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-8">
+            <!-- Pendientes Section -->
+            <div class="bg-slate-950/40 border border-white/5 rounded-2xl p-5 md:p-6">
+              <h3 class="font-title font-extrabold text-sm text-gold-bruna uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span>⏳ Pendientes de Aprobación</span>
+                <span id="testimonios-pendientes-count" class="bg-amber-950/60 border border-gold-bruna/20 text-gold-bruna text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+              </h3>
+              <div id="testimonios-pendientes-list" class="flex flex-col gap-4">
+                <!-- Se inyectarán dinámicamente -->
+              </div>
+            </div>
+
+            <!-- Aprobados Section -->
+            <div class="bg-slate-950/40 border border-white/5 rounded-2xl p-5 md:p-6">
+              <h3 class="font-title font-extrabold text-sm text-green-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span>✓ Comentarios Aprobados (Visibles en la Web)</span>
+                <span id="testimonios-aprobados-count" class="bg-green-950/60 border border-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+              </h3>
+              <div id="testimonios-aprobados-list" class="flex flex-col gap-4">
+                <!-- Se inyectarán dinámicamente -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab: Lanzamientos Musicales -->
+        <section id="tab-lanzamientos" class="tab-pane hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white font-title">Lanzamientos & Campañas</h2>
+            <button id="btn-new-lanzamiento" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+              + Nuevo Lanzamiento
+            </button>
+          </div>
+
+          <div id="lanzamientos-list" class="flex flex-col gap-4">
+            <!-- Se inyectarán dinámicamente -->
+          </div>
+        </section>
+
         <!-- Tab 6: Auditoría / Logs -->
         <section id="tab-logs" class="tab-pane hidden">
           <h2 class="font-title font-bold text-xl uppercase text-white mb-6">Historial de Auditoría</h2>
@@ -420,6 +474,8 @@ import Layout from '../../layouts/Layout.astro';
           if (target === 'equipo') loadEquipo();
           if (target === 'rider') loadRider();
           if (target === 'config') loadConfig();
+          if (target === 'testimonios') loadTestimonios();
+          if (target === 'lanzamientos') loadLanzamientos();
           if (target === 'logs') loadLogs();
         });
       });
@@ -1741,6 +1797,635 @@ import Layout from '../../layouts/Layout.astro';
             </tr>
           `;
         }).join('');
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: TESTIMONIOS
+      // ==========================================
+      async function loadTestimonios() {
+        const pendientesList = document.getElementById('testimonios-pendientes-list');
+        const aprobadosList = document.getElementById('testimonios-aprobados-list');
+        const pendientesCount = document.getElementById('testimonios-pendientes-count');
+        const aprobadosCount = document.getElementById('testimonios-aprobados-count');
+
+        if (!pendientesList || !aprobadosList || !pendientesCount || !aprobadosCount) return;
+
+        pendientesList.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando comentarios pendientes...</p>';
+        aprobadosList.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando comentarios aprobados...</p>';
+
+        const { data, error } = await supabase
+          .from('testimonios')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error || !data) {
+          pendientesList.innerHTML = '<p class="text-xs text-red-400">Error al cargar testimonios de Supabase.</p>';
+          aprobadosList.innerHTML = '<p class="text-xs text-red-400">Error al cargar testimonios de Supabase.</p>';
+          return;
+        }
+
+        const pendientes = data.filter(item => !item.aprobado);
+        const aprobados = data.filter(item => item.aprobado);
+
+        pendientesCount.textContent = pendientes.length.toString();
+        aprobadosCount.textContent = aprobados.length.toString();
+
+        if (pendientes.length === 0) {
+          pendientesList.innerHTML = '<p class="text-xs text-slate-500 py-4 text-center">No hay testimonios pendientes de aprobación.</p>';
+        } else {
+          pendientesList.innerHTML = pendientes.map(item => `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="text-xs font-bold text-white font-title uppercase">${item.nombre_cliente}</span>
+                  ${item.cargo_cliente || item.organizacion_cliente ? `
+                    <span class="text-[9px] text-slate-500 uppercase">
+                      — ${item.cargo_cliente || ''} ${item.cargo_cliente && item.organizacion_cliente ? 'en' : ''} ${item.organizacion_cliente || ''}
+                    </span>
+                  ` : ''}
+                  <span class="text-gold-bruna text-[10px] font-bold ml-2">${'★'.repeat(item.calificacion)}${'☆'.repeat(5 - item.calificacion)}</span>
+                </div>
+                <p class="text-xs text-slate-300 italic font-light">"${item.contenido}"</p>
+                <p class="text-[8px] text-slate-600 font-mono mt-1.5">${new Date(item.created_at).toLocaleDateString('es-CL')} ${new Date(item.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</p>
+              </div>
+              <div class="flex gap-2 w-full md:w-auto justify-end">
+                <button data-approve-testimonio-id="${item.id}" class="text-[10px] bg-green-950/20 border border-green-500/20 hover:border-green-500 hover:text-green-450 text-green-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Aprobar</button>
+                <button data-delete-testimonio-id="${item.id}" data-testimonio-name="${item.nombre_cliente}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Eliminar</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        if (aprobados.length === 0) {
+          aprobadosList.innerHTML = '<p class="text-xs text-slate-500 py-4 text-center">No hay testimonios aprobados publicados.</p>';
+        } else {
+          aprobadosList.innerHTML = aprobados.map(item => `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="text-xs font-bold text-white font-title uppercase">${item.nombre_cliente}</span>
+                  ${item.cargo_cliente || item.organizacion_cliente ? `
+                    <span class="text-[9px] text-slate-500 uppercase">
+                      — ${item.cargo_cliente || ''} ${item.cargo_cliente && item.organizacion_cliente ? 'en' : ''} ${item.organizacion_cliente || ''}
+                    </span>
+                  ` : ''}
+                  <span class="text-gold-bruna text-[10px] font-bold ml-2">${'★'.repeat(item.calificacion)}${'☆'.repeat(5 - item.calificacion)}</span>
+                </div>
+                <p class="text-xs text-slate-300 italic font-light">"${item.contenido}"</p>
+                <p class="text-[8px] text-slate-600 font-mono mt-1.5">${new Date(item.created_at).toLocaleDateString('es-CL')} ${new Date(item.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</p>
+              </div>
+              <div class="flex gap-2 w-full md:w-auto justify-end">
+                <button data-unapprove-testimonio-id="${item.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Desaprobar</button>
+                <button data-delete-testimonio-id="${item.id}" data-testimonio-name="${item.nombre_cliente}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Eliminar</button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Bind events
+        document.querySelectorAll('[data-approve-testimonio-id]').forEach(btn => {
+          btn.addEventListener('click', () => updateTestimonioApproval((btn as HTMLButtonElement).dataset.approveTestimonioId, true));
+        });
+        document.querySelectorAll('[data-unapprove-testimonio-id]').forEach(btn => {
+          btn.addEventListener('click', () => updateTestimonioApproval((btn as HTMLButtonElement).dataset.unapproveTestimonioId, false));
+        });
+        document.querySelectorAll('[data-delete-testimonio-id]').forEach(btn => {
+          const id = (btn as HTMLButtonElement).dataset.deleteTestimonioId;
+          const name = (btn as HTMLButtonElement).dataset.testimonioName;
+          btn.addEventListener('click', () => deleteTestimonio(id, name));
+        });
+      }
+
+      async function updateTestimonioApproval(id: string | undefined, approved: boolean) {
+        if (!id) return;
+        const { error } = await supabase
+          .from('testimonios')
+          .update({ aprobado: approved })
+          .eq('id', id);
+
+        if (!error) {
+          const actionText = approved ? 'Aprobó testimonio de cliente para mostrar en la web' : 'Desaprobó testimonio de cliente (ocultado de la web)';
+          await logAction(`${actionText} (ID: ${id})`);
+          loadTestimonios();
+        } else {
+          alert('Error al actualizar el testimonio.');
+        }
+      }
+
+      async function deleteTestimonio(id: string | undefined, name: string | undefined) {
+        if (!id || !confirm(`¿Estás seguro de que deseas eliminar permanentemente el testimonio de "${name || 'este cliente'}"?`)) return;
+        
+        const { error } = await supabase
+          .from('testimonios')
+          .delete()
+          .eq('id', id);
+
+        if (!error) {
+          await logAction(`Eliminó permanentemente testimonio de cliente "${name || id}"`);
+          loadTestimonios();
+        } else {
+          alert('Error al eliminar el testimonio.');
+        }
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: LANZAMIENTOS
+      // ==========================================
+      async function loadLanzamientos() {
+        const listDiv = document.getElementById('lanzamientos-list');
+        if (!listDiv) return;
+        listDiv.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando lanzamientos...</p>';
+
+        const { data, error } = await supabase
+          .from('lanzamientos')
+          .select('*')
+          .order('orden', { ascending: true });
+
+        if (error || !data) {
+          listDiv.innerHTML = '<p class="text-xs text-red-400">Error al cargar lanzamientos de Supabase. Asegúrate de ejecutar el script SQL.</p>';
+          return;
+        }
+
+        if (data.length === 0) {
+          listDiv.innerHTML = '<p class="text-xs text-slate-500 py-6 text-center">No hay lanzamientos registrados. Haz clic en "Nuevo Lanzamiento" para empezar.</p>';
+          return;
+        }
+
+        listDiv.innerHTML = data.map(item => {
+          const statusColor = item.estado === 'publicado' ? 'text-green-400 border-green-500/20 bg-green-950/60' : 'text-slate-400 border-slate-700 bg-slate-800';
+          const launchDate = new Date(item.fecha_lanzamiento).toLocaleString('es-CL');
+          return `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div class="flex items-center gap-4">
+                ${item.imagen_desktop ? `<img src="${item.imagen_desktop}" class="w-12 h-12 rounded object-cover border border-white/10" />` : '<div class="w-12 h-12 bg-slate-950 rounded flex items-center justify-center text-xs text-slate-500">🚀</div>'}
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-title font-bold text-sm text-white uppercase">${item.nombre}</h4>
+                    <span class="text-[8px] font-bold px-2 py-0.5 rounded-full border ${statusColor}">${item.estado.toUpperCase()}</span>
+                  </div>
+                  <p class="text-[10px] text-slate-500 mt-1">Estreno: <span class="text-white">${launchDate}</span> — Slug: <a href="/${item.slug}" target="_blank" class="text-gold-bruna hover:underline">${item.slug}</a></p>
+                </div>
+              </div>
+              <div class="flex gap-2 w-full md:w-auto justify-end">
+                <button data-edit-lanzamiento-id="${item.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Editar</button>
+                <button data-delete-lanzamiento-id="${item.id}" data-lanzamiento-name="${item.nombre}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Borrar</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Bind events
+        document.querySelectorAll('[data-edit-lanzamiento-id]').forEach(btn => {
+          btn.addEventListener('click', () => openLanzamientoModal((btn as HTMLButtonElement).dataset.editLanzamientoId));
+        });
+        document.querySelectorAll('[data-delete-lanzamiento-id]').forEach(btn => {
+          const id = (btn as HTMLButtonElement).dataset.deleteLanzamientoId;
+          const name = (btn as HTMLButtonElement).dataset.lanzamientoName;
+          btn.addEventListener('click', () => deleteLanzamiento(id, name));
+        });
+      }
+
+      document.getElementById('btn-new-lanzamiento')?.addEventListener('click', () => openLanzamientoModal());
+
+      async function openLanzamientoModal(id?: string) {
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        let lanzamiento = {
+          nombre: '',
+          tipo: 'single',
+          estado: 'borrador',
+          slug: '',
+          titulo: '',
+          subtitulo: '',
+          descripcion: '',
+          bold_text: '',
+          color_principal: '#e21c1c',
+          color_secundario: '#090707',
+          fecha_lanzamiento: '',
+          fecha_inicio: '',
+          mostrar_home: true,
+          mostrar_contador: true,
+          mostrar_plataformas: true,
+          activar_auto: true,
+          desactivar_auto: false,
+          orden: 0,
+          imagen_desktop: '',
+          imagen_mobile: '',
+          imagen_banner: '',
+          imagen_compartir: '',
+          historia: '',
+          galeria_images: [] as string[],
+          making_of_images: [] as string[],
+          detras_camaras_videos: [] as any[],
+          plataformas_links: {} as any,
+          meta_title: '',
+          meta_description: '',
+          keywords: ''
+        };
+
+        if (id) {
+          const { data } = await supabase.from('lanzamientos').select('*').eq('id', id).single();
+          if (data) lanzamiento = data;
+        }
+
+        const formatForInput = (isoString: string) => {
+          if (!isoString) return '';
+          const d = new Date(isoString);
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
+
+        const links = lanzamiento.plataformas_links || {};
+        const vids = lanzamiento.detras_camaras_videos || [];
+        const galleryStr = (lanzamiento.galeria_images || []).join('\n');
+        const makingStr = (lanzamiento.making_of_images || []).join('\n');
+        const vidsStr = JSON.stringify(vids, null, 2);
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/5 w-full max-w-2xl rounded-2xl p-6 md:p-8 flex flex-col gap-5 max-h-[90vh] overflow-y-auto text-left">
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+              <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Lanzamiento' : 'Crear Lanzamiento'}</h3>
+              <span class="text-[9px] text-slate-550 uppercase font-bold">Autoadministrable</span>
+            </div>
+            
+            <form id="lanzamiento-form" class="flex flex-col gap-5 text-left">
+              <!-- Información Básica -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">1. Datos Básicos</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre Interno (Campañas)</label>
+                  <input type="text" id="lan-nombre" value="${lanzamiento.nombre}" required placeholder="ej: Ahogado en un Bar - Single" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Slug (URL del lanzamiento)</label>
+                  <input type="text" id="lan-slug" value="${lanzamiento.slug}" required placeholder="ej: ahogado-en-un-bar" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Tipo de Lanzamiento</label>
+                  <select id="lan-tipo" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40">
+                    <option value="single" ${lanzamiento.tipo === 'single' ? 'selected' : ''}>Sencillo / Single</option>
+                    <option value="album" ${lanzamiento.tipo === 'album' ? 'selected' : ''}>Álbum / EP</option>
+                    <option value="videoclip" ${lanzamiento.tipo === 'videoclip' ? 'selected' : ''}>Videoclip Oficial</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Estado</label>
+                  <select id="lan-estado" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40">
+                    <option value="borrador" ${lanzamiento.estado === 'borrador' ? 'selected' : ''}>Borrador (Oculto)</option>
+                    <option value="publicado" ${lanzamiento.estado === 'publicado' ? 'selected' : ''}>Publicado (Visible)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Fechas y Control -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">2. Fechas & Visibilidad</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Fecha Estreno Oficial (Lanzamiento)</label>
+                  <input type="datetime-local" id="lan-fecha-lanzamiento" value="${formatForInput(lanzamiento.fecha_lanzamiento)}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Fecha Inicio Expectativa (Aparición en Home)</label>
+                  <input type="datetime-local" id="lan-fecha-inicio" value="${formatForInput(lanzamiento.fecha_inicio)}" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-wrap gap-x-6 gap-y-3 col-span-2 mt-2">
+                  <label class="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                    <input type="checkbox" id="lan-mostrar-home" ${lanzamiento.mostrar_home ? 'checked' : ''} class="rounded border-white/10 bg-slate-950 text-gold-bruna" />
+                    Mostrar bloque en Home
+                  </label>
+                  <label class="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                    <input type="checkbox" id="lan-mostrar-contador" ${lanzamiento.mostrar_contador ? 'checked' : ''} class="rounded border-white/10 bg-slate-950 text-gold-bruna" />
+                    Mostrar cuenta regresiva
+                  </label>
+                  <label class="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                    <input type="checkbox" id="lan-mostrar-plataformas" ${lanzamiento.mostrar_plataformas ? 'checked' : ''} class="rounded border-white/10 bg-slate-950 text-gold-bruna" />
+                    Mostrar links de streaming
+                  </label>
+                  <label class="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                    <input type="checkbox" id="lan-activar-auto" ${lanzamiento.activar_auto ? 'checked' : ''} class="rounded border-white/10 bg-slate-950 text-gold-bruna" />
+                    Habilitar links auto al estreno
+                  </label>
+                </div>
+                <div class="flex flex-col gap-1 col-span-2">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Orden de prioridad</label>
+                  <input type="number" id="lan-orden" value="${lanzamiento.orden}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+              </div>
+
+              <!-- Contenido e Identidad Visual -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">3. Diseño & Contenido del Banner / Landing</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Título de Campaña (Visible)</label>
+                  <input type="text" id="lan-titulo" value="${lanzamiento.titulo}" required placeholder="ej: AHOGADO EN UN BAR" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Subtítulo</label>
+                  <input type="text" id="lan-subtitulo" value="${lanzamiento.subtitulo || ''}" placeholder="ej: Nuevo Single & Videoclip Oficial" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1 col-span-2">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Descripción del Lanzamiento</label>
+                  <textarea id="lan-descripcion" rows="2" placeholder="Breve resumen del lanzamiento para la home y SEO..." class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40 resize-none">${lanzamiento.descripcion || ''}</textarea>
+                </div>
+                <div class="flex flex-col gap-1 col-span-2">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Texto Destacado (Negrita expectativa)</label>
+                  <input type="text" id="lan-bold-text" value="${lanzamiento.bold_text || ''}" placeholder="ej: ¡La espera está por terminar!..." class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Color Principal (Corporativo)</label>
+                  <div class="flex gap-2">
+                    <input type="color" id="lan-color-principal-picker" value="${lanzamiento.color_principal}" class="bg-transparent border border-white/5 rounded h-9 w-12 cursor-pointer" />
+                    <input type="text" id="lan-color-principal" value="${lanzamiento.color_principal}" required class="bg-slate-950 border border-white/5 rounded p-2 w-full text-white text-xs outline-none" />
+                  </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Color Secundario (Fondo)</label>
+                  <div class="flex gap-2">
+                    <input type="color" id="lan-color-secundario-picker" value="${lanzamiento.color_secundario}" class="bg-transparent border border-white/5 rounded h-9 w-12 cursor-pointer" />
+                    <input type="text" id="lan-color-secundario" value="${lanzamiento.color_secundario}" required class="bg-slate-950 border border-white/5 rounded p-2 w-full text-white text-xs outline-none" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Imágenes de la Campaña -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">4. Imágenes (Subida o URLs)</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Imagen Portada Desktop</label>
+                  <input type="file" id="lan-img-desktop" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+                  <input type="text" id="lan-img-desktop-url" value="${lanzamiento.imagen_desktop || ''}" placeholder="O URL de imagen pública" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs outline-none mt-1" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Imagen Portada Mobile</label>
+                  <input type="file" id="lan-img-mobile" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+                  <input type="text" id="lan-img-mobile-url" value="${lanzamiento.imagen_mobile || ''}" placeholder="O URL de imagen pública" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs outline-none mt-1" />
+                </div>
+                <div class="flex flex-col gap-1 col-span-2">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Imagen Banner (Horizontal Landing/Home)</label>
+                  <input type="file" id="lan-img-banner" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+                  <input type="text" id="lan-img-banner-url" value="${lanzamiento.imagen_banner || ''}" placeholder="O URL de imagen pública" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs outline-none mt-1" />
+                </div>
+              </div>
+
+              <!-- Historia y Multimedia de la Landing -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 gap-4">
+                <div>
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">5. Contenido de la Landing Page</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Historia / Relato del Lanzamiento</label>
+                  <textarea id="lan-historia" rows="5" placeholder="Escribe el relato..." class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40">${lanzamiento.historia || ''}</textarea>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Galería de Imágenes (una por línea)</label>
+                  <textarea id="lan-galeria" rows="4" placeholder="https://cloudinary.com/img1.jpg" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-[11px] font-mono outline-none focus:border-gold-bruna/40">${galleryStr}</textarea>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Making Of / Detrás de Cámaras Fotos (una por línea)</label>
+                  <textarea id="lan-making" rows="4" placeholder="https://cloudinary.com/making1.jpg" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-[11px] font-mono outline-none focus:border-gold-bruna/40">${makingStr}</textarea>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Videos Detrás de Cámaras (JSON)</label>
+                  <textarea id="lan-vids" rows="5" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-[10px] font-mono outline-none focus:border-gold-bruna/40">${vidsStr}</textarea>
+                  <p class="text-[8px] text-slate-500">Ejemplo: [ { "url": "url_mp4", "tipo": "vertical", "caption": "Título" } ]</p>
+                </div>
+              </div>
+
+              <!-- Enlaces Plataformas -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">6. Enlaces de Distribución Digital</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">YouTube (Link de Video o Video ID)</label>
+                  <input type="text" id="plat-youtube" value="${links.youtube || ''}" placeholder="https://www.youtube.com/watch?v=..." class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Spotify (URL)</label>
+                  <input type="text" id="plat-spotify" value="${links.spotify || ''}" placeholder="https://open.spotify.com/track/..." class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Apple Music (URL)</label>
+                  <input type="text" id="plat-apple" value="${links.apple_music || ''}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">YouTube Music (URL)</label>
+                  <input type="text" id="plat-ytmusic" value="${links.youtube_music || ''}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Amazon Music (URL)</label>
+                  <input type="text" id="plat-amazon" value="${links.amazon_music || ''}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Deezer (URL)</label>
+                  <input type="text" id="plat-deezer" value="${links.deezer || ''}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+              </div>
+
+              <!-- SEO Meta -->
+              <div class="bg-slate-950/40 p-4 rounded-xl border border-white/5 grid grid-cols-1 gap-4">
+                <div>
+                  <h4 class="text-[10px] font-extrabold text-gold-bruna uppercase tracking-widest mb-2">7. Metadatos SEO</h4>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">SEO Title Tag</label>
+                  <input type="text" id="lan-meta-title" value="${lanzamiento.meta_title || ''}" placeholder="ej: Ahogado en un Bar - Banda Bruna" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">SEO Meta Description</label>
+                  <textarea id="lan-meta-desc" rows="2" placeholder="Escribe la descripción meta..." class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40 resize-none">${lanzamiento.meta_description || ''}</textarea>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Keywords SEO (separadas por comas)</label>
+                  <input type="text" id="lan-keywords" value="${lanzamiento.keywords || ''}" placeholder="banda bruna, lanzamiento, ahogado en un bar" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+              </div>
+
+              <div class="flex gap-3 mt-4 justify-end border-t border-white/5 pt-4">
+                <button type="button" id="btn-modal-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
+                <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer">Guardar Lanzamiento</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        modal.classList.remove('hidden');
+
+        const pickerP = document.getElementById('lan-color-principal-picker') as HTMLInputElement;
+        const textP = document.getElementById('lan-color-principal') as HTMLInputElement;
+        pickerP?.addEventListener('input', (e) => { textP.value = (e.target as HTMLInputElement).value; });
+        textP?.addEventListener('change', (e) => { pickerP.value = (e.target as HTMLInputElement).value; });
+
+        const pickerS = document.getElementById('lan-color-secundario-picker') as HTMLInputElement;
+        const textS = document.getElementById('lan-color-secundario') as HTMLInputElement;
+        pickerS?.addEventListener('input', (e) => { textS.value = (e.target as HTMLInputElement).value; });
+        textS?.addEventListener('change', (e) => { pickerS.value = (e.target as HTMLInputElement).value; });
+
+        document.getElementById('btn-modal-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        document.getElementById('lanzamiento-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const nombre = (document.getElementById('lan-nombre') as HTMLInputElement).value;
+          const slug = (document.getElementById('lan-slug') as HTMLInputElement).value.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+          const tipo = (document.getElementById('lan-tipo') as HTMLSelectElement).value;
+          const estado = (document.getElementById('lan-estado') as HTMLSelectElement).value;
+          
+          const rawLanzamiento = (document.getElementById('lan-fecha-lanzamiento') as HTMLInputElement).value;
+          const rawInicio = (document.getElementById('lan-fecha-inicio') as HTMLInputElement).value;
+          
+          const fecha_lanzamiento = rawLanzamiento ? new Date(rawLanzamiento).toISOString() : new Date().toISOString();
+          const fecha_inicio = rawInicio ? new Date(rawInicio).toISOString() : new Date().toISOString();
+          
+          const mostrar_home = (document.getElementById('lan-mostrar-home') as HTMLInputElement).checked;
+          const mostrar_contador = (document.getElementById('lan-mostrar-contador') as HTMLInputElement).checked;
+          const mostrar_plataformas = (document.getElementById('lan-mostrar-plataformas') as HTMLInputElement).checked;
+          const activar_auto = (document.getElementById('lan-activar-auto') as HTMLInputElement).checked;
+          const orden = parseInt((document.getElementById('lan-orden') as HTMLInputElement).value) || 0;
+          const titulo = (document.getElementById('lan-titulo') as HTMLInputElement).value;
+          const subtitulo = (document.getElementById('lan-subtitulo') as HTMLInputElement).value;
+          const descripcion = (document.getElementById('lan-descripcion') as HTMLTextAreaElement).value;
+          const bold_text = (document.getElementById('lan-bold-text') as HTMLInputElement).value;
+          const color_principal = textP.value;
+          const color_secundario = textS.value;
+          const historia = (document.getElementById('lan-historia') as HTMLTextAreaElement).value;
+
+          const galeria_images = (document.getElementById('lan-galeria') as HTMLTextAreaElement).value
+            .split('\n')
+            .map(url => url.trim())
+            .filter(url => url.length > 0);
+
+          const making_of_images = (document.getElementById('lan-making') as HTMLTextAreaElement).value
+            .split('\n')
+            .map(url => url.trim())
+            .filter(url => url.length > 0);
+
+          let detras_camaras_videos = [];
+          try {
+            detras_camaras_videos = JSON.parse((document.getElementById('lan-vids') as HTMLTextAreaElement).value || '[]');
+          } catch(err) {
+            alert('El campo de Videos Detrás de Cámaras tiene un formato JSON inválido.');
+            return;
+          }
+
+          const plataformas_links = {
+            youtube: (document.getElementById('plat-youtube') as HTMLInputElement).value.trim(),
+            spotify: (document.getElementById('plat-spotify') as HTMLInputElement).value.trim(),
+            apple_music: (document.getElementById('plat-apple') as HTMLInputElement).value.trim(),
+            youtube_music: (document.getElementById('plat-ytmusic') as HTMLInputElement).value.trim(),
+            amazon_music: (document.getElementById('plat-amazon') as HTMLInputElement).value.trim(),
+            deezer: (document.getElementById('plat-deezer') as HTMLInputElement).value.trim()
+          };
+
+          const meta_title = (document.getElementById('lan-meta-title') as HTMLInputElement).value;
+          const meta_description = (document.getElementById('lan-meta-desc') as HTMLTextAreaElement).value;
+          const keywords = (document.getElementById('lan-keywords') as HTMLInputElement).value;
+
+          const desktopFile = (document.getElementById('lan-img-desktop') as HTMLInputElement).files?.[0];
+          const mobileFile = (document.getElementById('lan-img-mobile') as HTMLInputElement).files?.[0];
+          const bannerFile = (document.getElementById('lan-img-banner') as HTMLInputElement).files?.[0];
+
+          let imagen_desktop = (document.getElementById('lan-img-desktop-url') as HTMLInputElement).value.trim() || lanzamiento.imagen_desktop;
+          let imagen_mobile = (document.getElementById('lan-img-mobile-url') as HTMLInputElement).value.trim() || lanzamiento.imagen_mobile;
+          let imagen_banner = (document.getElementById('lan-img-banner-url') as HTMLInputElement).value.trim() || lanzamiento.imagen_banner;
+
+          if (desktopFile) {
+            const uploaded = await uploadImageToStorage(desktopFile, 'noticias');
+            if (uploaded) imagen_desktop = uploaded;
+          }
+          if (mobileFile) {
+            const uploaded = await uploadImageToStorage(mobileFile, 'noticias');
+            if (uploaded) imagen_mobile = uploaded;
+          }
+          if (bannerFile) {
+            const uploaded = await uploadImageToStorage(bannerFile, 'noticias');
+            if (uploaded) imagen_banner = uploaded;
+          }
+
+          const payload = {
+            nombre,
+            tipo,
+            estado,
+            slug,
+            titulo,
+            subtitulo,
+            descripcion,
+            bold_text,
+            color_principal,
+            color_secundario,
+            fecha_lanzamiento,
+            fecha_inicio,
+            mostrar_home,
+            mostrar_contador,
+            mostrar_plataformas,
+            activar_auto,
+            orden,
+            imagen_desktop,
+            imagen_mobile,
+            imagen_banner,
+            imagen_compartir: imagen_desktop,
+            historia,
+            galeria_images,
+            making_of_images,
+            detras_camaras_videos,
+            plataformas_links,
+            meta_title,
+            meta_description,
+            keywords,
+            updated_at: new Date().toISOString()
+          };
+
+          let success = false;
+          if (id) {
+            const { error } = await supabase.from('lanzamientos').update(payload).eq('id', id);
+            if (!error) {
+              success = true;
+              await logAction('Editó el lanzamiento: "' + nombre + '"');
+            } else {
+              console.error(error);
+              alert('Error al actualizar lanzamiento: ' + error.message);
+            }
+          } else {
+            const { error } = await supabase.from('lanzamientos').insert([payload]);
+            if (!error) {
+              success = true;
+              await logAction('Creó un nuevo lanzamiento: "' + nombre + '"');
+            } else {
+              console.error(error);
+              alert('Error al crear lanzamiento: ' + error.message);
+            }
+          }
+
+          if (success) {
+            modal.classList.add('hidden');
+            loadLanzamientos();
+          }
+        });
+      }
+
+      async function deleteLanzamiento(id: string | undefined, name: string | undefined) {
+        if (!id || !confirm('¿Estás seguro de que deseas eliminar permanentemente el lanzamiento "' + (name || 'este lanzamiento') + '"?')) return;
+
+        const { error } = await supabase
+          .from('lanzamientos')
+          .delete()
+          .eq('id', id);
+
+        if (!error) {
+          await logAction('Eliminó permanentemente el lanzamiento "' + (name || id) + '"');
+          loadLanzamientos();
+        } else {
+          alert('Error al eliminar el lanzamiento.');
+        }
       }
 
     });

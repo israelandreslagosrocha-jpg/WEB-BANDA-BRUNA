@@ -6,116 +6,104 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const statsFilePath = path.join(__dirname, '..', 'src', 'data', 'socialStats.json');
 
-// Read existing stats
+// 1. Valores por defecto / existentes
 let stats = {
   musiciansTrajectory: 15,
   stageYears: 10,
-  instagramFollowers: 3157,
+  instagramFollowers: 3190,
   facebookFriends: 4900,
-  youtubeSubscribers: 576,
-  tiktokFollowers: 1092,
+  youtubeSubscribers: 577,
+  tiktokFollowers: 1095,
   regions: 5,
   lastUpdated: new Date().toISOString()
 };
 
+// Cargar estadísticas actuales como base
 if (fs.existsSync(statsFilePath)) {
   try {
     const rawData = fs.readFileSync(statsFilePath, 'utf8');
     stats = { ...stats, ...JSON.parse(rawData) };
-    console.log('Read existing stats:', stats);
+    console.log('Estadísticas locales cargadas:', stats);
   } catch (err) {
-    console.warn('Could not read existing stats file, using defaults:', err.message);
+    console.warn('No se pudo leer el archivo local de estadísticas, usando valores por defecto:', err.message);
   }
 }
 
-async function fetchYouTube() {
-  try {
-    const url = 'https://www.youtube.com/@bandabrunaoficial';
-    console.log('Verifying YouTube subscribers...');
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
-      }
-    });
-    
-    if (res.status === 200) {
-      const html = await res.text();
-      // Look for "content":"576 suscriptores" or similar in YouTube JSON
-      const match = html.match(/"content"\s*:\s*"([\d,.]+)\s+(?:suscriptores|subscribers)"/i) ||
-                    html.match(/"accessibilityLabel"\s*:\s*"([\d,.]+)\s+(?:suscriptores|subscribers)"/i);
-      
-      if (match) {
-        // Strip out dots or commas and parse to integer
-        const cleanVal = match[1].replace(/[.,]/g, '').trim();
-        const count = parseInt(cleanVal, 10);
-        if (!isNaN(count) && count > 0) {
-          console.log(`YouTube subscriber count updated: ${count}`);
-          stats.youtubeSubscribers = count;
-          return;
-        }
-      }
-      console.warn('YouTube response was OK but could not parse subscriber count pattern from HTML.');
-    } else {
-      console.warn(`YouTube fetch returned status: ${res.status}`);
-    }
-  } catch (err) {
-    console.error('YouTube verification failed:', err.message);
-  }
-}
+// 2. URL del JSON público de Google Sheets
+const sheetId = '1im9i2l0LuXuUdIGFpQq3u7Gxw5Rh_nnPDC0uB7x8QdY';
+const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-async function fetchTikTok() {
+async function fetchStatsFromGoogleSheets() {
   try {
-    const url = 'https://www.tiktok.com/@bandabrunaoficial';
-    console.log('Verifying TikTok followers...');
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+    console.log('Consultando estadísticas desde Google Sheets...');
+    const res = await fetch(gvizUrl);
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const text = await res.text();
+    
+    // Extraer JSON del wrapper google.visualization.Query.setResponse(...)
+    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+    if (!match) {
+      throw new Error('Formato de respuesta de Google Sheets no reconocido.');
+    }
+    
+    const json = JSON.parse(match[1]);
+    const rows = json.table?.rows || [];
+    
+    if (rows.length === 0) {
+      console.log('La hoja de Google Sheets está vacía. Se conservan las estadísticas actuales.');
+      return;
+    }
+    
+    let updatedCount = 0;
+    
+    rows.forEach(row => {
+      // row.c representa las celdas [A, B, C, D]
+      if (row.c && row.c[0] && row.c[1]) {
+        const platform = String(row.c[0].v).toLowerCase().trim();
+        const value = parseInt(row.c[1].v, 10);
+        
+        if (!isNaN(value) && value > 0) {
+          if (platform === 'youtube') {
+            stats.youtubeSubscribers = value;
+            updatedCount++;
+          } else if (platform === 'instagram') {
+            stats.instagramFollowers = value;
+            updatedCount++;
+          } else if (platform === 'tiktok') {
+            stats.tiktokFollowers = value;
+            updatedCount++;
+          } else if (platform === 'facebook') {
+            stats.facebookFriends = value;
+            updatedCount++;
+          }
+        }
       }
     });
     
-    if (res.status === 200) {
-      const html = await res.text();
-      const match = html.match(/"followerCount":\s*(\d+)/);
-      if (match) {
-        const count = parseInt(match[1], 10);
-        if (!isNaN(count) && count > 0) {
-          console.log(`TikTok follower count updated: ${count}`);
-          stats.tiktokFollowers = count;
-          return;
-        }
-      }
-      console.warn('TikTok response was OK but could not parse followerCount from HTML.');
-    } else {
-      console.warn(`TikTok fetch returned status: ${res.status}`);
-    }
+    console.log(`Se actualizaron ${updatedCount} estadísticas desde Google Sheets.`);
   } catch (err) {
-    console.error('TikTok verification failed:', err.message);
+    console.error('Error al obtener datos de Google Sheets (se mantendrán las estadísticas anteriores):', err.message);
   }
 }
 
 async function run() {
-  // Run verifications in parallel
-  await Promise.all([
-    fetchYouTube(),
-    fetchTikTok()
-  ]);
-
-  // Update timestamp
+  await fetchStatsFromGoogleSheets();
+  
+  // Guardar fecha de actualización
   stats.lastUpdated = new Date().toISOString();
-
-  // Write back to JSON file
+  
+  // Escribir archivo socialStats.json
   try {
-    // Ensure dir exists
     const dir = path.dirname(statsFilePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(statsFilePath, JSON.stringify(stats, null, 2), 'utf8');
-    console.log('Saved updated stats to JSON:', stats);
+    console.log('Archivo de estadísticas guardado:', stats);
   } catch (err) {
-    console.error('Failed to save stats to file:', err.message);
+    console.error('Error al guardar el archivo de estadísticas:', err.message);
   }
 }
 

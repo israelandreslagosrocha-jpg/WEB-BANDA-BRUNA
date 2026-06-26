@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { supabase } from '../services/supabaseClient.js';
+import FeaturedCampaignBanner from '../components/FeaturedCampaignBanner.astro';
 
 interface Props {
   title?: string;
@@ -18,8 +19,8 @@ const currentPath = Astro.url.pathname;
 const getLinkClass = (path: string) => {
   const isActive = currentPath === path || currentPath === `${path}/` || (path !== '/' && currentPath.startsWith(path));
   return isActive 
-    ? "text-gold-bruna font-extrabold border-b-2 border-gold-bruna pb-1 transition-all" 
-    : "text-slate-300 hover:text-white pb-1 transition-all";
+    ? "text-gold-bruna border-b-2 border-gold-bruna pb-1 transition-all" 
+    : "text-slate-300 hover:text-white border-b-2 border-transparent pb-1 transition-all";
 };
 
 // Cargar la configuración global
@@ -125,12 +126,43 @@ const getWhatsAppLink = (phone: string) => {
     }
   </script>
   <slot name="head" />
+  
+  <style is:global>
+    /* Efecto de Onda Expansiva Dorada al Clic en el menú */
+    nav ul li a {
+      position: relative;
+      overflow: visible;
+    }
+    .nav-click-ripple {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: radial-gradient(circle, rgba(214,175,55,0.7) 0%, rgba(214,175,55,0) 70%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 50;
+      animation: nav-ripple-grow 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+    @keyframes nav-ripple-grow {
+      0% {
+        width: 0px;
+        height: 0px;
+        opacity: 1;
+      }
+      100% {
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+      }
+    }
+  </style>
 </head>
 <body class="bg-bg-darkest text-white selection:bg-gold-bruna/30 selection:text-gold-bruna min-h-screen flex flex-col">
 
   <!-- Header / Nav -->
-  <header id="main-header" class="fixed top-0 left-0 w-full z-50 glassmorphism transition-all duration-300">
-    <div class="max-w-[1400px] mx-auto px-6 py-4 flex justify-between items-center">
+  <header id="main-header" class="fixed top-0 left-0 w-full z-50 glassmorphism transition-all duration-300 py-4">
+    <div class="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
       
       <!-- Brand Logo in header -->
       <a href="/" class="flex items-center group" aria-label="Ir al inicio de Banda Bruna">
@@ -145,9 +177,13 @@ const getWhatsAppLink = (phone: string) => {
       </button>
 
       <!-- Nav Links -->
-      <nav class="hidden lg:block">
-        <ul class="flex gap-6 items-center list-none text-xs font-title font-bold tracking-widest">
+      <nav class="hidden lg:block relative">
+        <!-- Backdrop de hover magnético -->
+        <div id="nav-hover-backdrop" class="absolute bg-gradient-to-r from-gold-bruna/5 to-amber-500/10 border border-gold-bruna/20 rounded-md pointer-events-none opacity-0 transition-all duration-300 ease-out z-0 h-8" style="top: 50%; transform: translateY(-50%);"></div>
+        
+        <ul class="flex gap-3.5 xl:gap-5 items-center list-none text-[10.5px] xl:text-xs font-title font-bold tracking-wider xl:tracking-widest relative z-10">
           <li><a href="/" class={getLinkClass('/')}>INICIO</a></li>
+          <li><a href="/eventos" class={getLinkClass('/eventos')}>EVENTOS</a></li>
           <li><a href="/banda" class={getLinkClass('/banda')}>BANDA</a></li>
           <li><a href="/integrantes" class={getLinkClass('/integrantes')}>INTEGRANTES</a></li>
           <li><a href="/musica" class={getLinkClass('/musica')}>MÚSICA</a></li>
@@ -172,6 +208,7 @@ const getWhatsAppLink = (phone: string) => {
       <div id="nav-menu" class="fixed top-0 right-[-100%] w-[300px] h-screen bg-slate-950/98 backdrop-blur-xl border-l border-white/5 p-8 pt-24 flex flex-col gap-6 lg:hidden z-40 transition-all duration-300 list-none">
         <ul class="flex flex-col gap-4 list-none p-0 m-0 font-title font-bold text-xs tracking-widest text-left">
           <li><a href="/" class="block py-2.5 border-b border-white/5">INICIO</a></li>
+          <li><a href="/eventos" class="block py-2.5 border-b border-white/5">EVENTOS</a></li>
           <li><a href="/banda" class="block py-2.5 border-b border-white/5">BANDA</a></li>
           <li><a href="/integrantes" class="block py-2.5 border-b border-white/5">INTEGRANTES</a></li>
           <li><a href="/musica" class="block py-2.5 border-b border-white/5">MÚSICA</a></li>
@@ -197,6 +234,7 @@ const getWhatsAppLink = (phone: string) => {
 
   <!-- Page Content -->
   <main class="flex-grow pt-20">
+    <FeaturedCampaignBanner />
     <slot />
   </main>
 
@@ -227,6 +265,7 @@ const getWhatsAppLink = (phone: string) => {
         <span class="font-title text-xs font-bold text-white tracking-widest uppercase">Navegación</span>
         <ul class="flex flex-col gap-2 text-xs list-none p-0">
           <li><a href="/" class="hover:text-gold-bruna transition-colors">Inicio</a></li>
+          <li><a href="/eventos" class="hover:text-gold-bruna transition-colors">Eventos</a></li>
           <li><a href="/banda" class="hover:text-gold-bruna transition-colors">Banda</a></li>
           <li><a href="/integrantes" class="hover:text-gold-bruna transition-colors">Integrantes</a></li>
           <li><a href="/musica" class="hover:text-gold-bruna transition-colors">Música</a></li>
@@ -290,6 +329,52 @@ const getWhatsAppLink = (phone: string) => {
     const bar1 = document.getElementById('bar1');
     const bar2 = document.getElementById('bar2');
     const bar3 = document.getElementById('bar3');
+
+    // HOVER BACKDROP MAGNÉTICO & CLICK RIPPLE EFECTOS (JS INTERACTIVO)
+    const navContainer = document.querySelector('nav');
+    const hoverBackdrop = document.getElementById('nav-hover-backdrop');
+    const navLinks = document.querySelectorAll('nav ul li a');
+
+    if (navContainer && hoverBackdrop && navLinks.length > 0) {
+      navLinks.forEach(link => {
+        // 1. Efecto Hover Backdrop magnético
+        link.addEventListener('mouseenter', () => {
+          const rect = link.getBoundingClientRect();
+          const navRect = navContainer.getBoundingClientRect();
+          
+          const left = rect.left - navRect.left;
+          const width = rect.width;
+          
+          hoverBackdrop.style.left = `${left - 10}px`;
+          hoverBackdrop.style.width = `${width + 20}px`;
+          hoverBackdrop.style.opacity = '1';
+        });
+
+        // 2. Efecto click ripple dorado
+        link.addEventListener('click', (e: any) => {
+          const ripple = document.createElement('span');
+          ripple.classList.add('nav-click-ripple');
+          
+          const rect = link.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          ripple.style.left = `${x}px`;
+          ripple.style.top = `${y}px`;
+          
+          link.appendChild(ripple);
+          
+          setTimeout(() => {
+            ripple.remove();
+          }, 500);
+        });
+      });
+
+      // Ocultar backdrop al salir del menú
+      navContainer.addEventListener('mouseleave', () => {
+        hoverBackdrop.style.opacity = '0';
+      });
+    }
 
     if (navToggle && navMenu) {
       navToggle.addEventListener('click', () => {

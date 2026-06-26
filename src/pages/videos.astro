@@ -14,28 +14,57 @@ const playlists = getVideoPlaylists();
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
-    <!-- 1. Video Destacado en Vivo (Facebook) -->
+    <!-- 1. Video Destacado en Vivo (Facebook Video Showcase) -->
     <div class="mb-20">
       <div class="bg-slate-900/60 border border-white/5 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl flex flex-col lg:flex-row gap-8 items-center">
         
-        <!-- Large Video Player (HTML5 video using Cloudinary MP4) -->
-        <div class="w-full lg:w-3/5 aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-lg relative flex items-center justify-center">
-          <video 
-            src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
-            class="w-full h-full object-contain bg-slate-950" 
-            controls 
-            preload="metadata"
-            playsinline
-            aria-label="Presentación en vivo de Banda Bruna"
-          >
-            <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
-          </video>
+        <!-- Large Video Player Carousel Container -->
+        <div class="w-full lg:w-3/5 aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-lg relative group">
+          <!-- Slide wrapper -->
+          <div id="video-carousel" class="flex w-full h-full transition-transform duration-500 ease-in-out" style="transform: translateX(0%);">
+            <!-- Slide 1 -->
+            <div class="w-full h-full shrink-0 relative flex items-center justify-center">
+              <video 
+                src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
+                class="w-full h-full object-cover bg-slate-950" 
+                controls 
+                preload="metadata"
+                playsinline
+                aria-label="Presentación en vivo de Banda Bruna - Puerto Saavedra"
+              >
+                <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+              </video>
+            </div>
+            <!-- Slide 2 -->
+            <div class="w-full h-full shrink-0 relative flex items-center justify-center">
+              <video 
+                src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4" 
+                class="w-full h-full object-cover bg-slate-950" 
+                controls 
+                preload="metadata"
+                playsinline
+                aria-label="Presentación en vivo de Banda Bruna - Show en Vivo 2"
+              >
+                <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+              </video>
+            </div>
+          </div>
+
+          <!-- Carousel Controls (Arrows) -->
+          <button id="prev-video" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none" aria-label="Video anterior">❮</button>
+          <button id="next-video" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none" aria-label="Siguiente video">❯</button>
+          
+          <!-- Slide indicators (dots) -->
+          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="0" aria-label="Video 1"></button>
+            <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="1" aria-label="Video 2"></button>
+          </div>
         </div>
 
         <!-- Description Box -->
         <div class="w-full lg:w-2/5 flex flex-col justify-center text-left">
-          <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1.5">PRESENTACIÓN DESTACADA</span>
-          <h2 class="font-title font-bold text-2xl text-white uppercase leading-snug mb-3">
+          <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1.5 font-title">PRESENTACIÓN DESTACADA</span>
+          <h2 id="featured-video-title" class="font-title font-bold text-2xl text-white uppercase leading-snug mb-3">
             La Energía del Show en Vivo
           </h2>
           <p class="text-xs text-slate-300 font-light leading-relaxed mb-6">
@@ -43,17 +72,18 @@ const playlists = getVideoPlaylists();
           </p>
           <div class="flex flex-wrap gap-4">
             <a 
+              id="fb-video-link"
               href="https://www.facebook.com/reel/918184277458701" 
               target="_blank" 
               rel="noopener" 
-              class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded hover:scale-102 transition-all flex items-center gap-2 uppercase"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded hover:scale-102 transition-all flex items-center gap-2 uppercase cursor-pointer"
             >
               <span>Ver en Facebook</span>
               <span>🌐</span>
             </a>
             <a 
               href="/contrataciones" 
-              class="border border-white/10 hover:border-gold-bruna bg-transparent hover:bg-white/5 text-white font-bold text-xs px-5 py-2.5 rounded transition-all uppercase"
+              class="border border-white/10 hover:border-gold-bruna bg-transparent hover:bg-white/5 text-white font-bold text-xs px-5 py-2.5 rounded transition-all uppercase cursor-pointer"
             >
               Cotizar Show
             </a>
@@ -327,4 +357,80 @@ const playlists = getVideoPlaylists();
     </div>
 
   </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const carousel = document.getElementById('video-carousel');
+      const prevBtn = document.getElementById('prev-video');
+      const nextBtn = document.getElementById('next-video');
+      const dots = document.querySelectorAll('[data-slide]');
+      const videos = document.querySelectorAll('#video-carousel video') as NodeListOf<HTMLVideoElement>;
+      const videoTitle = document.getElementById('featured-video-title');
+      const fbBtn = document.getElementById('fb-video-link') as HTMLAnchorElement;
+
+      let currentSlide = 0;
+
+      const titles = [
+        "La Energía del Show en Vivo",
+        "Show Masivo en el Escenario"
+      ];
+      
+      const fbLinks = [
+        "https://www.facebook.com/reel/918184277458701",
+        "https://www.facebook.com/bandabruna"
+      ];
+
+      function updateCarousel(index: number) {
+        // Pausar todos los videos
+        videos.forEach(vid => vid.pause());
+
+        currentSlide = index;
+        if (carousel) {
+          carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
+        // Actualizar dots
+        dots.forEach((dot, idx) => {
+          if (idx === currentSlide) {
+            dot.classList.add('bg-white');
+            dot.classList.remove('bg-white/40');
+          } else {
+            dot.classList.remove('bg-white');
+            dot.classList.add('bg-white/40');
+          }
+        });
+
+        // Actualizar título y link de FB
+        if (videoTitle) {
+          videoTitle.textContent = titles[currentSlide];
+        }
+        if (fbBtn) {
+          fbBtn.href = fbLinks[currentSlide];
+        }
+      }
+
+      if (prevBtn && nextBtn) {
+        prevBtn.addEventListener('click', () => {
+          let index = currentSlide - 1;
+          if (index < 0) index = videos.length - 1;
+          updateCarousel(index);
+        });
+
+        nextBtn.addEventListener('click', () => {
+          let index = currentSlide + 1;
+          if (index >= videos.length) index = 0;
+          updateCarousel(index);
+        });
+      }
+
+      dots.forEach((dot, idx) => {
+        dot.addEventListener('click', () => {
+          updateCarousel(idx);
+        });
+      });
+
+      // Inicializar primer estado
+      updateCarousel(0);
+    });
+  </script>
 </Layout>
