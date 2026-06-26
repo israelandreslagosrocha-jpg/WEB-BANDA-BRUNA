@@ -156,6 +156,18 @@ const getWhatsAppLink = (phone: string) => {
         opacity: 0;
       }
     }
+    /* WhatsApp Floating Button Pulse Effect */
+    @keyframes phone-vr-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(37, 211, 102, 0.25), 0 0 0 0px rgba(37, 211, 102, 0.35);
+      }
+      50% {
+        box-shadow: 0 0 25px rgba(37, 211, 102, 0.4), 0 0 0 8px rgba(37, 211, 102, 0);
+      }
+    }
+    .whatsapp-glow {
+      animation: phone-vr-glow 2.5s infinite ease-in-out;
+    }
   </style>
 </head>
 <body class="bg-bg-darkest text-white selection:bg-gold-bruna/30 selection:text-gold-bruna min-h-screen flex flex-col">
@@ -170,7 +182,7 @@ const getWhatsAppLink = (phone: string) => {
       </a>
 
       <!-- Nav Toggle Button (Mobile) -->
-      <button id="nav-toggle" class="lg:hidden text-white focus:outline-none p-1 z-50 cursor-pointer" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú de navegación">
+      <button id="nav-toggle" class="lg:hidden text-white focus:outline-none p-2.5 z-50 cursor-pointer" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú de navegación">
         <div class="w-6 h-0.5 bg-white mb-1.5 transition-all duration-300" id="bar1"></div>
         <div class="w-6 h-0.5 bg-white mb-1.5 transition-all duration-300" id="bar2"></div>
         <div class="w-6 h-0.5 bg-white transition-all duration-300" id="bar3"></div>
@@ -388,6 +400,7 @@ const getWhatsAppLink = (phone: string) => {
           bar1.style.transform = 'rotate(45deg) translate(5px, 5px)';
           bar2.style.opacity = '0';
           bar3.style.transform = 'rotate(-45deg) translate(5px, -5px)';
+          document.body.style.overflow = 'hidden'; // Evitar scroll del fondo
         } else {
           // Close menu drawer
           navMenu.style.right = '-100%';
@@ -395,6 +408,7 @@ const getWhatsAppLink = (phone: string) => {
           bar1.style.transform = 'none';
           bar2.style.opacity = '1';
           bar3.style.transform = 'none';
+          document.body.style.overflow = ''; // Restaurar scroll del fondo
         }
       });
     }
@@ -421,6 +435,20 @@ const getWhatsAppLink = (phone: string) => {
       observer.observe(el);
     });
   </script>
+
+  <!-- Floating WhatsApp Button (Mobile Only) -->
+  <a 
+    href={getWhatsAppLink(config.telefono_principal)}
+    target="_blank" 
+    rel="noopener"
+    class="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/20 active:scale-95 md:hidden cursor-pointer border border-white/10 hover:scale-105 transition-all whatsapp-glow"
+    aria-label="Contactar por WhatsApp"
+    id="whatsapp-floating-button"
+  >
+    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/>
+    </svg>
+  </a>
 
 </body>
 </html>

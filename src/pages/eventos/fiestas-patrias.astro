@@ -304,7 +304,7 @@ const faqs = [
 
     <!-- Lightbox Modal (Hidden by default) -->
     <div id="video-lightbox" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
-      <button id="close-lightbox" class="absolute top-4 right-4 text-slate-400 hover:text-white p-3 text-base transition-colors cursor-pointer bg-slate-900/60 rounded-full w-10 h-10 flex items-center justify-center border border-white/5" aria-label="Cerrar reproductor">
+      <button id="close-lightbox" class="absolute top-4 right-4 text-slate-400 hover:text-white p-3 text-base transition-colors cursor-pointer bg-slate-900/60 rounded-full w-12 h-12 flex items-center justify-center border border-white/5 z-20 shadow-lg shadow-black/30" aria-label="Cerrar reproductor">
         ✕
       </button>
 
@@ -319,9 +319,15 @@ const faqs = [
         >
           Tu navegador no soporta videos HTML5.
         </video>
-        <!-- Title overlay in lightbox -->
-        <div class="absolute bottom-4 left-4 right-4 bg-black/65 backdrop-blur-md border border-white/5 p-3 rounded-lg text-left">
-          <p id="lightbox-video-title" class="text-xs font-bold text-white uppercase font-title tracking-wide"></p>
+        <!-- Title overlay in lightbox with Next/Prev buttons -->
+        <div class="absolute bottom-4 left-4 right-4 bg-black/65 backdrop-blur-md border border-white/5 p-3 rounded-lg text-left flex items-center justify-between gap-4">
+          <div class="flex-1">
+            <p id="lightbox-video-title" class="text-xs font-bold text-white uppercase font-title tracking-wide"></p>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button id="lightbox-prev" class="w-8 h-8 rounded bg-slate-950/60 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer text-xs select-none" aria-label="Video anterior">❮</button>
+            <button id="lightbox-next" class="w-8 h-8 rounded bg-slate-950/60 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer text-xs select-none" aria-label="Siguiente video">❯</button>
+          </div>
         </div>
       </div>
     </div>
@@ -794,46 +800,96 @@ const faqs = [
       });
     }
 
-    // Lightbox modal logic
+    // Lightbox modal logic with navigation & history integration
     const lightbox = document.getElementById('video-lightbox');
     const lightboxVid = document.getElementById('lightbox-video') as HTMLVideoElement | null;
     const lightboxTitle = document.getElementById('lightbox-video-title');
     const closeBtn = document.getElementById('close-lightbox');
     const videoCards = document.querySelectorAll('.vertical-video-card');
+    const prevBtnLightbox = document.getElementById('lightbox-prev');
+    const nextBtnLightbox = document.getElementById('lightbox-next');
 
-    videoCards.forEach(card => {
-      card.addEventListener('click', () => {
-        const url = card.getAttribute('data-video-url');
-        const title = card.getAttribute('data-video-title');
+    // Mapear los videos disponibles
+    const videosList = Array.from(videoCards).map(card => ({
+      url: card.getAttribute('data-video-url'),
+      title: card.getAttribute('data-video-title')
+    }));
+    let currentIndex = 0;
 
-        if (lightbox && lightboxVid && url) {
-          lightboxVid.src = url;
-          if (lightboxTitle) lightboxTitle.textContent = title || '';
+    function openVideo(index, pushToHistory = true) {
+      if (index < 0) index = videosList.length - 1;
+      if (index >= videosList.length) index = 0;
+      currentIndex = index;
+
+      const videoData = videosList[currentIndex];
+      if (lightbox && lightboxVid && videoData && videoData.url) {
+        lightboxVid.src = videoData.url;
+        if (lightboxTitle) lightboxTitle.textContent = videoData.title || '';
+        
+        if (lightbox.classList.contains('hidden')) {
           lightbox.classList.remove('hidden');
           document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
-          lightboxVid.play().catch(() => {});
+          
+          if (pushToHistory) {
+            // Registrar estado en el historial del navegador
+            history.pushState({ lightboxOpen: true }, '');
+          }
         }
-      });
-    });
+        
+        lightboxVid.play().catch(() => {});
+      }
+    }
 
-    function closeLightbox() {
+    function closeLightbox(shouldPopHistory = true) {
       if (lightbox && lightboxVid) {
         lightboxVid.pause();
         lightboxVid.src = '';
         lightbox.classList.add('hidden');
         document.body.style.overflow = ''; // Restaurar scroll
+        
+        // Si el cierre fue manual (X o clic fuera) y hay un estado en el historial, sacarlo
+        if (shouldPopHistory && history.state && history.state.lightboxOpen) {
+          history.back();
+        }
       }
     }
 
+    videoCards.forEach((card, idx) => {
+      card.addEventListener('click', () => {
+        openVideo(idx, true);
+      });
+    });
+
     if (closeBtn) {
-      closeBtn.addEventListener('click', closeLightbox);
+      closeBtn.addEventListener('click', () => closeLightbox(true));
     }
     if (lightbox) {
       lightbox.addEventListener('click', (e) => {
         if (e.target === lightbox) {
-          closeLightbox();
+          closeLightbox(true);
         }
       });
     }
+
+    if (prevBtnLightbox) {
+      prevBtnLightbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openVideo(currentIndex - 1, false);
+      });
+    }
+    if (nextBtnLightbox) {
+      nextBtnLightbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openVideo(currentIndex + 1, false);
+      });
+    }
+
+    // Escuchar el botón atrás del navegador/dispositivo móvil
+    window.addEventListener('popstate', () => {
+      if (lightbox && !lightbox.classList.contains('hidden')) {
+        // El usuario presionó atrás en el dispositivo: cerramos el reproductor sin salir de la página
+        closeLightbox(false);
+      }
+    });
   });
 </script>

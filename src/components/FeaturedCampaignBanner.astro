@@ -59,7 +59,7 @@ try {
     </div>
 
     <!-- Content Container -->
-    <div class="relative z-10 max-w-[1400px] mx-auto flex flex-col md:flex-row items-start md:items-center gap-6 pr-8 md:pr-12">
+    <div class="relative z-10 max-w-[1400px] mx-auto flex flex-col md:flex-row items-start md:items-center gap-6 pr-10 md:pr-12">
       <div class="flex-1 text-left">
         <div class="flex items-center gap-2 mb-1">
           <span class="bg-red-600 text-white text-[9px] font-extrabold tracking-widest px-2 py-0.5 rounded-sm uppercase font-title animate-pulse">
@@ -97,7 +97,7 @@ try {
     <!-- Close Button (X) -->
     <button 
       id={`close-banner-${campaign.id}`}
-      class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-2 text-base transition-colors z-20 cursor-pointer bg-slate-950/40 hover:bg-slate-900 rounded-full w-8 h-8 flex items-center justify-center border border-white/5"
+      class="absolute right-3 top-3 md:right-4 md:top-1/2 md:-translate-y-1/2 text-slate-400 hover:text-white p-2 text-base transition-colors z-20 cursor-pointer bg-slate-950/40 hover:bg-slate-900 rounded-full w-8 h-8 flex items-center justify-center border border-white/5"
       aria-label="Cerrar anuncio"
     >
       ✕
@@ -112,7 +112,7 @@ try {
     
     banners.forEach((banner) => {
       const campaignId = banner.getAttribute('data-campaign-id');
-      const isClosed = localStorage.getItem(`closed_campaign_${campaignId}`);
+      const isClosed = sessionStorage.getItem(`closed_campaign_${campaignId}`);
       
       // Si ya fue cerrado por el usuario, ocultarlo de inmediato
       if (isClosed === 'true') {
@@ -131,7 +131,7 @@ try {
             banner.style.opacity = '0';
             banner.style.border = 'none';
             
-            localStorage.setItem(`closed_campaign_${campaignId}`, 'true');
+            sessionStorage.setItem(`closed_campaign_${campaignId}`, 'true');
             
             // Animación suave de ocultamiento
             setTimeout(() => {

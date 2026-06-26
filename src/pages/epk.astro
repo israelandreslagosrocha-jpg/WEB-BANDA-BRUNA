@@ -172,7 +172,7 @@ function getStageIconSvg(type: string): string {
     
     <div class="text-center mb-16">
       <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">PROMOTORES & PRENSA</span>
-      <h1 class="text-4xl font-extrabold font-title uppercase">ELECTRONIC PRESS KIT</h1>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-title uppercase">ELECTRONIC PRESS KIT</h1>
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
@@ -237,14 +237,14 @@ function getStageIconSvg(type: string): string {
         </p>
         
         <!-- Tabs Buttons Navigation -->
-        <div class="flex border-b border-white/10 mb-6 overflow-x-auto gap-2 scrollbar-none">
-          <button class="tab-btn active px-4 py-2.5 text-xs font-title font-bold tracking-widest text-gold-bruna border-b-2 border-gold-bruna cursor-pointer uppercase whitespace-nowrap" data-tab="reqs">
+        <div class="flex flex-col md:flex-row border-b border-white/10 md:border-b mb-6 gap-1 md:gap-2">
+          <button class="tab-btn active px-4 py-2.5 text-xs font-title font-bold tracking-widest cursor-pointer uppercase whitespace-nowrap text-left md:text-center w-full md:w-auto" data-tab="reqs">
             Requerimientos
           </button>
-          <button class="tab-btn px-4 py-2.5 text-xs font-title font-bold tracking-widest text-slate-400 hover:text-white cursor-pointer uppercase whitespace-nowrap" data-tab="channels">
+          <button class="tab-btn px-4 py-2.5 text-xs font-title font-bold tracking-widest cursor-pointer uppercase whitespace-nowrap text-left md:text-center w-full md:w-auto" data-tab="channels">
             Lista de Canales
           </button>
-          <button class="tab-btn px-4 py-2.5 text-xs font-title font-bold tracking-widest text-slate-400 hover:text-white cursor-pointer uppercase whitespace-nowrap" data-tab="stage">
+          <button class="tab-btn px-4 py-2.5 text-xs font-title font-bold tracking-widest cursor-pointer uppercase whitespace-nowrap text-left md:text-center w-full md:w-auto" data-tab="stage">
             Escenario (Stage Plot)
           </button>
         </div>
@@ -430,6 +430,39 @@ function getStageIconSvg(type: string): string {
 
   </section>
 
+  <!-- CSS styles for responsives tabs -->
+  <style>
+    .tab-btn {
+      border-left: 2px solid transparent;
+      color: #94a3b8; /* text-slate-400 */
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+    .tab-btn.active {
+      color: #d4af37; /* gold-bruna */
+      border-color: #d4af37;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    @media (min-width: 768px) {
+      .tab-btn {
+        border-left: none;
+        border-bottom: 2px solid transparent;
+        text-align: center;
+      }
+      .tab-btn:hover {
+        background-color: transparent;
+      }
+      .tab-btn.active {
+        border-color: #d4af37;
+        background-color: transparent;
+      }
+    }
+  </style>
+
   <!-- Client-side script for interactive tabs -->
   <script>
     // Tab switching logic for EPK Rider Page
@@ -440,15 +473,13 @@ function getStageIconSvg(type: string): string {
       btn.addEventListener('click', () => {
         const tabId = btn.getAttribute('data-tab');
         
-        // Remove active states from buttons
+        // Remove active state from buttons
         tabButtons.forEach(b => {
-          b.classList.remove('active', 'text-gold-bruna', 'border-b-2', 'border-gold-bruna');
-          b.classList.add('text-slate-400');
+          b.classList.remove('active');
         });
         
-        // Add active states to clicked button
-        btn.classList.add('active', 'text-gold-bruna', 'border-b-2', 'border-gold-bruna');
-        btn.classList.remove('text-slate-400');
+        // Add active state to clicked button
+        btn.classList.add('active');
         
         // Hide all contents
         tabContents.forEach(content => {
