@@ -119,6 +119,29 @@ const videoSchema = hasYoutube ? {
   "uploadDate": lanzamiento.fecha_lanzamiento,
   "embedUrl": `https://www.youtube.com/embed/${youtubeId}`
 } : null;
+
+// Combinar videos de backstage con publicaciones de Instagram relacionadas para "Ahogado en un Bar"
+const instagramReels = (slug === 'ahogado-en-un-bar') ? [
+  {
+    url: "https://www.instagram.com/p/DZkqDn1uNpC/",
+    thumbnail: "/assets/images/instagram/segunda_publicacion.webp",
+    caption: "Próximamente en todas nuestras plataformas..! 🎸 BANDA BRUNA BB!! 🎶",
+    tipo: "instagram",
+    aspect: "vertical"
+  },
+  {
+    url: "https://www.instagram.com/p/DZpvNd-uBjx/",
+    thumbnail: "/assets/images/instagram/reel_cover.webp",
+    caption: "Un pequeño resumen del proceso de grabación de nuestro nuevo videoclip junto a nuestros queridos amigos de Agencia CK 🎬",
+    tipo: "instagram",
+    aspect: "vertical"
+  }
+] : [];
+
+const allDetrasCamaras = [
+  ...(lanzamiento.detras_camaras_videos || []),
+  ...instagramReels
+];
 ---
 
 <Layout 
@@ -434,33 +457,76 @@ const videoSchema = hasYoutube ? {
       </section>
     )}
 
-    <!-- 5. VIDEOS DETRÁS DE CÁMARAS (SHORTS/REELS) -->
-    {lanzamiento.detras_camaras_videos && lanzamiento.detras_camaras_videos.length > 0 && (
+    <!-- 5. VIDEOS DETRÁS DE CÁMARAS (SHORTS/REELS) Y REDES SOCIALES -->
+    {allDetrasCamaras.length > 0 && (
       <section class="relative z-10 px-6 max-w-7xl mx-auto py-16 border-t border-white/5 text-center">
         <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Detrás de Cámaras</h2>
         <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Registros de preparación y backstage</p>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
-          {lanzamiento.detras_camaras_videos.map((vid: any) => {
-            const isVertical = vid.tipo === 'vertical';
+          {allDetrasCamaras.map((vid: any) => {
+            const isInstagram = vid.tipo === 'instagram';
+            const isVertical = vid.tipo === 'vertical' || vid.aspect === 'vertical';
             return (
               <div 
-                class="bg-slate-950 border border-white/5 p-3 rounded-2xl flex flex-col gap-3 mx-auto w-full max-w-[280px] shadow-lg hover:border-white/10 transition-colors"
+                class="bg-slate-950 border border-white/5 p-3 rounded-2xl flex flex-col gap-3 mx-auto w-full max-w-[280px] shadow-lg hover:border-white/10 transition-colors group/insta-card"
               >
-                <!-- Video player -->
-                <div class={`relative w-full overflow-hidden rounded-xl bg-black ${isVertical ? 'aspect-[9/16]' : 'aspect-video'}`}>
-                  <video 
-                    src={vid.url} 
-                    controls 
-                    preload="none"
-                    class="w-full h-full object-cover"
-                  ></video>
-                </div>
+                <!-- Video player or Instagram link -->
+                {isInstagram ? (
+                  <a 
+                    href={vid.url} 
+                    target="_blank" 
+                    rel="noopener" 
+                    class="relative w-full overflow-hidden rounded-xl bg-black block border border-white/10 group-hover/insta-card:border-pink-500/30 transition-colors cursor-pointer"
+                    style={`aspect-ratio: ${isVertical ? '9/16' : '16/9'};`}
+                  >
+                    <img 
+                      src={vid.thumbnail} 
+                      alt={vid.caption} 
+                      class="w-full h-full object-cover group-hover/insta-card:scale-[1.03] transition-transform duration-500" 
+                      loading="lazy"
+                    />
+                    <!-- Instagram badge overlay -->
+                    <div class="absolute top-2.5 left-2.5 bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 text-white font-extrabold text-[8px] px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-md flex items-center gap-1 z-10">
+                      <span>📸</span> INSTAGRAM
+                    </div>
+                    <!-- Play overlay -->
+                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover/insta-card:bg-black/30 transition-colors">
+                      <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-lg group-hover/insta-card:scale-110 transition-transform pl-0.5">
+                        ▶
+                      </div>
+                    </div>
+                  </a>
+                ) : (
+                  <div 
+                    class="relative w-full overflow-hidden rounded-xl bg-black"
+                    style={`aspect-ratio: ${isVertical ? '9/16' : '16/9'};`}
+                  >
+                    <video 
+                      src={vid.url} 
+                      controls 
+                      preload="none"
+                      class="w-full h-full object-cover"
+                    ></video>
+                  </div>
+                )}
                 <!-- Caption -->
                 {vid.caption && (
-                  <p class="text-xs text-slate-350 font-medium px-1 text-left leading-tight">
-                    {vid.caption}
-                  </p>
+                  <div class="flex flex-col gap-2 mt-auto justify-between">
+                    <p class="text-xs text-slate-350 font-medium px-1 text-left leading-tight line-clamp-3">
+                      {vid.caption}
+                    </p>
+                    {isInstagram && (
+                      <a 
+                        href={vid.url} 
+                        target="_blank" 
+                        rel="noopener" 
+                        class="text-[9px] font-bold text-pink-400 hover:text-pink-300 uppercase tracking-widest text-left px-1 block hover:underline transition-colors mt-auto"
+                      >
+                        Ver Reel en Instagram ➔
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             );
