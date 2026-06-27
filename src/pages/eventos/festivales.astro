@@ -1,0 +1,852 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../services/supabaseClient.js';
+
+// Videos de festivales masivos, con el nuevo video de Puerto Saavedra 2026 de primero
+const videos = [
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-25_at_1.31.25_PM_zm9b8v.mp4",
+    title: "Expo Campesina Puerto Saavedra 2026",
+    category: "🎪 FESTIVAL",
+    tagline: "Show masivo en vivo frente al mar"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243535/WhatsApp_Video_2026-06-23_at_3.35.21_PM_rzlepr.mp4",
+    title: "Fonda Oficial Llena",
+    category: "🏛 MUNICIPAL",
+    tagline: "Miles cantando al unísono en eventos públicos"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243531/WhatsApp_Video_2026-06-23_at_3.35.18_PM_zpdgvh.mp4",
+    title: "La Energía del Escenario",
+    category: "⚡ EN VIVO",
+    tagline: "Fuerza y conexión total con la audiencia"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782245403/WhatsApp_Video_2026-06-23_at_3.42.16_PM_yp01qd.mp4",
+    title: "Público Encendido",
+    category: "🔥 CONEXIÓN",
+    tagline: "El cariño de la gente en festivales del sur"
+  }
+];
+
+const galleryImages = [
+  "/assets/images/hero/hero_1.webp",
+  "/assets/images/hero/hero_3.webp",
+  "/assets/images/hero/hero_5.webp",
+  "/assets/images/experiencia/experiencia_2.webp",
+  "/assets/images/experiencia/experiencia_4.webp",
+  "/assets/images/experiencia/experiencia_5.webp"
+];
+
+const faqs = [
+  {
+    q: "¿Qué requerimientos de escenario y rider técnico tiene Banda Bruna para festivales?",
+    a: "Contamos con un rider técnico detallado de sonido, iluminación y pantallas LED (disponible en nuestro EPK). Para festivales municipales u organizados por productoras, nos coordinamos directamente con el equipo técnico a cargo del evento para asegurar un correcto linecheck y puesta a punto."
+  },
+  {
+    q: "¿Cuál es la duración del show en vivo para festivales masivos?",
+    a: "El show estándar de festival tiene una duración de 75 a 90 minutos ininterrumpidos de música bailable de alta energía, ideal para mantener al público bailando y cantando de principio a fin."
+  },
+  {
+    q: "¿Se trasladan a regiones apartadas de Chile?",
+    a: "Sí, nos trasladamos a todo Chile. Contamos con amplia experiencia viajando a festivales en comunas costeras, zonas rurales y centros urbanos de norte a sur. Nos hacemos cargo de toda nuestra logística interna de traslado."
+  },
+  {
+    q: "¿Qué tipo de repertorio presentan en escenarios masivos?",
+    a: "Nuestro show de festival combina cumbia chilena clásica, cumbia sureña con guitarras eléctricas enérgicas, sintetizadores espaciales y dinámicas participativas con el público, garantizando una puesta en escena familiar y altamente interactiva."
+  },
+  {
+    q: "¿Están inscritos en los sistemas de compras públicas (Mercado Público)?",
+    a: "Sí, contamos con la documentación y registro al día como proveedores del Estado de Chile para convenios marcos y contrataciones directas vía Mercado Público (Licitaciones y Trato Directo), facilitando la gestión de municipios y corporaciones culturales."
+  }
+];
+---
+
+<Layout 
+  title="Festivales Masivos y Regionales | Banda Bruna - Show en Vivo" 
+  description="Contrata a Banda Bruna para festivales municipales, eventos masivos interregionales, veranos alegres y ferias de gran envergadura en todo Chile."
+>
+  <!-- SEO Struct Data (Events, FAQs & Breadcrumbs) -->
+  <script type="application/ld+json" is:inline slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://bandabruna.cl/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Eventos",
+          "item": "https://bandabruna.cl/eventos/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Festivales",
+          "item": "https://bandabruna.cl/eventos/festivales/"
+        }
+      ]
+    }
+  </script>
+
+  <script type="application/ld+json" is:inline slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": "Gira de Festivales y Eventos Masivos 2026 - Banda Bruna",
+      "startDate": "2026-09-01T20:00:00-04:00",
+      "endDate": "2027-03-31T23:59:00-04:00",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+      "location": {
+        "@type": "Place",
+        "name": "Festivales, Plazas de Armas y Escenarios Masivos de Chile",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Saavedra, Temuco, Toltén, Concepción, Valdivia",
+          "addressCountry": "CL"
+        }
+      },
+      "image": [
+        "https://res.cloudinary.com/dhgifjpkh/image/upload/v1781892646/compressed_Proyecto-nuevo_e1myjx.webp"
+      ],
+      "description": "Contrataciones abiertas para festivales de música, shows municipales, ferias regionales y veranos alegres con la mejor cumbia de Banda Bruna.",
+      "performer": {
+        "@type": "MusicGroup",
+        "name": "Banda Bruna",
+        "sameAs": "https://bandabruna.cl"
+      }
+    }
+  </script>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-[70vh] flex items-center justify-center bg-black overflow-hidden py-24 px-6 border-b border-white/5">
+    <!-- Background elements -->
+    <div class="absolute inset-0 z-0 bg-cover bg-center opacity-25" style="background-image: url('/assets/images/hero/hero_1.webp');"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent z-1"></div>
+    <!-- Orange and Amber subtle ambient glows -->
+    <div class="absolute top-10 left-10 w-96 h-96 bg-orange-650/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-amber-650/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto text-center scroll-reveal">
+      <div class="flex items-center justify-center gap-2 mb-4">
+        <span class="h-[1px] w-8 bg-gold-bruna"></span>
+        <span class="text-gold-bruna text-xs md:text-sm tracking-[0.35em] font-extrabold uppercase block font-title">
+          BANDA BRUNA MASIVOS
+        </span>
+        <span class="h-[1px] w-8 bg-gold-bruna"></span>
+      </div>
+      <h1 class="text-4xl md:text-6xl lg:text-7xl font-black font-title text-white tracking-tight uppercase leading-tight mb-6">
+        FESTIVALES <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-400 to-gold-bruna-hover">MASIVOS</span>
+      </h1>
+      <p class="text-sm md:text-lg text-slate-300 font-light leading-relaxed max-w-3xl mx-auto mb-10">
+        Puesta en escena enérgica, sonido de alto impacto y la mejor cumbia del sur de Chile para festivales municipales, semanas comunales, veranos alegres y eventos masivos de gran convocatoria.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a 
+          href="#cotizar-section" 
+          class="w-full sm:w-auto bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-8 py-3.5 rounded-sm font-extrabold text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-gold-bruna/20 cursor-pointer"
+        >
+          SOLICITAR COTIZACIÓN
+        </a>
+        <a 
+          href="#videos-section" 
+          class="w-full sm:w-auto border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna px-8 py-3.5 rounded-sm font-extrabold text-xs uppercase tracking-widest hover:scale-105 transition-all bg-black/40 cursor-pointer"
+        >
+          VER VIDEOS DE FESTIVALES
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Videos Section -->
+  <section id="videos-section" class="py-20 px-6 max-w-[1400px] mx-auto overflow-hidden">
+    <div class="text-center mb-12 scroll-reveal">
+      <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">REGISTROS 9:16</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white font-title">Puesta en Escena en Vivo</h2>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+      <p class="text-xs md:text-sm text-slate-400 font-light max-w-lg mx-auto mt-3">
+        Explora nuestros registros en formato vertical directo del escenario, destacando nuestro show en la Expo Campesina de Puerto Saavedra 2026.
+      </p>
+    </div>
+
+    <!-- Video Track Container -->
+    <div class="relative group max-w-6xl mx-auto px-2">
+      <!-- Carousel controls -->
+      <button id="prev-vertical" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border border-white/10 cursor-pointer shadow-lg select-none" aria-label="Anterior">❮</button>
+      <button id="next-vertical" class="absolute right-[-20px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border border-white/10 cursor-pointer shadow-lg select-none" aria-label="Siguiente">❯</button>
+
+      <!-- Scroll wrapper -->
+      <div id="vertical-video-track" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6" style="scrollbar-width: none; -ms-overflow-style: none;">
+        {videos.map((vid, idx) => (
+          <div 
+            class="vertical-video-card min-w-[260px] sm:min-w-[280px] md:min-w-[290px] aspect-[9/16] bg-slate-900 border border-white/5 rounded-2xl overflow-hidden relative group/card snap-start cursor-pointer hover:border-gold-bruna/30 hover:scale-[1.02] transition-all duration-300 shadow-2xl"
+            data-video-url={vid.url}
+            data-video-title={vid.title}
+          >
+            <!-- Background video preview -->
+            <div class="absolute inset-0 z-0 bg-slate-950 flex items-center justify-center">
+              <video 
+                src={vid.url} 
+                class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity" 
+                muted 
+                loop 
+                playsinline 
+                preload="metadata"
+              />
+            </div>
+
+            <!-- Gradient Overlays -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/40 z-10 pointer-events-none"></div>
+
+            <!-- Card Content (Category Badge, Title, play icon) -->
+            <div class="absolute inset-0 z-20 p-5 flex flex-col justify-between items-start text-left">
+              <!-- Top category badge -->
+              <span class="bg-gold-bruna text-black text-[9px] font-extrabold tracking-widest px-2.5 py-1 rounded-sm uppercase font-title">
+                {vid.category}
+              </span>
+
+              <!-- Center play button container -->
+              <div class="w-full flex justify-center py-10 opacity-85 group-hover/card:opacity-100 group-hover/card:scale-110 transition-all duration-300">
+                <div class="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg group-hover/card:border-gold-bruna/40">
+                  <span class="text-gold-bruna text-sm pl-1">▶</span>
+                </div>
+              </div>
+
+              <!-- Bottom descriptions -->
+              <div class="w-full">
+                <h4 class="font-title font-extrabold text-xs sm:text-sm text-white uppercase mb-1 tracking-wide leading-tight group-hover/card:text-gold-bruna transition-colors">
+                  {vid.title}
+                </h4>
+                <p class="text-[10px] text-slate-400 font-light leading-normal">
+                  {vid.tagline}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Lightbox Modal (Hidden by default) -->
+    <div id="video-lightbox" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+      <button id="close-lightbox" class="absolute top-4 right-4 text-slate-400 hover:text-white p-3 text-base transition-colors cursor-pointer bg-slate-900/60 rounded-full w-12 h-12 flex items-center justify-center border border-white/5 z-20 shadow-lg shadow-black/30" aria-label="Cerrar reproductor">
+        ✕
+      </button>
+
+      <!-- Lightbox content -->
+      <div class="w-full max-w-[340px] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center">
+        <video 
+          id="lightbox-video" 
+          controls 
+          autoplay 
+          playsinline 
+          class="w-full h-full object-contain bg-black"
+        >
+          Tu navegador no soporta videos HTML5.
+        </video>
+        <!-- Title overlay in lightbox with Next/Prev buttons -->
+        <div class="absolute bottom-4 left-4 right-4 bg-black/65 backdrop-blur-md border border-white/5 p-3 rounded-lg text-left flex items-center justify-between gap-4">
+          <div class="flex-1">
+            <p id="lightbox-video-title" class="text-xs font-bold text-white uppercase font-title tracking-wide"></p>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button id="lightbox-prev" class="w-8 h-8 rounded bg-slate-950/60 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer text-xs select-none" aria-label="Video anterior">❮</button>
+            <button id="lightbox-next" class="w-8 h-8 rounded bg-slate-950/60 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer text-xs select-none" aria-label="Siguiente video">❯</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hide scrollbars styles -->
+    <style>
+      #vertical-video-track::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </section>
+
+  <!-- Benefits / Production Values Section -->
+  <section class="bg-[#030612] py-20 px-6 border-t border-b border-white/5">
+    <div class="max-w-[1400px] mx-auto">
+      <div class="text-center mb-16 scroll-reveal">
+        <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">PRODUCCIÓN MUNICIPAL</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">Un Show Diseñado para Escenarios Masivos</h2>
+        <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        
+        <!-- Benefit 1 -->
+        <div class="scroll-reveal bg-slate-900/40 border border-white/5 rounded-xl p-6 text-left hover:border-gold-bruna/20 transition-all">
+          <div class="w-10 h-10 rounded bg-amber-950/40 text-gold-bruna flex items-center justify-center text-xl font-bold mb-4 border border-gold-bruna/10">
+            🔥
+          </div>
+          <h3 class="text-base font-extrabold font-title uppercase text-white mb-2">Energía de Multitudes</h3>
+          <p class="text-xs text-slate-400 font-light leading-relaxed">
+            Puesta en escena dinámica que conecta de inmediato con audiencias de miles de personas.
+          </p>
+        </div>
+
+        <!-- Benefit 2 -->
+        <div class="scroll-reveal bg-slate-900/40 border border-white/5 rounded-xl p-6 text-left hover:border-gold-bruna/20 transition-all">
+          <div class="w-10 h-10 rounded bg-amber-950/40 text-gold-bruna flex items-center justify-center text-xl font-bold mb-4 border border-gold-bruna/10">
+            🇨🇱
+          </div>
+          <h3 class="text-base font-extrabold font-title uppercase text-white mb-2">Cobertura País</h3>
+          <p class="text-xs text-slate-400 font-light leading-relaxed">
+            Traslados y logística coordinada para presentarnos en plazas de armas y ferias comunales de todo Chile.
+          </p>
+        </div>
+
+        <!-- Benefit 3 -->
+        <div class="scroll-reveal bg-slate-900/40 border border-white/5 rounded-xl p-6 text-left hover:border-gold-bruna/20 transition-all">
+          <div class="w-10 h-10 rounded bg-amber-950/40 text-gold-bruna flex items-center justify-center text-xl font-bold mb-4 border border-gold-bruna/10">
+            📋
+          </div>
+          <h3 class="text-base font-extrabold font-title uppercase text-white mb-2">Soporte Mercado Público</h3>
+          <p class="text-xs text-slate-400 font-light leading-relaxed">
+            Proveedor oficial del Estado para contrataciones transparentes vía Mercado Público y tratos directos.
+          </p>
+        </div>
+
+        <!-- Benefit 4 -->
+        <div class="scroll-reveal bg-slate-900/40 border border-white/5 rounded-xl p-6 text-left hover:border-gold-bruna/20 transition-all">
+          <div class="w-10 h-10 rounded bg-amber-950/40 text-gold-bruna flex items-center justify-center text-xl font-bold mb-4 border border-gold-bruna/10">
+            🎹
+          </div>
+          <h3 class="text-base font-extrabold font-title uppercase text-white mb-2">Staff Técnico Propio</h3>
+          <p class="text-xs text-slate-400 font-light leading-relaxed">
+            Operación con ingenieros de sonido propios de FOH y monitores, garantizando calidad acústica premium.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Photo Gallery Section -->
+  <section class="py-20 px-6 max-w-[1400px] mx-auto">
+    <div class="text-center mb-16 scroll-reveal">
+      <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">GALERÍA</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">Festivales de Banda Bruna</h2>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {galleryImages.map((img, idx) => (
+        <div class="scroll-reveal overflow-hidden rounded-lg aspect-[4/3] bg-slate-900 border border-white/5 group shadow-lg" style={`transition-delay: ${idx * 50}ms`}>
+          <img 
+            src={img} 
+            alt="Banda Bruna en Escenario de Festival Masivo" 
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- FAQs Accordion Section -->
+  <section class="py-20 px-6 max-w-3xl mx-auto border-t border-white/5">
+    <div class="text-center mb-12 scroll-reveal">
+      <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">FAQ</span>
+      <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white font-title">Preguntas Frecuentes</h2>
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      {faqs.map((faq) => (
+        <details class="scroll-reveal bg-slate-900 border border-white/5 rounded-xl group overflow-hidden transition-all duration-300">
+          <summary class="flex justify-between items-center p-5 text-xs md:text-sm font-bold font-title text-white uppercase cursor-pointer select-none hover:text-gold-bruna transition-colors list-none">
+            <span>{faq.q}</span>
+            <span class="text-xs transition-transform group-open:rotate-180 duration-300 text-gold-bruna">▼</span>
+          </summary>
+          <div class="p-5 pt-0 border-t border-white/5 text-left text-xs text-slate-400 font-light leading-relaxed">
+            {faq.a}
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- Form and Booking section (specific for Festivals) -->
+  <section id="cotizar-section" class="bg-[#030612] py-20 px-6 border-t border-white/5">
+    <div class="max-w-4xl mx-auto">
+      
+      <div class="text-center mb-12 scroll-reveal">
+        <span class="text-gold-bruna text-xs tracking-[0.25em] font-extrabold uppercase block mb-1">PRODUCTORAS & MUNICIPALIDADES</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">COTIZA TU FESTIVAL</h2>
+        <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+        <p class="text-xs md:text-sm text-slate-400 font-light mt-3 max-w-lg mx-auto">
+          Completa el formulario y te enviaremos una propuesta formal y ficha técnica adaptada a los requerimientos de tu festival municipal o evento regional.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-10 scroll-reveal">
+        
+        <!-- Contact channels cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <a href="https://wa.me/56990021689" target="_blank" rel="noopener" class="bg-slate-950 border border-white/5 hover:border-green-500 rounded-xl p-5 flex justify-between items-center transition-all group cursor-pointer shadow-md">
+            <div>
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest block mb-1">Mánager Booking</span>
+              <span class="text-white font-bold text-base block font-title">+56 9 9002 1689</span>
+            </div>
+            <span class="text-[10px] text-green-400 font-bold border border-green-500/20 px-3 py-1.5 rounded bg-green-950/20 group-hover:bg-green-500 group-hover:text-black transition-colors uppercase tracking-wider">
+              WhatsApp Directo
+            </span>
+          </a>
+
+          <a href="mailto:contacto@bandabruna.cl" class="bg-slate-950 border border-white/5 hover:border-gold-bruna rounded-xl p-5 flex justify-between items-center transition-all group cursor-pointer shadow-md">
+            <div>
+              <span class="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest block mb-1">Correo de Reserva</span>
+              <span class="text-white font-bold text-base block font-title">contacto@bandabruna.cl</span>
+            </div>
+            <span class="text-[10px] text-gold-bruna font-bold border border-gold-bruna/20 px-3 py-1.5 rounded bg-amber-950/20 group-hover:bg-gold-bruna group-hover:text-black transition-colors uppercase tracking-wider">
+              Enviar Email
+            </span>
+          </a>
+        </div>
+
+        <!-- Form container -->
+        <div id="booking-form-container" class="bg-slate-900/60 border border-white/5 backdrop-blur-md rounded-2xl p-6 md:p-10 shadow-2xl">
+          <form id="quote-form-extended" class="flex flex-col gap-6 text-left" novalidate>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex flex-col gap-2">
+                <label for="ext-name" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Nombre de Contacto / Encargado de Cultura</label>
+                <input 
+                  type="text" 
+                  id="ext-name" 
+                  name="name" 
+                  placeholder="Ingresa tu nombre completo" 
+                  required
+                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                />
+                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-name-err">Por favor ingresa tu nombre.</span>
+              </div>
+              
+              <div class="flex flex-col gap-2">
+                <label for="ext-phone" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono de Contacto</label>
+                <input 
+                  type="tel" 
+                  id="ext-phone" 
+                  name="phone" 
+                  placeholder="+56 9 1234 5678" 
+                  required
+                  autocomplete="tel"
+                  inputmode="tel"
+                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                />
+                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-phone-err">Por favor ingresa tu teléfono.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex flex-col gap-2">
+                <label for="ext-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Correo de Contacto</label>
+                <input 
+                  type="email" 
+                  id="ext-email" 
+                  name="email" 
+                  placeholder="ejemplo@municipalidad.cl" 
+                  required
+                  autocomplete="email"
+                  inputmode="email"
+                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                />
+                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-email-err">Por favor ingresa un correo válido.</span>
+              </div>
+              
+              <div class="flex flex-col gap-2">
+                <label for="ext-entity" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Municipalidad / Productora / Institución</label>
+                <input 
+                  type="text" 
+                  id="ext-entity" 
+                  name="entity" 
+                  placeholder="Ej: Ilustre Municipalidad de Puerto Saavedra" 
+                  required
+                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                />
+                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-entity-err">Por favor ingresa la institución u organizador.</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex flex-col gap-2">
+                <label for="ext-date" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Fecha Tentativa del Festival</label>
+                <input 
+                  type="date" 
+                  id="ext-date" 
+                  name="event-date"
+                  required
+                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+                />
+                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-date-err">Por favor selecciona la fecha.</span>
+              </div>
+              
+              <div class="flex flex-col gap-2">
+                <label for="ext-city" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Comuna / Localidad del Evento</label>
+                <input 
+                  type="text" 
+                  id="ext-city" 
+                  name="city" 
+                  placeholder="Ej: Puerto Saavedra, Valdivia, Pucón" 
+                  required
+                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+                />
+                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-city-err">Por favor ingresa la comuna.</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="ext-message" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Detalles del Escenario, Aforo Estimado y Requerimientos</label>
+              <textarea 
+                id="ext-message" 
+                name="message" 
+                rows="5" 
+                placeholder="Indícanos si el evento es al aire libre (ej: estadio, playa, plaza), aforo proyectado de asistentes, si cuentan con técnica contratada o si requieren cotizar rider completo..."
+                class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-3.5 rounded text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer">
+              ENVIAR PROPUESTA DE COTIZACIÓN
+            </button>
+            
+            <div id="ext-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border font-bold" role="alert"></div>
+
+          </form>
+        </div>
+
+        <!-- Success Panel (Hidden by default) -->
+        <div id="success-panel" class="hidden bg-slate-900 border border-white/5 rounded-2xl p-8 md:p-10 shadow-2xl text-center flex flex-col items-center gap-6">
+          <div class="w-16 h-16 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-3xl animate-bounce">
+            ✓
+          </div>
+          <div>
+            <h3 class="font-title font-extrabold text-2xl text-white uppercase tracking-wide">¡Solicitud de Reserva Registrada!</h3>
+            <p class="text-slate-300 text-sm font-light mt-2 max-w-lg mx-auto">
+              Hemos registrado la cotización de tu festival. Se ha enviado una copia de respaldo con todos los detalles a <strong class="text-white">contacto@bandabruna.cl</strong>.
+            </p>
+          </div>
+
+          <div class="w-full max-w-md border-t border-white/5 pt-6 mt-2 flex flex-col gap-4">
+            <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">NOTIFICAR INMEDIATAMENTE AL STAFF COMERCIAL</span>
+            <p class="text-slate-400 text-xs font-light leading-relaxed">
+              Haz clic en cualquiera de los siguientes botones para enviar la notificación directamente por WhatsApp y acelerar el proceso de revisión:
+            </p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+              <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+                💬 Jaime Cárdenas
+              </a>
+              <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+                💬 César Bruna
+              </a>
+            </div>
+          </div>
+
+          <button id="btn-reset-form" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-2 px-6 rounded transition-colors uppercase font-bold tracking-wider cursor-pointer">
+            Cotizar Otro Festival
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { supabase } from '../../services/supabaseClient.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // FORMULARIO DE RESERVAS
+    // ==========================================
+    const form = document.getElementById('quote-form-extended') as HTMLFormElement;
+    const feedback = document.getElementById('ext-form-feedback');
+    const nameInput = document.getElementById('ext-name') as HTMLInputElement;
+    const phoneInput = document.getElementById('ext-phone') as HTMLInputElement;
+    const emailInput = document.getElementById('ext-email') as HTMLInputElement;
+    const entityInput = document.getElementById('ext-entity') as HTMLInputElement;
+    const dateInput = document.getElementById('ext-date') as HTMLInputElement;
+    const cityInput = document.getElementById('ext-city') as HTMLInputElement;
+
+    const nameErr = document.getElementById('ext-name-err');
+    const phoneErr = document.getElementById('ext-phone-err');
+    const emailErr = document.getElementById('ext-email-err');
+    const entityErr = document.getElementById('ext-entity-err');
+    const dateErr = document.getElementById('ext-date-err');
+    const cityErr = document.getElementById('ext-city-err');
+    
+    const formContainer = document.getElementById('booking-form-container');
+    const successPanel = document.getElementById('success-panel');
+    const resetBtn = document.getElementById('btn-reset-form');
+
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        nameErr?.classList.add('hidden');
+        phoneErr?.classList.add('hidden');
+        emailErr?.classList.add('hidden');
+        entityErr?.classList.add('hidden');
+        dateErr?.classList.add('hidden');
+        cityErr?.classList.add('hidden');
+        if (feedback) feedback.classList.add('hidden');
+
+        let valid = true;
+
+        if (!nameInput.value.trim()) {
+          nameErr?.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!phoneInput.value.trim()) {
+          phoneErr?.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+          emailErr?.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!entityInput.value.trim()) {
+          entityErr?.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!dateInput.value) {
+          dateErr?.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!cityInput.value.trim()) {
+          cityErr?.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!valid) return;
+
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const origText = btn.textContent;
+        btn.textContent = 'Enviando...';
+        btn.disabled = true;
+
+        const nameVal = nameInput.value.trim();
+        const phoneVal = phoneInput.value.trim();
+        const emailVal = emailInput.value.trim();
+        const entityVal = entityInput.value.trim();
+        const typeVal = 'Festival / Evento Masivo';
+        const dateVal = dateInput.value;
+        const cityVal = cityInput.value.trim();
+        const msgVal = (document.getElementById('ext-message') as HTMLTextAreaElement).value.trim() || 'Sin detalles adicionales.';
+
+        // Guardar cotización en Supabase
+        supabase.from('cotizaciones').insert([
+          {
+            nombre: nameVal,
+            telefono: phoneVal,
+            email: emailVal,
+            fecha_evento: dateVal || null,
+            ciudad: cityVal,
+            tipo_evento: `${typeVal} (${entityVal})`,
+            mensaje: msgVal
+          }
+        ]).then(({ error }) => {
+          if (error) {
+            console.error('Error al guardar en Supabase:', error);
+          } else {
+            console.log('Cotización guardada exitosamente en Supabase');
+          }
+        });
+
+        // Enviar correo asíncronamente con FormSubmit.co
+        fetch("https://formsubmit.co/ajax/contacto@bandabruna.cl", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            "Asunto": "Nueva Cotización de Festival - Banda Bruna",
+            "Nombre Organizador": nameVal,
+            "Institución/Entidad": entityVal,
+            "Teléfono": phoneVal,
+            "Email": emailVal,
+            "Tipo de Evento": typeVal,
+            "Fecha Tentativa": dateVal,
+            "Ciudad/Comuna": cityVal,
+            "Detalles/Mensaje": msgVal
+          })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Error al enviar.');
+          return response.json();
+        })
+        .then(() => {
+          btn.textContent = origText;
+          btn.disabled = false;
+
+          // Formatear mensaje para WhatsApp
+          const waMessage = `*Nueva Solicitud de Cotización de Festival*\n\n` +
+            `👤 *Organizador:* ${nameVal}\n` +
+            `🏛 *Entidad:* ${entityVal}\n` +
+            `📞 *Fono:* ${phoneVal}\n` +
+            `📧 *Email:* ${emailVal}\n` +
+            `🎭 *Evento:* ${typeVal}\n` +
+            `📅 *Fecha:* ${dateVal}\n` +
+            `📍 *Ciudad/Comuna:* ${cityVal}\n` +
+            `📝 *Detalles:* ${msgVal}`;
+          
+          const encodedMessage = encodeURIComponent(waMessage);
+
+          // Configurar botones de WhatsApp
+          const btnJaime = document.getElementById('btn-wa-jaime') as HTMLAnchorElement;
+          const btnCesar = document.getElementById('btn-wa-cesar') as HTMLAnchorElement;
+          if (btnJaime) btnJaime.href = `https://wa.me/56990021689?text=${encodedMessage}`;
+          if (btnCesar) btnCesar.href = `https://wa.me/56976149408?text=${encodedMessage}`;
+
+          // Intentar abrir WhatsApp automáticamente con Jaime
+          window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
+
+          // Ocultar formulario y mostrar panel de éxito
+          formContainer?.classList.add('hidden');
+          successPanel?.classList.remove('hidden');
+
+          form.reset();
+        })
+        .catch(() => {
+          btn.textContent = origText;
+          btn.disabled = false;
+          if (feedback) {
+            feedback.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos directamente a través de WhatsApp.';
+            feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 block';
+          }
+        });
+      });
+    }
+
+    if (resetBtn && formContainer && successPanel) {
+      resetBtn.addEventListener('click', () => {
+        successPanel.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+      });
+    }
+
+    // ==========================================
+    // INTERACTIVIDAD DE VIDEOS VERTICALES 9:16
+    // ==========================================
+    const track = document.getElementById('vertical-video-track');
+    const prevBtn = document.getElementById('prev-vertical');
+    const nextBtn = document.getElementById('next-vertical');
+
+    if (track && prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -300, behavior: 'smooth' });
+      });
+      nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: 300, behavior: 'smooth' });
+      });
+    }
+
+    // Lightbox modal logic with navigation & history integration
+    const lightbox = document.getElementById('video-lightbox');
+    const lightboxVid = document.getElementById('lightbox-video') as HTMLVideoElement | null;
+    const lightboxTitle = document.getElementById('lightbox-video-title');
+    const closeBtn = document.getElementById('close-lightbox');
+    const videoCards = document.querySelectorAll('.vertical-video-card');
+    const prevBtnLightbox = document.getElementById('lightbox-prev');
+    const nextBtnLightbox = document.getElementById('lightbox-next');
+
+    // Mapear los videos disponibles
+    const videosList = Array.from(videoCards).map(card => ({
+      url: card.getAttribute('data-video-url'),
+      title: card.getAttribute('data-video-title')
+    }));
+    let currentIndex = 0;
+
+    function openVideo(index, pushToHistory = true) {
+      if (index < 0) index = videosList.length - 1;
+      if (index >= videosList.length) index = 0;
+      currentIndex = index;
+
+      const videoData = videosList[currentIndex];
+      if (lightbox && lightboxVid && videoData && videoData.url) {
+        lightboxVid.src = videoData.url;
+        if (lightboxTitle) lightboxTitle.textContent = videoData.title || '';
+        
+        if (lightbox.classList.contains('hidden')) {
+          lightbox.classList.remove('hidden');
+          document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
+          
+          if (pushToHistory) {
+            // Registrar estado en el historial del navegador
+            history.pushState({ lightboxOpen: true }, '');
+          }
+        }
+        
+        lightboxVid.play().catch(() => {});
+      }
+    }
+
+    function closeLightbox(shouldPopHistory = true) {
+      if (lightbox && lightboxVid) {
+        lightboxVid.pause();
+        lightboxVid.src = '';
+        lightbox.classList.add('hidden');
+        document.body.style.overflow = ''; // Restaurar scroll
+        
+        if (shouldPopHistory && history.state && history.state.lightboxOpen) {
+          history.back();
+        }
+      }
+    }
+
+    videoCards.forEach((card, idx) => {
+      card.addEventListener('click', () => {
+        openVideo(idx, true);
+      });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => closeLightbox(true));
+    }
+    if (lightbox) {
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+          closeLightbox(true);
+        }
+      });
+    }
+
+    if (prevBtnLightbox) {
+      prevBtnLightbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openVideo(currentIndex - 1, false);
+      });
+    }
+    if (nextBtnLightbox) {
+      nextBtnLightbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openVideo(currentIndex + 1, false);
+      });
+    }
+
+    // Escuchar el botón atrás del navegador/dispositivo móvil
+    window.addEventListener('popstate', () => {
+      if (lightbox && !lightbox.classList.contains('hidden')) {
+        closeLightbox(false);
+      }
+    });
+  });
+</script>

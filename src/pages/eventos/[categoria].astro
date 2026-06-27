@@ -10,13 +10,6 @@ const categorias: Record<string, { title: string; subtitle: string; icon: string
     color: "from-blue-600/20 to-indigo-900/10",
     description: "Show familiar y masivo ideal para plazas de armas, veranos alegres, ferias costumbristas y shows públicos municipales."
   },
-  "eventos-corporativos": {
-    title: "Eventos Corporativos",
-    subtitle: "Cenas Anuales, Aniversarios & Lanzamientos",
-    icon: "🏢",
-    color: "from-amber-600/20 to-yellow-900/10",
-    description: "Música en vivo para cenas anuales de empresa, aniversarios corporativos, lanzamientos de marca y fiestas de fin de año."
-  },
   "eventos-privados": {
     title: "Eventos Privados",
     subtitle: "Cumpleaños, Galas & Celebraciones Exclusivas",
@@ -30,13 +23,6 @@ const categorias: Record<string, { title: string; subtitle: string; icon: string
     icon: "🎊",
     color: "from-rose-600/20 to-red-900/10",
     description: "Shows en vivo a medida para aniversarios comunales, de clubes, gremios y organizaciones en todo Chile."
-  },
-  "festivales": {
-    title: "Festivales",
-    subtitle: "Eventos Masivos & Festivales Regionales",
-    icon: "🎪",
-    color: "from-orange-600/20 to-amber-900/10",
-    description: "Puesta en escena impactante para festivales de música, eventos masivos regionales e interregionales."
   },
   "colegios-universidades": {
     title: "Colegios y Universidades",
@@ -57,10 +43,8 @@ const categorias: Record<string, { title: string; subtitle: string; icon: string
 export function getStaticPaths() {
   return [
     { params: { categoria: "municipalidades" } },
-    { params: { categoria: "eventos-corporativos" } },
     { params: { categoria: "eventos-privados" } },
     { params: { categoria: "aniversarios" } },
-    { params: { categoria: "festivales" } },
     { params: { categoria: "colegios-universidades" } },
     { params: { categoria: "matrimonios" } }
   ];
