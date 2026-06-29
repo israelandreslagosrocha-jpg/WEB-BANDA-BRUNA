@@ -60,6 +60,13 @@ const relatedNews = newsList.filter(news => {
 // Extraer ID de YouTube
 function getYouTubeId(url: string) {
   if (!url) return '';
+  // Soportar shorts: youtube.com/shorts/ID
+  if (url.includes('/shorts/')) {
+    const parts = url.split('/shorts/');
+    if (parts.length > 1) {
+      return parts[1].split(/[?#&]/)[0];
+    }
+  }
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
   const match = url.match(regExp);
   return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
@@ -172,6 +179,9 @@ const allDetrasCamaras = [
     id="lanzamiento-root"
     data-launch-date={lanzamiento.fecha_lanzamiento}
     data-youtube-id={youtubeId}
+    data-supabase-url={import.meta.env.PUBLIC_SUPABASE_URL}
+    data-supabase-key={import.meta.env.PUBLIC_SUPABASE_ANON_KEY}
+    data-slug={lanzamiento.slug}
   >
     <!-- Background blurred ambient glow -->
     <div class="absolute inset-0 pointer-events-none z-0">
@@ -466,7 +476,8 @@ const allDetrasCamaras = [
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
           {allDetrasCamaras.map((vid: any) => {
             const isInstagram = vid.tipo === 'instagram';
-            const isVertical = vid.tipo === 'vertical' || vid.aspect === 'vertical';
+            const isYouTube = vid.url && (vid.url.includes('youtube.com') || vid.url.includes('youtu.be'));
+            const isVertical = vid.tipo === 'vertical' || vid.aspect === 'vertical' || (vid.url && vid.url.includes('/shorts/'));
             return (
               <div 
                 class="bg-slate-950 border border-white/5 p-3 rounded-2xl flex flex-col gap-3 mx-auto w-full max-w-[280px] shadow-lg hover:border-white/10 transition-colors group/insta-card"
@@ -497,6 +508,20 @@ const allDetrasCamaras = [
                       </div>
                     </div>
                   </a>
+                ) : isYouTube ? (
+                  <div 
+                    class="relative w-full overflow-hidden rounded-xl bg-black"
+                    style={`aspect-ratio: ${isVertical ? '9/16' : '16/9'};`}
+                  >
+                    <iframe 
+                      src={`https://www.youtube.com/embed/${getYouTubeId(vid.url)}`}
+                      title={vid.caption || "YouTube video player"}
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen
+                      class="w-full h-full absolute inset-0"
+                    ></iframe>
+                  </div>
                 ) : (
                   <div 
                     class="relative w-full overflow-hidden rounded-xl bg-black"
@@ -516,7 +541,7 @@ const allDetrasCamaras = [
                     <p class="text-xs text-slate-350 font-medium px-1 text-left leading-tight line-clamp-3">
                       {vid.caption}
                     </p>
-                    {isInstagram && (
+                    {isInstagram ? (
                       <a 
                         href={vid.url} 
                         target="_blank" 
@@ -525,7 +550,16 @@ const allDetrasCamaras = [
                       >
                         Ver Reel en Instagram ➔
                       </a>
-                    )}
+                    ) : isYouTube ? (
+                      <a 
+                        href={vid.url} 
+                        target="_blank" 
+                        rel="noopener" 
+                        class="text-[9px] font-bold text-red-400 hover:text-red-300 uppercase tracking-widest text-left px-1 block hover:underline transition-colors mt-auto"
+                      >
+                        Ver en YouTube ➔
+                      </a>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -579,7 +613,29 @@ const allDetrasCamaras = [
       const youtubeId = root.getAttribute('data-youtube-id');
       if (!launchDateStr) return;
 
-      const launchDate = new Date(launchDateStr).getTime();
+      let launchDate = new Date(launchDateStr).getTime();
+
+      // Consulta en tiempo real a Supabase para evitar desactualizaciones por SSG
+      const supabaseUrl = root.getAttribute('data-supabase-url');
+      const supabaseKey = root.getAttribute('data-supabase-key');
+      const slug = root.getAttribute('data-slug') || 'ahogado-en-un-bar';
+
+      if (supabaseUrl && supabaseKey) {
+        fetch(`${supabaseUrl}/rest/v1/lanzamientos?slug=eq.${slug}&select=fecha_lanzamiento`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.length > 0 && data[0].fecha_lanzamiento) {
+            launchDate = new Date(data[0].fecha_lanzamiento).getTime();
+            updateTimer();
+          }
+        })
+        .catch(err => console.error("Error al obtener fecha en tiempo real:", err));
+      }
       const badgeEstado = document.getElementById('badge-estado-lanzamiento');
       const countdownSection = document.getElementById('countdown-landing');
       

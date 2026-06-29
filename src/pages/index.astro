@@ -116,6 +116,9 @@ try {
       class="relative w-full overflow-hidden border-b border-white/10 py-6 px-6 md:px-12 z-30 transition-all duration-500"
       style={`background: linear-gradient(135deg, ${activeLanzamiento.color_secundario || '#090707'} 0%, #151111 50%, ${activeLanzamiento.color_principal || '#e21c1c'}22 100%);`}
       data-launch-date={activeLanzamiento.fecha_lanzamiento}
+      data-supabase-url={import.meta.env.PUBLIC_SUPABASE_URL}
+      data-supabase-key={import.meta.env.PUBLIC_SUPABASE_ANON_KEY}
+      data-slug={activeLanzamiento.slug}
     >
       <!-- Background glow effects -->
       <div class="absolute inset-0 z-0 pointer-events-none select-none">
@@ -208,7 +211,7 @@ try {
         const launchDateStr = block.getAttribute('data-launch-date');
         if (!launchDateStr) return;
 
-        const launchDate = new Date(launchDateStr).getTime();
+        let launchDate = new Date(launchDateStr).getTime();
         const countdownContainer = document.getElementById('lanzamiento-countdown-container');
         const badgeEstado = document.getElementById('lanzamiento-badge-estado');
         
@@ -216,6 +219,28 @@ try {
         const hoursEl = document.getElementById('countdown-hours');
         const minutesEl = document.getElementById('countdown-minutes');
         const secondsEl = document.getElementById('countdown-seconds');
+
+        // Consulta en tiempo real a Supabase para evitar desfases por caché estática (SSG)
+        const supabaseUrl = block.getAttribute('data-supabase-url');
+        const supabaseKey = block.getAttribute('data-supabase-key');
+        const slug = block.getAttribute('data-slug');
+
+        if (supabaseUrl && supabaseKey && slug) {
+          fetch(`${supabaseUrl}/rest/v1/lanzamientos?slug=eq.${slug}&select=fecha_lanzamiento`, {
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.length > 0 && data[0].fecha_lanzamiento) {
+              launchDate = new Date(data[0].fecha_lanzamiento).getTime();
+              updateTimer();
+            }
+          })
+          .catch(err => console.error("Error al obtener fecha en tiempo real:", err));
+        }
 
         function updateTimer() {
           const now = new Date().getTime();
@@ -1259,6 +1284,7 @@ try {
             "Accept": "application/json"
           },
           body: JSON.stringify({
+            "_cc": "contactobandabruna@gmail.com",
             "Asunto": "Nueva Cotización desde Home del Sitio Web",
             "Nombre": nameVal,
             "Teléfono": phoneVal,
