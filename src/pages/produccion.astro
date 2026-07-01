@@ -5,6 +5,7 @@ import ProfileSelector from '../components/production/ProfileSelector.astro';
 import InteractiveStageViewer from '../components/production/InteractiveStageViewer.astro';
 import InputListTable from '../components/production/InputListTable.astro';
 import BacklineGrid from '../components/production/BacklineGrid.astro';
+import StagePlotVisualizer from '../components/production/StagePlotVisualizer.astro';
 
 // Cargar la lista inicial de Layouts (Versiones) desde Supabase para renderizar el select
 const { data: dbLayouts } = await supabase
@@ -97,33 +98,7 @@ const defaultLayoutId = layouts.length > 0 ? layouts[0].id : '';
         <InteractiveStageViewer />
       </section>
 
-      <!-- Sección 2: Audio & Input List -->
-      <section id="sec-audio" data-production-section class="flex flex-col gap-6 scroll-mt-24">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
-          <div>
-            <span class="text-gold-bruna text-[9px] font-bold tracking-widest uppercase font-mono block mb-1">SONIDISTAS & MONITORES</span>
-            <h2 class="text-2xl font-bold font-title uppercase text-white">Input List & Mezcla en Sala</h2>
-          </div>
-          <p class="text-xs text-slate-450 max-w-sm">Lista de canales de audio ordenados para mezcla en vivo, micrófonos sugeridos y asignaciones.</p>
-        </div>
-
-        <InputListTable />
-      </section>
-
-      <!-- Sección 3: Backline Técnico -->
-      <section id="sec-backline" data-production-section class="flex flex-col gap-6 scroll-mt-24">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
-          <div>
-            <span class="text-gold-bruna text-[9px] font-bold tracking-widest uppercase font-mono block mb-1">STAGE MANAGERS & MONTAJE</span>
-            <h2 class="text-2xl font-bold font-title uppercase text-white">Backline Técnico Requerido</h2>
-          </div>
-          <p class="text-xs text-slate-450 max-w-sm">Listado de instrumentos, amplificación de guitarras, bajo y atriles necesarios en escenario.</p>
-        </div>
-
-        <BacklineGrid />
-      </section>
-
-      <!-- Sección 4: Efectos Especiales -->
+      <!-- Sección 2: Efectos Especiales -->
       <section id="sec-efectos" data-production-section class="flex flex-col gap-6 scroll-mt-24">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
           <div>
@@ -138,7 +113,46 @@ const defaultLayoutId = layouts.length > 0 ? layouts[0].id : '';
         </div>
       </section>
 
-      <!-- Sección 5: Zona de Descargas -->
+      <!-- Sección 3: Audio & Input List -->
+      <section id="sec-audio" data-production-section class="flex flex-col gap-6 scroll-mt-24">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
+          <div>
+            <span class="text-gold-bruna text-[9px] font-bold tracking-widest uppercase font-mono block mb-1">SONIDISTAS & MONITORES</span>
+            <h2 class="text-2xl font-bold font-title uppercase text-white">Input List & Mezcla en Sala</h2>
+          </div>
+          <p class="text-xs text-slate-450 max-w-sm">Lista de canales de audio ordenados para mezcla en vivo, micrófonos sugeridos y asignaciones.</p>
+        </div>
+
+        <InputListTable />
+      </section>
+
+      <!-- Sección 4: Stage Plot (Orden en el escenario) -->
+      <section id="sec-stageplot" data-production-section class="flex flex-col gap-6 scroll-mt-24">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
+          <div>
+            <span class="text-gold-bruna text-[9px] font-bold tracking-widest uppercase font-mono block mb-1">STAGE MANAGERS & INTEGRANTES</span>
+            <h2 class="text-2xl font-bold font-title uppercase text-white">Stage Plot (Orden en el Escenario)</h2>
+          </div>
+          <p class="text-xs text-slate-450 max-w-sm">Alineación exacta de músicos, tarimas de soporte, conexiones eléctricas y monitores.</p>
+        </div>
+
+        <StagePlotVisualizer />
+      </section>
+
+      <!-- Sección 5: Backline Técnico -->
+      <section id="sec-backline" data-production-section class="flex flex-col gap-6 scroll-mt-24">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
+          <div>
+            <span class="text-gold-bruna text-[9px] font-bold tracking-widest uppercase font-mono block mb-1">STAGE MANAGERS & MONTAJE</span>
+            <h2 class="text-2xl font-bold font-title uppercase text-white">Backline Técnico Requerido</h2>
+          </div>
+          <p class="text-xs text-slate-450 max-w-sm">Listado de instrumentos, amplificación de guitarras, bajo y atriles necesarios en escenario.</p>
+        </div>
+
+        <BacklineGrid />
+      </section>
+
+      <!-- Sección 6: Zona de Descargas -->
       <section id="sec-descargas" data-production-section class="flex flex-col gap-6 scroll-mt-24">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 border-b border-white/5 pb-4">
           <div>

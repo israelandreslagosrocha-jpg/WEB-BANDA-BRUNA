@@ -204,49 +204,49 @@ export const getBandMembers = () => {
   return [
     {
       name: "Cesar Bruna",
-      role: "Vocalista",
+      role: "Voz principal",
       image: "/assets/images/banda/cesar_bruna.webp",
       instagram: "https://www.instagram.com/bruna.cantante/",
       bio: "La voz y el carisma al frente de Banda Bruna, conectando al público con el alma y el ritmo de la cumbia sureña."
     },
     {
-      name: "Jaime Cárdenas Sanhueza",
-      role: "Percusión",
-      image: "/assets/images/banda/jaime_sanhueza.webp",
-      instagram: "https://www.instagram.com/jaime_cardenas_s/",
-      bio: "El latido rítmico de la banda, dominando las congas y los bongos para encender la pista de baile."
-    },
-    {
-      name: "Vicente Nuñez",
-      role: "Guitarras & Dirección Musical",
-      image: "/assets/images/banda/vicente_nunez.webp",
-      instagram: "https://www.instagram.com/nunezenun_4/",
-      bio: "Creador de las armonías y riffs de guitarra, guiando la dirección musical y la energía en el escenario."
-    },
-    {
-      name: "Jaime Cárdenas Quilodrán",
-      role: "Batería",
-      image: "/assets/images/banda/jaime_quilodran.webp",
-      instagram: "https://www.instagram.com/jaime.wavv/",
-      bio: "El motor de la batería, asegurando la potencia y el tempo perfecto en cada presentación en vivo."
-    },
-    {
-      name: "Gerson Ulloa",
-      role: "Bajos",
-      image: "/assets/images/banda/gerson_ulloa.webp",
-      instagram: "https://www.instagram.com/geruson79/",
-      bio: "El groove y la profundidad del bajo eléctrico que le da cuerpo a la propuesta tropical de la banda."
-    },
-    {
-      name: "Fabián Garrido",
-      role: "Güiros",
+      name: "Fabian Garrido",
+      role: "Guiro/Animación",
       image: "/assets/images/banda/fabian_garrido.webp",
       instagram: "https://www.instagram.com/fabian.gaes/",
       bio: "El brillo indispensable de la cumbia, aportando el sonido metálico del güiro y la percusión menor."
     },
     {
-      name: "Israel Lagos",
-      role: "Teclados",
+      name: "Vicente Nuñez",
+      role: "Guitarra Electrica/Dirección/Coros",
+      image: "/assets/images/banda/vicente_nunez.webp",
+      instagram: "https://www.instagram.com/nunezenun_4/",
+      bio: "Creador de las armonías y riffs de guitarra, guiando la dirección musical y la energía en el escenario."
+    },
+    {
+      name: "Gerson Ulloa",
+      role: "Bajos/Coros",
+      image: "/assets/images/banda/gerson_ulloa.webp",
+      instagram: "https://www.instagram.com/geruson79/",
+      bio: "El groove y la profundidad del bajo eléctrico que le da cuerpo a la propuesta tropical de la banda."
+    },
+    {
+      name: "Jaime Cardenas Quilodrán",
+      role: "Percusión/Timbal/Talkback/Voces",
+      image: "/assets/images/banda/jaime_quilodran.webp",
+      instagram: "https://www.instagram.com/jaime.wavv/",
+      bio: "El motor de la batería, asegurando la potencia y el tempo perfecto en cada presentación en vivo."
+    },
+    {
+      name: "Jaime Cardenas Sanhueza",
+      role: "Congas/Bongos/Percusión/Coros",
+      image: "/assets/images/banda/jaime_sanhueza.webp",
+      instagram: "https://www.instagram.com/jaime_cardenas_s/",
+      bio: "El latido rítmico de la banda, dominando las congas y los bongos para encender la pista de baile."
+    },
+    {
+      name: "Israel Lagos Rocha",
+      role: "Pianos/Teclados/Sintetizadores",
       image: "/assets/images/banda/israel_lagos.webp",
       instagram: "https://www.instagram.com/andresromusic/",
       bio: "Teclados y sintetizadores que crean los ganchos melódicos y las secuencias de nuestro show."

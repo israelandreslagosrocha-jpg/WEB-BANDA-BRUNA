@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/updateSocialStats.js && astro build",
+    "build": "node scripts/generate_tech_pdfs.js && node scripts/zip_press_photos.js && node scripts/updateSocialStats.js && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.108.2",
     "@tailwindcss/vite": "^4.3.1",
     "astro": "^6.4.7",
+    "pdfkit": "^0.19.1",
     "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
