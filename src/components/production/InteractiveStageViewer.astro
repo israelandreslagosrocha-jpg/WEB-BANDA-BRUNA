@@ -1,0 +1,551 @@
+---
+// Visor Interactivo de Escenario e Iluminación (Astro Island Vanilla JS)
+---
+<div class="bg-slate-900/40 border border-white/5 p-6 rounded-3xl flex flex-col gap-6 relative overflow-hidden" id="interactive-stage-viewer-root">
+  <!-- Glow decorativos -->
+  <div class="absolute -top-40 -right-40 w-80 h-80 bg-gold-bruna/5 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Controles Superiores: Vistas y Modos -->
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-white/5 pb-5 z-10">
+    <!-- Selector de Vistas -->
+    <div class="flex flex-wrap bg-slate-950 p-1 rounded-xl border border-white/5">
+      <button class="view-tab-btn active text-xs px-4 py-2.5 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-view="superior">
+        Vista Superior
+      </button>
+      <button class="view-tab-btn text-xs px-4 py-2.5 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-view="frontal">
+        Vista Frontal
+      </button>
+      <button class="view-tab-btn text-xs px-4 py-2.5 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-view="lateral">
+        Vista Lateral
+      </button>
+      <button class="view-tab-btn text-xs px-4 py-2.5 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-view="3d">
+        Vista 3D
+      </button>
+    </div>
+
+    <!-- Modos de Visualización -->
+    <div class="flex flex-wrap gap-2">
+      <button class="mode-toggle-btn active bg-slate-950 hover:bg-slate-900 border border-white/5 text-white text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider cursor-pointer transition-all" data-mode="produccion">
+        Modo Producción
+      </button>
+      <button class="mode-toggle-btn bg-slate-950 hover:bg-slate-900 border border-white/5 text-slate-400 text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider cursor-pointer transition-all" data-mode="tecnico">
+        Modo Técnico
+      </button>
+      <button class="mode-toggle-btn bg-slate-950 hover:bg-slate-900 border border-white/5 text-slate-400 text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider cursor-pointer transition-all" data-mode="limpio">
+        Modo Limpio
+      </button>
+    </div>
+  </div>
+
+  <!-- Grid de Contenido Principal -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-[400px]">
+    <!-- Escenario Visual -->
+    <div class="lg:col-span-3 bg-slate-950 border border-white/10 rounded-2xl relative overflow-hidden flex items-center justify-center p-6 aspect-[16/10] shadow-inner shadow-black group" id="stage-viewport">
+      <div class="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
+
+      <!-- Contenedor del escenario (Gira con CSS en 3D) -->
+      <div id="stage-wrapper" class="w-full h-full relative transition-all duration-700 ease-out origin-center">
+        <!-- Capa de Puentes / Trusses -->
+        <div id="viewer-trusses-layer" class="absolute inset-0 z-0 flex flex-col justify-between py-10 pointer-events-none transition-all duration-700">
+          <!-- Dinámico -->
+        </div>
+
+        <!-- Capa de Focos e Iluminación -->
+        <div id="viewer-fixtures-layer" class="absolute inset-0 z-10 transition-all duration-700">
+          <!-- Dinámico -->
+        </div>
+      </div>
+
+      <!-- Eje Guía Boca Escenario -->
+      <div id="stage-front-label" class="absolute bottom-3 left-1/2 -translate-x-1/2 text-[8px] text-slate-650 uppercase tracking-widest font-mono pointer-events-none transition-opacity duration-300">
+        BOCA DE ESCENARIO (FRENTE)
+      </div>
+    </div>
+
+    <!-- Barra Lateral de Detalles (Drawer) -->
+    <div class="lg:col-span-1 flex flex-col gap-4 bg-slate-950/40 border border-white/5 p-5 rounded-2xl h-full justify-between" id="viewer-drawer">
+      <div class="flex flex-col gap-4">
+        <h3 class="font-title font-bold text-xs text-gold-bruna uppercase tracking-widest border-b border-white/5 pb-2">Información del Foco</h3>
+        
+        <div id="drawer-empty-state" class="text-center py-16 text-slate-500 text-xs uppercase tracking-wider font-mono">
+          Haz clic en cualquier foco o puente en el escenario para ver sus detalles.
+        </div>
+
+        <div id="drawer-content" class="hidden flex flex-col gap-4">
+          <!-- Foco Detalle -->
+          <div id="drawer-fixture-detail" class="flex flex-col gap-3">
+            <div>
+              <span id="drawer-el-label" class="text-lg font-bold text-white font-title block">Beam 1</span>
+              <span id="drawer-el-type" class="text-[10px] text-gold-bruna font-bold uppercase tracking-widest">BEAM FIXTURE</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Marca</span>
+                <span id="drawer-el-brand" class="font-bold text-white block">Clay Paky</span>
+              </div>
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Modelo</span>
+                <span id="drawer-el-model" class="font-bold text-white block">Sharpy 7R</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Potencia</span>
+                <span id="drawer-el-power" class="font-bold text-white block">230W</span>
+              </div>
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Modo DMX</span>
+                <span id="drawer-el-mode" class="font-bold text-white block">16CH</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Universo DMX</span>
+                <span id="drawer-el-univ" class="font-bold text-white block">1</span>
+              </div>
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Canal DMX</span>
+                <span id="drawer-el-channel" class="font-bold text-white block">17</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Estructura</span>
+                <span id="drawer-el-truss" class="font-bold text-white block">Puente Contra</span>
+              </div>
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Altura</span>
+                <span id="drawer-el-z" class="font-bold text-white block">5.0m</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Puente Detalle -->
+          <div id="drawer-truss-detail" class="hidden flex flex-col gap-3">
+            <div>
+              <span id="drawer-truss-name" class="text-lg font-bold text-white font-title block">Puente Contra</span>
+              <span class="text-[10px] text-gold-bruna font-bold uppercase tracking-widest">ESTRUCTURA DE ILUMINACIÓN</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Longitud</span>
+                <span id="drawer-truss-len" class="font-bold text-white block">9.0m</span>
+              </div>
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Altura</span>
+                <span id="drawer-truss-alt" class="font-bold text-white block">5.0m</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Carga Máxima</span>
+                <span id="drawer-truss-load" class="font-bold text-white block">500 kg</span>
+              </div>
+              <div>
+                <span class="text-[8px] text-slate-450 uppercase block font-mono">Luminarias</span>
+                <span id="drawer-truss-fixtures" class="font-bold text-white block">12 focos</span>
+              </div>
+            </div>
+            <div class="bg-slate-900/40 border border-white/5 p-3 rounded-xl text-xs">
+              <span class="text-[8px] text-slate-450 uppercase block font-mono">Observaciones</span>
+              <p id="drawer-truss-desc" class="text-white mt-1">Puente trasero suspendido utilizado para retroiluminación y contra.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="drawer-footer" class="hidden text-[9px] text-slate-500 font-mono text-center border-t border-white/5 pt-3">
+        BANDA BRUNA • PLANTA DE ILUMINACIÓN
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { supabase } from '../../services/supabaseClient.js';
+
+  let activeLayoutId = '';
+  let trussesList = [];
+  let stageElements = [];
+  let selectedView = 'superior'; // superior, frontal, lateral, 3d
+  let selectedMode = 'produccion'; // produccion, tecnico, limpio
+  let activeSelectedId = null;
+
+  // Clases CSS de color e icono por tipo de luminaria
+  const fixtureColors = {
+    'Beam': 'bg-red-600 border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.5)]',
+    'Wash': 'bg-blue-600 border border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]',
+    'Led Bar': 'bg-emerald-600 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)] w-8 h-3 rounded',
+    'Cob': 'bg-yellow-500 border border-yellow-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]',
+    'Blinder': 'bg-orange-500 border border-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.5)] rounded-sm',
+    'Moving Head': 'bg-fuchsia-600 border border-fuchsia-400 shadow-[0_0_10px_rgba(217,70,239,0.5)]'
+  };
+
+  const effectColors = {
+    'Spark': 'bg-purple-600 border border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]',
+    'Smoke': 'bg-pink-600 border border-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.6)]',
+    'Hazer': 'bg-indigo-650 border border-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.6)]',
+    'Co2': 'bg-cyan-600 border border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.6)]',
+    'Confetti': 'bg-teal-600 border border-teal-400 shadow-[0_0_12px_rgba(20,184,166,0.6)]'
+  };
+
+  // Escuchar evento global de cambio de versión
+  document.addEventListener('production-layout-changed', async (e: any) => {
+    activeLayoutId = e.detail.layoutId;
+    activeSelectedId = null;
+    hideDrawer();
+    await loadLayoutData();
+  });
+
+  async function loadLayoutData() {
+    if (!activeLayoutId) return;
+
+    // 1. Cargar Trusses
+    const { data: trusses } = await supabase
+      .from('lighting_trusses')
+      .select('*')
+      .eq('layout_id', activeLayoutId)
+      .order('orden', { ascending: true });
+
+    trussesList = trusses || [];
+    renderTrusses();
+
+    // 2. Cargar Focos
+    const { data: fixtures } = await supabase
+      .from('layout_objects')
+      .select('*, fixture:lighting_fixtures(*), truss:lighting_trusses(*)')
+      .eq('layout_id', activeLayoutId);
+
+    // 3. Cargar Efectos
+    const { data: effects } = await supabase
+      .from('lighting_effects')
+      .select('*')
+      .eq('layout_id', activeLayoutId);
+
+    stageElements = [
+      ...(fixtures || []).map(f => ({ ...f, type: 'fixture' })),
+      ...(effects || []).map(e => ({ ...e, type: 'effect', nombre_etiqueta: e.nombre }))
+    ];
+
+    renderFixtures();
+  }
+
+  // Renderizar Trusses (Puentes)
+  function renderTrusses() {
+    const layer = document.getElementById('viewer-trusses-layer');
+    if (!layer) return;
+
+    if (selectedView === 'superior' || selectedView === '3d') {
+      layer.innerHTML = trussesList.map(t => `
+        <div 
+          class="truss-hotspot w-[88%] mx-auto bg-slate-900/60 border-y border-dashed border-white/10 hover:border-gold-bruna/30 hover:bg-slate-900/80 flex items-center justify-between px-6 py-2.5 relative cursor-pointer pointer-events-auto transition-all rounded-lg select-none"
+          data-truss-id="${t.id}"
+        >
+          <span class="text-[8px] text-slate-500 font-mono tracking-widest uppercase font-bold">${t.nombre}</span>
+          <span class="text-[7px] text-slate-650 font-mono">${t.longitud}m • H: ${t.altura}m</span>
+        </div>
+      `).join('');
+    } else if (selectedView === 'frontal') {
+      // Vista frontal: trusses apilados verticalmente a escala de altura
+      layer.innerHTML = trussesList.map(t => {
+        // Altura normalizada (ej: de 0 a 5 metros escalada a % de altura)
+        const pctHeight = (t.altura / 6) * 100;
+        return `
+          <div 
+            class="truss-hotspot absolute left-[6%] right-[6%] bg-slate-900/70 border-y border-white/10 flex items-center justify-between px-6 py-1 cursor-pointer pointer-events-auto transition-all"
+            style="bottom: ${pctHeight}%; height: 16px; transform: translateY(50%);"
+            data-truss-id="${t.id}"
+          >
+            <span class="text-[7px] text-slate-500 font-bold uppercase tracking-widest font-mono">${t.nombre}</span>
+            <span class="text-[6px] text-slate-600 font-mono">H: ${t.altura}m</span>
+          </div>
+        `;
+      }).join('');
+    } else if (selectedView === 'lateral') {
+      // Vista lateral: trusses representados como círculos/perfiles de truss a escala Z e Y
+      layer.innerHTML = trussesList.map(t => {
+        const pctHeight = (t.altura / 6) * 100;
+        // Asignación de profundidad Y arbitraria en base al puente
+        let depthY = 80; // Contra
+        if (t.nombre.includes('Cenital') || t.nombre.includes('Medio')) depthY = 50;
+        if (t.nombre.includes('Frontal') || t.nombre.includes('Frente')) depthY = 20;
+
+        return `
+          <div 
+            class="truss-hotspot absolute bg-slate-900 border border-white/20 w-8 h-8 rounded flex items-center justify-center cursor-pointer pointer-events-auto transition-all"
+            style="bottom: ${pctHeight}%; left: ${depthY}%; transform: translate(-50%, 50%);"
+            data-truss-id="${t.id}"
+          >
+            <span class="text-[6px] text-slate-450 font-mono font-bold">Truss</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Bind click events on trusses
+    document.querySelectorAll('.truss-hotspot').forEach(trDiv => {
+      trDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tId = (e.currentTarget as HTMLElement).getAttribute('data-truss-id');
+        selectTruss(tId);
+      });
+    });
+  }
+
+  // Renderizar Focos y Efectos
+  function renderFixtures() {
+    const layer = document.getElementById('viewer-fixtures-layer');
+    if (!layer) return;
+
+    layer.innerHTML = stageElements.map(el => {
+      let colorClass = 'bg-slate-500';
+      let shapeClass = 'w-6 h-6 rounded-full';
+
+      if (el.type === 'fixture' && el.fixture) {
+        colorClass = fixtureColors[el.fixture.tipo] || 'bg-slate-500';
+        if (el.fixture.tipo === 'Led Bar') {
+          shapeClass = 'w-7.5 h-3 rounded';
+        }
+      } else if (el.type === 'effect') {
+        colorClass = effectColors[el.nombre] || 'bg-purple-600';
+        shapeClass = 'w-5 h-5 rounded-md';
+      }
+
+      // Renderizar etiqueta en base al modo seleccionado
+      let label = '';
+      if (selectedMode === 'produccion') {
+        label = el.nombre_etiqueta ? el.nombre_etiqueta.replace(/^\D+/g, '') : '';
+      } else if (selectedMode === 'tecnico' && el.type === 'fixture') {
+        label = `ch${el.canal_dmx}`;
+      }
+
+      // Calcular posiciones X, Y, Z según la vista actual
+      let posX = el.posicion_x;
+      let posY = el.posicion_y;
+
+      if (selectedView === 'frontal') {
+        posX = el.posicion_x;
+        const height = el.posicion_z || (el.truss ? el.truss.altura : 0);
+        posY = 100 - (height / 6) * 100;
+      } else if (selectedView === 'lateral') {
+        posX = el.posicion_y;
+        const height = el.posicion_z || (el.truss ? el.truss.altura : 0);
+        posY = 100 - (height / 6) * 100;
+      }
+
+      const isSelected = (activeSelectedId === el.id);
+      const activeClass = isSelected ? 'outline outline-2 outline-offset-2 outline-gold-bruna scale-110' : '';
+
+      // Determinar color de haz de luz
+      let beamColor = 'rgba(212, 175, 55, 0.35)'; // Oro por defecto
+      if (el.type === 'fixture' && el.fixture) {
+        const t = el.fixture.tipo;
+        if (t === 'Beam') beamColor = 'rgba(239, 68, 68, 0.35)'; // Rojo
+        else if (t === 'Wash') beamColor = 'rgba(59, 130, 246, 0.35)'; // Azul
+        else if (t === 'Led Bar') beamColor = 'rgba(16, 185, 129, 0.35)'; // Verde
+        else if (t === 'Cob') beamColor = 'rgba(245, 158, 11, 0.35)'; // Amarillo
+        else if (t === 'Blinder') beamColor = 'rgba(249, 115, 22, 0.35)'; // Naranja
+        else if (t === 'Moving Head') beamColor = 'rgba(217, 70, 239, 0.35)'; // Fucsia
+      } else if (el.type === 'effect') {
+        beamColor = 'rgba(168, 85, 247, 0.3)'; // Púrpura
+      }
+
+      // Renderizar el haz de luz
+      let beamHtml = '';
+      if (isSelected) {
+        if (selectedView === 'superior' || selectedView === '3d') {
+          beamHtml = `<div class="stage-light-glow absolute pointer-events-none rounded-full" style="background: radial-gradient(circle, ${beamColor.replace('0.35', '0.6').replace('0.3', '0.5')} 0%, rgba(0,0,0,0) 70%); width: 100px; height: 100px; z-index: -1; transform: translate(-50%, -50%); left: 50%; top: 50%;"></div>`;
+        } else {
+          beamHtml = `<div class="stage-light-beam absolute pointer-events-none" style="background: linear-gradient(to bottom, ${beamColor} 0%, rgba(0,0,0,0) 100%); z-index: -1; left: 50%; top: 50%;"></div>`;
+        }
+      }
+
+      return `
+        <div 
+          class="fixture-hotspot absolute cursor-pointer flex items-center justify-center text-[7px] text-white font-bold transition-all duration-300 ${shapeClass} ${colorClass} ${activeClass} select-none"
+          style="left: ${posX}%; top: ${posY}%; transform: translate(-50%, -50%) rotate(${selectedView === 'superior' ? el.rotacion : 0}deg);"
+          data-id="${el.id}"
+          data-type="${el.type}"
+          title="${el.nombre_etiqueta || el.nombre}"
+        >
+          <span class="pointer-events-none select-none z-10">${label}</span>
+          ${beamHtml}
+        </div>
+      `;
+    }).join('');
+
+    // Click handlers
+    document.querySelectorAll('.fixture-hotspot').forEach(elDiv => {
+      elDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+        const type = (e.currentTarget as HTMLElement).getAttribute('data-type');
+        selectFixture(id, type);
+      });
+    });
+  }
+
+  // Seleccionar foco y abrir Drawer
+  function selectFixture(id: string | null, type: string | null) {
+    activeSelectedId = id;
+    renderFixtures();
+
+    const el = stageElements.find(item => item.id === id && item.type === type);
+    if (!el) return;
+
+    // Rellenar Drawer
+    const emptyState = document.getElementById('drawer-empty-state');
+    const content = document.getElementById('drawer-content');
+    const fixDetail = document.getElementById('drawer-fixture-detail');
+    const trussDetail = document.getElementById('drawer-truss-detail');
+    const footer = document.getElementById('drawer-footer');
+
+    if (!emptyState || !content || !fixDetail || !trussDetail || !footer) return;
+
+    emptyState.classList.add('hidden');
+    content.classList.remove('hidden');
+    fixDetail.classList.remove('hidden');
+    trussDetail.classList.add('hidden');
+    footer.classList.remove('hidden');
+
+    document.getElementById('drawer-el-label')!.textContent = el.nombre_etiqueta || el.nombre;
+    document.getElementById('drawer-el-type')!.textContent = el.type === 'fixture' ? `${el.fixture?.tipo || 'MOVING'} FIXTURE` : 'EFECTO ESPECIAL';
+    
+    if (el.type === 'fixture') {
+      document.getElementById('drawer-el-brand')!.textContent = el.fixture?.marca || 'Generico';
+      document.getElementById('drawer-el-model')!.textContent = el.fixture?.modelo || 'Estándar';
+      document.getElementById('drawer-el-power')!.textContent = el.fixture?.potencia || 'S/P';
+      document.getElementById('drawer-el-mode')!.textContent = el.modo || 'N/A';
+      document.getElementById('drawer-el-univ')!.textContent = el.universo_dmx;
+      document.getElementById('drawer-el-channel')!.textContent = el.canal_dmx;
+      document.getElementById('drawer-el-truss')!.textContent = el.truss?.nombre || 'Piso';
+      document.getElementById('drawer-el-z')!.textContent = `${el.posicion_z}m`;
+    } else {
+      document.getElementById('drawer-el-brand')!.textContent = 'Banda Bruna';
+      document.getElementById('drawer-el-model')!.textContent = el.nombre;
+      document.getElementById('drawer-el-power')!.textContent = 'N/A';
+      document.getElementById('drawer-el-mode')!.textContent = 'N/A';
+      document.getElementById('drawer-el-univ')!.textContent = 'Manual / DMX';
+      document.getElementById('drawer-el-channel')!.textContent = el.descripcion || 'Efecto Escenario';
+      document.getElementById('drawer-el-truss')!.textContent = 'Escenario / Piso';
+      document.getElementById('drawer-el-z')!.textContent = '0m';
+    }
+  }
+
+  // Seleccionar puente (truss)
+  function selectTruss(id: string | null) {
+    const t = trussesList.find(item => item.id === id);
+    if (!t) return;
+
+    // Calcular cuántas luminarias cuelgan de este puente
+    const count = stageElements.filter(el => el.type === 'fixture' && el.truss_id === id).length;
+
+    const emptyState = document.getElementById('drawer-empty-state');
+    const content = document.getElementById('drawer-content');
+    const fixDetail = document.getElementById('drawer-fixture-detail');
+    const trussDetail = document.getElementById('drawer-truss-detail');
+    const footer = document.getElementById('drawer-footer');
+
+    if (!emptyState || !content || !fixDetail || !trussDetail || !footer) return;
+
+    emptyState.classList.add('hidden');
+    content.classList.remove('hidden');
+    fixDetail.classList.add('hidden');
+    trussDetail.classList.remove('hidden');
+    footer.classList.remove('hidden');
+
+    document.getElementById('drawer-truss-name')!.textContent = t.nombre;
+    document.getElementById('drawer-truss-len')!.textContent = `${t.longitud} metros`;
+    document.getElementById('drawer-truss-alt')!.textContent = `${t.altura} metros`;
+    document.getElementById('drawer-truss-load')!.textContent = `${t.carga_maxima} kg`;
+    document.getElementById('drawer-truss-fixtures')!.textContent = `${count} luminarias`;
+    document.getElementById('drawer-truss-desc')!.textContent = t.descripcion || 'Sin observaciones.';
+  }
+
+  function hideDrawer() {
+    const emptyState = document.getElementById('drawer-empty-state');
+    const content = document.getElementById('drawer-content');
+    const footer = document.getElementById('drawer-footer');
+    if (emptyState && content && footer) {
+      emptyState.classList.remove('hidden');
+      content.classList.add('hidden');
+      footer.classList.add('hidden');
+    }
+  }
+
+  // --- CONTROL DE VISTAS (Pestañas) ---
+  const viewBtns = document.querySelectorAll('.view-tab-btn');
+  const stageWrapper = document.getElementById('stage-wrapper');
+  const labelBoca = document.getElementById('stage-front-label');
+
+  viewBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.getAttribute('data-view');
+      if (!view || !stageWrapper) return;
+
+      selectedView = view;
+
+      // Update button styles
+      viewBtns.forEach(b => b.classList.remove('active', 'bg-gold-bruna', 'text-black'));
+      viewBtns.forEach(b => b.classList.add('text-slate-400'));
+      btn.classList.add('active', 'bg-gold-bruna', 'text-black');
+      btn.classList.remove('text-slate-400');
+
+      // Restablecer transformaciones de 3D si aplica
+      if (view === '3d') {
+        stageWrapper.style.transform = 'perspective(1200px) rotateX(62deg) rotateZ(-30deg) scale(0.9)';
+        if (labelBoca) labelBoca.style.opacity = '0';
+      } else {
+        stageWrapper.style.transform = 'none';
+        if (labelBoca) labelBoca.style.opacity = '1';
+      }
+
+      renderTrusses();
+      renderFixtures();
+    });
+  });
+
+  // --- CONTROL DE MODOS ---
+  const modeBtns = document.querySelectorAll('.mode-toggle-btn');
+  modeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.getAttribute('data-mode');
+      if (!mode) return;
+
+      selectedMode = mode;
+
+      modeBtns.forEach(b => b.classList.remove('active', 'text-white'));
+      modeBtns.forEach(b => b.classList.add('text-slate-400'));
+      btn.classList.add('active', 'text-white');
+      btn.classList.remove('text-slate-400');
+
+      renderFixtures();
+    });
+  });
+</script>
+
+<style is:global>
+  .stage-light-beam {
+    width: 48px;
+    height: 380px;
+    transform: translate(-50%, 0);
+    transform-origin: top center;
+    clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+    opacity: 0.8;
+    filter: blur(1px);
+    animation: beamBlink 2.5s infinite alternate;
+  }
+  .stage-light-glow {
+    opacity: 0.85;
+    filter: blur(4px);
+    animation: glowBlink 2s infinite alternate;
+  }
+  @keyframes beamBlink {
+    0% { opacity: 0.65; transform: translate(-50%, 0) scaleX(0.96); }
+    100% { opacity: 0.85; transform: translate(-50%, 0) scaleX(1.04); }
+  }
+  @keyframes glowBlink {
+    0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.65; }
+    100% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.9; }
+  }
+</style>

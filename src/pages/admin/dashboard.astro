@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ProductionDashboardTab from '../../components/admin/ProductionDashboardTab.astro';
 ---
 
 <Layout title="Dashboard de Administración | Banda Bruna" description="Panel de control dinámico oficial de Banda Bruna.">
@@ -41,6 +42,9 @@ import Layout from '../../layouts/Layout.astro';
         </button>
         <button data-tab-target="rider" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📋 Rider Técnico / EPK
+        </button>
+        <button data-tab-target="produccion-tecnica" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          🏗️ Producción Técnica
         </button>
         <button data-tab-target="config" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           ⚙️ Ajustes & Redes
@@ -395,6 +399,8 @@ import Layout from '../../layouts/Layout.astro';
           </div>
         </section>
 
+        <ProductionDashboardTab />
+
       </main>
     </div>
   </div>
@@ -416,7 +422,7 @@ import Layout from '../../layouts/Layout.astro';
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. AUTENTICACIÓN: Verificar acceso seguro y correo exacto
       const { data: { session } } = await supabase.auth.getSession();
-      const emailsAutorizados = ['contacto@bandabruna.cl', 'tecnico@bandabruna.cl'];
+      const emailsAutorizados = ['contacto@bandabruna.cl'];
       
       if (!session || !session.user || !session.user.email || !emailsAutorizados.includes(session.user.email)) {
         // Redirigir a login
@@ -425,7 +431,7 @@ import Layout from '../../layouts/Layout.astro';
       }
 
       loggedInUserEmail = session.user.email;
-      const isTecnico = loggedInUserEmail === 'tecnico@bandabruna.cl';
+      const isTecnico = false;
       
       const userDisplay = document.getElementById('user-display');
       if (userDisplay) userDisplay.textContent = loggedInUserEmail;
@@ -473,6 +479,11 @@ import Layout from '../../layouts/Layout.astro';
           if (target === 'eventos') loadEventos();
           if (target === 'equipo') loadEquipo();
           if (target === 'rider') loadRider();
+          if (target === 'produccion-tecnica') {
+            if (typeof window.loadProduccionTecnica === 'function') {
+              window.loadProduccionTecnica();
+            }
+          }
           if (target === 'config') loadConfig();
           if (target === 'testimonios') loadTestimonios();
           if (target === 'lanzamientos') loadLanzamientos();
@@ -485,7 +496,7 @@ import Layout from '../../layouts/Layout.astro';
         // Ocultar botones de pestañas que no corresponden
         document.querySelectorAll('.tab-btn').forEach(btn => {
           const target = btn.getAttribute('data-tab-target');
-          if (target !== 'rider') {
+          if (target !== 'rider' && target !== 'produccion-tecnica') {
             (btn as HTMLElement).style.display = 'none';
           }
         });

@@ -89,7 +89,7 @@ insert into public.lanzamientos (
   'Ahogado en un Bar',
   'single',
   '2026-06-25 00:00:00-04', -- Ya visible
-  '2026-07-04 00:00:00-04', -- Fecha de estreno
+  '2026-07-04 19:00:00-04', -- Fecha de estreno
   'publicado',
   'ahogado-en-un-bar',
   'AHOGADO EN UN BAR',
@@ -123,7 +123,7 @@ insert into public.lanzamientos (
     {"url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1781910507/757c793c-3f28-4861-8be5-b383b2045af1_ggzjfz.mp4", "tipo": "vertical", "caption": "Detrás de cámaras"}
   ]'::jsonb,
   '{
-    "youtube": "https://www.youtube.com/watch?v=U-eHssIG91o",
+    "youtube": "https://www.youtube.com/watch?v=mZhYl60ENAs",
     "spotify": "https://open.spotify.com/artist/3QpgBBp8CypsMEM5rgWo7D",
     "apple_music": "https://music.apple.com/cl/artist/banda-bruna/3QpgBBp8CypsMEM5rgWo7D",
     "youtube_music": "https://music.youtube.com/channel/3QpgBBp8CypsMEM5rgWo7D",

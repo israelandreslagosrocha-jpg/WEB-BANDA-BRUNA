@@ -1,0 +1,1252 @@
+---
+// Componente de Administración de Producción Técnica
+---
+<section id="tab-produccion-tecnica" class="tab-pane hidden">
+  <div class="flex flex-col gap-8">
+    <!-- Header y Selector de Versiones -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 border border-white/5 p-5 rounded-2xl">
+      <div>
+        <h2 class="font-title font-bold text-xl uppercase text-white mb-1">Producción Técnica & Planta de Luces</h2>
+        <p class="text-xs text-slate-400">Gestiona versiones del show, distribución de luminarias, audio patch y descargas.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Versión Activa</label>
+          <select id="prod-layout-select" class="bg-slate-950 border border-white/10 rounded px-3 py-2 text-xs text-white outline-none cursor-pointer focus:border-gold-bruna min-w-[200px]">
+            <!-- Dinámico -->
+          </select>
+        </div>
+        <div class="flex gap-2 self-end">
+          <button id="btn-prod-new-layout" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+            + Nueva Versión
+          </button>
+          <button id="btn-prod-dup-layout" class="bg-slate-950 border border-white/10 hover:border-gold-bruna/30 text-white px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+            Duplicar
+          </button>
+          <button id="btn-prod-del-layout" class="bg-red-950/40 border border-red-500/20 hover:border-red-500 text-red-400 px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layout Grid: Diseñador e Info de Foco -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <!-- Visor / Diseñador 2D -->
+      <div class="xl:col-span-2 flex flex-col gap-4 bg-slate-900/40 border border-white/5 p-5 rounded-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Diseñador de Iluminación 2D (Vista Aérea)</h3>
+          <div class="flex gap-2">
+            <button id="btn-prod-add-fixture" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer">
+              + Añadir Foco
+            </button>
+            <button id="btn-prod-add-effect" class="bg-slate-950 border border-white/10 hover:border-gold-bruna text-white px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer">
+              + Añadir Efecto Especial
+            </button>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400">
+          Arrastra los focos o efectos sobre el escenario para posicionarlos. Haz clic en un elemento para editar su DMX, marca, truss o rotación en el panel derecho. Las coordenadas se salvan automáticamente al soltar.
+        </p>
+
+        <!-- Escenario Interactivo Admin -->
+        <div id="prod-stage-canvas" class="w-full aspect-[16/10] bg-slate-950 border border-white/10 rounded-xl relative overflow-hidden select-none min-h-[350px] shadow-inner shadow-black">
+          <div class="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+          
+          <!-- Trusses de Fondo -->
+          <div id="prod-trusses-layer" class="absolute inset-0 z-0 flex flex-col justify-between py-12 pointer-events-none">
+            <!-- Dinámicos -->
+          </div>
+
+          <!-- Capa de Elementos Arrastrables -->
+          <div id="prod-elements-layer" class="absolute inset-0 z-10">
+            <!-- Focos y Efectos Dinámicos -->
+          </div>
+
+          <!-- Eje de Frente Escenario -->
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[8px] text-slate-600 uppercase tracking-widest pointer-events-none">BOCA DE ESCENARIO (FRONTAL)</div>
+        </div>
+      </div>
+
+      <!-- Editor de Propiedades / Detalles -->
+      <div class="xl:col-span-1 flex flex-col gap-6">
+        <!-- Detalle de Foco Seleccionado -->
+        <div id="prod-editor-panel" class="bg-slate-900/60 border border-white/5 p-5 rounded-2xl flex flex-col gap-4">
+          <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider border-b border-white/5 pb-2">Propiedades del Elemento</h3>
+          
+          <div id="prod-editor-empty" class="text-center py-12 text-xs text-slate-500 uppercase">
+            Haz clic en un foco o efecto para editar sus propiedades.
+          </div>
+
+          <form id="prod-editor-form" class="hidden flex flex-col gap-4">
+            <input type="hidden" id="edit-el-id" />
+            <input type="hidden" id="edit-el-type" /> <!-- 'fixture' o 'effect' -->
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Etiqueta / Nombre Corto</label>
+              <input type="text" id="edit-el-label" required class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+            </div>
+
+            <!-- Campos específicos para Focos -->
+            <div id="fixture-only-fields" class="flex flex-col gap-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Tipo Equipo (Fixture)</label>
+                  <select id="edit-el-fixture-id" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none cursor-pointer focus:border-gold-bruna">
+                    <!-- Dinámico -->
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Truss / Puente</label>
+                  <select id="edit-el-truss-id" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none cursor-pointer focus:border-gold-bruna">
+                    <option value="">Piso (Sin Puente)</option>
+                    <!-- Dinámico -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Universo</label>
+                  <input type="number" id="edit-el-univ" min="1" max="10" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Canal DMX</label>
+                  <input type="number" id="edit-el-channel" min="1" max="512" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Modo DMX</label>
+                  <input type="text" id="edit-el-mode" placeholder="ej: 16CH" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Altura (Z en metros)</label>
+                  <input type="number" step="0.1" id="edit-el-z" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Rotación (0-360°)</label>
+                  <input type="number" id="edit-el-rot" min="0" max="360" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Campos específicos para Efectos Especiales -->
+            <div id="effect-only-fields" class="hidden flex flex-col gap-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Efecto Especial</label>
+                  <select id="edit-el-effect-name" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none cursor-pointer focus:border-gold-bruna">
+                    <option value="Spark">Spark (Chispa Fría)</option>
+                    <option value="Smoke">Smoke (Humo Vertical)</option>
+                    <option value="Hazer">Hazer (Húmedo)</option>
+                    <option value="Co2">CO2 Jet</option>
+                    <option value="Confetti">Confetti Jet</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Cantidad</label>
+                  <input type="number" id="edit-el-effect-qty" min="1" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Descripción del Efecto</label>
+                <textarea id="edit-el-effect-desc" rows="2" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna resize-none"></textarea>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mt-2">
+              <button type="submit" class="w-full bg-gold-bruna hover:bg-gold-bruna-hover text-black py-2.5 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+                Guardar Cambios
+              </button>
+              <button type="button" id="btn-prod-delete-el" class="bg-red-950/40 border border-red-500/20 hover:border-red-500 text-red-400 px-4 py-2.5 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+                Eliminar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Catálogo Rápido / Equipos -->
+        <div class="bg-slate-900/60 border border-white/5 p-5 rounded-2xl flex flex-col gap-4">
+          <div class="flex justify-between items-center">
+            <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Catálogo de Luminarias</h3>
+            <button id="btn-prod-new-catalog-item" class="border border-white/10 hover:border-gold-bruna text-white px-2 py-1 rounded text-[8px] font-bold uppercase tracking-widest cursor-pointer">
+              + Nuevo Equipo
+            </button>
+          </div>
+          <div class="max-h-[220px] overflow-y-auto pr-1 flex flex-col gap-2" id="prod-catalog-list">
+            <!-- Dinámico -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Trusses / Puentes Físicos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="bg-slate-900/40 border border-white/5 p-6 rounded-2xl flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Estructura & Puentes (Trusses)</h3>
+          <button id="btn-prod-new-truss" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer">
+            + Nuevo Puente
+          </button>
+        </div>
+        <div class="max-h-[300px] overflow-y-auto pr-1 flex flex-col gap-3" id="prod-trusses-list">
+          <!-- Dinámico -->
+        </div>
+      </div>
+
+      <!-- Sección de Descargas por Layout -->
+      <div class="bg-slate-900/40 border border-white/5 p-6 rounded-2xl flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Descargas & Documentación Técnica</h3>
+          <button id="btn-prod-new-download" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer">
+            + Añadir Archivo
+          </button>
+        </div>
+        <div class="max-h-[300px] overflow-y-auto pr-1 flex flex-col gap-3" id="prod-downloads-list">
+          <!-- Dinámico -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modales del Panel Técnico -->
+
+<!-- Modal: Crear/Editar Layout -->
+<div id="modal-prod-layout" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-900 border border-white/5 rounded-2xl p-6 relative">
+    <h3 id="modal-layout-title" class="font-title font-bold text-md text-white uppercase tracking-wider mb-4">Nueva Versión de Producción</h3>
+    <form id="form-prod-layout" class="flex flex-col gap-4">
+      <input type="hidden" id="layout-modal-id" />
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre de la Versión</label>
+        <input type="text" id="layout-modal-name" required placeholder="ej: Teatro Municipal, Festival al Aire Libre" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Slug (Identificador único en URL)</label>
+        <input type="text" id="layout-modal-slug" required placeholder="ej: festival-outdoor, indoor-teatro" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="flex gap-2 justify-end mt-2">
+        <button type="button" id="btn-prod-layout-cancel" class="bg-slate-950 border border-white/10 hover:border-white/20 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Confirmar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Catálogo Item (Fixture) -->
+<div id="modal-prod-fixture" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-900 border border-white/5 rounded-2xl p-6 relative">
+    <h3 id="modal-fixture-title" class="font-title font-bold text-md text-white uppercase tracking-wider mb-4">Foco del Catálogo</h3>
+    <form id="form-prod-fixture" class="flex flex-col gap-4">
+      <input type="hidden" id="fixture-modal-id" />
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre del Equipo</label>
+        <input type="text" id="fixture-modal-name" required placeholder="ej: Beam 7R" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Tipo</label>
+          <select id="fixture-modal-type" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none cursor-pointer focus:border-gold-bruna">
+            <option value="Beam">Beam (Haz Concentrado)</option>
+            <option value="Wash">Wash (Bañador)</option>
+            <option value="Blinder">Blinder (Cegadora)</option>
+            <option value="Led Bar">Led Bar (Paleta/Barra LED)</option>
+            <option value="Cob">Cob (Luz de Relleno)</option>
+            <option value="Moving Head">Moving Head (Cabeza Móvil)</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Potencia</label>
+          <input type="text" id="fixture-modal-power" placeholder="ej: 230W, 300W" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Marca</label>
+          <input type="text" id="fixture-modal-brand" placeholder="ej: Clay Paky, Martin" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Modelo</label>
+          <input type="text" id="fixture-modal-model" placeholder="ej: Sharpy" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end mt-2">
+        <button type="button" id="btn-prod-fixture-cancel" class="bg-slate-950 border border-white/10 hover:border-white/20 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Truss (Puente) -->
+<div id="modal-prod-truss" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-900 border border-white/5 rounded-2xl p-6 relative">
+    <h3 id="modal-truss-title" class="font-title font-bold text-md text-white uppercase tracking-wider mb-4">Puente de Iluminación</h3>
+    <form id="form-prod-truss" class="flex flex-col gap-4">
+      <input type="hidden" id="truss-modal-id" />
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nombre del Puente</label>
+        <input type="text" id="truss-modal-name" required placeholder="ej: Puente Contra, Puente Cenital" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Longitud (m)</label>
+          <input type="number" step="0.1" id="truss-modal-len" required value="9.0" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Altura (m)</label>
+          <input type="number" step="0.1" id="truss-modal-alt" required value="5.0" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Carga Máx (kg)</label>
+          <input type="number" id="truss-modal-load" required value="500" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Orden (Posición)</label>
+          <input type="number" id="truss-modal-order" required value="0" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Descripción</label>
+          <input type="text" id="truss-modal-desc" placeholder="ej: Puente trasero de contra" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end mt-2">
+        <button type="button" id="btn-prod-truss-cancel" class="bg-slate-950 border border-white/10 hover:border-white/20 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Descargas (Downloads) -->
+<div id="modal-prod-download" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-900 border border-white/5 rounded-2xl p-6 relative">
+    <h3 id="modal-download-title" class="font-title font-bold text-md text-white uppercase tracking-wider mb-4">Añadir Archivo de Descarga</h3>
+    <form id="form-prod-download" class="flex flex-col gap-4">
+      <input type="hidden" id="download-modal-id" />
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Título del Archivo</label>
+        <input type="text" id="download-modal-title" required placeholder="ej: Rider de Audio PDF" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Categoría</label>
+          <select id="download-modal-cat" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none cursor-pointer focus:border-gold-bruna">
+            <option value="Rider">Rider Técnico General</option>
+            <option value="Audio">Audio</option>
+            <option value="Iluminacion">Iluminación</option>
+            <option value="Backline">Backline</option>
+            <option value="Stage Plot">Stage Plot</option>
+            <option value="Logos">Logos</option>
+            <option value="Fotos">Fotos Oficiales</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Orden</label>
+          <input type="number" id="download-modal-order" required value="0" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">URL del PDF / Archivo</label>
+        <input type="text" id="download-modal-pdf" placeholder="ej: /assets/downloads/rider.pdf" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">URL de la Imagen Previa (Opcional)</label>
+        <input type="text" id="download-modal-img" placeholder="ej: /assets/images/rider_preview.webp" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+      </div>
+      <div class="flex gap-2 justify-end mt-2">
+        <button type="button" id="btn-prod-download-cancel" class="bg-slate-950 border border-white/10 hover:border-white/20 text-white px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  import { supabase } from '../../services/supabaseClient.js';
+
+  let currentLayoutId = '';
+  let layoutsList = [];
+  let fixturesCatalog = [];
+  let trussesList = [];
+  let stageElements = []; // { id, x, y, label, type, fixture_id, dmx, truss_id... }
+  let activeSelectedElement = null; // Foco o efecto seleccionado en editor
+
+  // Colores por tipo de foco basados en el diagrama
+  const fixtureColors = {
+    'Beam': 'bg-red-600 shadow-[0_0_10px_#ef4444]',
+    'Wash': 'bg-blue-600 shadow-[0_0_10px_#3b82f6]',
+    'Led Bar': 'bg-emerald-600 w-8 h-3 rounded shadow-[0_0_10px_#10b981]',
+    'Cob': 'bg-yellow-500 shadow-[0_0_10px_#f59e0b]',
+    'Blinder': 'bg-orange-500 rounded shadow-[0_0_10px_#f97316]',
+    'Moving Head': 'bg-fuchsia-600 shadow-[0_0_10px_#d946ef]'
+  };
+
+  const effectColors = {
+    'Spark': 'bg-purple-600 border border-purple-400 shadow-[0_0_12px_#a855f7]',
+    'Smoke': 'bg-pink-600 border border-pink-400 shadow-[0_0_12px_#ec4899]',
+    'Hazer': 'bg-indigo-650 border border-indigo-400 shadow-[0_0_12px_#6366f1]',
+    'Co2': 'bg-cyan-600 border border-cyan-400 shadow-[0_0_12px_#06b6d4]',
+    'Confetti': 'bg-teal-600 border border-teal-400 shadow-[0_0_12px_#14b8a6]'
+  };
+
+  // 1. Inicialización global desde el dashboard
+  window.loadProduccionTecnica = async function() {
+    await loadLayouts();
+    await loadCatalog();
+    if (layoutsList.length > 0) {
+      currentLayoutId = layoutsList[0].id;
+      const select = document.getElementById('prod-layout-select') as HTMLSelectElement;
+      if (select) select.value = currentLayoutId;
+      await loadActiveLayoutDetails();
+    }
+  };
+
+  // Cargar lista de Layouts
+  async function loadLayouts() {
+    const select = document.getElementById('prod-layout-select');
+    if (!select) return;
+
+    const { data, error } = await supabase
+      .from('stage_layouts')
+      .select('*')
+      .order('nombre', { ascending: true });
+
+    if (!error && data) {
+      layoutsList = data;
+      select.innerHTML = data.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('');
+    }
+  }
+
+  // Cargar Catálogo de Equipos
+  async function loadCatalog() {
+    const listContainer = document.getElementById('prod-catalog-list');
+    const selectEditor = document.getElementById('edit-el-fixture-id');
+    const modalSelect = document.getElementById('fixture-modal-type');
+    if (!listContainer) return;
+
+    const { data, error } = await supabase
+      .from('lighting_fixtures')
+      .select('*')
+      .order('nombre', { ascending: true });
+
+    if (!error && data) {
+      fixturesCatalog = data;
+      
+      // Render list
+      listContainer.innerHTML = data.map(f => `
+        <div class="flex justify-between items-center bg-slate-950/60 border border-white/5 px-3 py-2 rounded-lg text-xs">
+          <div>
+            <span class="font-bold text-white block">${f.nombre}</span>
+            <span class="text-[9px] text-slate-450 uppercase">${f.tipo} • ${f.potencia || 'S/P'}</span>
+          </div>
+          <button class="btn-edit-catalog-item text-[10px] text-gold-bruna hover:underline cursor-pointer" data-id="${f.id}">Editar</button>
+        </div>
+      `).join('');
+
+      // Populate selects
+      if (selectEditor) {
+        selectEditor.innerHTML = data.map(f => `<option value="${f.id}">${f.nombre} (${f.tipo})</option>`).join('');
+      }
+
+      // Add click handlers for edit
+      document.querySelectorAll('.btn-edit-catalog-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.target as HTMLElement).getAttribute('data-id');
+          openFixtureModal(id);
+        });
+      });
+    }
+  }
+
+  // Cargar Detalles del Layout Activo
+  async function loadActiveLayoutDetails() {
+    if (!currentLayoutId) return;
+
+    // A. Cargar Puentes (Trusses)
+    const { data: trusses, error: errTrusses } = await supabase
+      .from('lighting_trusses')
+      .select('*')
+      .eq('layout_id', currentLayoutId)
+      .order('orden', { ascending: true });
+
+    if (!errTrusses && trusses) {
+      trussesList = trusses;
+      renderTrusses();
+      
+      // Populate select in editor
+      const selectTruss = document.getElementById('edit-el-truss-id');
+      if (selectTruss) {
+        selectTruss.innerHTML = '<option value="">Piso (Sin Puente)</option>' + 
+          trusses.map(t => `<option value="${t.id}">${t.nombre} (${t.longitud}m)</option>`).join('');
+      }
+    }
+
+    // B. Cargar Luminarias
+    const { data: fixtures, error: errFixtures } = await supabase
+      .from('layout_objects')
+      .select('*, fixture:lighting_fixtures(*)')
+      .eq('layout_id', currentLayoutId);
+
+    // C. Cargar Efectos Especiales
+    const { data: effects, error: errEffects } = await supabase
+      .from('lighting_effects')
+      .select('*')
+      .eq('layout_id', currentLayoutId);
+
+    if (!errFixtures && fixtures && !errEffects && effects) {
+      // Unir focos y efectos en una lista unificada para pintar en pantalla
+      stageElements = [
+        ...fixtures.map(f => ({ ...f, type: 'fixture' })),
+        ...effects.map(e => ({ ...e, type: 'effect', nombre_etiqueta: e.nombre }))
+      ];
+      renderStageElements();
+    }
+
+    // D. Cargar Descargas
+    await loadDownloads();
+  }
+
+  // Cargar lista de descargas
+  async function loadDownloads() {
+    const container = document.getElementById('prod-downloads-list');
+    if (!container) return;
+
+    const { data, error } = await supabase
+      .from('downloads')
+      .select('*')
+      .or(`layout_id.eq.${currentLayoutId},layout_id.is.null`)
+      .order('orden', { ascending: true });
+
+    if (!error && data) {
+      container.innerHTML = data.map(d => `
+        <div class="flex justify-between items-center bg-slate-950/60 border border-white/5 px-3.5 py-3 rounded-xl">
+          <div>
+            <span class="font-bold text-white text-xs block">${d.titulo}</span>
+            <span class="text-[9px] text-gold-bruna uppercase font-mono tracking-wider">${d.categoria} ${d.layout_id ? '• Versión Especial' : '• General'}</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn-edit-download text-[10px] text-slate-400 hover:text-white cursor-pointer" data-id="${d.id}">Editar</button>
+            <button class="btn-del-download text-[10px] text-red-400 hover:text-red-300 cursor-pointer" data-id="${d.id}">Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.btn-edit-download').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = (e.target as HTMLElement).getAttribute('data-id');
+          openDownloadModal(id);
+        });
+      });
+
+      document.querySelectorAll('.btn-del-download').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = (e.target as HTMLElement).getAttribute('data-id');
+          if (confirm('¿Eliminar esta descarga?')) {
+            await supabase.from('downloads').delete().eq('id', id);
+            await loadDownloads();
+          }
+        });
+      });
+    }
+  }
+
+  // Renderizar Puentes (Trusses) en el Canvas
+  function renderTrusses() {
+    const canvasTrusses = document.getElementById('prod-trusses-layer');
+    const trussesListContainer = document.getElementById('prod-trusses-list');
+    if (!canvasTrusses || !trussesListContainer) return;
+
+    // Pintar rectángulos en el fondo del escenario
+    canvasTrusses.innerHTML = trussesList.map(t => `
+      <div class="w-[85%] mx-auto bg-slate-900/80 border-y border-dashed border-white/10 flex items-center justify-between px-6 py-2.5 relative">
+        <span class="text-[8px] text-slate-550 uppercase font-mono font-bold tracking-widest">${t.nombre} (${t.longitud}m x H:${t.altura}m)</span>
+        <span class="text-[7px] text-slate-650 uppercase font-mono">Max: ${t.carga_maxima}kg</span>
+      </div>
+    `).join('');
+
+    // Pintar listado administrativo de puentes
+    trussesListContainer.innerHTML = trussesList.map(t => `
+      <div class="flex justify-between items-center bg-slate-950/60 border border-white/5 px-4 py-3 rounded-xl text-xs">
+        <div>
+          <span class="font-bold text-white block">${t.nombre}</span>
+          <span class="text-[9px] text-slate-450 uppercase">L: ${t.longitud}m • H: ${t.altura}m • Carga: ${t.carga_maxima}kg</span>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-edit-truss text-[10px] text-slate-400 hover:text-white cursor-pointer" data-id="${t.id}">Editar</button>
+          <button class="btn-del-truss text-[10px] text-red-400 hover:text-red-300 cursor-pointer" data-id="${t.id}">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Bindings
+    document.querySelectorAll('.btn-edit-truss').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).getAttribute('data-id');
+        openTrussModal(id);
+      });
+    });
+
+    document.querySelectorAll('.btn-del-truss').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = (e.target as HTMLElement).getAttribute('data-id');
+        if (confirm('¿Eliminar este puente? Esto borrará focos asociados.')) {
+          await supabase.from('lighting_trusses').delete().eq('id', id);
+          await loadActiveLayoutDetails();
+        }
+      });
+    });
+  }
+
+  // Renderizar Focos y Efectos en el escenario
+  function renderStageElements() {
+    const container = document.getElementById('prod-elements-layer');
+    if (!container) return;
+
+    container.innerHTML = stageElements.map(el => {
+      let colorClass = 'bg-slate-500';
+      let shapeClass = 'w-6 h-6 rounded-full';
+
+      if (el.type === 'fixture' && el.fixture) {
+        colorClass = fixtureColors[el.fixture.tipo] || 'bg-slate-500 shadow-lg';
+        if (el.fixture.tipo === 'Led Bar') {
+          shapeClass = 'w-8 h-3.5 rounded';
+        }
+      } else if (el.type === 'effect') {
+        colorClass = effectColors[el.nombre] || 'bg-purple-500';
+        shapeClass = 'w-5.5 h-5.5 border-2 rounded-mdRotate';
+      }
+
+      const activeClass = (activeSelectedElement && activeSelectedElement.id === el.id) ? 'outline outline-2 outline-offset-2 outline-gold-bruna' : '';
+
+      return `
+        <div 
+          class="absolute cursor-pointer flex items-center justify-center text-[7px] text-white font-bold transition-shadow ${shapeClass} ${colorClass} ${activeClass} select-none"
+          style="left: ${el.posicion_x}%; top: ${el.posicion_y}%; transform: translate(-50%, -50%) rotate(${el.rotacion || 0}deg);"
+          data-element-id="${el.id}"
+          data-element-type="${el.type}"
+          title="${el.nombre_etiqueta || el.nombre}"
+        >
+          <span class="pointer-events-none select-none">${el.nombre_etiqueta ? el.nombre_etiqueta.replace(/^\D+/g, '') : ''}</span>
+        </div>
+      `;
+    }).join('');
+
+    // Agregar eventos de clic y drag en caliente
+    container.querySelectorAll('[data-element-id]').forEach(elDiv => {
+      elDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-element-id');
+        const type = (e.currentTarget as HTMLElement).getAttribute('data-element-type');
+        selectElement(id, type);
+      });
+
+      // Drag and drop handler
+      initDragHandler(elDiv as HTMLElement);
+    });
+  }
+
+  // Lógica de Drag and Drop
+  function initDragHandler(el: HTMLElement) {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    const canvas = document.getElementById('prod-stage-canvas');
+    if (!canvas) return;
+
+    el.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      el.style.zIndex = '50';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const clientX = Math.max(rect.left, Math.min(rect.right, e.clientX));
+      const clientY = Math.max(rect.top, Math.min(rect.bottom, e.clientY));
+
+      const pctX = ((clientX - rect.left) / rect.width) * 100;
+      const pctY = ((clientY - rect.top) / rect.height) * 100;
+
+      el.style.left = `${pctX.toFixed(2)}%`;
+      el.style.top = `${pctY.toFixed(2)}%`;
+    });
+
+    document.addEventListener('mouseup', async (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      el.style.zIndex = '10';
+
+      const id = el.getAttribute('data-element-id');
+      const type = el.getAttribute('data-element-type');
+      
+      const pctX = parseFloat(el.style.left);
+      const pctY = parseFloat(el.style.top);
+
+      // Actualizar en Supabase
+      if (type === 'fixture') {
+        await supabase
+          .from('layout_objects')
+          .update({ posicion_x: pctX, posicion_y: pctY })
+          .eq('id', id);
+      } else {
+        await supabase
+          .from('lighting_effects')
+          .update({ posicion_x: pctX, posicion_y: pctY })
+          .eq('id', id);
+      }
+
+      // Actualizar localmente
+      const localObj = stageElements.find(item => item.id === id);
+      if (localObj) {
+        localObj.posicion_x = pctX;
+        localObj.posicion_y = pctY;
+      }
+    });
+  }
+
+  // Seleccionar elemento y rellenar formulario
+  function selectElement(id: string, type: string) {
+    const emptyMsg = document.getElementById('prod-editor-empty');
+    const form = document.getElementById('prod-editor-form') as HTMLFormElement;
+    if (!emptyMsg || !form) return;
+
+    activeSelectedElement = stageElements.find(el => el.id === id && el.type === type);
+    if (!activeSelectedElement) return;
+
+    emptyMsg.classList.add('hidden');
+    form.classList.remove('hidden');
+
+    // Rellenar campos comunes
+    (document.getElementById('edit-el-id') as HTMLInputElement).value = activeSelectedElement.id;
+    (document.getElementById('edit-el-type') as HTMLInputElement).value = activeSelectedElement.type;
+    (document.getElementById('edit-el-label') as HTMLInputElement).value = activeSelectedElement.nombre_etiqueta || '';
+
+    const fixFields = document.getElementById('fixture-only-fields');
+    const effFields = document.getElementById('effect-only-fields');
+
+    if (type === 'fixture' && fixFields && effFields) {
+      fixFields.classList.remove('hidden');
+      effFields.classList.add('hidden');
+
+      (document.getElementById('edit-el-fixture-id') as HTMLSelectElement).value = activeSelectedElement.fixture_id;
+      (document.getElementById('edit-el-truss-id') as HTMLSelectElement).value = activeSelectedElement.truss_id || '';
+      (document.getElementById('edit-el-univ') as HTMLInputElement).value = activeSelectedElement.universo_dmx;
+      (document.getElementById('edit-el-channel') as HTMLInputElement).value = activeSelectedElement.canal_dmx;
+      (document.getElementById('edit-el-mode') as HTMLInputElement).value = activeSelectedElement.modo || '';
+      (document.getElementById('edit-el-z') as HTMLInputElement).value = activeSelectedElement.posicion_z;
+      (document.getElementById('edit-el-rot') as HTMLInputElement).value = activeSelectedElement.rotacion || 0;
+
+    } else if (type === 'effect' && fixFields && effFields) {
+      fixFields.classList.add('hidden');
+      effFields.classList.remove('hidden');
+
+      (document.getElementById('edit-el-effect-name') as HTMLSelectElement).value = activeSelectedElement.nombre;
+      (document.getElementById('edit-el-effect-qty') as HTMLInputElement).value = activeSelectedElement.cantidad;
+      (document.getElementById('edit-el-effect-desc') as HTMLTextAreaElement).value = activeSelectedElement.descripcion || '';
+    }
+
+    renderStageElements();
+  }
+
+  // Guardar formulario de propiedades
+  const editorForm = document.getElementById('prod-editor-form');
+  if (editorForm) {
+    editorForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = (document.getElementById('edit-el-id') as HTMLInputElement).value;
+      const type = (document.getElementById('edit-el-type') as HTMLInputElement).value;
+      const label = (document.getElementById('edit-el-label') as HTMLInputElement).value.trim();
+
+      if (type === 'fixture') {
+        const fixture_id = (document.getElementById('edit-el-fixture-id') as HTMLSelectElement).value;
+        const truss_id = (document.getElementById('edit-el-truss-id') as HTMLSelectElement).value || null;
+        const universo_dmx = parseInt((document.getElementById('edit-el-univ') as HTMLInputElement).value);
+        const canal_dmx = parseInt((document.getElementById('edit-el-channel') as HTMLInputElement).value);
+        const modo = (document.getElementById('edit-el-mode') as HTMLInputElement).value;
+        const posicion_z = parseFloat((document.getElementById('edit-el-z') as HTMLInputElement).value);
+        const rotacion = parseInt((document.getElementById('edit-el-rot') as HTMLInputElement).value);
+
+        const { error } = await supabase
+          .from('layout_objects')
+          .update({ fixture_id, truss_id, nombre_etiqueta: label, universo_dmx, canal_dmx, modo, posicion_z, rotacion })
+          .eq('id', id);
+
+        if (error) alert('Error al guardar: ' + error.message);
+      } else {
+        const nombre = (document.getElementById('edit-el-effect-name') as HTMLSelectElement).value;
+        const cantidad = parseInt((document.getElementById('edit-el-effect-qty') as HTMLInputElement).value);
+        const descripcion = (document.getElementById('edit-el-effect-desc') as HTMLTextAreaElement).value.trim();
+
+        const { error } = await supabase
+          .from('lighting_effects')
+          .update({ nombre, cantidad, descripcion })
+          .eq('id', id);
+
+        if (error) alert('Error al guardar: ' + error.message);
+      }
+
+      await loadActiveLayoutDetails();
+      // Refocus selected
+      selectElement(id, type);
+    });
+  }
+
+  // Eliminar Foco/Efecto
+  const delElBtn = document.getElementById('btn-prod-delete-el');
+  if (delElBtn) {
+    delElBtn.addEventListener('click', async () => {
+      const id = (document.getElementById('edit-el-id') as HTMLInputElement).value;
+      const type = (document.getElementById('edit-el-type') as HTMLInputElement).value;
+      
+      if (!confirm('¿Deseas eliminar este elemento de la planta?')) return;
+
+      if (type === 'fixture') {
+        await supabase.from('layout_objects').delete().eq('id', id);
+      } else {
+        await supabase.from('lighting_effects').delete().eq('id', id);
+      }
+
+      activeSelectedElement = null;
+      document.getElementById('prod-editor-empty')?.classList.remove('hidden');
+      document.getElementById('prod-editor-form')?.classList.add('hidden');
+
+      await loadActiveLayoutDetails();
+    });
+  }
+
+  // Eventos de Selector de Layout
+  const selectLayout = document.getElementById('prod-layout-select');
+  if (selectLayout) {
+    selectLayout.addEventListener('change', (e) => {
+      currentLayoutId = (e.target as HTMLSelectElement).value;
+      activeSelectedElement = null;
+      document.getElementById('prod-editor-empty')?.classList.remove('hidden');
+      document.getElementById('prod-editor-form')?.classList.add('hidden');
+      loadActiveLayoutDetails();
+    });
+  }
+
+  // Modales Trigger: Layout
+  const newLayoutBtn = document.getElementById('btn-prod-new-layout');
+  const dupLayoutBtn = document.getElementById('btn-prod-dup-layout');
+  const delLayoutBtn = document.getElementById('btn-prod-del-layout');
+  const modalLayout = document.getElementById('modal-prod-layout');
+
+  if (newLayoutBtn && modalLayout) {
+    newLayoutBtn.addEventListener('click', () => {
+      (document.getElementById('layout-modal-id') as HTMLInputElement).value = '';
+      (document.getElementById('layout-modal-name') as HTMLInputElement).value = '';
+      (document.getElementById('layout-modal-slug') as HTMLInputElement).value = '';
+      modalLayout.classList.remove('hidden');
+    });
+  }
+
+  const cancelLayoutBtn = document.getElementById('btn-prod-layout-cancel');
+  if (cancelLayoutBtn && modalLayout) {
+    cancelLayoutBtn.addEventListener('click', () => modalLayout.classList.add('hidden'));
+  }
+
+  const formLayout = document.getElementById('form-prod-layout');
+  if (formLayout && modalLayout) {
+    formLayout.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = (document.getElementById('layout-modal-name') as HTMLInputElement).value.trim();
+      const slug = (document.getElementById('layout-modal-slug') as HTMLInputElement).value.trim();
+
+      const { data, error } = await supabase
+        .from('stage_layouts')
+        .insert([{ nombre, slug }]);
+
+      if (!error) {
+        modalLayout.classList.add('hidden');
+        await loadLayouts();
+        // Cargar el recién creado
+        const select = document.getElementById('prod-layout-select') as HTMLSelectElement;
+        const newL = layoutsList.find(item => item.slug === slug);
+        if (newL) {
+          currentLayoutId = newL.id;
+          select.value = currentLayoutId;
+          await loadActiveLayoutDetails();
+        }
+      } else {
+        alert('Error al guardar: ' + error.message);
+      }
+    });
+  }
+
+  // Duplicar Layout
+  if (dupLayoutBtn) {
+    dupLayoutBtn.addEventListener('click', async () => {
+      if (!currentLayoutId) return;
+      const current = layoutsList.find(l => l.id === currentLayoutId);
+      if (!current) return;
+
+      const newName = prompt('Nombre para la nueva versión duplicada:', current.nombre + ' (Copia)');
+      if (!newName) return;
+      const newSlug = prompt('Slug único para la URL:', current.slug + '-copia');
+      if (!newSlug) return;
+
+      // 1. Crear nuevo layout
+      const { data: newL, error: errNew } = await supabase
+        .from('stage_layouts')
+        .insert([{ nombre: newName, slug: newSlug }])
+        .select()
+        .single();
+
+      if (errNew || !newL) {
+        alert('Error al duplicar layout: ' + errNew?.message);
+        return;
+      }
+
+      // 2. Duplicar Trusses
+      const { data: trusses } = await supabase.from('lighting_trusses').select('*').eq('layout_id', currentLayoutId);
+      const trussIdMap = {}; // Viejo id -> nuevo id
+
+      if (trusses && trusses.length > 0) {
+        for (const t of trusses) {
+          const { id, created_at, ...tPayload } = t;
+          tPayload.layout_id = newL.id;
+          const { data: newT } = await supabase.from('lighting_trusses').insert([tPayload]).select().single();
+          if (newT) trussIdMap[t.id] = newT.id;
+        }
+      }
+
+      // 3. Duplicar Focos (Layout Objects)
+      const { data: fixtures } = await supabase.from('layout_objects').select('*').eq('layout_id', currentLayoutId);
+      if (fixtures && fixtures.length > 0) {
+        const payloadFixtures = fixtures.map(f => {
+          const { id, created_at, ...fPayload } = f;
+          fPayload.layout_id = newL.id;
+          if (f.truss_id) fPayload.truss_id = trussIdMap[f.truss_id] || null;
+          return fPayload;
+        });
+        await supabase.from('layout_objects').insert(payloadFixtures);
+      }
+
+      // 4. Duplicar Efectos Especiales
+      const { data: effects } = await supabase.from('lighting_effects').select('*').eq('layout_id', currentLayoutId);
+      if (effects && effects.length > 0) {
+        const payloadEffects = effects.map(e => {
+          const { id, created_at, ...ePayload } = e;
+          ePayload.layout_id = newL.id;
+          return ePayload;
+        });
+        await supabase.from('lighting_effects').insert(payloadEffects);
+      }
+
+      // 5. Duplicar Descargas
+      const { data: downloads } = await supabase.from('downloads').select('*').eq('layout_id', currentLayoutId);
+      if (downloads && downloads.length > 0) {
+        const payloadDownloads = downloads.map(d => {
+          const { id, created_at, ...dPayload } = d;
+          dPayload.layout_id = newL.id;
+          return dPayload;
+        });
+        await supabase.from('downloads').insert(payloadDownloads);
+      }
+
+      alert('¡Layout duplicado con éxito!');
+      await loadLayouts();
+      
+      const select = document.getElementById('prod-layout-select') as HTMLSelectElement;
+      currentLayoutId = newL.id;
+      select.value = currentLayoutId;
+      await loadActiveLayoutDetails();
+    });
+  }
+
+  // Eliminar Layout
+  if (delLayoutBtn) {
+    delLayoutBtn.addEventListener('click', async () => {
+      if (!currentLayoutId || layoutsList.length <= 1) {
+        alert('No se puede eliminar la única versión existente.');
+        return;
+      }
+      if (!confirm('¿Seguro que deseas eliminar permanentemente esta versión del escenario? Esto borrará toda la planta de luces y audio asociada.')) return;
+
+      const { error } = await supabase.from('stage_layouts').delete().eq('id', currentLayoutId);
+      if (!error) {
+        await loadLayouts();
+        currentLayoutId = layoutsList[0].id;
+        const select = document.getElementById('prod-layout-select') as HTMLSelectElement;
+        select.value = currentLayoutId;
+        await loadActiveLayoutDetails();
+      }
+    });
+  }
+
+  // Añadir Foco Rápido al Canvas
+  const addFixtureBtn = document.getElementById('btn-prod-add-fixture');
+  if (addFixtureBtn) {
+    addFixtureBtn.addEventListener('click', async () => {
+      if (!currentLayoutId) return;
+      if (fixturesCatalog.length === 0) {
+        alert('Primero debes crear equipos en el Catálogo.');
+        return;
+      }
+
+      // Crear foco genérico en el centro
+      const defaultFixture = fixturesCatalog[0];
+      const count = stageElements.filter(el => el.type === 'fixture').length + 1;
+
+      const { data, error } = await supabase
+        .from('layout_objects')
+        .insert([{
+          layout_id: currentLayoutId,
+          fixture_id: defaultFixture.id,
+          nombre_etiqueta: `${defaultFixture.nombre} ${count}`,
+          posicion_x: 50,
+          posicion_y: 50,
+          posicion_z: 0,
+          universo_dmx: 1,
+          canal_dmx: 1
+        }])
+        .select()
+        .single();
+
+      if (!error && data) {
+        await loadActiveLayoutDetails();
+        selectElement(data.id, 'fixture');
+      }
+    });
+  }
+
+  // Añadir Efecto Especial Rápido al Canvas
+  const addEffectBtn = document.getElementById('btn-prod-add-effect');
+  if (addEffectBtn) {
+    addEffectBtn.addEventListener('click', async () => {
+      if (!currentLayoutId) return;
+
+      const { data, error } = await supabase
+        .from('lighting_effects')
+        .insert([{
+          layout_id: currentLayoutId,
+          nombre: 'Smoke',
+          descripcion: 'Humo Vertical',
+          posicion_x: 50,
+          posicion_y: 60,
+          cantidad: 1
+        }])
+        .select()
+        .single();
+
+      if (!error && data) {
+        await loadActiveLayoutDetails();
+        selectElement(data.id, 'effect');
+      }
+    });
+  }
+
+  // --- CRUD MODALES: FIXTURE ---
+  const modalFixture = document.getElementById('modal-prod-fixture');
+  const formFixture = document.getElementById('form-prod-fixture');
+  const newFixtureBtn = document.getElementById('btn-prod-new-catalog-item');
+  const cancelFixtureBtn = document.getElementById('btn-prod-fixture-cancel');
+
+  function openFixtureModal(id = '') {
+    if (!modalFixture) return;
+    (document.getElementById('fixture-modal-id') as HTMLInputElement).value = id;
+    if (id) {
+      const f = fixturesCatalog.find(item => item.id === id);
+      if (f) {
+        (document.getElementById('modal-fixture-title') as HTMLElement).textContent = 'Editar Equipo del Catálogo';
+        (document.getElementById('fixture-modal-name') as HTMLInputElement).value = f.nombre;
+        (document.getElementById('fixture-modal-type') as HTMLSelectElement).value = f.tipo;
+        (document.getElementById('fixture-modal-power') as HTMLInputElement).value = f.potencia || '';
+        (document.getElementById('fixture-modal-brand') as HTMLInputElement).value = f.marca || '';
+        (document.getElementById('fixture-modal-model') as HTMLInputElement).value = f.modelo || '';
+      }
+    } else {
+      (document.getElementById('modal-fixture-title') as HTMLElement).textContent = 'Nuevo Equipo de Iluminación';
+      (document.getElementById('fixture-modal-name') as HTMLInputElement).value = '';
+      (document.getElementById('fixture-modal-type') as HTMLSelectElement).value = 'Beam';
+      (document.getElementById('fixture-modal-power') as HTMLInputElement).value = '';
+      (document.getElementById('fixture-modal-brand') as HTMLInputElement).value = '';
+      (document.getElementById('fixture-modal-model') as HTMLInputElement).value = '';
+    }
+    modalFixture.classList.remove('hidden');
+  }
+
+  if (newFixtureBtn) newFixtureBtn.addEventListener('click', () => openFixtureModal());
+  if (cancelFixtureBtn && modalFixture) cancelFixtureBtn.addEventListener('click', () => modalFixture.classList.add('hidden'));
+
+  if (formFixture && modalFixture) {
+    formFixture.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = (document.getElementById('fixture-modal-id') as HTMLInputElement).value;
+      const nombre = (document.getElementById('fixture-modal-name') as HTMLInputElement).value.trim();
+      const tipo = (document.getElementById('fixture-modal-type') as HTMLSelectElement).value;
+      const potencia = (document.getElementById('fixture-modal-power') as HTMLInputElement).value.trim();
+      const marca = (document.getElementById('fixture-modal-brand') as HTMLInputElement).value.trim();
+      const modelo = (document.getElementById('fixture-modal-model') as HTMLInputElement).value.trim();
+
+      const payload = { nombre, tipo, potencia, marca, modelo };
+
+      let err = null;
+      if (id) {
+        const { error } = await supabase.from('lighting_fixtures').update(payload).eq('id', id);
+        err = error;
+      } else {
+        const { error } = await supabase.from('lighting_fixtures').insert([payload]);
+        err = error;
+      }
+
+      if (!err) {
+        modalFixture.classList.add('hidden');
+        await loadCatalog();
+        await loadActiveLayoutDetails();
+      }
+    });
+  }
+
+  // --- CRUD MODALES: TRUSS (PUENTES) ---
+  const modalTruss = document.getElementById('modal-prod-truss');
+  const formTruss = document.getElementById('form-prod-truss');
+  const newTrussBtn = document.getElementById('btn-prod-new-truss');
+  const cancelTrussBtn = document.getElementById('btn-prod-truss-cancel');
+
+  function openTrussModal(id = '') {
+    if (!modalTruss) return;
+    (document.getElementById('truss-modal-id') as HTMLInputElement).value = id;
+    if (id) {
+      const t = trussesList.find(item => item.id === id);
+      if (t) {
+        (document.getElementById('modal-truss-title') as HTMLElement).textContent = 'Editar Puente de Iluminación';
+        (document.getElementById('truss-modal-name') as HTMLInputElement).value = t.nombre;
+        (document.getElementById('truss-modal-len') as HTMLInputElement).value = t.longitud;
+        (document.getElementById('truss-modal-alt') as HTMLInputElement).value = t.altura;
+        (document.getElementById('truss-modal-load') as HTMLInputElement).value = t.carga_maxima;
+        (document.getElementById('truss-modal-order') as HTMLInputElement).value = t.orden;
+        (document.getElementById('truss-modal-desc') as HTMLInputElement).value = t.descripcion || '';
+      }
+    } else {
+      (document.getElementById('modal-truss-title') as HTMLElement).textContent = 'Nuevo Puente Suspendido';
+      (document.getElementById('truss-modal-name') as HTMLInputElement).value = '';
+      (document.getElementById('truss-modal-len') as HTMLInputElement).value = '9.0';
+      (document.getElementById('truss-modal-alt') as HTMLInputElement).value = '5.0';
+      (document.getElementById('truss-modal-load') as HTMLInputElement).value = '500';
+      (document.getElementById('truss-modal-order') as HTMLInputElement).value = (trussesList.length + 1).toString();
+      (document.getElementById('truss-modal-desc') as HTMLInputElement).value = '';
+    }
+    modalTruss.classList.remove('hidden');
+  }
+
+  if (newTrussBtn) newTrussBtn.addEventListener('click', () => openTrussModal());
+  if (cancelTrussBtn && modalTruss) cancelTrussBtn.addEventListener('click', () => modalTruss.classList.add('hidden'));
+
+  if (formTruss && modalTruss) {
+    formTruss.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = (document.getElementById('truss-modal-id') as HTMLInputElement).value;
+      const nombre = (document.getElementById('truss-modal-name') as HTMLInputElement).value.trim();
+      const longitud = parseFloat((document.getElementById('truss-modal-len') as HTMLInputElement).value);
+      const altura = parseFloat((document.getElementById('truss-modal-alt') as HTMLInputElement).value);
+      const carga_maxima = parseInt((document.getElementById('truss-modal-load') as HTMLInputElement).value);
+      const orden = parseInt((document.getElementById('truss-modal-order') as HTMLInputElement).value);
+      const descripcion = (document.getElementById('truss-modal-desc') as HTMLInputElement).value.trim();
+
+      const payload = { nombre, longitud, altura, carga_maxima, orden, descripcion, layout_id: currentLayoutId };
+
+      let err = null;
+      if (id) {
+        const { error } = await supabase.from('lighting_trusses').update(payload).eq('id', id);
+        err = error;
+      } else {
+        const { error } = await supabase.from('lighting_trusses').insert([payload]);
+        err = error;
+      }
+
+      if (!err) {
+        modalTruss.classList.add('hidden');
+        await loadActiveLayoutDetails();
+      }
+    });
+  }
+
+  // --- CRUD MODALES: DOWNLOADS (DESCARGAS) ---
+  const modalDownload = document.getElementById('modal-prod-download');
+  const formDownload = document.getElementById('form-prod-download');
+  const newDownloadBtn = document.getElementById('btn-prod-new-download');
+  const cancelDownloadBtn = document.getElementById('btn-prod-download-cancel');
+
+  async function openDownloadModal(id = '') {
+    if (!modalDownload) return;
+    (document.getElementById('download-modal-id') as HTMLInputElement).value = id;
+    if (id) {
+      const { data } = await supabase.from('downloads').select('*').eq('id', id).single();
+      if (data) {
+        (document.getElementById('modal-download-title') as HTMLElement).textContent = 'Editar Documento Técnico';
+        (document.getElementById('download-modal-title') as HTMLInputElement).value = data.titulo;
+        (document.getElementById('download-modal-cat') as HTMLSelectElement).value = data.categoria;
+        (document.getElementById('download-modal-order') as HTMLInputElement).value = data.orden;
+        (document.getElementById('download-modal-pdf') as HTMLInputElement).value = data.pdf_url || '';
+        (document.getElementById('download-modal-img') as HTMLInputElement).value = data.imagen_url || '';
+      }
+    } else {
+      (document.getElementById('modal-download-title') as HTMLElement).textContent = 'Añadir Documento Técnico';
+      (document.getElementById('download-modal-title') as HTMLInputElement).value = '';
+      (document.getElementById('download-modal-cat') as HTMLSelectElement).value = 'Rider';
+      (document.getElementById('download-modal-order') as HTMLInputElement).value = '0';
+      (document.getElementById('download-modal-pdf') as HTMLInputElement).value = '';
+      (document.getElementById('download-modal-img') as HTMLInputElement).value = '';
+    }
+    modalDownload.classList.remove('hidden');
+  }
+
+  if (newDownloadBtn) newDownloadBtn.addEventListener('click', () => openDownloadModal());
+  if (cancelDownloadBtn && modalDownload) cancelDownloadBtn.addEventListener('click', () => modalDownload.classList.add('hidden'));
+
+  if (formDownload && modalDownload) {
+    formDownload.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = (document.getElementById('download-modal-id') as HTMLInputElement).value;
+      const titulo = (document.getElementById('download-modal-title') as HTMLInputElement).value.trim();
+      const categoria = (document.getElementById('download-modal-cat') as HTMLSelectElement).value;
+      const orden = parseInt((document.getElementById('download-modal-order') as HTMLInputElement).value);
+      const pdf_url = (document.getElementById('download-modal-pdf') as HTMLInputElement).value.trim() || null;
+      const imagen_url = (document.getElementById('download-modal-img') as HTMLInputElement).value.trim() || null;
+
+      const payload = { titulo, categoria, orden, pdf_url, imagen_url, layout_id: currentLayoutId };
+
+      let err = null;
+      if (id) {
+        const { error } = await supabase.from('downloads').update(payload).eq('id', id);
+        err = error;
+      } else {
+        const { error } = await supabase.from('downloads').insert([payload]);
+        err = error;
+      }
+
+      if (!err) {
+        modalDownload.classList.add('hidden');
+        await loadDownloads();
+      }
+    });
+  }
+</script>

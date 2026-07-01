@@ -1,0 +1,148 @@
+---
+// Tabla de Lista de Canales de Audio (Input List)
+---
+<div class="bg-slate-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden" id="input-list-root">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div>
+      <h3 class="font-title font-bold text-lg uppercase text-white mb-1">Input List Oficial</h3>
+      <p class="text-xs text-slate-400">Canales, instrumentos y micrófonos/DI requeridos para la mezcla del show.</p>
+    </div>
+    <!-- Filtro rápido de categorías -->
+    <div class="flex flex-wrap gap-1.5 bg-slate-950 p-1 rounded-xl border border-white/5" id="input-cat-filters">
+      <button class="cat-filter-btn active text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="all">
+        Ver Todo
+      </button>
+      <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="bateria">
+        Batería
+      </button>
+      <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="percusion">
+        Percusión
+      </button>
+      <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="cuerdas">
+        Cuerdas / Armonía
+      </button>
+      <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="voces">
+        Voces
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenedor Tabla -->
+  <div class="overflow-x-auto border border-white/5 rounded-2xl bg-slate-950/45">
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-white/5 bg-slate-950/90 text-slate-400 font-mono">
+          <th class="p-4 uppercase font-bold tracking-widest w-16 text-center">Ch</th>
+          <th class="p-4 uppercase font-bold tracking-widest">Instrumento / Fuente</th>
+          <th class="p-4 uppercase font-bold tracking-widest">Micrófono / Conexión</th>
+          <th class="p-4 uppercase font-bold tracking-widest">Categoría</th>
+        </tr>
+      </thead>
+      <tbody id="input-list-table-body">
+        <!-- Dinámico -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  import { supabase } from '../../services/supabaseClient.js';
+
+  let currentLayoutId = '';
+  let channelsList = [];
+  let selectedCategory = 'all';
+
+  const defaultCanales = [
+    { canal: 1, instrumento: 'KICK', conexion: 'SHURE PGA52', categoria: 'bateria' },
+    { canal: 2, instrumento: 'SNARE', conexion: 'SHURE PGA57', categoria: 'bateria' },
+    { canal: 3, instrumento: 'TIMBAL HIGH', conexion: 'SHURE PGA56', categoria: 'bateria' },
+    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE PGA56', categoria: 'bateria' },
+    { canal: 5, instrumento: 'OCTAPAD', conexion: 'CAJA DIRECTA (DI)', categoria: 'bateria' },
+    { canal: 6, instrumento: 'OH L', conexion: 'SHURE PGA81', categoria: 'bateria' },
+    { canal: 7, instrumento: 'OH R', conexion: 'SHURE PGA81', categoria: 'bateria' },
+    { canal: 8, instrumento: 'CONGA HIGH', conexion: 'SHURE PGA56', categoria: 'percusion' },
+    { canal: 9, instrumento: 'CONGA LOW', conexion: 'SHURE PGA56', categoria: 'percusion' },
+    { canal: 10, instrumento: 'BONGOS', conexion: 'SHURE SM57', categoria: 'percusion' },
+    { canal: 11, instrumento: 'CHIMES', conexion: 'SHURE SM57', categoria: 'percusion' },
+    { canal: 12, instrumento: 'BASS (DI)', conexion: 'CAJA DIRECTA ACTIVA', categoria: 'cuerdas' },
+    { canal: 13, instrumento: 'GTR ACUSTICA', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
+    { canal: 14, instrumento: 'GTR ELECTRICA', conexion: 'MIC (SM57 / PGA57)', categoria: 'cuerdas' },
+    { canal: 15, instrumento: 'TECLADO L', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
+    { canal: 16, instrumento: 'TECLADO R', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
+    { canal: 17, instrumento: 'VOZ MAIN (BRUNA)', conexion: 'SHURE BETA 58 WIRELESS', categoria: 'voces' },
+    { canal: 18, instrumento: 'VOZ CORO (GTR)', conexion: 'SHURE SM58', categoria: 'voces' },
+    { canal: 19, instrumento: 'VOZ CORO (TECL)', conexion: 'SHURE SM58', categoria: 'voces' }
+  ];
+
+  // Escuchar cambio de layout
+  document.addEventListener('production-layout-changed', async (e: any) => {
+    currentLayoutId = e.detail.layoutId;
+    await loadChannels();
+  });
+
+  async function loadChannels() {
+    const tableBody = document.getElementById('input-list-table-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500 uppercase tracking-widest animate-pulse">Cargando canales...</td></tr>';
+
+    const { data, error } = await supabase
+      .from('rider_canales')
+      .select('*')
+      .or(`layout_id.eq.${currentLayoutId},layout_id.is.null`)
+      .order('canal', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      channelsList = data;
+    } else {
+      channelsList = defaultCanales;
+    }
+
+    renderTable();
+  }
+
+  function renderTable() {
+    const tableBody = document.getElementById('input-list-table-body');
+    if (!tableBody) return;
+
+    const filtered = selectedCategory === 'all' 
+      ? channelsList 
+      : channelsList.filter(ch => ch.categoria === selectedCategory);
+
+    if (filtered.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-550 italic">No hay canales asignados en esta categoría.</td></tr>`;
+      return;
+    }
+
+    tableBody.innerHTML = filtered.map(ch => `
+      <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+        <td class="p-4 text-center font-title font-bold text-gold-bruna">${ch.canal}</td>
+        <td class="p-4 font-bold text-white uppercase">${ch.instrumento}</td>
+        <td class="p-4 text-slate-300 font-mono">${ch.conexion}</td>
+        <td class="p-4">
+          <span class="px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold bg-slate-900 border border-white/5 text-slate-400">
+            ${ch.categoria}
+          </span>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // --- FILTROS DE CATEGORÍA ---
+  const filterBtns = document.querySelectorAll('.cat-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-cat');
+      if (!cat) return;
+
+      selectedCategory = cat;
+
+      filterBtns.forEach(b => b.classList.remove('active', 'bg-gold-bruna', 'text-black'));
+      filterBtns.forEach(b => b.classList.add('text-slate-400'));
+      btn.classList.add('active', 'bg-gold-bruna', 'text-black');
+      btn.classList.remove('text-slate-400');
+
+      renderTable();
+    });
+  });
+</script>

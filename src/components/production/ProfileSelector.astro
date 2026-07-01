@@ -1,0 +1,183 @@
+---
+// Componente de Selección de Perfil de Producción
+---
+<div id="production-profile-overlay" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-6 transition-all duration-700 ease-in-out">
+  <div class="absolute inset-0 bg-[radial-gradient(#1e3a8a0b_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
+  
+  <!-- Glow decorativos -->
+  <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-bruna/5 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+
+  <div class="w-full max-w-4xl text-center relative z-10">
+    <div class="mb-8">
+      <span class="text-gold-bruna text-[10px] tracking-widest font-extrabold uppercase block mb-2">PORTAL DE PRODUCCIÓN TÉCNICA</span>
+      <h1 class="text-3xl md:text-5xl font-extrabold font-title uppercase text-white tracking-tight">¿Cuál es tu rol en el show?</h1>
+      <div class="w-16 h-1 bg-gold-bruna mx-auto mt-4 rounded-full"></div>
+      <p class="text-xs text-slate-400 mt-3 max-w-md mx-auto">Selecciona tu perfil para adaptar la interfaz del rider técnico a tus necesidades específicas.</p>
+    </div>
+
+    <!-- Rejilla de Perfiles -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+      <!-- Productor -->
+      <button 
+        class="profile-btn group bg-slate-900/60 border border-white/5 hover:border-gold-bruna/40 p-5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all duration-350 hover:scale-[1.03] cursor-pointer hover:shadow-lg hover:shadow-gold-bruna/5"
+        data-role="productor"
+      >
+        <div class="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center text-gold-bruna group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+        </div>
+        <div class="text-center">
+          <span class="font-title font-bold text-xs uppercase text-white block">Soy Productor</span>
+          <span class="text-[9px] text-slate-450 mt-1 block">Tiempos, Logística, Contratos</span>
+        </div>
+      </button>
+
+      <!-- Sonidista -->
+      <button 
+        class="profile-btn group bg-slate-900/60 border border-white/5 hover:border-gold-bruna/40 p-5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all duration-350 hover:scale-[1.03] cursor-pointer hover:shadow-lg hover:shadow-gold-bruna/5"
+        data-role="sonidista"
+      >
+        <div class="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center text-gold-bruna group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 0L21 8.25M19.5 6C18.672 6 18 6.672 18 7.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5S20.328 6 19.5 6ZM9 9v9m0-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm10.5-3.375a1.875 1.875 0 1 0 0-3.75 1.875 1.875 0 0 0 0 3.75Z" />
+          </svg>
+        </div>
+        <div class="text-center">
+          <span class="font-title font-bold text-xs uppercase text-white block">Soy Sonidista</span>
+          <span class="text-[9px] text-slate-450 mt-1 block">Input List, Monitores, Patch</span>
+        </div>
+      </button>
+
+      <!-- Iluminador -->
+      <button 
+        class="profile-btn group bg-slate-900/60 border border-white/5 hover:border-gold-bruna/40 p-5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all duration-350 hover:scale-[1.03] cursor-pointer hover:shadow-lg hover:shadow-gold-bruna/5"
+        data-role="iluminador"
+      >
+        <div class="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center text-gold-bruna group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.467 5.99 5.99 0 0 0-1.925 3.546 5.974 5.974 0 0 1-2.133-1A3.75 3.75 0 0 0 12 18Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547Z" />
+          </svg>
+        </div>
+        <div class="text-center">
+          <span class="font-title font-bold text-xs uppercase text-white block">Soy Iluminador</span>
+          <span class="text-[9px] text-slate-450 mt-1 block">DMX, Fixtures, Planta interactiva</span>
+        </div>
+      </button>
+
+      <!-- Stage Manager -->
+      <button 
+        class="profile-btn group bg-slate-900/60 border border-white/5 hover:border-gold-bruna/40 p-5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all duration-350 hover:scale-[1.03] cursor-pointer hover:shadow-lg hover:shadow-gold-bruna/5"
+        data-role="stage_manager"
+      >
+        <div class="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center text-gold-bruna group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3.75-9h1.5m-1.5 3h1.5m-1.5 3h1.5" />
+          </svg>
+        </div>
+        <div class="text-center">
+          <span class="font-title font-bold text-xs uppercase text-white block">Stage Manager</span>
+          <span class="text-[9px] text-slate-450 mt-1 block">Escenario, Posiciones, Backline</span>
+        </div>
+      </button>
+
+      <!-- Solo Descargas -->
+      <button 
+        class="profile-btn group bg-slate-900/60 border border-white/5 hover:border-gold-bruna/40 p-5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all duration-350 hover:scale-[1.03] cursor-pointer hover:shadow-lg hover:shadow-gold-bruna/5"
+        data-role="descargas"
+      >
+        <div class="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center text-gold-bruna group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+        </div>
+        <div class="text-center">
+          <span class="font-title font-bold text-xs uppercase text-white block">Solo Descargar</span>
+          <span class="text-[9px] text-slate-450 mt-1 block">Riders Completos en PDF</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Botón para omitir / entrar directo -->
+    <button id="btn-skip-profile" class="mt-8 text-[10px] text-slate-500 hover:text-white uppercase font-bold tracking-widest transition-colors cursor-pointer">
+      Ver todo el Rider sin filtrar ➔
+    </button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('production-profile-overlay');
+    const skipBtn = document.getElementById('btn-skip-profile');
+    const profileBtns = document.querySelectorAll('.profile-btn');
+
+    // Verificar si ya hay una elección guardada en esta sesión
+    const savedRole = sessionStorage.getItem('production-role');
+    if (savedRole) {
+      applyRoleView(savedRole, true); // Aplicar de inmediato sin animar la entrada
+    }
+
+    // Omitir selector
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        closeOverlay('all');
+      });
+    }
+
+    // Al hacer clic en un rol
+    profileBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const role = btn.getAttribute('data-role');
+        if (role) {
+          sessionStorage.setItem('production-role', role);
+          applyRoleView(role, false);
+        }
+      });
+    });
+
+    function closeOverlay(role: string) {
+      if (!overlay) return;
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 700);
+
+      // Si seleccionó descargar rider
+      if (role === 'descargas') {
+        const section = document.getElementById('sec-descargas');
+        if (section) section.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function applyRoleView(role: string, instant: boolean) {
+      closeOverlay(role);
+
+      const targetSections = {
+        productor: 'sec-descargas',
+        sonidista: 'sec-audio',
+        iluminador: 'sec-iluminacion',
+        stage_manager: 'sec-backline',
+        descargas: 'sec-descargas'
+      };
+
+      const targetId = targetSections[role as keyof typeof targetSections];
+      if (targetId) {
+        const section = document.getElementById(targetId);
+        if (section) {
+          // Scroll suave
+          setTimeout(() => {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Destello visual de borde/sombra dorado
+            section.classList.add('ring-2', 'ring-gold-bruna/30', 'shadow-[0_0_30px_rgba(212,175,55,0.15)]');
+            setTimeout(() => {
+              section.classList.remove('ring-2', 'ring-gold-bruna/30', 'shadow-[0_0_30px_rgba(212,175,55,0.15)]');
+            }, 2500);
+          }, instant ? 100 : 750);
+        }
+      }
+    }
+  });
+</script>
