@@ -1978,6 +1978,7 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
                 </div>
               </div>
               <div class="flex gap-2 w-full md:w-auto justify-end">
+                <button data-comments-lanzamiento-slug="${item.slug}" data-lanzamiento-name="${item.nombre}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">💬 Opiniones</button>
                 <button data-edit-lanzamiento-id="${item.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Editar</button>
                 <button data-delete-lanzamiento-id="${item.id}" data-lanzamiento-name="${item.nombre}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Borrar</button>
               </div>
@@ -1986,6 +1987,11 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         }).join('');
 
         // Bind events
+        document.querySelectorAll('[data-comments-lanzamiento-slug]').forEach(btn => {
+          const slug = (btn as HTMLButtonElement).dataset.commentsLanzamientoSlug;
+          const name = (btn as HTMLButtonElement).dataset.lanzamientoName;
+          btn.addEventListener('click', () => openCommentsModal(slug, name));
+        });
         document.querySelectorAll('[data-edit-lanzamiento-id]').forEach(btn => {
           btn.addEventListener('click', () => openLanzamientoModal((btn as HTMLButtonElement).dataset.editLanzamientoId));
         });
@@ -2437,6 +2443,194 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         } else {
           alert('Error al eliminar el lanzamiento.');
         }
+      }
+
+      async function openCommentsModal(slug: string | undefined, name: string | undefined) {
+        if (!slug) return;
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/5 w-full max-w-3xl rounded-2xl p-6 md:p-8 flex flex-col gap-6 max-h-[90vh] overflow-y-auto text-left">
+            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+              <div>
+                <h3 class="font-title font-bold text-base uppercase text-white">💬 Moderación de Opiniones</h3>
+                <p class="text-[10px] text-slate-550 mt-0.5">Lanzamiento: <span class="text-gold-bruna uppercase font-bold">${name || slug}</span></p>
+              </div>
+              <button id="btn-close-comments-modal" class="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-wider bg-slate-950 border border-white/5 hover:border-white/10 px-3 py-1.5 rounded transition-all cursor-pointer">Cerrar</button>
+            </div>
+
+            <!-- Listados -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Pendientes -->
+              <div class="flex flex-col gap-4">
+                <h4 class="text-[10px] font-extrabold text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                  ⚠️ Pendientes de Aprobación
+                  <span id="mod-pendientes-count" class="bg-amber-950/60 border border-amber-500/20 px-2 py-0.5 rounded-full text-[9px]">0</span>
+                </h4>
+                <div id="mod-pendientes-list" class="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                  <p class="text-xs text-slate-500 animate-pulse uppercase">Cargando...</p>
+                </div>
+              </div>
+
+              <!-- Aprobados -->
+              <div class="flex flex-col gap-4">
+                <h4 class="text-[10px] font-extrabold text-green-400 uppercase tracking-widest flex items-center gap-2">
+                  ✓ Publicados (En Muro)
+                  <span id="mod-aprobados-count" class="bg-green-950/60 border border-green-500/20 px-2 py-0.5 rounded-full text-[9px]">0</span>
+                </h4>
+                <div id="mod-aprobados-list" class="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                  <p class="text-xs text-slate-500 animate-pulse uppercase">Cargando...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        modal.classList.remove('hidden');
+
+        // Cerrar modal
+        document.getElementById('btn-close-comments-modal')?.addEventListener('click', () => {
+          modal.classList.add('hidden');
+        });
+
+        // Cargar datos
+        async function fetchComments() {
+          const pendientesList = document.getElementById('mod-pendientes-list');
+          const aprobadosList = document.getElementById('mod-aprobados-list');
+          const pendientesCount = document.getElementById('mod-pendientes-count');
+          const aprobadosCount = document.getElementById('mod-aprobados-count');
+
+          if (!pendientesList || !aprobadosList) return;
+
+          const { data, error } = await supabase
+            .from('comentarios_lanzamientos')
+            .select('*')
+            .eq('lanzamiento_slug', slug)
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            pendientesList.innerHTML = '<p class="text-xs text-red-400">Error al cargar.</p>';
+            aprobadosList.innerHTML = '<p class="text-xs text-red-400">Error al cargar.</p>';
+            return;
+          }
+
+          const pendientes = data.filter((c: any) => !c.aprobado);
+          const aprobados = data.filter((c: any) => c.aprobado);
+
+          if (pendientesCount) pendientesCount.textContent = String(pendientes.length);
+          if (aprobadosCount) aprobadosCount.textContent = String(aprobados.length);
+
+          // Render Pendientes
+          if (pendientes.length === 0) {
+            pendientesList.innerHTML = '<p class="text-[10px] text-slate-550 uppercase py-4">No hay comentarios pendientes</p>';
+          } else {
+            pendientesList.innerHTML = pendientes.map((c: any) => {
+              const stars = '★'.repeat(c.calificacion) + '☆'.repeat(5 - c.calificacion);
+              return `
+                <div class="bg-slate-950 border border-white/5 p-4 rounded-xl flex flex-col gap-2 relative">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h5 class="font-bold text-xs text-white uppercase">${c.nombre}</h5>
+                      ${c.ciudad ? `<span class="text-[8px] text-slate-500 uppercase font-bold">${c.ciudad}</span>` : ''}
+                    </div>
+                    <span class="text-gold-bruna text-[10px] font-mono">${stars}</span>
+                  </div>
+                  <p class="text-xs text-slate-350 leading-tight font-light">${c.comentario}</p>
+                  <div class="flex gap-2 justify-end mt-2 pt-2 border-t border-white/5">
+                    <button data-mod-approve-id="${c.id}" class="text-[9px] bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 hover:text-green-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Aprobar</button>
+                    <button data-mod-reject-id="${c.id}" class="text-[9px] bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:text-red-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Eliminar</button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+            // Bind events
+            pendientesList.querySelectorAll('[data-mod-approve-id]').forEach(btn => {
+              btn.addEventListener('click', async () => {
+                const id = (btn as HTMLButtonElement).dataset.modApproveId;
+                if (!id) return;
+                const { error: err } = await supabase.from('comentarios_lanzamientos').update({ aprobado: true }).eq('id', id);
+                if (!err) {
+                  await logAction('Aprobó opinión del lanzamiento "' + slug + '"');
+                  fetchComments();
+                } else {
+                  alert('Error al aprobar: ' + err.message);
+                }
+              });
+            });
+
+            pendientesList.querySelectorAll('[data-mod-reject-id]').forEach(btn => {
+              btn.addEventListener('click', async () => {
+                const id = (btn as HTMLButtonElement).dataset.modRejectId;
+                if (!id || !confirm('¿Eliminar permanentemente esta opinión?')) return;
+                const { error: err } = await supabase.from('comentarios_lanzamientos').delete().eq('id', id);
+                if (!err) {
+                  await logAction('Eliminó opinión del lanzamiento "' + slug + '"');
+                  fetchComments();
+                } else {
+                  alert('Error al eliminar: ' + err.message);
+                }
+              });
+            });
+          }
+
+          // Render Aprobados
+          if (aprobados.length === 0) {
+            aprobadosList.innerHTML = '<p class="text-[10px] text-slate-550 uppercase py-4">No hay comentarios publicados</p>';
+          } else {
+            aprobadosList.innerHTML = aprobados.map((c: any) => {
+              const stars = '★'.repeat(c.calificacion) + '☆'.repeat(5 - c.calificacion);
+              return `
+                <div class="bg-slate-950/60 border border-white/5 p-4 rounded-xl flex flex-col gap-2 relative">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h5 class="font-bold text-xs text-white uppercase">${c.nombre}</h5>
+                      ${c.ciudad ? `<span class="text-[8px] text-slate-550 uppercase font-bold">${c.ciudad}</span>` : ''}
+                    </div>
+                    <span class="text-gold-bruna text-[10px] font-mono">${stars}</span>
+                  </div>
+                  <p class="text-xs text-slate-350 leading-tight font-light">${c.comentario}</p>
+                  <div class="flex gap-2 justify-end mt-2 pt-2 border-t border-white/5">
+                    <button data-mod-disapprove-id="${c.id}" class="text-[9px] border border-white/10 hover:border-amber-500 hover:text-amber-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Ocultar</button>
+                    <button data-mod-reject-id="${c.id}" class="text-[9px] bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:text-red-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Eliminar</button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+            // Bind events
+            aprobadosList.querySelectorAll('[data-mod-disapprove-id]').forEach(btn => {
+              btn.addEventListener('click', async () => {
+                const id = (btn as HTMLButtonElement).dataset.modDisapproveId;
+                if (!id) return;
+                const { error: err } = await supabase.from('comentarios_lanzamientos').update({ aprobado: false }).eq('id', id);
+                if (!err) {
+                  await logAction('Ocultó opinión del lanzamiento "' + slug + '"');
+                  fetchComments();
+                } else {
+                  alert('Error al ocultar: ' + err.message);
+                }
+              });
+            });
+
+            aprobadosList.querySelectorAll('[data-mod-reject-id]').forEach(btn => {
+              btn.addEventListener('click', async () => {
+                const id = (btn as HTMLButtonElement).dataset.modRejectId;
+                if (!id || !confirm('¿Eliminar permanentemente esta opinión?')) return;
+                const { error: err } = await supabase.from('comentarios_lanzamientos').delete().eq('id', id);
+                if (!err) {
+                  await logAction('Eliminó opinión del lanzamiento "' + slug + '"');
+                  fetchComments();
+                } else {
+                  alert('Error al eliminar: ' + err.message);
+                }
+              });
+            });
+          }
+        }
+
+        fetchComments();
       }
 
     });

@@ -75,6 +75,9 @@ function getYouTubeId(url: string) {
 const youtubeId = getYouTubeId(lanzamiento.plataformas_links?.youtube || '');
 const hasYoutube = !!youtubeId;
 
+// Determinar si el lanzamiento ya se encuentra disponible (para renderizar de inmediato)
+const isReleased = lanzamiento.fecha_lanzamiento ? new Date(lanzamiento.fecha_lanzamiento).getTime() <= Date.now() : false;
+
 // SEO Variables
 const pageTitle = lanzamiento.meta_title || `${lanzamiento.titulo} - Banda Bruna | Próximo Estreno`;
 const pageDescription = lanzamiento.meta_description || lanzamiento.descripcion;
@@ -316,6 +319,83 @@ const allDetrasCamaras = [
       </div>
     </section>
 
+    <!-- 1.5 SECCIÓN DE OPINIONES (CARRUSEL Y FORMULARIO COMPACTO) -->
+    <section class="relative z-10 px-6 max-w-7xl mx-auto py-12 border-t border-white/5" id="opinions-section">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Formulario Compacto (4 columnas en lg) -->
+        <div class="lg:col-span-4 bg-slate-900/40 border border-white/5 rounded-2xl p-5 md:p-6 text-left backdrop-blur-md relative h-full flex flex-col justify-center">
+          <h3 class="font-title font-extrabold text-sm text-white uppercase tracking-wider mb-1">
+            ¿Qué te pareció el lanzamiento?
+          </h3>
+          <p class="text-[9px] text-slate-455 uppercase tracking-widest font-bold mb-4">Comenta qué te pareció el videoclip y el single</p>
+          
+          <form id="form-comentario-lanzamiento" class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+              <label for="com-nombre" class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Nombre / Apodo</label>
+              <div class="flex gap-2 items-center">
+                <input type="text" id="com-nombre" required placeholder="ej: Juan" class="flex-grow bg-slate-950 border border-white/5 rounded-lg p-2 text-white text-[11px] outline-none focus:border-gold-bruna/40 transition-colors" />
+                
+                <!-- Selector minimalista de estrellas -->
+                <div class="flex items-center gap-0.5 shrink-0 bg-slate-950 border border-white/5 px-2 py-1.5 rounded-lg" id="stars-selector">
+                  <button type="button" data-star-value="1" class="star-btn text-xs text-slate-650 hover:scale-110 transition-transform focus:outline-none cursor-pointer">★</button>
+                  <button type="button" data-star-value="2" class="star-btn text-xs text-slate-650 hover:scale-110 transition-transform focus:outline-none cursor-pointer">★</button>
+                  <button type="button" data-star-value="3" class="star-btn text-xs text-slate-650 hover:scale-110 transition-transform focus:outline-none cursor-pointer">★</button>
+                  <button type="button" data-star-value="4" class="star-btn text-xs text-slate-650 hover:scale-110 transition-transform focus:outline-none cursor-pointer">★</button>
+                  <button type="button" data-star-value="5" class="star-btn text-xs text-slate-650 hover:scale-110 transition-transform focus:outline-none cursor-pointer">★</button>
+                  <input type="hidden" id="com-calificacion" value="5" />
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <div class="flex justify-between items-center">
+                <label for="com-contenido" class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Opinión</label>
+                <input type="text" id="com-ciudad" placeholder="Ciudad (opcional)" class="bg-transparent text-right text-slate-500 text-[9px] outline-none focus:text-gold-bruna transition-colors border-none p-0 w-24" />
+              </div>
+              <textarea id="com-contenido" required rows="2" placeholder="¡Escribe tus buenas vibras aquí!..." class="bg-slate-950 border border-white/5 rounded-lg p-2 text-white text-[11px] outline-none resize-none focus:border-gold-bruna/40 transition-colors"></textarea>
+            </div>
+
+            <button type="submit" id="btn-submit-comentario" class="bg-gradient-to-r from-gold-bruna/80 to-gold-bruna text-black text-[10px] font-bold py-2.5 px-4 rounded-lg uppercase tracking-widest hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-center">
+              Enviar Opinión
+            </button>
+          </form>
+          
+          <div id="comentario-success-msg" class="hidden text-center py-6">
+            <div class="w-8 h-8 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-sm mx-auto mb-2 font-bold">✓</div>
+            <p class="text-xs text-slate-200 font-bold uppercase tracking-wider">¡Opinión enviada!</p>
+            <p class="text-[9px] text-slate-400 mt-1">Aparecerá tras ser moderada.</p>
+            <button id="btn-comentar-otro" class="text-[8px] text-gold-bruna hover:underline uppercase tracking-wider mt-4 cursor-pointer">Opinar otra vez</button>
+          </div>
+        </div>
+
+        <!-- Slider de Comentarios (8 columnas en lg) -->
+        <div class="lg:col-span-8 flex flex-col gap-4 text-left h-full justify-center">
+          <div class="flex justify-between items-center">
+            <div>
+              <h4 class="font-title font-extrabold text-sm text-white uppercase tracking-wider">
+                Muro de Buenas Vibras
+              </h4>
+              <p class="text-[8px] text-slate-550 uppercase tracking-widest font-bold">La comunidad comenta en vivo</p>
+            </div>
+            <!-- Controles del Slider -->
+            <div class="flex gap-2">
+              <button id="btn-slide-prev" class="w-7 h-7 rounded-full bg-slate-900 border border-white/5 hover:border-gold-bruna/30 hover:text-gold-bruna flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Anterior">←</button>
+              <button id="btn-slide-next" class="w-7 h-7 rounded-full bg-slate-900 border border-white/5 hover:border-gold-bruna/30 hover:text-gold-bruna flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Siguiente">→</button>
+            </div>
+          </div>
+
+          <!-- Carrusel contenedor -->
+          <div class="carousel-wrapper" id="carousel-container">
+            <div class="carousel-track" id="comentarios-muro-grid">
+              <p class="text-xs text-slate-450 uppercase animate-pulse py-6">Cargando comentarios de fans...</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- 2. STREAMING & PLATFORM CARDS -->
     {lanzamiento.mostrar_plataformas && (
       <section class="relative z-10 px-6 max-w-4xl mx-auto py-16 text-center">
@@ -329,14 +409,13 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="spotify" 
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#1DB954]/40 hover:bg-[#1DB954]/5 transition-all duration-300 relative group overflow-hidden"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#1DB954]/40 hover:bg-[#1DB954]/5 transition-all duration-300 relative group overflow-hidden glow-active"
           >
-            <div class="w-12 h-12 rounded-full bg-[#1DB954]/10 flex items-center justify-center text-[#1DB954] text-2xl group-hover:scale-110 transition-transform">
-              🎧
+            <div class="w-12 h-12 rounded-full bg-[#1DB954]/10 flex items-center justify-center text-[#1DB954] group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.495 17.305c-.215.353-.677.463-1.03.248-2.868-1.753-6.48-2.15-10.732-1.176-.403.092-.81-.16-.902-.563-.092-.403.16-.81.563-.902 4.65-1.064 8.627-.61 11.854 1.362.353.216.464.678.247 1.031zm1.467-3.26c-.27.44-.847.585-1.287.315-3.284-2.02-8.29-2.607-12.177-1.427-.492.15-1.018-.13-1.168-.622-.15-.492.13-1.017.622-1.168 4.444-1.348 9.957-.7 13.7 1.61.44.27.585.848.315 1.288zm.13-3.39c-3.94-2.34-10.45-2.556-14.237-1.407-.604.183-1.246-.16-1.43-0.764-.183-.604.16-1.246.764-1.43 4.354-1.32 11.536-1.07 16.082 1.63.543.32.722 1.026.4 1.57-.32.544-1.027.722-1.57.402z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Spotify</span>
-            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
-            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">PRE-SAVE</div>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#1DB954]/25 text-[#1DB954] bg-[#1DB954]/10 uppercase tracking-wider">YA DISPONIBLE</span>
           </a>
 
           <!-- YouTube -->
@@ -345,14 +424,13 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="youtube"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden glow-active"
           >
-            <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] text-2xl group-hover:scale-110 transition-transform">
-              📺
+            <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">YouTube</span>
-            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
-            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESTRENO</div>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FF0000]/25 text-[#FF0000] bg-[#FF0000]/10 uppercase tracking-wider">YA DISPONIBLE</span>
           </a>
 
           <!-- Apple Music -->
@@ -361,14 +439,13 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="apple_music"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FA243C]/40 hover:bg-[#FA243C]/5 transition-all duration-300 relative group overflow-hidden"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FA243C]/40 hover:bg-[#FA243C]/5 transition-all duration-300 relative group overflow-hidden glow-active"
           >
-            <div class="w-12 h-12 rounded-full bg-[#FA243C]/10 flex items-center justify-center text-[#FA243C] text-2xl group-hover:scale-110 transition-transform">
-              🍎
+            <div class="w-12 h-12 rounded-full bg-[#FA243C]/10 flex items-center justify-center text-[#FA243C] group-hover:scale-110 transition-transform">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.006 3.753c-.313-.195-.694-.213-1.025-.05l-8.006 4C9.52 7.925 9.22 8.358 9.22 8.847V16.32c-.524-.4-1.22-.634-1.997-.634-1.78 0-3.223 1.135-3.223 2.535 0 1.4 1.443 2.535 3.223 2.535 1.745 0 3.167-1.092 3.22-2.463l.003-.072V11.51l6.78-3.39v4.2c-.524-.4-1.22-.634-1.997-.634-1.78 0-3.223 1.135-3.223 2.535 0 1.4 1.443 2.535 3.223 2.535 1.745 0 3.167-1.092 3.22-2.463l.003-.072V4.5c0-.332-.164-.643-.456-.827l.001.08z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Apple Music</span>
-            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
-            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">PRE-ADD</div>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FA243C]/25 text-[#FA243C] bg-[#FA243C]/10 uppercase tracking-wider">YA DISPONIBLE</span>
           </a>
 
           <!-- YouTube Music -->
@@ -377,14 +454,13 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="youtube_music"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden glow-active"
           >
-            <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] text-2xl group-hover:scale-110 transition-transform">
-              🎵
+            <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.824c-4.32 0-7.824-3.504-7.824-7.824S7.68 4.176 12 4.176s7.824 3.504 7.824 7.824-3.504 7.824-7.824 7.824zm3.912-7.824l-5.868-3.36v6.72l5.868-3.36z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">YT Music</span>
-            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
-            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESCUCHAR</div>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FF0000]/25 text-[#FF0000] bg-[#FF0000]/10 uppercase tracking-wider">YA DISPONIBLE</span>
           </a>
 
           <!-- Amazon Music -->
@@ -393,14 +469,13 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="amazon_music"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#00A8E1]/40 hover:bg-[#00A8E1]/5 transition-all duration-300 relative group overflow-hidden"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#00A8E1]/40 hover:bg-[#00A8E1]/5 transition-all duration-300 relative group overflow-hidden glow-active"
           >
-            <div class="w-12 h-12 rounded-full bg-[#00A8E1]/10 flex items-center justify-center text-[#00A8E1] text-2xl group-hover:scale-110 transition-transform">
-              ☁️
+            <div class="w-12 h-12 rounded-full bg-[#00A8E1]/10 flex items-center justify-center text-[#00A8E1] group-hover:scale-110 transition-transform">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.73 17.55c-1.46 1.13-3.66 1.72-5.83 1.72-3.08 0-5.86-1.18-7.73-3.18-.18-.2-.04-.46.19-.34 2.2 1.18 5.06 1.88 7.82 1.88 2.06 0 4.25-.42 5.92-1.24.28-.14.48.14.28.34l-.65.82zm.74-2.54c-.2-.25-.56-.12-.51.2.14.88-.02 1.8-.46 2.54-.12.2.04.42.22.28 1.1-.88 1.54-2.3 1.26-3.76-.06-.3-.3-.42-.51-.26zM21.33 6.9C14.7 6.9 5.3 13.5 2 17.5c-.24.3.06.66.36.42 3-2.3 9.4-7.5 18.6-7.5.38 0 .6-.32.37-.52z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Amazon Music</span>
-            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
-            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESCUCHAR</div>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#00A8E1]/25 text-[#00A8E1] bg-[#00A8E1]/10 uppercase tracking-wider">YA DISPONIBLE</span>
           </a>
 
           <!-- Deezer -->
@@ -409,14 +484,13 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="deezer"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#EF5466]/40 hover:bg-[#EF5466]/5 transition-all duration-300 relative group overflow-hidden"
+            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#EF5466]/40 hover:bg-[#EF5466]/5 transition-all duration-300 relative group overflow-hidden glow-active"
           >
-            <div class="w-12 h-12 rounded-full bg-[#EF5466]/10 flex items-center justify-center text-[#EF5466] text-2xl group-hover:scale-110 transition-transform">
-              🎧
+            <div class="w-12 h-12 rounded-full bg-[#EF5466]/10 flex items-center justify-center text-[#EF5466] group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 16.2h4.1V20H0v-3.8zm5.5-5.4h4.1v3.8H5.5v-3.8zm0 5.4h4.1V20H5.5v-3.8zm0-10.8H0v3.8h4.1V5.4zm11-5.4h-4.1v3.8h4.1V0zm0 5.4h-4.1v3.8h4.1V5.4zm0 5.4h-4.1v3.8h4.1v-3.8zm0 5.4h-4.1V20h4.1v-3.8zm5.5-16.2h-4.1v3.8h4.1V0zm0 5.4h-4.1v3.8h4.1V5.4zm0 5.4h-4.1v3.8h4.1v-3.8zm0 5.4h-4.1V20h4.1v-3.8zM22 0h-4.1v3.8H22V0zm0 5.4h-4.1v3.8H22V5.4zm0 5.4h-4.1v3.8H22v-3.8zm0 5.4h-4.1V20H22v-3.8z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Deezer</span>
-            <span class="badge-plat text-[8px] font-bold px-2 py-0.5 rounded border border-white/10 text-slate-450 uppercase">Próximamente</span>
-            <div class="locked-overlay absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center text-[10px] font-bold tracking-widest text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">ESCUCHAR</div>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#EF5466]/25 text-[#EF5466] bg-[#EF5466]/10 uppercase tracking-wider">YA DISPONIBLE</span>
           </a>
         </div>
       </section>
@@ -601,6 +675,8 @@ const allDetrasCamaras = [
         </div>
       </section>
     )}
+
+
   </div>
 
   <!-- Countdown, lock, copy link & Youtube iframe Script -->
@@ -686,6 +762,15 @@ const allDetrasCamaras = [
         if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
       }
 
+      const platformColors = {
+        spotify: { text: 'text-[#1DB954]', border: 'border-[#1DB954]/25', bg: 'bg-[#1DB954]/10' },
+        youtube: { text: 'text-[#FF0000]', border: 'border-[#FF0000]/25', bg: 'bg-[#FF0000]/10' },
+        apple_music: { text: 'text-[#FA243C]', border: 'border-[#FA243C]/25', bg: 'bg-[#FA243C]/10' },
+        youtube_music: { text: 'text-[#FF0000]', border: 'border-[#FF0000]/25', bg: 'bg-[#FF0000]/10' },
+        amazon_music: { text: 'text-[#00A8E1]', border: 'border-[#00A8E1]/25', bg: 'bg-[#00A8E1]/10' },
+        deezer: { text: 'text-[#EF5466]', border: 'border-[#EF5466]/25', bg: 'bg-[#EF5466]/10' }
+      };
+
       function unlockMediaAndLinks() {
         unlocked = true;
 
@@ -709,13 +794,18 @@ const allDetrasCamaras = [
           `;
         }
 
-        // 3. Activar y cambiar texto en tarjetas de plataformas
+        // 3. Activar, brillar y cambiar texto en tarjetas de plataformas
         platformCards.forEach(card => {
           card.classList.remove('pointer-events-none');
+          card.classList.add('glow-active'); // Activa animación de brillo y destello
+          
+          const plat = card.getAttribute('data-platform');
+          const colors = platformColors[plat] || { text: 'text-green-400', border: 'border-green-500/20', bg: 'bg-green-950/40' };
+          
           const badge = card.querySelector('.badge-plat');
           if (badge) {
-            badge.textContent = 'ESCUCHAR AHORA';
-            badge.className = 'badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-green-500/20 text-green-400 bg-green-950/40 uppercase';
+            badge.textContent = 'YA DISPONIBLE';
+            badge.className = `badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border ${colors.border} ${colors.text} ${colors.bg} uppercase tracking-wider`;
           }
           const lockOver = card.querySelector('.locked-overlay');
           if (lockOver) lockOver.style.display = 'none';
@@ -755,6 +845,380 @@ const allDetrasCamaras = [
           });
         });
       }
+
+      // --- LÓGICA DEL MURO DE COMENTARIOS Y OPINIONES (CARRUSEL) ---
+      const muroGrid = document.getElementById('comentarios-muro-grid');
+      const starBtns = document.querySelectorAll('.star-btn');
+      const califInput = document.getElementById('com-calificacion');
+      const comForm = document.getElementById('form-comentario-lanzamiento');
+      const successMsg = document.getElementById('comentario-success-msg');
+      const comentOtroBtn = document.getElementById('btn-comentar-otro');
+
+      // Palabras no deseadas básicas
+      const badWords = ['weon', 'culiao', 'conchadesumadre', 'ctm', 'wea', 'chucha', 'pico', 'tula', 'maraco', 'ql', 'culiazo', 'puta', 'mierda'];
+      
+      let currentIndex = 0;
+      let autoPlayInterval;
+
+      function initCarousel() {
+        const track = document.getElementById('comentarios-muro-grid');
+        const container = document.getElementById('carousel-container');
+        const prevBtn = document.getElementById('btn-slide-prev');
+        const nextBtn = document.getElementById('btn-slide-next');
+        if (!track || !container) return;
+
+        const items = track.querySelectorAll('.carousel-item');
+        if (items.length <= 1) {
+          if (prevBtn) prevBtn.style.display = 'none';
+          if (nextBtn) nextBtn.style.display = 'none';
+          return;
+        } else {
+          if (prevBtn) prevBtn.style.display = 'flex';
+          if (nextBtn) nextBtn.style.display = 'flex';
+        }
+
+        // Limpiar intervalos previos
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
+        currentIndex = 0;
+        track.style.transform = `translateX(0px)`;
+
+        function getVisibleWidth() {
+          return container.clientWidth;
+        }
+
+        function getTrackWidth() {
+          return track.scrollWidth;
+        }
+
+        function slideTo(index) {
+          const itemWidth = items[0].clientWidth + 16; // ancho + gap
+          const maxScroll = getTrackWidth() - getVisibleWidth();
+          let newTranslate = -index * itemWidth;
+
+          if (Math.abs(newTranslate) >= maxScroll) {
+            newTranslate = -maxScroll;
+            currentIndex = Math.ceil(maxScroll / itemWidth);
+          }
+          if (newTranslate > 0) {
+            newTranslate = 0;
+            currentIndex = 0;
+          }
+
+          track.style.transform = `translateX(${newTranslate}px)`;
+        }
+
+        if (nextBtn) {
+          nextBtn.onclick = () => {
+            const itemWidth = items[0].clientWidth + 16;
+            const maxScroll = getTrackWidth() - getVisibleWidth();
+            const currentScroll = currentIndex * itemWidth;
+            if (currentScroll >= maxScroll) {
+              currentIndex = 0;
+            } else {
+              currentIndex++;
+            }
+            slideTo(currentIndex);
+          };
+        }
+
+        if (prevBtn) {
+          prevBtn.onclick = () => {
+            if (currentIndex <= 0) {
+              const itemWidth = items[0].clientWidth + 16;
+              const maxScroll = getTrackWidth() - getVisibleWidth();
+              currentIndex = Math.ceil(maxScroll / itemWidth);
+            } else {
+              currentIndex--;
+            }
+            slideTo(currentIndex);
+          };
+        }
+
+        // Auto-play suave cada 4 segundos
+        autoPlayInterval = setInterval(() => {
+          const itemWidth = items[0].clientWidth + 16;
+          const maxScroll = getTrackWidth() - getVisibleWidth();
+          const currentScroll = currentIndex * itemWidth;
+          if (currentScroll >= maxScroll) {
+            currentIndex = 0;
+          } else {
+            currentIndex++;
+          }
+          slideTo(currentIndex);
+        }, 4000);
+
+        // Detener autoplay en hover
+        container.onmouseenter = () => clearInterval(autoPlayInterval);
+        container.onmouseleave = () => {
+          clearInterval(autoPlayInterval);
+          autoPlayInterval = setInterval(() => {
+            const itemWidth = items[0].clientWidth + 16;
+            const maxScroll = getTrackWidth() - getVisibleWidth();
+            const currentScroll = currentIndex * itemWidth;
+            if (currentScroll >= maxScroll) {
+              currentIndex = 0;
+            } else {
+              currentIndex++;
+            }
+            slideTo(currentIndex);
+          }, 4000);
+        };
+      }
+
+      function loadMuroComentarios() {
+        if (!supabaseUrl || !supabaseKey || !muroGrid) return;
+        fetch(`${supabaseUrl}/rest/v1/comentarios_lanzamientos?lanzamiento_slug=eq.${slug}&aprobado=eq.true&select=*&order=created_at.desc`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (!data || data.length === 0) {
+            muroGrid.innerHTML = `<p class="text-xs text-slate-500 py-8 col-span-full uppercase font-bold tracking-widest font-title">¡Sé el primero en dejar tu buena vibra!</p>`;
+            return;
+          }
+          muroGrid.innerHTML = data.map(com => {
+            const estrellas = '★'.repeat(com.calificacion) + '☆'.repeat(5 - com.calificacion);
+            const fecha = new Date(com.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+            return `
+              <div class="carousel-item">
+                <div class="bg-slate-900/60 border border-white/5 rounded-xl p-4 flex flex-col text-left gap-2 backdrop-blur-sm relative hover:border-gold-bruna/20 transition-all duration-300 h-full min-h-[110px]">
+                  <div class="flex justify-between items-start">
+                    <div class="min-w-0 flex-grow">
+                      <h4 class="font-bold text-[11px] text-white uppercase tracking-wider truncate">${com.nombre}</h4>
+                      ${com.ciudad ? `<span class="text-[8px] text-slate-500 font-bold uppercase truncate block mt-0.5">${com.ciudad}</span>` : ''}
+                    </div>
+                    <div class="text-gold-bruna text-[9px] tracking-wide font-mono shrink-0 pl-2">${estrellas}</div>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-snug font-light line-clamp-3">${com.comentario}</p>
+                  <span class="text-[7px] text-slate-600 uppercase font-mono mt-auto pt-1">${fecha}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          initCarousel();
+        })
+        .catch(err => {
+          console.error("Error al cargar comentarios:", err);
+          muroGrid.innerHTML = `<p class="text-xs text-red-400 py-6 col-span-full">Error al cargar el muro de opiniones.</p>`;
+        });
+      }
+
+      // Inicializar estrellas interactiva
+      starBtns.forEach(btn => {
+        btn.classList.add('text-gold-bruna');
+
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.getAttribute('data-star-value') || '5');
+          if (califInput) califInput.value = String(val);
+          starBtns.forEach(b => {
+            const bVal = parseInt(b.getAttribute('data-star-value') || '0');
+            if (bVal <= val) {
+              b.classList.remove('text-slate-650');
+              b.classList.add('text-gold-bruna');
+            } else {
+              b.classList.remove('text-gold-bruna');
+              b.classList.add('text-slate-650');
+            }
+          });
+        });
+      });
+
+      // Envío de opiniones
+      if (comForm) {
+        comForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const nombre = document.getElementById('com-nombre').value.trim();
+          const ciudad = document.getElementById('com-ciudad').value.trim();
+          const calificacion = parseInt(califInput ? califInput.value : '5');
+          const comentario = document.getElementById('com-contenido').value.trim();
+
+          // Validar palabras groseras
+          const lowerText = (nombre + ' ' + comentario).toLowerCase();
+          const hasBadWord = badWords.some(word => lowerText.includes(word));
+          if (hasBadWord) {
+            alert('Por favor, mantén las buenas vibras en tus comentarios.');
+            return;
+          }
+
+          const submitBtn = document.getElementById('btn-submit-comentario');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+          }
+
+          fetch(`${supabaseUrl}/rest/v1/comentarios_lanzamientos`, {
+            method: 'POST',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              nombre,
+              ciudad: ciudad || null,
+              comentario,
+              calificacion,
+              lanzamiento_slug: slug,
+              aprobado: false // Moderación requerida
+            })
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('Error al enviar opinión');
+            return res.json();
+          })
+          .then(() => {
+            comForm.reset();
+            // Resetear estrellas a 5
+            starBtns.forEach(b => {
+              b.classList.remove('text-slate-650');
+              b.classList.add('text-gold-bruna');
+            });
+            if (califInput) califInput.value = "5";
+            
+            comForm.classList.add('hidden');
+            if (successMsg) successMsg.classList.remove('hidden');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Enviar Opinión';
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            alert('Error al enviar la opinión. Inténtalo de nuevo.');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Enviar Opinión';
+            }
+          });
+        });
+      }
+
+      if (comentOtroBtn) {
+        comentOtroBtn.addEventListener('click', () => {
+          if (successMsg) successMsg.classList.add('hidden');
+          if (comForm) comForm.classList.remove('hidden');
+        });
+      }
+
+      // Carga inicial y auto-recarga cada 10 segundos
+      loadMuroComentarios();
+      setInterval(loadMuroComentarios, 10000);
     });
   </script>
+
+  <style is:global>
+    /* Efecto de Brillo y Destello para Plataformas */
+    .platform-card.glow-active {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    /* Animación de halo pulsante (Glow) */
+    .platform-card[data-platform="spotify"].glow-active {
+      box-shadow: 0 0 15px rgba(29, 185, 84, 0.15), 0 0 5px rgba(29, 185, 84, 0.1);
+      animation: glow-pulse-spotify 3s infinite alternate;
+    }
+    .platform-card[data-platform="youtube"].glow-active {
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.15), 0 0 5px rgba(255, 0, 0, 0.1);
+      animation: glow-pulse-youtube 3s infinite alternate;
+    }
+    .platform-card[data-platform="apple_music"].glow-active {
+      box-shadow: 0 0 15px rgba(250, 36, 60, 0.15), 0 0 5px rgba(250, 36, 60, 0.1);
+      animation: glow-pulse-apple 3s infinite alternate;
+    }
+    .platform-card[data-platform="youtube_music"].glow-active {
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.15), 0 0 5px rgba(255, 0, 0, 0.1);
+      animation: glow-pulse-ytmusic 3s infinite alternate;
+    }
+    .platform-card[data-platform="amazon_music"].glow-active {
+      box-shadow: 0 0 15px rgba(0, 168, 225, 0.15), 0 0 5px rgba(0, 168, 225, 0.1);
+      animation: glow-pulse-amazon 3s infinite alternate;
+    }
+    .platform-card[data-platform="deezer"].glow-active {
+      box-shadow: 0 0 15px rgba(239, 84, 102, 0.15), 0 0 5px rgba(239, 84, 102, 0.1);
+      animation: glow-pulse-deezer 3s infinite alternate;
+    }
+
+    @keyframes glow-pulse-spotify {
+      0% { box-shadow: 0 0 12px rgba(29, 185, 84, 0.1), 0 0 3px rgba(29, 185, 84, 0.05); }
+      100% { box-shadow: 0 0 25px rgba(29, 185, 84, 0.3), 0 0 8px rgba(29, 185, 84, 0.15); }
+    }
+    @keyframes glow-pulse-youtube {
+      0% { box-shadow: 0 0 12px rgba(255, 0, 0, 0.1), 0 0 3px rgba(255, 0, 0, 0.05); }
+      100% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.3), 0 0 8px rgba(255, 0, 0, 0.15); }
+    }
+    @keyframes glow-pulse-apple {
+      0% { box-shadow: 0 0 12px rgba(250, 36, 60, 0.1), 0 0 3px rgba(250, 36, 60, 0.05); }
+      100% { box-shadow: 0 0 25px rgba(250, 36, 60, 0.3), 0 0 8px rgba(250, 36, 60, 0.15); }
+    }
+    @keyframes glow-pulse-ytmusic {
+      0% { box-shadow: 0 0 12px rgba(255, 0, 0, 0.1), 0 0 3px rgba(255, 0, 0, 0.05); }
+      100% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.3), 0 0 8px rgba(255, 0, 0, 0.15); }
+    }
+    @keyframes glow-pulse-amazon {
+      0% { box-shadow: 0 0 12px rgba(0, 168, 225, 0.1), 0 0 3px rgba(0, 168, 225, 0.05); }
+      100% { box-shadow: 0 0 25px rgba(0, 168, 225, 0.3), 0 0 8px rgba(0, 168, 225, 0.15); }
+    }
+    @keyframes glow-pulse-deezer {
+      0% { box-shadow: 0 0 12px rgba(239, 84, 102, 0.1), 0 0 3px rgba(239, 84, 102, 0.05); }
+      100% { box-shadow: 0 0 25px rgba(239, 84, 102, 0.3), 0 0 8px rgba(239, 84, 102, 0.15); }
+    }
+
+    /* Efecto de destello de luz deslizable (Shimmer) */
+    .platform-card.glow-active::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.07) 50%,
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(30deg);
+      transition: none;
+      animation: shimmer-light 4s infinite linear;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer-light {
+      0% { transform: translate(-30%, -30%) rotate(30deg); }
+      100% { transform: translate(30%, 30%) rotate(30deg); }
+    }
+
+    /* Estilos para el slider/carrusel de comentarios */
+    .carousel-wrapper {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding: 10px 0;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 16px;
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
+      width: max-content;
+    }
+    .carousel-item {
+      flex-shrink: 0;
+      width: 280px; /* Ancho fijo para cada tarjeta pequeña */
+    }
+    @media (min-width: 768px) {
+      .carousel-item {
+        width: 320px;
+      }
+    }
+  </style>
 </Layout>
