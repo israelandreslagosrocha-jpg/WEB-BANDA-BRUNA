@@ -1055,8 +1055,7 @@ const allDetrasCamaras = [
             headers: {
               'apikey': supabaseKey,
               'Authorization': `Bearer ${supabaseKey}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               nombre,
@@ -1069,7 +1068,7 @@ const allDetrasCamaras = [
           })
           .then(res => {
             if (!res.ok) throw new Error('Error al enviar opinión');
-            return res.json();
+            return res;
           })
           .then(() => {
             comForm.reset();
