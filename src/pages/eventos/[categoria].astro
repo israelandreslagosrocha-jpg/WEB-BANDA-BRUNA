@@ -2,13 +2,44 @@
 import Layout from '../../layouts/Layout.astro';
 
 // Mapeo de todos los slugs de evento con su información de display
-const categorias: Record<string, { title: string; subtitle: string; icon: string; color: string; description: string }> = {
+interface CategoriaInfo {
+  title: string;
+  subtitle: string;
+  icon: string;
+  color: string;
+  description: string;
+  videos?: Array<{
+    url: string;
+    title: string;
+    category: string;
+    tagline: string;
+    aspect: string;
+  }>;
+}
+
+const categorias: Record<string, CategoriaInfo> = {
   "municipalidades": {
     title: "Municipalidades",
     subtitle: "Shows Municipales & Plazas de Armas",
     icon: "🏛️",
     color: "from-blue-600/20 to-indigo-900/10",
-    description: "Show familiar y masivo ideal para plazas de armas, veranos alegres, ferias costumbristas y shows públicos municipales."
+    description: "Show familiar y masivo ideal para plazas de armas, veranos alegres, ferias costumbristas y shows públicos municipales.",
+    videos: [
+      {
+        url: "https://www.youtube.com/shorts/aBYjqqXYDck",
+        title: "Show en Plaza de Armas",
+        category: "🏛 MUNICIPAL",
+        tagline: "Show masivo familiar con toda la potencia de la cumbia sureña",
+        aspect: "vertical"
+      },
+      {
+        url: "https://www.youtube.com/shorts/43o1m508_0E",
+        title: "Fiestas Comunales",
+        category: "🏛 MUNICIPAL",
+        tagline: "Gran ambiente y alegría en ferias y aniversarios",
+        aspect: "vertical"
+      }
+    ]
   },
   "eventos-privados": {
     title: "Eventos Privados",
@@ -39,6 +70,20 @@ const categorias: Record<string, { title: string; subtitle: string; icon: string
     description: "Boda de ensueño con música en vivo desde el cóctel hasta el show bailable principal que hará saltar a todos."
   }
 };
+
+// Extraer ID de YouTube para reproducir en Lightbox
+function getYouTubeId(url: string) {
+  if (!url) return '';
+  if (url.includes('/shorts/')) {
+    const parts = url.split('/shorts/');
+    if (parts.length > 1) {
+      return parts[1].split(/[?#&]/)[0];
+    }
+  }
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
+}
 
 export function getStaticPaths() {
   return [
@@ -115,41 +160,150 @@ const pageDescription = info.description;
         <div class="w-12 h-px bg-gold-bruna/30"></div>
       </div>
 
-      <!-- Status Message -->
-      <div class="bg-slate-900/70 border border-gold-bruna/20 rounded-2xl p-8 md:p-10 backdrop-blur-md mb-10 shadow-2xl shadow-black/60">
-        
-        <!-- Animated icon -->
-        <div class="flex items-center justify-center gap-3 mb-5">
-          <div class="w-10 h-10 rounded-full bg-gold-bruna/10 border border-gold-bruna/30 flex items-center justify-center text-gold-bruna animate-pulse">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+      <!-- Dynamic Video Track or Status Message -->
+      {(!info.videos || info.videos.length === 0) ? (
+        <div class="bg-slate-900/70 border border-gold-bruna/20 rounded-2xl p-8 md:p-10 backdrop-blur-md mb-10 shadow-2xl shadow-black/60">
+          <!-- Animated icon -->
+          <div class="flex items-center justify-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full bg-gold-bruna/10 border border-gold-bruna/30 flex items-center justify-center text-gold-bruna animate-pulse">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <span class="text-[10px] font-extrabold tracking-widest text-gold-bruna uppercase font-title">
+              Sección en Preparación
+            </span>
           </div>
-          <span class="text-[10px] font-extrabold tracking-widest text-gold-bruna uppercase font-title">
-            Sección en Preparación
-          </span>
-        </div>
 
-        <p class="text-white font-bold text-lg md:text-xl mb-3 leading-snug">
-          Estamos preparando todo el material de esta sección.
-        </p>
-        <p class="text-slate-400 text-sm leading-relaxed max-w-xl mx-auto">
-          {info.description} Pronto tendrás acceso a fotos, videos, referencias y toda la información necesaria para contratar a Banda Bruna para tu <strong class="text-slate-300">{info.title.toLowerCase()}</strong>.
-        </p>
+          <p class="text-white font-bold text-lg md:text-xl mb-3 leading-snug">
+            Estamos preparando todo el material de esta sección.
+          </p>
+          <p class="text-slate-400 text-sm leading-relaxed max-w-xl mx-auto">
+            {info.description} Pronto tendrás acceso a fotos, videos, referencias y toda la información necesaria para contratar a Banda Bruna para tu <strong class="text-slate-300">{info.title.toLowerCase()}</strong>.
+          </p>
 
-        <!-- Progress bar visual -->
-        <div class="mt-8 text-left">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Recopilación de material</span>
-            <span class="text-[9px] font-bold text-gold-bruna">En progreso...</span>
-          </div>
-          <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-gold-bruna to-amber-500 rounded-full w-[35%] relative">
-              <div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-300 rounded-full shadow-lg shadow-amber-400/50 animate-pulse"></div>
+          <!-- Progress bar visual -->
+          <div class="mt-8 text-left">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-[9px] font-bold tracking-widest text-slate-400 uppercase">Recopilación de material</span>
+              <span class="text-[9px] font-bold text-gold-bruna">En progreso...</span>
+            </div>
+            <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-gold-bruna to-amber-500 rounded-full w-[35%] relative">
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-amber-300 rounded-full shadow-lg shadow-amber-400/50 animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div class="w-full mt-4 mb-16">
+          <!-- Video Track Container -->
+          <div class="relative group max-w-5xl mx-auto px-2">
+            <!-- Carousel controls -->
+            <button id="prev-vertical" class="absolute left-[-20px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border border-white/10 cursor-pointer shadow-lg select-none" aria-label="Anterior">❮</button>
+            <button id="next-vertical" class="absolute right-[-20px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border border-white/10 cursor-pointer shadow-lg select-none" aria-label="Siguiente">❯</button>
+
+            <!-- Scroll wrapper -->
+            <div id="vertical-video-track" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6" style="scrollbar-width: none; -ms-overflow-style: none;">
+              {info.videos.map((vid, idx) => {
+                const ytId = getYouTubeId(vid.url);
+                const isYt = !!ytId;
+                const previewImg = isYt ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+
+                return (
+                  <div 
+                    class="vertical-video-card min-w-[260px] sm:min-w-[280px] md:min-w-[290px] aspect-[9/16] bg-slate-900 border border-white/5 rounded-2xl overflow-hidden relative group/card snap-start cursor-pointer hover:border-gold-bruna/30 hover:scale-[1.02] transition-all duration-300 shadow-2xl"
+                    data-video-url={vid.url}
+                    data-video-title={vid.title}
+                    data-video-aspect={vid.aspect || 'vertical'}
+                  >
+                    <!-- Background video preview -->
+                    <div class="absolute inset-0 z-0 bg-slate-950 flex items-center justify-center">
+                      {isYt ? (
+                        <img 
+                          src={previewImg} 
+                          alt={vid.title} 
+                          class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <video 
+                          src={vid.url} 
+                          class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity" 
+                          muted 
+                          loop 
+                          playsinline 
+                          preload="metadata"
+                        />
+                      )}
+                    </div>
+
+                    <!-- Gradient Overlays -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/40 z-10 pointer-events-none"></div>
+
+                    <!-- Card Content -->
+                    <div class="absolute inset-0 z-20 p-5 flex flex-col justify-between items-start text-left">
+                      <!-- Top category badge -->
+                      <span class="bg-gold-bruna text-black text-[9px] font-extrabold tracking-widest px-2.5 py-1 rounded-sm uppercase font-title">
+                        {vid.category}
+                      </span>
+
+                      <!-- Center play button container -->
+                      <div class="w-full flex justify-center py-10 opacity-85 group-hover/card:opacity-100 group-hover/card:scale-110 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg group-hover/card:border-gold-bruna/40">
+                          <span class="text-gold-bruna text-sm pl-1">▶</span>
+                        </div>
+                      </div>
+
+                      <!-- Bottom descriptions -->
+                      <div class="w-full">
+                        <h4 class="font-title font-extrabold text-xs sm:text-sm text-white uppercase mb-1 tracking-wide leading-tight group-hover/card:text-gold-bruna transition-colors">
+                          {vid.title}
+                        </h4>
+                        <p class="text-[10px] text-slate-400 font-light leading-normal">
+                          {vid.tagline}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <!-- Lightbox Modal (Hidden by default) -->
+          <div id="video-lightbox" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <button id="close-lightbox" class="absolute top-4 right-4 text-slate-400 hover:text-white p-3 text-base transition-colors cursor-pointer bg-slate-900/60 rounded-full w-12 h-12 flex items-center justify-center border border-white/5 z-20 shadow-lg shadow-black/30" aria-label="Cerrar reproductor">
+              ✕
+            </button>
+
+            <!-- Lightbox content -->
+            <div id="lightbox-media-container" class="w-full max-w-[340px] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center transition-all duration-300">
+              <video 
+                id="lightbox-video" 
+                controls 
+                autoplay 
+                playsinline 
+                class="w-full h-full object-contain bg-black"
+              >
+                Tu navegador no soporta videos HTML5.
+              </video>
+              <div id="lightbox-iframe-container" class="w-full h-full hidden bg-black"></div>
+
+              <!-- Title overlay in lightbox with Next/Prev buttons -->
+              <div class="absolute bottom-4 left-4 right-4 bg-black/65 backdrop-blur-md border border-white/5 p-3 rounded-lg text-left flex items-center justify-between gap-4">
+                <div class="flex-1">
+                  <p id="lightbox-video-title" class="text-xs font-bold text-white uppercase font-title tracking-wide"></p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                  <button id="lightbox-prev" class="w-8 h-8 rounded bg-slate-950/60 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer text-xs select-none" aria-label="Video anterior">❮</button>
+                  <button id="lightbox-next" class="w-8 h-8 rounded bg-slate-950/60 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer text-xs select-none" aria-label="Siguiente video">❯</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <!-- CTA Section -->
       <p class="text-slate-400 text-xs mb-6 tracking-wide">
@@ -175,6 +329,174 @@ const pageDescription = info.description;
     </div>
 
   </section>
+
+  <!-- client-side scripts for dynamic videos -->
+  {info.videos && info.videos.length > 0 && (
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Controladores de scroll
+        const track = document.getElementById('vertical-video-track');
+        const prevBtn = document.getElementById('prev-vertical');
+        const nextBtn = document.getElementById('next-vertical');
+
+        if (track && prevBtn && nextBtn) {
+          prevBtn.addEventListener('click', () => {
+            track.scrollBy({ left: -300, behavior: 'smooth' });
+          });
+          nextBtn.addEventListener('click', () => {
+            track.scrollBy({ left: 300, behavior: 'smooth' });
+          });
+        }
+
+        // Lógica de Lightbox
+        const lightbox = document.getElementById('video-lightbox');
+        const lightboxVid = document.getElementById('lightbox-video') as HTMLVideoElement | null;
+        const lightboxIframeContainer = document.getElementById('lightbox-iframe-container');
+        const mediaContainer = document.getElementById('lightbox-media-container');
+        const lightboxTitle = document.getElementById('lightbox-video-title');
+        const closeBtn = document.getElementById('close-lightbox');
+        const videoCards = document.querySelectorAll('.vertical-video-card');
+        const prevBtnLightbox = document.getElementById('lightbox-prev');
+        const nextBtnLightbox = document.getElementById('lightbox-next');
+
+        const videosList = Array.from(videoCards).map(card => ({
+          url: card.getAttribute('data-video-url'),
+          title: card.getAttribute('data-video-title')
+        }));
+        let currentIndex = 0;
+
+        function getYouTubeIdClient(url: string) {
+          if (!url) return '';
+          if (url.includes('/shorts/')) {
+            const parts = url.split('/shorts/');
+            if (parts.length > 1) {
+              return parts[1].split(/[?#&]/)[0];
+            }
+          }
+          const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+          const match = url.match(regExp);
+          return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
+        }
+
+        function openVideo(index, pushToHistory = true) {
+          if (index < 0) index = videosList.length - 1;
+          if (index >= videosList.length) index = 0;
+          currentIndex = index;
+
+          const videoData = videosList[currentIndex];
+          const card = videoCards[currentIndex];
+          const aspect = card ? card.getAttribute('data-video-aspect') || 'vertical' : 'vertical';
+
+          if (lightbox && videoData && videoData.url) {
+            if (lightboxTitle) lightboxTitle.textContent = videoData.title || '';
+            
+            if (mediaContainer) {
+              if (aspect === 'horizontal') {
+                mediaContainer.className = "w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center transition-all duration-300";
+              } else {
+                mediaContainer.className = "w-full max-w-[340px] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center transition-all duration-300";
+              }
+            }
+
+            const ytId = getYouTubeIdClient(videoData.url);
+
+            if (ytId) {
+              if (lightboxVid) {
+                lightboxVid.pause();
+                lightboxVid.src = '';
+                lightboxVid.classList.add('hidden');
+              }
+              if (lightboxIframeContainer) {
+                lightboxIframeContainer.innerHTML = `
+                  <iframe 
+                    src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" 
+                    title="${videoData.title}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen 
+                    class="w-full h-full"
+                  ></iframe>
+                `;
+                lightboxIframeContainer.classList.remove('hidden');
+              }
+            } else {
+              if (lightboxIframeContainer) {
+                lightboxIframeContainer.innerHTML = '';
+                lightboxIframeContainer.classList.add('hidden');
+              }
+              if (lightboxVid) {
+                lightboxVid.src = videoData.url;
+                lightboxVid.classList.remove('hidden');
+                lightboxVid.play().catch(() => {});
+              }
+            }
+
+            if (lightbox.classList.contains('hidden')) {
+              lightbox.classList.remove('hidden');
+              document.body.style.overflow = 'hidden';
+              if (pushToHistory) {
+                history.pushState({ lightboxOpen: true }, '');
+              }
+            }
+          }
+        }
+
+        function closeLightbox(shouldPopHistory = true) {
+          if (lightbox) {
+            if (lightboxVid) {
+              lightboxVid.pause();
+              lightboxVid.src = '';
+            }
+            if (lightboxIframeContainer) {
+              lightboxIframeContainer.innerHTML = '';
+              lightboxIframeContainer.classList.add('hidden');
+            }
+            lightbox.classList.add('hidden');
+            document.body.style.overflow = '';
+            if (shouldPopHistory && history.state && history.state.lightboxOpen) {
+              history.back();
+            }
+          }
+        }
+
+        videoCards.forEach((card, idx) => {
+          card.addEventListener('click', () => {
+            openVideo(idx, true);
+          });
+        });
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => closeLightbox(true));
+        }
+        if (lightbox) {
+          lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+              closeLightbox(true);
+            }
+          });
+        }
+
+        if (prevBtnLightbox) {
+          prevBtnLightbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openVideo(currentIndex - 1, false);
+          });
+        }
+        if (nextBtnLightbox) {
+          nextBtnLightbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openVideo(currentIndex + 1, false);
+          });
+        }
+
+        window.addEventListener('popstate', () => {
+          if (lightbox && !lightbox.classList.contains('hidden')) {
+            closeLightbox(false);
+          }
+        });
+      });
+    </script>
+  )}
 
 </Layout>
 

@@ -2,31 +2,70 @@
 import Layout from '../../layouts/Layout.astro';
 import { supabase } from '../../services/supabaseClient.js';
 
-// Videos de festivales masivos, con el nuevo video de Puerto Saavedra 2026 de primero
+// Extraer ID de YouTube para reproducir en Lightbox
+function getYouTubeId(url: string) {
+  if (!url) return '';
+  if (url.includes('/shorts/')) {
+    const parts = url.split('/shorts/');
+    if (parts.length > 1) {
+      return parts[1].split(/[?#&]/)[0];
+    }
+  }
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
+}
+
+// Videos de festivales masivos, con los nuevos videos de YouTube al principio
 const videos = [
+  {
+    url: "https://www.youtube.com/shorts/lLdj5P-aXs8",
+    title: "Festival de Cumbia 2026",
+    category: "🎪 FESTIVAL",
+    tagline: "La energía arrolladora de la cumbia sureña",
+    aspect: "vertical"
+  },
+  {
+    url: "https://www.youtube.com/shorts/Q3eRwLYVosY",
+    title: "El Ritmo de la Noche",
+    category: "⚡ EN VIVO",
+    tagline: "Miles de personas bailando con Banda Bruna",
+    aspect: "vertical"
+  },
+  {
+    url: "https://youtu.be/fYzthzjMJ2U",
+    title: "Gran Show Cumbia Sureña",
+    category: "🔥 EN ESCENARIO",
+    tagline: "Presentación completa en vivo con toda la potencia",
+    aspect: "horizontal"
+  },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-25_at_1.31.25_PM_zm9b8v.mp4",
     title: "Expo Campesina Puerto Saavedra 2026",
     category: "🎪 FESTIVAL",
-    tagline: "Show masivo en vivo frente al mar"
+    tagline: "Show masivo en vivo frente al mar",
+    aspect: "vertical"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243535/WhatsApp_Video_2026-06-23_at_3.35.21_PM_rzlepr.mp4",
     title: "Fonda Oficial Llena",
     category: "🏛 MUNICIPAL",
-    tagline: "Miles cantando al unísono en eventos públicos"
+    tagline: "Miles cantando al unísono en eventos públicos",
+    aspect: "vertical"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243531/WhatsApp_Video_2026-06-23_at_3.35.18_PM_zpdgvh.mp4",
     title: "La Energía del Escenario",
     category: "⚡ EN VIVO",
-    tagline: "Fuerza y conexión total con la audiencia"
+    tagline: "Fuerza y conexión total con la audiencia",
+    aspect: "vertical"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782245403/WhatsApp_Video_2026-06-23_at_3.42.16_PM_yp01qd.mp4",
     title: "Público Encendido",
     category: "🔥 CONEXIÓN",
-    tagline: "El cariño de la gente en festivales del sur"
+    tagline: "El cariño de la gente en festivales del sur",
+    aspect: "vertical"
   }
 ];
 
@@ -185,53 +224,69 @@ const faqs = [
 
       <!-- Scroll wrapper -->
       <div id="vertical-video-track" class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6" style="scrollbar-width: none; -ms-overflow-style: none;">
-        {videos.map((vid, idx) => (
-          <div 
-            class="vertical-video-card min-w-[260px] sm:min-w-[280px] md:min-w-[290px] aspect-[9/16] bg-slate-900 border border-white/5 rounded-2xl overflow-hidden relative group/card snap-start cursor-pointer hover:border-gold-bruna/30 hover:scale-[1.02] transition-all duration-300 shadow-2xl"
-            data-video-url={vid.url}
-            data-video-title={vid.title}
-          >
-            <!-- Background video preview -->
-            <div class="absolute inset-0 z-0 bg-slate-950 flex items-center justify-center">
-              <video 
-                src={vid.url} 
-                class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity" 
-                muted 
-                loop 
-                playsinline 
-                preload="metadata"
-              />
-            </div>
+        {videos.map((vid, idx) => {
+          const ytId = getYouTubeId(vid.url);
+          const isYt = !!ytId;
+          const previewImg = isYt ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
 
-            <!-- Gradient Overlays -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/40 z-10 pointer-events-none"></div>
+          return (
+            <div 
+              class="vertical-video-card min-w-[260px] sm:min-w-[280px] md:min-w-[290px] aspect-[9/16] bg-slate-900 border border-white/5 rounded-2xl overflow-hidden relative group/card snap-start cursor-pointer hover:border-gold-bruna/30 hover:scale-[1.02] transition-all duration-300 shadow-2xl"
+              data-video-url={vid.url}
+              data-video-title={vid.title}
+              data-video-aspect={vid.aspect || 'vertical'}
+            >
+              <!-- Background video preview -->
+              <div class="absolute inset-0 z-0 bg-slate-950 flex items-center justify-center">
+                {isYt ? (
+                  <img 
+                    src={previewImg} 
+                    alt={vid.title} 
+                    class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity"
+                    loading="lazy"
+                  />
+                ) : (
+                  <video 
+                    src={vid.url} 
+                    class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity" 
+                    muted 
+                    loop 
+                    playsinline 
+                    preload="metadata"
+                  />
+                )}
+              </div>
 
-            <!-- Card Content (Category Badge, Title, play icon) -->
-            <div class="absolute inset-0 z-20 p-5 flex flex-col justify-between items-start text-left">
-              <!-- Top category badge -->
-              <span class="bg-gold-bruna text-black text-[9px] font-extrabold tracking-widest px-2.5 py-1 rounded-sm uppercase font-title">
-                {vid.category}
-              </span>
+              <!-- Gradient Overlays -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/40 z-10 pointer-events-none"></div>
 
-              <!-- Center play button container -->
-              <div class="w-full flex justify-center py-10 opacity-85 group-hover/card:opacity-100 group-hover/card:scale-110 transition-all duration-300">
-                <div class="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg group-hover/card:border-gold-bruna/40">
-                  <span class="text-gold-bruna text-sm pl-1">▶</span>
+              <!-- Card Content (Category Badge, Title, play icon) -->
+              <div class="absolute inset-0 z-20 p-5 flex flex-col justify-between items-start text-left">
+                <!-- Top category badge -->
+                <span class="bg-gold-bruna text-black text-[9px] font-extrabold tracking-widest px-2.5 py-1 rounded-sm uppercase font-title">
+                  {vid.category}
+                </span>
+
+                <!-- Center play button container -->
+                <div class="w-full flex justify-center py-10 opacity-85 group-hover/card:opacity-100 group-hover/card:scale-110 transition-all duration-300">
+                  <div class="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg group-hover/card:border-gold-bruna/40">
+                    <span class="text-gold-bruna text-sm pl-1">▶</span>
+                  </div>
+                </div>
+
+                <!-- Bottom descriptions -->
+                <div class="w-full">
+                  <h4 class="font-title font-extrabold text-xs sm:text-sm text-white uppercase mb-1 tracking-wide leading-tight group-hover/card:text-gold-bruna transition-colors">
+                    {vid.title}
+                  </h4>
+                  <p class="text-[10px] text-slate-400 font-light leading-normal">
+                    {vid.tagline}
+                  </p>
                 </div>
               </div>
-
-              <!-- Bottom descriptions -->
-              <div class="w-full">
-                <h4 class="font-title font-extrabold text-xs sm:text-sm text-white uppercase mb-1 tracking-wide leading-tight group-hover/card:text-gold-bruna transition-colors">
-                  {vid.title}
-                </h4>
-                <p class="text-[10px] text-slate-400 font-light leading-normal">
-                  {vid.tagline}
-                </p>
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
 
@@ -242,7 +297,7 @@ const faqs = [
       </button>
 
       <!-- Lightbox content -->
-      <div class="w-full max-w-[340px] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center">
+      <div id="lightbox-media-container" class="w-full max-w-[340px] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center transition-all duration-300">
         <video 
           id="lightbox-video" 
           controls 
@@ -252,6 +307,8 @@ const faqs = [
         >
           Tu navegador no soporta videos HTML5.
         </video>
+        <div id="lightbox-iframe-container" class="w-full h-full hidden bg-black"></div>
+
         <!-- Title overlay in lightbox with Next/Prev buttons -->
         <div class="absolute bottom-4 left-4 right-4 bg-black/65 backdrop-blur-md border border-white/5 p-3 rounded-lg text-left flex items-center justify-between gap-4">
           <div class="flex-1">
@@ -763,6 +820,8 @@ const faqs = [
     // Lightbox modal logic with navigation & history integration
     const lightbox = document.getElementById('video-lightbox');
     const lightboxVid = document.getElementById('lightbox-video') as HTMLVideoElement | null;
+    const lightboxIframeContainer = document.getElementById('lightbox-iframe-container');
+    const mediaContainer = document.getElementById('lightbox-media-container');
     const lightboxTitle = document.getElementById('lightbox-video-title');
     const closeBtn = document.getElementById('close-lightbox');
     const videoCards = document.querySelectorAll('.vertical-video-card');
@@ -776,34 +835,97 @@ const faqs = [
     }));
     let currentIndex = 0;
 
+    // Extraer ID de YouTube en el cliente
+    function getYouTubeIdClient(url: string) {
+      if (!url) return '';
+      if (url.includes('/shorts/')) {
+        const parts = url.split('/shorts/');
+        if (parts.length > 1) {
+          return parts[1].split(/[?#&]/)[0];
+        }
+      }
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
+    }
+
     function openVideo(index, pushToHistory = true) {
       if (index < 0) index = videosList.length - 1;
       if (index >= videosList.length) index = 0;
       currentIndex = index;
 
       const videoData = videosList[currentIndex];
-      if (lightbox && lightboxVid && videoData && videoData.url) {
-        lightboxVid.src = videoData.url;
+      const card = videoCards[currentIndex];
+      const aspect = card ? card.getAttribute('data-video-aspect') || 'vertical' : 'vertical';
+
+      if (lightbox && videoData && videoData.url) {
         if (lightboxTitle) lightboxTitle.textContent = videoData.title || '';
         
+        // Ajustar el aspecto del Lightbox (horizontal 16:9 o vertical 9:16)
+        if (mediaContainer) {
+          if (aspect === 'horizontal') {
+            mediaContainer.className = "w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center transition-all duration-300";
+          } else {
+            mediaContainer.className = "w-full max-w-[340px] aspect-[9/16] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative flex items-center justify-center transition-all duration-300";
+          }
+        }
+
+        const ytId = getYouTubeIdClient(videoData.url);
+
+        if (ytId) {
+          // Si es YouTube, inyectar iframe y pausar/ocultar el reproductor nativo
+          if (lightboxVid) {
+            lightboxVid.pause();
+            lightboxVid.src = '';
+            lightboxVid.classList.add('hidden');
+          }
+          if (lightboxIframeContainer) {
+            lightboxIframeContainer.innerHTML = `
+              <iframe 
+                src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" 
+                title="${videoData.title}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen 
+                class="w-full h-full"
+              ></iframe>
+            `;
+            lightboxIframeContainer.classList.remove('hidden');
+          }
+        } else {
+          // Si es un MP4 tradicional, limpiar iframe y usar reproductor nativo
+          if (lightboxIframeContainer) {
+            lightboxIframeContainer.innerHTML = '';
+            lightboxIframeContainer.classList.add('hidden');
+          }
+          if (lightboxVid) {
+            lightboxVid.src = videoData.url;
+            lightboxVid.classList.remove('hidden');
+            lightboxVid.play().catch(() => {});
+          }
+        }
+
         if (lightbox.classList.contains('hidden')) {
           lightbox.classList.remove('hidden');
           document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
           
           if (pushToHistory) {
-            // Registrar estado en el historial del navegador
             history.pushState({ lightboxOpen: true }, '');
           }
         }
-        
-        lightboxVid.play().catch(() => {});
       }
     }
 
     function closeLightbox(shouldPopHistory = true) {
-      if (lightbox && lightboxVid) {
-        lightboxVid.pause();
-        lightboxVid.src = '';
+      if (lightbox) {
+        if (lightboxVid) {
+          lightboxVid.pause();
+          lightboxVid.src = '';
+        }
+        if (lightboxIframeContainer) {
+          lightboxIframeContainer.innerHTML = '';
+          lightboxIframeContainer.classList.add('hidden');
+        }
         lightbox.classList.add('hidden');
         document.body.style.overflow = ''; // Restaurar scroll
         
