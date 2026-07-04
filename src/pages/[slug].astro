@@ -393,11 +393,7 @@ const allDetrasCamaras = [
           </div>
         </div>
 
-      </div>
-    </section>
-
-    <!-- 2. STREAMING & PLATFORM CARDS -->
-    {lanzamiento.mostrar_plataformas && (
+      </d    {lanzamiento.mostrar_plataformas && (
       <section class="relative z-10 px-6 max-w-4xl mx-auto py-16 text-center">
         <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Escucha / Guarda en Plataformas</h2>
         <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Disponible en todos los servicios de streaming</p>
@@ -409,13 +405,20 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="spotify" 
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#1DB954]/40 hover:bg-[#1DB954]/5 transition-all duration-300 relative group overflow-hidden glow-active"
+            class={`platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#1DB954]/40 hover:bg-[#1DB954]/5 transition-all duration-300 relative group overflow-hidden ${isReleased ? 'glow-active' : 'pointer-events-none opacity-50'}`}
           >
             <div class="w-12 h-12 rounded-full bg-[#1DB954]/10 flex items-center justify-center text-[#1DB954] group-hover:scale-110 transition-transform">
               <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.495 17.305c-.215.353-.677.463-1.03.248-2.868-1.753-6.48-2.15-10.732-1.176-.403.092-.81-.16-.902-.563-.092-.403.16-.81.563-.902 4.65-1.064 8.627-.61 11.854 1.362.353.216.464.678.247 1.031zm1.467-3.26c-.27.44-.847.585-1.287.315-3.284-2.02-8.29-2.607-12.177-1.427-.492.15-1.018-.13-1.168-.622-.15-.492.13-1.017.622-1.168 4.444-1.348 9.957-.7 13.7 1.61.44.27.585.848.315 1.288zm.13-3.39c-3.94-2.34-10.45-2.556-14.237-1.407-.604.183-1.246-.16-1.43-0.764-.183-.604.16-1.246.764-1.43 4.354-1.32 11.536-1.07 16.082 1.63.543.32.722 1.026.4 1.57-.32.544-1.027.722-1.57.402z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Spotify</span>
-            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#1DB954]/25 text-[#1DB954] bg-[#1DB954]/10 uppercase tracking-wider">YA DISPONIBLE</span>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#1DB954]/25 text-[#1DB954] bg-[#1DB954]/10 uppercase tracking-wider">
+              {isReleased ? 'YA DISPONIBLE' : 'PRÓXIMAMENTE'}
+            </span>
+            {!isReleased && (
+              <div class="locked-overlay absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span class="text-xs">🔒</span>
+              </div>
+            )}
           </a>
 
           <!-- YouTube -->
@@ -424,13 +427,20 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="youtube"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden glow-active"
+            class={`platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden ${isReleased ? 'glow-active' : 'pointer-events-none opacity-50'}`}
           >
             <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] group-hover:scale-110 transition-transform">
               <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">YouTube</span>
-            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FF0000]/25 text-[#FF0000] bg-[#FF0000]/10 uppercase tracking-wider">YA DISPONIBLE</span>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FF0000]/25 text-[#FF0000] bg-[#FF0000]/10 uppercase tracking-wider">
+              {isReleased ? 'YA DISPONIBLE' : 'PRÓXIMAMENTE'}
+            </span>
+            {!isReleased && (
+              <div class="locked-overlay absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span class="text-xs">🔒</span>
+              </div>
+            )}
           </a>
 
           <!-- Apple Music -->
@@ -439,13 +449,20 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="apple_music"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FA243C]/40 hover:bg-[#FA243C]/5 transition-all duration-300 relative group overflow-hidden glow-active"
+            class={`platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FA243C]/40 hover:bg-[#FA243C]/5 transition-all duration-300 relative group overflow-hidden ${isReleased ? 'glow-active' : 'pointer-events-none opacity-50'}`}
           >
             <div class="w-12 h-12 rounded-full bg-[#FA243C]/10 flex items-center justify-center text-[#FA243C] group-hover:scale-110 transition-transform">
               <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.006 3.753c-.313-.195-.694-.213-1.025-.05l-8.006 4C9.52 7.925 9.22 8.358 9.22 8.847V16.32c-.524-.4-1.22-.634-1.997-.634-1.78 0-3.223 1.135-3.223 2.535 0 1.4 1.443 2.535 3.223 2.535 1.745 0 3.167-1.092 3.22-2.463l.003-.072V11.51l6.78-3.39v4.2c-.524-.4-1.22-.634-1.997-.634-1.78 0-3.223 1.135-3.223 2.535 0 1.4 1.443 2.535 3.223 2.535 1.745 0 3.167-1.092 3.22-2.463l.003-.072V4.5c0-.332-.164-.643-.456-.827l.001.08z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Apple Music</span>
-            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FA243C]/25 text-[#FA243C] bg-[#FA243C]/10 uppercase tracking-wider">YA DISPONIBLE</span>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FA243C]/25 text-[#FA243C] bg-[#FA243C]/10 uppercase tracking-wider">
+              {isReleased ? 'YA DISPONIBLE' : 'PRÓXIMAMENTE'}
+            </span>
+            {!isReleased && (
+              <div class="locked-overlay absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span class="text-xs">🔒</span>
+              </div>
+            )}
           </a>
 
           <!-- YouTube Music -->
@@ -454,13 +471,20 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="youtube_music"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden glow-active"
+            class={`platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#FF0000]/40 hover:bg-[#FF0000]/5 transition-all duration-300 relative group overflow-hidden ${isReleased ? 'glow-active' : 'pointer-events-none opacity-50'}`}
           >
             <div class="w-12 h-12 rounded-full bg-[#FF0000]/10 flex items-center justify-center text-[#FF0000] group-hover:scale-110 transition-transform">
               <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.824c-4.32 0-7.824-3.504-7.824-7.824S7.68 4.176 12 4.176s7.824 3.504 7.824 7.824-3.504 7.824-7.824 7.824zm3.912-7.824l-5.868-3.36v6.72l5.868-3.36z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">YT Music</span>
-            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FF0000]/25 text-[#FF0000] bg-[#FF0000]/10 uppercase tracking-wider">YA DISPONIBLE</span>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#FF0000]/25 text-[#FF0000] bg-[#FF0000]/10 uppercase tracking-wider">
+              {isReleased ? 'YA DISPONIBLE' : 'PRÓXIMAMENTE'}
+            </span>
+            {!isReleased && (
+              <div class="locked-overlay absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span class="text-xs">🔒</span>
+              </div>
+            )}
           </a>
 
           <!-- Amazon Music -->
@@ -469,13 +493,20 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="amazon_music"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#00A8E1]/40 hover:bg-[#00A8E1]/5 transition-all duration-300 relative group overflow-hidden glow-active"
+            class={`platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#00A8E1]/40 hover:bg-[#00A8E1]/5 transition-all duration-300 relative group overflow-hidden ${isReleased ? 'glow-active' : 'pointer-events-none opacity-50'}`}
           >
             <div class="w-12 h-12 rounded-full bg-[#00A8E1]/10 flex items-center justify-center text-[#00A8E1] group-hover:scale-110 transition-transform">
-              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.73 17.55c-1.46 1.13-3.66 1.72-5.83 1.72-3.08 0-5.86-1.18-7.73-3.18-.18-.2-.04-.46.19-.34 2.2 1.18 5.06 1.88 7.82 1.88 2.06 0 4.25-.42 5.92-1.24.28-.14.48.14.28.34l-.65.82zm.74-2.54c-.2-.25-.56-.12-.51.2.14.88-.02 1.8-.46 2.54-.12.2.04.42.22.28 1.1-.88 1.54-2.3 1.26-3.76-.06-.3-.3-.42-.51-.26zM21.33 6.9C14.7 6.9 5.3 13.5 2 17.5c-.24.3.06.66.36.42 3-2.3 9.4-7.5 18.6-7.5.38 0 .6-.32.37-.52z"/></svg>
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.73 17.55c-1.46 1.13-3.66 1.72-5.83 1.72-3.08 0-5.86-1.18-7.73-3.18-.18-.2-.04-.46.19-.34 2.2 1.18 5.06 1.88 7.82 1.88 2.06 0 4.25-.42 5.92-1.24.28-.14.48.14.28.34l-.65.82zm.74-2.54c-.2-.25-.56-.12-.51.2 1.14.88-.02 1.8-.46 2.54-.12.2.04.42.22.28 1.1-.88 1.54-2.3 1.26-3.76-.06-.3-.3-.42-.51-.26zM21.33 6.9C14.7 6.9 5.3 13.5 2 17.5c-.24.3.06.66.36.42 3-2.3 9.4-7.5 18.6-7.5.38 0 .6-.32.37-.52z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Amazon Music</span>
-            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#00A8E1]/25 text-[#00A8E1] bg-[#00A8E1]/10 uppercase tracking-wider">YA DISPONIBLE</span>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#00A8E1]/25 text-[#00A8E1] bg-[#00A8E1]/10 uppercase tracking-wider">
+              {isReleased ? 'YA DISPONIBLE' : 'PRÓXIMAMENTE'}
+            </span>
+            {!isReleased && (
+              <div class="locked-overlay absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span class="text-xs">🔒</span>
+              </div>
+            )}
           </a>
 
           <!-- Deezer -->
@@ -484,13 +515,20 @@ const allDetrasCamaras = [
             target="_blank" 
             rel="noopener"
             data-platform="deezer"
-            class="platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#EF5466]/40 hover:bg-[#EF5466]/5 transition-all duration-300 relative group overflow-hidden glow-active"
+            class={`platform-card bg-slate-900/60 border border-white/5 rounded-2xl p-6 flex flex-col items-center gap-3 hover:border-[#EF5466]/40 hover:bg-[#EF5466]/5 transition-all duration-300 relative group overflow-hidden ${isReleased ? 'glow-active' : 'pointer-events-none opacity-50'}`}
           >
             <div class="w-12 h-12 rounded-full bg-[#EF5466]/10 flex items-center justify-center text-[#EF5466] group-hover:scale-110 transition-transform">
               <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 16.2h4.1V20H0v-3.8zm5.5-5.4h4.1v3.8H5.5v-3.8zm0 5.4h4.1V20H5.5v-3.8zm0-10.8H0v3.8h4.1V5.4zm11-5.4h-4.1v3.8h4.1V0zm0 5.4h-4.1v3.8h4.1V5.4zm0 5.4h-4.1v3.8h4.1v-3.8zm0 5.4h-4.1V20h4.1v-3.8zm5.5-16.2h-4.1v3.8h4.1V0zm0 5.4h-4.1v3.8h4.1V5.4zm0 5.4h-4.1v3.8h4.1v-3.8zm0 5.4h-4.1V20h4.1v-3.8zM22 0h-4.1v3.8H22V0zm0 5.4h-4.1v3.8H22V5.4zm0 5.4h-4.1v3.8H22v-3.8zm0 5.4h-4.1V20H22v-3.8z"/></svg>
             </div>
             <span class="font-bold text-xs tracking-wider uppercase font-title text-white">Deezer</span>
-            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#EF5466]/25 text-[#EF5466] bg-[#EF5466]/10 uppercase tracking-wider">YA DISPONIBLE</span>
+            <span class="badge-plat text-[8px] font-extrabold px-2 py-0.5 rounded border border-[#EF5466]/25 text-[#EF5466] bg-[#EF5466]/10 uppercase tracking-wider">
+              {isReleased ? 'YA DISPONIBLE' : 'PRÓXIMAMENTE'}
+            </span>
+            {!isReleased && (
+              <div class="locked-overlay absolute inset-0 bg-black/45 backdrop-blur-[1px] flex items-center justify-center z-10">
+                <span class="text-xs">🔒</span>
+              </div>
+            )}
           </a>
         </div>
       </section>
@@ -796,7 +834,7 @@ const allDetrasCamaras = [
 
         // 3. Activar, brillar y cambiar texto en tarjetas de plataformas
         platformCards.forEach(card => {
-          card.classList.remove('pointer-events-none');
+          card.classList.remove('pointer-events-none', 'opacity-50');
           card.classList.add('glow-active'); // Activa animación de brillo y destello
           
           const plat = card.getAttribute('data-platform');
