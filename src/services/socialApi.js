@@ -4,12 +4,12 @@
 
 export const getLatestVideo = () => {
   return {
-    id: "p_zdcQEEOFY",
-    title: "AGONÍA (SESIÓN EN VIVO)",
-    type: "Sesión En Vivo",
-    youtubeUrl: "https://www.youtube.com/watch?v=p_zdcQEEOFY",
-    embedUrl: "https://www.youtube.com/embed/p_zdcQEEOFY?autoplay=1&mute=1&loop=1&playlist=p_zdcQEEOFY&controls=0&showinfo=0&rel=0&modestbranding=1",
-    thumbnail: "/assets/images/youtube/latest_yt_cover.webp",
+    id: "mZhYl60ENAs",
+    title: "AHOGADO EN UN BAR (VIDEOCLIP OFICIAL)",
+    type: "Videoclip Oficial",
+    youtubeUrl: "https://www.youtube.com/watch?v=mZhYl60ENAs",
+    embedUrl: "https://www.youtube.com/embed/mZhYl60ENAs?autoplay=1&mute=1&loop=1&playlist=mZhYl60ENAs&controls=0&showinfo=0&rel=0&modestbranding=1",
+    thumbnail: "https://i.ytimg.com/vi/mZhYl60ENAs/maxresdefault.jpg",
     publishedAt: "Reciente"
   };
 };
@@ -17,6 +17,7 @@ export const getLatestVideo = () => {
 export const getVideoPlaylists = () => {
   return {
     "youtube": [
+      { id: "yt_ahogado", title: "Banda Bruna - Ahogado en un Bar (Videoclip Oficial)", url: "https://www.youtube.com/watch?v=mZhYl60ENAs", embedId: "mZhYl60ENAs", thumbnail: "https://i.ytimg.com/vi/mZhYl60ENAs/hqdefault.jpg", duration: "3:40", category: "YouTube Oficial" },
       { id: "yt1", title: "Banda Bruna - Luna Amiga (Videoclip Oficial)", url: "https://www.youtube.com/watch?v=bcHvOVSqYrY", embedId: "bcHvOVSqYrY", thumbnail: "https://i.ytimg.com/vi/bcHvOVSqYrY/hqdefault.jpg", duration: "3:10", category: "YouTube Oficial" },
       { id: "yt2", title: "Banda Bruna - Agonía (Sesión En Vivo)", url: "https://www.youtube.com/watch?v=p_zdcQEEOFY", embedId: "p_zdcQEEOFY", thumbnail: "https://i.ytimg.com/vi/p_zdcQEEOFY/hqdefault.jpg", duration: "4:20", category: "YouTube Oficial" },
       { id: "yt3", title: "Banda Bruna - Mix Cumbias Clásicas (Sesión En Vivo)", url: "https://www.youtube.com/watch?v=jhuzbKVCjuo", embedId: "jhuzbKVCjuo", thumbnail: "https://i.ytimg.com/vi/jhuzbKVCjuo/hqdefault.jpg", duration: "8:45", category: "YouTube Oficial" },
@@ -48,6 +49,17 @@ export const getVideoPlaylists = () => {
 
 export const getInstagramFeed = () => {
   return [
+    {
+      id: "ig_lanzamiento",
+      imageUrl: "/assets/images/instagram/lanzamiento_reel.webp",
+      likes: 624,
+      comments: 57,
+      caption: `🔥 ¡YA DISPONIBLE "AHOGADO EN UN BAR"! 🍻
+El videoclip oficial ya está activo. Agradecemos a todos por su inmenso apoyo. ¡Vayan a verlo, escucharlo y compartirlo con todos sus amigos! 🎸🎶`,
+      username: "@banda_bruna",
+      timeAgo: "Hace 1 día",
+      link: "https://www.instagram.com/p/DaY5-_YCctx/"
+    },
     {
       id: "ig1",
       imageUrl: "/assets/images/instagram/lanzamiento_reel.webp",

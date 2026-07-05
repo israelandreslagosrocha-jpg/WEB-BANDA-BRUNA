@@ -75,6 +75,16 @@ function getYouTubeId(url: string) {
 const youtubeId = getYouTubeId(lanzamiento.plataformas_links?.youtube || '');
 const hasYoutube = !!youtubeId;
 
+// Extraer ID de Instagram
+function getInstagramId(url: string) {
+  if (!url) return '';
+  const match = url.match(/\/p\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : '';
+}
+
+const instagramLink = lanzamiento.plataformas_links?.instagram || '';
+const instagramId = getInstagramId(instagramLink);
+
 // Determinar si el lanzamiento ya se encuentra disponible (para renderizar de inmediato)
 const isReleased = lanzamiento.fecha_lanzamiento ? new Date(lanzamiento.fecha_lanzamiento).getTime() <= Date.now() : false;
 
@@ -133,6 +143,13 @@ const videoSchema = hasYoutube ? {
 // Combinar videos de backstage con publicaciones de Instagram relacionadas para "Ahogado en un Bar"
 const instagramReels = (slug === 'ahogado-en-un-bar') ? [
   {
+    url: "https://www.instagram.com/p/DaY5-_YCctx/",
+    thumbnail: lanzamiento?.imagen_desktop || "/assets/images/instagram/reel_cover.webp",
+    caption: "¡Video oficial del lanzamiento! Ya disponible en Instagram. 📸",
+    tipo: "instagram",
+    aspect: "vertical"
+  },
+  {
     url: "https://www.instagram.com/p/DZkqDn1uNpC/",
     thumbnail: "/assets/images/instagram/segunda_publicacion.webp",
     caption: "Próximamente en todas nuestras plataformas..! 🎸 BANDA BRUNA BB!! 🎶",
@@ -182,6 +199,7 @@ const allDetrasCamaras = [
     id="lanzamiento-root"
     data-launch-date={lanzamiento.fecha_lanzamiento}
     data-youtube-id={youtubeId}
+    data-instagram-id={instagramId}
     data-supabase-url={import.meta.env.PUBLIC_SUPABASE_URL}
     data-supabase-key={import.meta.env.PUBLIC_SUPABASE_ANON_KEY}
     data-slug={lanzamiento.slug}
@@ -292,11 +310,33 @@ const allDetrasCamaras = [
       </div>
 
       <!-- Right side: Video player / Cover graphic -->
-      <div class="lg:col-span-5 w-full relative group">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 z-10 rounded-2xl pointer-events-none"></div>
+      <div class="lg:col-span-5 w-full flex flex-col gap-3 relative">
+        <!-- Selector de Video (Pestañas) - Solo visible cuando está desbloqueado -->
+        {instagramId && (
+          <div 
+            id="media-tabs" 
+            class="flex justify-start gap-2 opacity-0 pointer-events-none select-none transition-all duration-500 z-20"
+          >
+            <button 
+              id="btn-play-youtube" 
+              class="px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest bg-red-600/20 text-red-300 border border-red-500/40 transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-black/40 ring-1 ring-white/10"
+            >
+              <span class="text-xs">📹</span> Ver Videoclip
+            </button>
+            <button 
+              id="btn-play-instagram" 
+              class="px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest bg-slate-900/50 text-slate-400 border border-white/5 hover:bg-slate-900/80 hover:text-white transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-black/40 ring-1 ring-white/5"
+            >
+              <span class="text-xs">📸</span> Ver Instagram
+            </button>
+          </div>
+        )}
         
-        <!-- Video/Image Display Container -->
-        <div id="media-frame" class="w-full aspect-video bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/80 relative flex items-center justify-center">
+        <div class="relative group">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 z-10 rounded-2xl pointer-events-none"></div>
+          
+          <!-- Video/Image Display Container -->
+          <div id="media-frame" class="w-full aspect-video bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/80 relative flex items-center justify-center">
           <!-- Cover Image -->
           <img 
             id="cover-media" 
@@ -728,6 +768,7 @@ const allDetrasCamaras = [
 
       const launchDateStr = root.getAttribute('data-launch-date');
       const youtubeId = root.getAttribute('data-youtube-id');
+      const instagramId = root.getAttribute('data-instagram-id');
       if (!launchDateStr) return;
 
       let launchDate = new Date(launchDateStr).getTime();
@@ -812,6 +853,57 @@ const allDetrasCamaras = [
         deezer: { text: 'text-[#EF5466]', border: 'border-[#EF5466]/25', bg: 'bg-[#EF5466]/10' }
       };
 
+      const btnYoutube = document.getElementById('btn-play-youtube');
+      const btnInstagram = document.getElementById('btn-play-instagram');
+      const mediaTabs = document.getElementById('media-tabs');
+
+      function loadYoutube() {
+        if (!youtubeId || !mediaFrame) return;
+        mediaFrame.innerHTML = `
+          <iframe 
+            src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=0" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen 
+            class="w-full h-full absolute inset-0"
+          ></iframe>
+        `;
+        if (btnYoutube) {
+          btnYoutube.className = "px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest bg-red-600/20 text-red-300 border border-red-500/40 transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-black/40 ring-1 ring-white/10";
+        }
+        if (btnInstagram) {
+          btnInstagram.className = "px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest bg-slate-900/50 text-slate-400 border border-white/5 hover:bg-slate-900/80 hover:text-white transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-black/40 ring-1 ring-white/5";
+        }
+      }
+
+      function loadInstagram() {
+        if (!instagramId || !mediaFrame) return;
+        mediaFrame.innerHTML = `
+          <iframe 
+            src="https://www.instagram.com/p/${instagramId}/embed/" 
+            class="w-full h-full absolute inset-0"
+            frameborder="0" 
+            scrolling="no" 
+            allowtransparency="true"
+            allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          ></iframe>
+        `;
+        if (btnYoutube) {
+          btnYoutube.className = "px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest bg-slate-900/50 text-slate-400 border border-white/5 hover:bg-slate-900/80 hover:text-white transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-black/40 ring-1 ring-white/5";
+        }
+        if (btnInstagram) {
+          btnInstagram.className = "px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest bg-gradient-to-tr from-pink-500/20 via-purple-600/20 to-yellow-500/20 text-pink-300 border border-pink-500/40 transition-all cursor-pointer flex items-center gap-2 shadow-lg shadow-black/40 ring-1 ring-white/10";
+        }
+      }
+
+      if (btnYoutube) {
+        btnYoutube.addEventListener('click', loadYoutube);
+      }
+      if (btnInstagram) {
+        btnInstagram.addEventListener('click', loadInstagram);
+      }
+
       function unlockMediaAndLinks() {
         unlocked = true;
 
@@ -821,21 +913,16 @@ const allDetrasCamaras = [
           setTimeout(() => lockedOverlay.style.display = 'none', 300);
         }
 
-        // 2. Si hay video de youtube, inyectar el iframe
-        if (youtubeId && mediaFrame) {
-          mediaFrame.innerHTML = `
-            <iframe 
-              src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=0" 
-              title="YouTube video player" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-              allowfullscreen 
-              class="w-full h-full absolute inset-0"
-            ></iframe>
-          `;
+        // 2. Mostrar contenedor de pestañas
+        if (mediaTabs) {
+          mediaTabs.classList.remove('opacity-0', 'pointer-events-none', 'select-none');
+          mediaTabs.classList.add('opacity-100');
         }
 
-        // 3. Activar, brillar y cambiar texto en tarjetas de plataformas
+        // 3. Cargar video de youtube por defecto
+        loadYoutube();
+
+        // 4. Activar, brillar y cambiar texto en tarjetas de plataformas
         platformCards.forEach(card => {
           card.classList.remove('pointer-events-none', 'opacity-50');
           card.classList.add('glow-active'); // Activa animación de brillo y destello
