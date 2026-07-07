@@ -24,7 +24,7 @@ try {
   
   // Usar el comando zip nativo de macOS/Linux por velocidad y evitar dependencias pesadas
   // Cambiamos de directorio al root del proyecto para mantener rutas limpias en el zip
-  const cmd = `zip -r "${outputFile}" public/assets/images/gallery public/assets/images/banda`;
+  const cmd = `zip -j "${outputFile}" public/assets/images/prensa/*`;
   
   execSync(cmd, { cwd: projectRoot, stdio: 'inherit' });
   

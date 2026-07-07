@@ -57,9 +57,48 @@ import Layout from '../layouts/Layout.astro';
               Descarga la carpeta con fotos artísticas del grupo y de presentaciones en vivo listas para prensa, sitios web informativos e impresiones.
             </p>
           </div>
-          <button class="w-full bg-slate-950 border border-white/10 hover:border-gold-bruna text-gold-bruna font-semibold py-3 rounded text-xs transition-colors cursor-pointer">
+          <a href="/assets/downloads/fotos_prensa.zip" download class="w-full text-center block bg-slate-950 border border-white/10 hover:border-gold-bruna text-gold-bruna font-semibold py-3 rounded text-xs transition-colors cursor-pointer uppercase">
             DESCARGAR FOTOS (.ZIP)
-          </button>
+          </a>
+        </div>
+      </div>
+
+      <!-- Sección: Galería de Fotos de Prensa -->
+      <div class="bg-slate-900 border border-white/5 rounded-2xl p-6 md:p-8 shadow-lg">
+        <h2 class="font-title font-bold text-xl text-white uppercase mb-6 flex items-center gap-2">
+          <span>📷</span> Galería de Prensa Oficial
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {[
+            { src: "/assets/images/prensa/foto_prensa_1.webp", label: "Promo Grupal 1" },
+            { src: "/assets/images/prensa/foto_prensa_2.webp", label: "Promo Grupal 2" },
+            { src: "/assets/images/prensa/foto_prensa_3.webp", label: "Promo Grupal 3" },
+            { src: "/assets/images/prensa/foto_prensa_4.webp", label: "Promo Grupal 4" },
+            { src: "/assets/images/prensa/foto_prensa_5.webp", label: "Promo Grupal 5" },
+            { src: "/assets/images/prensa/foto_prensa_6.webp", label: "Show en Vivo" }
+          ].map((photo, index) => (
+            <div class="relative group rounded-lg overflow-hidden border border-white/5 bg-slate-950/65 aspect-[3/2] flex items-center justify-center">
+              <img 
+                src={photo.src} 
+                alt={photo.label} 
+                class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500" 
+                loading="lazy"
+              />
+              <!-- Hover Overlay with Download Icon/Button -->
+              <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-left">
+                <span class="text-[9px] font-bold text-gold-bruna uppercase tracking-wider mb-1.5 block">
+                  {photo.label}
+                </span>
+                <a 
+                  href={photo.src} 
+                  download={`Banda_Bruna_Prensa_${index + 1}.webp`} 
+                  class="w-full text-center bg-gold-bruna hover:bg-gold-bruna-hover text-black py-1.5 rounded text-[8px] font-bold tracking-widest uppercase transition-all"
+                >
+                  DESCARGAR HD
+                </a>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

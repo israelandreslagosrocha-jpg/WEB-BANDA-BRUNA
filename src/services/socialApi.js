@@ -62,7 +62,7 @@ El videoclip oficial ya está activo. Agradecemos a todos por su inmenso apoyo. 
     },
     {
       id: "ig1",
-      imageUrl: "/assets/images/instagram/lanzamiento_reel.webp",
+      imageUrl: "/assets/images/instagram/ig_reel_2.webp",
       likes: 423,
       comments: 38,
       caption: `🎬✨ Próximamente...
@@ -223,21 +223,21 @@ export const getBandMembers = () => {
     },
     {
       name: "Fabian Garrido",
-      role: "Guiro/Animación",
+      role: "Güiro y animación",
       image: "/assets/images/banda/fabian_garrido.webp",
       instagram: "https://www.instagram.com/fabian.gaes/",
       bio: "El brillo indispensable de la cumbia, aportando el sonido metálico del güiro y la percusión menor."
     },
     {
       name: "Vicente Nuñez",
-      role: "Guitarra Electrica/Dirección/Coros",
+      role: "Guitarrista y director musical",
       image: "/assets/images/banda/vicente_nunez.webp",
       instagram: "https://www.instagram.com/nunezenun_4/",
       bio: "Creador de las armonías y riffs de guitarra, guiando la dirección musical y la energía en el escenario."
     },
     {
       name: "Gerson Ulloa",
-      role: "Bajos/Coros",
+      role: "Bajista",
       image: "/assets/images/banda/gerson_ulloa.webp",
       instagram: "https://www.instagram.com/geruson79/",
       bio: "El groove y la profundidad del bajo eléctrico que le da cuerpo a la propuesta tropical de la banda."
@@ -265,3 +265,62 @@ export const getBandMembers = () => {
     }
   ];
 };
+
+export const getMemberVideo = (name, type) => {
+  if (!name) return "";
+  const norm = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  if (norm.includes("cesar")) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397923/21_ityujj.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397919/23_xutmb8.mp4";
+  }
+  if (norm.includes("fabian")) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397921/31_izteaa.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397921/32_qjjyld.mp4";
+  }
+  if (norm.includes("vicente")) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397923/33_egwnqe.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397922/35_vdj2po.mp4";
+  }
+  if (norm.includes("gerson")) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397919/28_zpag2l.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397921/30_lwzzaw.mp4";
+  }
+  if (norm.includes("quilodran") || (norm.includes("jaime") && norm.includes("quil"))) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783398437/24_zd82r1.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397919/25_lmlbtd.mp4";
+  }
+  if (norm.includes("sanhueza") || (norm.includes("jaime") && !norm.includes("quil"))) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397924/26_xikb2b.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397921/27_kea8ik.mp4";
+  }
+  if (norm.includes("israel") || norm.includes("lagos")) {
+    return type === "banda"
+      ? "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397921/36_fudbs6.mp4"
+      : "https://res.cloudinary.com/dhgifjpkh/video/upload/v1783397923/38_qlb0uz.mp4";
+  }
+  return "";
+};
+
+export const getCustomRole = (name, currentRole) => {
+  if (!name) return currentRole || "";
+  const norm = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (norm.includes("vicente")) {
+    return "Guitarrista y director musical";
+  }
+  if (norm.includes("gerson")) {
+    return "Bajista";
+  }
+  if (norm.includes("fabian")) {
+    return "Güiro y animación";
+  }
+  return currentRole || "";
+};
+
+

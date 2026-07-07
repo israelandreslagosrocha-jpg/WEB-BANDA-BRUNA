@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../services/supabaseClient.js';
-import { getBandMembers } from '../services/socialApi.js';
+import { getBandMembers, getMemberVideo, getCustomRole } from '../services/socialApi.js';
 
 // Cargar integrantes activos desde Supabase
 const { data: dbMembers } = await supabase
@@ -59,6 +59,12 @@ const staff = (dbStaff || []).map((s: any) => ({
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
+    <!-- Imagen Destacada de Integrantes -->
+    <div class="relative w-full rounded-xl overflow-hidden border border-white/5 bg-slate-950/50 mb-12 shadow-xl flex justify-center items-center">
+      <img src="https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398589/compressed_BB26_cou4ly.webp" alt="Banda Bruna Integrantes Oficiales" class="w-full h-auto max-h-[650px] object-contain block mx-auto" loading="eager" />
+      <div class="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent pointer-events-none"></div>
+    </div>
+
     <!-- Members Slider Container -->
     <div class="relative w-full px-2 md:px-10">
       
@@ -66,19 +72,32 @@ const staff = (dbStaff || []).map((s: any) => ({
       <div class="overflow-hidden w-full">
         <!-- Track -->
         <div id="members-track" class="flex transition-transform duration-500 ease-out">
-          {members.map(member => (
+          {members.map(member => {
+            const videoUrl = getMemberVideo(member.name, 'integrantes');
+            return (
             <div class="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3 md:px-4 box-border">
               <!-- Card -->
               <div class="relative overflow-hidden rounded-xl border border-white/5 bg-slate-900/40 transition-all duration-300 hover:border-gold-bruna/30 hover:shadow-[0_10px_30px_rgba(212,175,55,0.08)] group flex flex-col h-full">
                 
                 <!-- Image Container (object-contain ensures the image is NEVER cropped) -->
                 <div class="relative w-full aspect-[2/3] overflow-hidden bg-slate-950 flex-shrink-0 border-b border-white/5 flex items-center justify-center">
-                  <img 
-                    src={member.image} 
-                    alt={member.name} 
-                    class="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500" 
-                    loading="lazy"
-                  />
+                  {videoUrl ? (
+                    <video 
+                      src={videoUrl} 
+                      autoplay 
+                      loop 
+                      muted 
+                      playsinline 
+                      class="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500"
+                    ></video>
+                  ) : (
+                    <img 
+                      src={member.image} 
+                      alt={member.name} 
+                      class="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500" 
+                      loading="lazy"
+                    />
+                  )}
                   <!-- Dark gradient overlay behind content area -->
                   <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none"></div>
                 </div>
@@ -108,7 +127,7 @@ const staff = (dbStaff || []).map((s: any) => ({
                     
                     <!-- Rol del miembro -->
                     <span class="text-[10px] font-bold text-gold-bruna uppercase tracking-widest block mt-2.5">
-                      {member.role}
+                      {getCustomRole(member.name, member.role)}
                     </span>
                     
                     <!-- Biografía descriptiva -->
@@ -120,7 +139,7 @@ const staff = (dbStaff || []).map((s: any) => ({
 
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 
