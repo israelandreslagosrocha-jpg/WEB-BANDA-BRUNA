@@ -236,6 +236,7 @@ const testimonios = dbTestimonios || [];
 
   <script>
     import { supabase } from '../services/supabaseClient.js';
+    import { sendEmail } from '../services/emailService.js';
 
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('quote-form-extended');
@@ -335,28 +336,16 @@ const testimonios = dbTestimonios || [];
             }
           });
 
-          // Send email asynchronously using FormSubmit.co
-          fetch("https://formsubmit.co/ajax/contacto@bandabruna.cl", {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "Accept": "application/json"
-            },
-            body: JSON.stringify({
-              "_cc": "contactobandabruna@gmail.com",
-              "Asunto": "Nueva Cotización desde Sitio Web",
-              "Nombre": nameVal,
-              "Teléfono": phoneVal,
-              "Email": emailVal,
-              "Tipo de Evento": typeVal,
-              "Fecha Tentativa": dateVal,
-              "Ciudad/Comuna": cityVal,
-              "Detalles/Mensaje": msgVal
-            })
-          })
-          .then(response => {
-            if (!response.ok) throw new Error('Error de envío.');
-            return response.json();
+          // Send email asynchronously using Web3Forms
+          sendEmail({
+            Asunto: "Nueva Cotización desde Sitio Web",
+            Nombre: nameVal,
+            Teléfono: phoneVal,
+            Email: emailVal,
+            "Tipo de Evento": typeVal,
+            "Fecha Tentativa": dateVal,
+            "Ciudad/Comuna": cityVal,
+            "Detalles/Mensaje": msgVal
           })
           .then(() => {
             btn.textContent = origText;
