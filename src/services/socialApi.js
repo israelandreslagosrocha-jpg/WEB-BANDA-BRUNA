@@ -62,19 +62,13 @@ El videoclip oficial ya está activo. Agradecemos a todos por su inmenso apoyo. 
     },
     {
       id: "ig1",
-      imageUrl: "/assets/images/instagram/ig_reel_2.webp",
-      likes: 423,
-      comments: 38,
-      caption: `🎬✨ Próximamente...
-
-Muy feliz y honrada de haber sido parte de este nuevo videoclip junto a @banda_bruna 📽 Gracias por la confianza y por permitirme formar parte de esta historia que pronto verá la luz.
-
-Muy profesionales @agenciack.cl ✨️💋
-
-Detrás de cada canción hay emociones, trabajo y momentos que merecen ser contados. Estoy ansiosa por ver el resultado final y compartirlo con ustedes🎶`,
+      imageUrl: "/assets/images/instagram/covers_vs_originales.webp",
+      likes: 33,
+      comments: 7,
+      caption: `Que prefieres que grabemos? 👀 Covers o Temas originales? 🤔🧐 Ese es el dilema siempre escuchamos que la gente quiere escuchar temas nuevo, pero tienen los temas originales la misma fuerza que un tema ya probado en otro estilos?🧐💬 Déjanos tu comentario es muy útil para nosotros... Y te enviamos a suscribirte en nuestro canal de YouTube Banda Bruna oficial.`,
       username: "@banda_bruna",
-      timeAgo: "Reciente",
-      link: "https://www.instagram.com/p/DZlukv6MFPb/"
+      timeAgo: "Hace 2 días",
+      link: "https://www.instagram.com/p/DaiUuuLKw3s/"
     },
     {
       id: "ig2",
@@ -103,12 +97,12 @@ export const getFacebookFeed = () => {
   return [
     {
       id: "fb1",
-      likes: 128,
-      comments: 10,
-      caption: "ultimo ensayo con transmisión en vivo para nuestra gente de todo Chile",
-      timeAgo: "Hace 3 días",
-      imageUrl: "/assets/images/instagram/tercera_publicacion.webp",
-      link: "https://www.facebook.com/share/v/1FfDmrUWPP/"
+      likes: 47,
+      comments: 12,
+      caption: "Nos llegó este saludo de los Chicos Mágicos! Tremendos músicos y cantantes de nuestro país que hoy nos envían su apoyo desde Santiago. No olvides visitar nuestro canal de YouTube y dejarnos tu comentario sobre nuestro nuevo tema Ahogado en un Bar!",
+      timeAgo: "Hace 2 días",
+      imageUrl: "/assets/images/facebook/chicos_magicos.webp",
+      link: "https://www.facebook.com/reel/1919974456057548"
     },
     {
       id: "fb2",
@@ -117,6 +111,21 @@ export const getFacebookFeed = () => {
       caption: "Agradecemos a la Municipalidad de Valdivia por la excelente acogida en las Fiestas Costumbristas. ¡Público espectacular!",
       timeAgo: "Hace 6 días",
       link: "https://facebook.com/bandabruna/posts/2"
+    }
+  ];
+};
+
+export const getTikTokFeed = () => {
+  return [
+    {
+      id: "tt_nuevo",
+      imageUrl: "/assets/images/tiktok/tiktok_nuevo.webp",
+      likes: 1200,
+      comments: 78,
+      caption: "#ahogadoenunbar #musicaenvivo #bandaenvivo #productora",
+      username: "@bandabrunaoficial",
+      timeAgo: "Hace 1 día",
+      link: "https://www.tiktok.com/@bandabrunaoficial/video/7659638967054126354"
     }
   ];
 };

@@ -1,0 +1,189 @@
+---
+// NowPlayingWidget.astro
+// Componente premium que muestra el estado actual de Banda Bruna en radios online chilenas.
+---
+
+<div 
+  id="radio-monitor-widget"
+  class="relative w-full max-w-lg mx-auto rounded-2xl overflow-hidden border border-white/5 bg-slate-950/60 backdrop-blur-xl p-6 shadow-2xl transition-all duration-500 hover:border-gold-bruna/30 group/widget"
+>
+  <!-- Efecto de gradiente de fondo dinámico -->
+  <div class="absolute -right-16 -top-16 w-36 h-36 bg-gold-bruna/5 rounded-full blur-3xl pointer-events-none group-hover/widget:bg-gold-bruna/10 transition-colors duration-500"></div>
+
+  <!-- Contenido Principal Dinámico -->
+  <div id="widget-content" class="relative z-10 flex flex-col gap-4">
+    <!-- Carga inicial (Skeleton) -->
+    <div class="animate-pulse flex items-center gap-4">
+      <div class="rounded-full bg-white/5 h-12 w-12"></div>
+      <div class="flex-1 space-y-2 py-1">
+        <div class="h-3 bg-white/5 rounded w-3/4"></div>
+        <div class="h-3 bg-white/5 rounded w-1/2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface NowPlayingInfo {
+    radio_id: string;
+    artist: string;
+    title: string;
+    artwork?: string;
+    started_at: string;
+    updated_at: string;
+    radio_name?: string;
+    radio_logo?: string;
+    stream_url?: string;
+  }
+
+  const widget = document.getElementById('radio-monitor-widget');
+  const contentContainer = document.getElementById('widget-content');
+
+  // Función para formatear tiempos relativos
+  function timeAgo(dateString: string): string {
+    const now = new Date();
+    const date = new Date(dateString);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'hace unos instantes';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes === 1) return 'hace 1 minuto';
+    if (minutes < 60) return `hace ${minutes} minutos`;
+    
+    return 'hace más de una hora';
+  }
+
+  async function checkNowPlaying() {
+    if (!contentContainer) return;
+
+    try {
+      const response = await fetch('/api/radio/now');
+      if (!response.ok) throw new Error('Network response error');
+      const data = await response.json();
+      
+      const detections: NowPlayingInfo[] = data.nowPlaying || [];
+
+      if (detections.length > 0) {
+        // Tomamos la última detección en vivo activa
+        const current = detections[0];
+        
+        contentContainer.innerHTML = `
+          <!-- Cabecera de En Vivo -->
+          <div class="flex items-center justify-between w-full border-b border-white/5 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              </span>
+              <span class="text-[10px] font-bold text-red-500 tracking-[0.2em] uppercase animate-pulse">EN VIVO EN RADIO</span>
+            </div>
+            
+            <!-- Ecualizador animado -->
+            <div class="flex items-end gap-[3px] h-3.5 px-1 select-none pointer-events-none">
+              <div class="w-[2px] bg-gold-bruna animate-[bounce_0.8s_infinite_0.1s] h-1.5 origin-bottom"></div>
+              <div class="w-[2px] bg-gold-bruna animate-[bounce_0.8s_infinite_0.3s] h-3 origin-bottom"></div>
+              <div class="w-[2px] bg-gold-bruna animate-[bounce_0.8s_infinite_0.5s] h-2 origin-bottom"></div>
+              <div class="w-[2px] bg-gold-bruna animate-[bounce_0.8s_infinite_0.2s] h-3.5 origin-bottom"></div>
+            </div>
+          </div>
+
+          <!-- Información del Tema y Emisora -->
+          <div class="flex items-center gap-4 py-2">
+            <!-- Logo de la Radio -->
+            <div class="relative group/logo">
+              <div class="absolute inset-0 rounded-xl bg-gold-bruna/10 blur-md opacity-0 group-hover/logo:opacity-100 transition-opacity"></div>
+              <img 
+                src="${current.radio_logo || '/assets/logo-bruna-gold-glow.png'}" 
+                alt="${current.radio_name}" 
+                class="w-14 h-14 rounded-xl object-cover border border-white/10 bg-slate-900 relative z-10"
+                onerror="this.src='/assets/logo-bruna-gold-glow.png'"
+              />
+            </div>
+
+            <!-- Textos -->
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider truncate">${current.radio_name}</p>
+              <h4 class="text-base font-extrabold text-white truncate font-title leading-tight mt-0.5">${current.title}</h4>
+              <p class="text-xs text-gold-bruna font-medium mt-0.5 truncate">${current.artist}</p>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="flex items-center gap-3 mt-2 border-t border-white/5 pt-4">
+            ${current.stream_url ? `
+              <a 
+                href="${current.stream_url}" 
+                target="_blank" 
+                class="flex-1 text-center bg-gold-bruna hover:bg-gold-bruna/90 text-slate-950 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-lg shadow-gold-bruna/10"
+              >
+                <span>🔊</span> ESCUCHAR AHORA
+              </a>
+            ` : ''}
+            <span class="text-[9px] text-slate-500 tracking-wider uppercase ml-auto self-center">
+              Detectado ${timeAgo(current.started_at)}
+            </span>
+          </div>
+        `;
+        
+        // Efecto hover premium en el contenedor
+        if (widget) {
+          widget.className = "relative w-full max-w-lg mx-auto rounded-2xl overflow-hidden border border-red-500/20 bg-slate-950/70 backdrop-blur-xl p-6 shadow-2xl shadow-red-950/10 transition-all duration-500 group/widget";
+        }
+      } else {
+        // Estado inactivo (Escuchando)
+        contentContainer.innerHTML = `
+          <div class="flex flex-col items-center text-center py-4 gap-3">
+            <!-- Icono de Escuchando (Radar) -->
+            <div class="relative flex items-center justify-center h-16 w-16 mb-2">
+              <span class="animate-ping absolute inline-flex h-12 w-12 rounded-full bg-gold-bruna/20 opacity-75"></span>
+              <span class="animate-[ping_2s_infinite_1s] absolute inline-flex h-8 w-8 rounded-full bg-gold-bruna/15 opacity-60"></span>
+              <div class="relative rounded-full bg-slate-900 border border-gold-bruna/20 h-10 w-10 flex items-center justify-center shadow-lg">
+                <span class="text-base animate-pulse">📡</span>
+              </div>
+            </div>
+
+            <!-- Textos -->
+            <div class="space-y-1">
+              <h4 class="text-sm font-bold text-white uppercase tracking-wider font-title">Sin Detecciones Activas</h4>
+              <p class="text-xs text-slate-400 font-light max-w-xs leading-relaxed">
+                Actualmente no hemos detectado reproducciones de Banda Bruna en las radios monitoreadas.
+              </p>
+            </div>
+            
+            <p class="text-[9px] font-bold text-gold-bruna/60 uppercase tracking-[0.25em] mt-2 border border-gold-bruna/10 bg-gold-bruna/5 py-1 px-3 rounded-full">
+              Escuchando +600 radios en vivo
+            </p>
+          </div>
+        `;
+
+        if (widget) {
+          widget.className = "relative w-full max-w-lg mx-auto rounded-2xl overflow-hidden border border-white/5 bg-slate-950/60 backdrop-blur-xl p-6 shadow-2xl transition-all duration-500 hover:border-gold-bruna/20 group/widget";
+        }
+      }
+    } catch (err) {
+      // Fallback por error
+      contentContainer.innerHTML = `
+        <div class="flex flex-col items-center text-center py-2 gap-2 text-slate-500">
+          <span class="text-lg">📡</span>
+          <p class="text-[10px] uppercase tracking-wider">Conectando con el servidor de monitoreo...</p>
+        </div>
+      `;
+    }
+  }
+
+  // Ejecutamos la consulta inmediatamente y luego cada 20 segundos
+  checkNowPlaying();
+  setInterval(checkNowPlaying, 20000);
+</script>
+
+<style>
+  /* Animación de rebote origen inferior para el ecualizador */
+  @keyframes bounce {
+    0%, 100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+</style>

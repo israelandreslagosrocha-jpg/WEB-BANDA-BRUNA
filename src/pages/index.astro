@@ -4,15 +4,18 @@ import {
   getLatestVideo, 
   getInstagramFeed, 
   getFacebookFeed, 
+  getTikTokFeed,
   getNews 
 } from '../services/socialApi.js';
 import socialStats from '../data/socialStats.json';
 import { supabase } from '../services/supabaseClient.js';
+import NowPlayingWidget from '../modules/radio-monitor/components/NowPlayingWidget.astro';
 
 // Fetch mock social data at build time
 const latestVideo = getLatestVideo();
 const instagramFeed = getInstagramFeed();
 const facebookFeed = getFacebookFeed();
+const tiktokFeed = getTikTokFeed();
 const newsList = getNews();
 
 // Cargar eventos activos desde Supabase ordenados por fecha ascendente
@@ -499,157 +502,179 @@ try {
     </div>
   </div>
 
-  <!-- Section: Split Grid (ÚLTIMOS LANZAMIENTOS & PRÓXIMOS EVENTOS) -->
-  <section id="lanzamientos" class="max-w-[1400px] mx-auto px-6 pt-24 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-reveal">
+  <!-- Section: Estado Actual (Eventos, Promo, Radio Monitor) -->
+  <section class="max-w-[1400px] mx-auto px-6 pt-24 pb-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch scroll-reveal">
     
-    <!-- LEFT SIDE: Últimos Lanzamientos (Col span 8) -->
-    <div class="lg:col-span-8 flex flex-col gap-6 w-full">
-      <div>
-        <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider mb-8">ÚLTIMOS LANZAMIENTOS</h2>
-      </div>
-
-      <!-- Grid of 3 columns of cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <!-- Card 1: YouTube -->
-        <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
-          <div class="relative aspect-video bg-black overflow-hidden">
-            <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
-              <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white">
-                <span class="text-xs pl-0.5">▶</span>
-              </div>
-            </a>
-            <span class="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">YOUTUBE</span>
-          </div>
-          <div class="p-5 flex-grow flex flex-col justify-between text-left">
-            <div>
-              <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase">{latestVideo.title}</h3>
-              <p class="text-xs text-slate-400 mt-2">Videoclip Oficial</p>
-            </div>
-            <span class="text-[10px] text-slate-500 font-semibold block mt-4">{latestVideo.publishedAt}</span>
-          </div>
+    <!-- Columna 1: Próximos Eventos -->
+    <div class="flex flex-col gap-6 w-full h-full justify-between">
+      <div class="flex flex-col gap-6 w-full">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">PRÓXIMOS EVENTOS</h2>
+          <a href="/agenda" class="text-gold-bruna text-[10px] font-bold hover:underline tracking-wider uppercase flex items-center gap-1 flex-shrink-0">
+            Ver agenda completa →
+          </a>
         </div>
 
-        <!-- Card 2: Instagram (Video Post) -->
-        <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
-          <div class="relative aspect-video bg-black overflow-hidden">
-            <img src={instagramFeed[0].imageUrl} alt="Instagram Video" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/25 transition-all">
-              <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                <span class="text-xs pl-0.5">▶</span>
-              </div>
-            </div>
-            <span class="absolute top-2.5 left-2.5 bg-pink-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">INSTAGRAM</span>
-          </div>
-          <div class="p-5 flex-grow flex flex-col justify-between text-left">
-            <div>
-              <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">ÚLTIMO LANZAMIENTO INSTAGRAM</span>
-              <p class="text-xs text-slate-300 leading-relaxed font-light line-clamp-5 mb-2 whitespace-pre-line">
-                {instagramFeed[0].caption}
+        <!-- Events List Timeline -->
+        <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-5 text-left flex-grow justify-center">
+          {upcomingEvents.length > 0 ? (
+            <ul class="flex flex-col gap-4 list-none p-0 m-0">
+              {upcomingEvents.map(event => (
+                <li class="flex items-center justify-between gap-4 pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                  <div class="flex items-center gap-3">
+                    <div class="flex flex-col text-left leading-none min-w-[32px]">
+                      <span class="text-2xl font-extrabold font-title text-white tracking-tighter">{event.date}</span>
+                      <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
+                    </div>
+                    <div>
+                      <h3 class="font-title font-bold text-xs text-white tracking-wide uppercase line-clamp-1">{event.title}</h3>
+                      <span class="text-[10px] text-slate-400">{event.location}</span>
+                    </div>
+                  </div>
+                  
+                  {event.statusType === 'confirmed' ? (
+                    <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
+                      CONFIRMADO
+                    </span>
+                  ) : (
+                    <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
+                      POR CONFIRMAR
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div class="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
+              <span class="text-2xl">✨</span>
+              <h3 class="font-title font-bold text-xs text-white uppercase tracking-wider">Próximas fechas pronto</h3>
+              <p class="text-[10px] text-slate-400 max-w-[240px] mx-auto font-light leading-relaxed">
+                Estamos preparando nuestro nuevo show. ¡Pronto anunciaremos las fechas!
               </p>
             </div>
-            <span class="text-[10px] text-slate-500 font-semibold block mt-4">{instagramFeed[0].timeAgo}</span>
-          </div>
-        </a>
-
-        <!-- Card 3: News -->
-        <a href={`/noticias/${newsList[0].slug}`} class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
-          <div class="relative aspect-video bg-black overflow-hidden border-b border-white/5">
-            {newsList[0].image ? (
-              <img 
-                src={newsList[0].image} 
-                alt={newsList[0].title} 
-                class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" 
-              />
-            ) : (
-              <div class="w-full h-full flex items-center justify-center bg-[#0b132b]">
-                <div class="w-12 h-12 bg-slate-950 rounded-full border border-white/5 flex items-center justify-center text-gold-bruna">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
-                </div>
-              </div>
-            )}
-            <span class="absolute top-2.5 left-2.5 bg-amber-500 text-black text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">NOTICIAS</span>
-          </div>
-          <div class="p-5 flex-grow flex flex-col justify-between text-left">
-            <div>
-              <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase line-clamp-2">{newsList[0].title}</h3>
-              <p class="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed font-light">{newsList[0].summary}</p>
-            </div>
-            <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5">
-              <span class="text-[10px] text-slate-500 font-semibold">{newsList[0].publishedAt}</span>
-              <span class="text-[10px] text-gold-bruna font-semibold group-hover:underline">Leer más →</span>
-            </div>
-          </div>
-        </a>
-
+          )}
+          
+          <a href="/agenda" class="w-full text-center border border-white/10 hover:border-gold-bruna bg-slate-950 hover:bg-slate-950/80 text-white font-bold py-2.5 rounded-sm text-[10px] tracking-widest flex items-center justify-center gap-2 transition-colors uppercase cursor-pointer mt-1">
+            <span>📅</span>
+            VER AGENDA COMPLETA
+          </a>
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT SIDE: Próximos Eventos & Banner (Col span 4) -->
-    <div class="lg:col-span-4 flex flex-col gap-6 w-full">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">PRÓXIMOS EVENTOS</h2>
-        <a href="/agenda" class="text-gold-bruna text-[10px] font-bold hover:underline tracking-wider uppercase flex items-center gap-1 flex-shrink-0">
-          Ver agenda completa →
-        </a>
-      </div>
-
-      <!-- Events List Timeline -->
-      <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-5 text-left">
-        {upcomingEvents.length > 0 ? (
-          <ul class="flex flex-col gap-4 list-none p-0 m-0">
-            {upcomingEvents.map(event => (
-              <li class="flex items-center justify-between gap-4 pb-4 border-b border-white/5 last:border-0 last:pb-0">
-                <div class="flex items-center gap-3">
-                  <div class="flex flex-col text-left leading-none min-w-[32px]">
-                    <span class="text-2xl font-extrabold font-title text-white tracking-tighter">{event.date}</span>
-                    <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
-                  </div>
-                  <div>
-                    <h3 class="font-title font-bold text-xs text-white tracking-wide uppercase line-clamp-1">{event.title}</h3>
-                    <span class="text-[10px] text-slate-400">{event.location}</span>
-                  </div>
-                </div>
-                
-                {event.statusType === 'confirmed' ? (
-                  <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
-                    CONFIRMADO
-                  </span>
-                ) : (
-                  <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
-                    POR CONFIRMAR
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div class="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
-            <span class="text-2xl">✨</span>
-            <h3 class="font-title font-bold text-xs text-white uppercase tracking-wider">Próximas fechas pronto</h3>
-            <p class="text-[10px] text-slate-400 max-w-[240px] mx-auto font-light leading-relaxed">
-              Estamos preparando nuestro nuevo show. ¡Pronto anunciaremos las fechas!
-            </p>
-          </div>
-        )}
+    <!-- Columna 2: Banner Promo (Fiesta para todos) -->
+    <div class="flex flex-col gap-6 w-full h-full justify-between">
+      <div class="flex flex-col gap-6 w-full h-full">
+        <!-- Espaciador para alinear con el título de los lados en desktop -->
+        <div class="h-[36px] mb-2 hidden md:block"></div>
         
-        <a href="/agenda" class="w-full text-center border border-white/10 hover:border-gold-bruna bg-slate-950 hover:bg-slate-950/80 text-white font-bold py-2.5 rounded-sm text-[10px] tracking-widest flex items-center justify-center gap-2 transition-colors uppercase cursor-pointer mt-1">
-          <span>📅</span>
-          VER AGENDA COMPLETA
-        </a>
+        <div class="relative w-full rounded-xl overflow-hidden border border-white/5 bg-slate-950/50 group shadow-lg flex justify-center items-center flex-grow min-h-[300px]">
+          <img src="https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB28_eykyvc.webp" alt="Banda Bruna Show en vivo" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-80 block mx-auto" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent flex items-end p-4 pointer-events-none">
+            <span class="font-title font-bold text-xs text-gold-bruna tracking-widest uppercase">Fiesta para todos !</span>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <!-- Balancing Banner Image below the timeline -->
-      <div class="relative w-full rounded-xl overflow-hidden border border-white/5 bg-slate-950/50 group shadow-lg flex justify-center items-center">
-        <img src="https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB28_eykyvc.webp" alt="Banda Bruna Show en vivo" class="w-full h-auto max-h-[500px] object-contain group-hover:scale-102 transition-transform duration-500 opacity-80 block mx-auto" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent flex items-end p-4 pointer-events-none">
-          <span class="font-title font-bold text-xs text-gold-bruna tracking-widest uppercase">LA ORQUESTA DEL SUR</span>
+    <!-- Columna 3: Detección de Radios (Radio Monitor) -->
+    <div class="flex flex-col gap-6 w-full h-full justify-between">
+      <div class="flex flex-col gap-6 w-full h-full">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">DETECCIÓN DE RADIOS</h2>
+        </div>
+
+        <div class="flex-grow flex flex-col justify-center">
+          <!-- Widget de Monitoreo Radial En Vivo -->
+          <NowPlayingWidget />
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Section: Últimos Lanzamientos (Ancho Completo) -->
+  <section id="lanzamientos" class="max-w-[1400px] mx-auto px-6 pt-12 pb-12 flex flex-col gap-6 scroll-reveal">
+    <div>
+      <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider mb-8">ÚLTIMOS LANZAMIENTOS</h2>
+    </div>
+
+    <!-- Grid of 3 columns of cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Card 1: YouTube -->
+      <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
+        <div class="relative aspect-video bg-black overflow-hidden">
+          <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+          <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
+            <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white">
+              <span class="text-xs pl-0.5">▶</span>
+            </div>
+          </a>
+          <span class="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">YOUTUBE</span>
+        </div>
+        <div class="p-5 flex-grow flex flex-col justify-between text-left">
+          <div>
+            <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase">{latestVideo.title}</h3>
+            <p class="text-xs text-slate-400 mt-2">Videoclip Oficial</p>
+          </div>
+          <span class="text-[10px] text-slate-500 font-semibold block mt-4">{latestVideo.publishedAt}</span>
         </div>
       </div>
 
-    </div>
+      <!-- Card 2: Instagram (Video Post) -->
+      <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
+        <div class="relative aspect-video bg-black overflow-hidden">
+          <img src={instagramFeed[0].imageUrl} alt="Instagram Video" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+          <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/25 transition-all">
+            <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+              <span class="text-xs pl-0.5">▶</span>
+            </div>
+          </div>
+          <span class="absolute top-2.5 left-2.5 bg-pink-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">INSTAGRAM</span>
+        </div>
+        <div class="p-5 flex-grow flex flex-col justify-between text-left">
+          <div>
+            <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">ÚLTIMO LANZAMIENTO INSTAGRAM</span>
+            <p class="text-xs text-slate-300 leading-relaxed font-light line-clamp-5 mb-2 whitespace-pre-line">
+              {instagramFeed[0].caption}
+            </p>
+          </div>
+          <span class="text-[10px] text-slate-500 font-semibold block mt-4">{instagramFeed[0].timeAgo}</span>
+        </div>
+      </a>
 
+      <!-- Card 3: News -->
+      <a href={`/noticias/${newsList[0].slug}`} class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
+        <div class="relative aspect-video bg-black overflow-hidden border-b border-white/5">
+          {newsList[0].image ? (
+            <img 
+              src={newsList[0].image} 
+              alt={newsList[0].title} 
+              class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" 
+            />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center bg-[#0b132b]">
+              <div class="w-12 h-12 bg-slate-950 rounded-full border border-white/5 flex items-center justify-center text-gold-bruna">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
+              </div>
+            </div>
+          )}
+          <span class="absolute top-2.5 left-2.5 bg-amber-500 text-black text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">NOTICIAS</span>
+        </div>
+        <div class="p-5 flex-grow flex flex-col justify-between text-left">
+          <div>
+            <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase line-clamp-2">{newsList[0].title}</h3>
+            <p class="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed font-light">{newsList[0].summary}</p>
+          </div>
+          <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5">
+            <span class="text-[10px] text-slate-500 font-semibold">{newsList[0].publishedAt}</span>
+            <span class="text-[10px] text-gold-bruna font-semibold group-hover:underline">Leer más →</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
   </section>
 
   <!-- Section: Presentación Destacada En Vivo (Facebook Video Showcase) -->
@@ -952,24 +977,25 @@ try {
           </div>
         </a>
 
-        <!-- Card 5 (Instagram) -->
-        <a href={instagramFeed[2].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
+        <!-- Card 5 (TikTok) -->
+        <a href={tiktokFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
           <div class="flex items-center gap-2 mb-3">
-            <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
+            <div class="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white border border-white/10">
+              <!-- TikTok SVG Icon -->
+              <svg class="w-3 h-3 fill-white" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.74-3.99-1.72-.08-.07-.17-.17-.25-.25v6.59c0 1.71-.4 3.42-1.34 4.81-1.71 2.54-4.96 3.79-7.9 3.12-2.87-.66-5.07-3.05-5.38-6-.42-4.04 2.65-7.75 6.69-8.08 1.12-.09 2.24.1 3.26.59v4.11c-.74-.43-1.6-.61-2.45-.52-1.84.2-3.32 1.7-3.46 3.54-.19 2.5 2.11 4.54 4.55 4.09 1.48-.27 2.58-1.51 2.67-3.01.03-1.88.02-3.76.02-5.64 0-2.3.02-4.6-.01-6.9v-.03z"/></svg>
             </div>
             <div>
-              <span class="text-[10px] font-bold text-white block">{instagramFeed[2].username}</span>
-              <span class="text-[8px] text-slate-500 block">Hace 4 días</span>
+              <span class="text-[10px] font-bold text-white block">{tiktokFeed[0].username}</span>
+              <span class="text-[8px] text-slate-500 block">{tiktokFeed[0].timeAgo}</span>
             </div>
           </div>
           <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={instagramFeed[2].imageUrl} alt="Instagram Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <img src={tiktokFeed[0].imageUrl} alt="TikTok Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
           </div>
-          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[2].caption}</p>
+          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{tiktokFeed[0].caption}</p>
           <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>❤️ 287</span>
-            <span>💬 18</span>
+            <span>❤️ {tiktokFeed[0].likes}</span>
+            <span>💬 {tiktokFeed[0].comments}</span>
           </div>
         </a>
 

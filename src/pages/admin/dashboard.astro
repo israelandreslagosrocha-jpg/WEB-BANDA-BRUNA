@@ -55,6 +55,9 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         <button data-tab-target="lanzamientos" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           🚀 Lanzamientos
         </button>
+        <button data-tab-target="radio-monitor" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📻 Radio Monitor
+        </button>
         <button data-tab-target="logs" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📜 Auditoría / Logs
         </button>
@@ -399,6 +402,144 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
           </div>
         </section>
 
+        <!-- Tab 7: Radio Monitor -->
+        <section id="tab-radio-monitor" class="tab-pane hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="font-title font-bold text-xl uppercase text-white">📡 Monitoreo Radial (Radio Monitor)</h2>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400 bg-slate-950 py-1.5 px-3 rounded-full border border-white/5" id="monitor-health-badge">
+                Cargando salud del sistema...
+              </span>
+              <button id="btn-trigger-scan" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+                ⚡ Escanear Ahora
+              </button>
+            </div>
+          </div>
+
+          <!-- Sub-pestañas internas -->
+          <div class="flex border-b border-white/5 gap-2 mb-6" id="monitor-subtabs">
+            <button data-subtab="dashboard" class="subtab-btn active text-xs font-bold tracking-wider uppercase pb-3 border-b-2 border-gold-bruna text-gold-bruna px-2 transition-all">
+              Tablero
+            </button>
+            <button data-subtab="radios" class="subtab-btn text-xs font-bold tracking-wider uppercase pb-3 border-b-2 border-transparent text-slate-400 hover:text-white px-2 transition-all">
+              Radios
+            </button>
+            <button data-subtab="reproducciones" class="subtab-btn text-xs font-bold tracking-wider uppercase pb-3 border-b-2 border-transparent text-slate-400 hover:text-white px-2 transition-all">
+              Reproducciones
+            </button>
+            <button data-subtab="estadisticas" class="subtab-btn text-xs font-bold tracking-wider uppercase pb-3 border-b-2 border-transparent text-slate-400 hover:text-white px-2 transition-all">
+              Estadísticas
+            </button>
+          </div>
+
+          <!-- Contenidos de sub-pestañas -->
+          <!-- 1. Tablero General -->
+          <div id="subtab-content-dashboard" class="subtab-pane space-y-6">
+            <!-- Métricas rápidas (Cartas) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5 shadow-lg">
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Total Reproducciones</span>
+                <h3 class="text-2xl font-extrabold text-white font-title mt-1" id="stat-total-plays">-</h3>
+              </div>
+              <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5 shadow-lg">
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Radios Activas</span>
+                <h3 class="text-2xl font-extrabold text-green-400 font-title mt-1" id="stat-active-radios">-</h3>
+              </div>
+              <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5 shadow-lg">
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Radios Offline</span>
+                <h3 class="text-2xl font-extrabold text-red-400 font-title mt-1" id="stat-offline-radios">-</h3>
+              </div>
+              <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5 shadow-lg">
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Última Sincronización</span>
+                <p class="text-xs text-white truncate font-medium mt-1.5" id="stat-last-sync">-</p>
+              </div>
+            </div>
+
+            <!-- En Vivo en este momento y timeline corto -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-4">
+                <h3 class="font-title font-bold text-sm text-white uppercase border-b border-white/5 pb-3">🔥 En Vivo Ahora</h3>
+                <div id="dashboard-live-container" class="space-y-3 min-h-[150px] flex flex-col justify-center text-slate-500 text-center">
+                  Cargando monitoreo en vivo...
+                </div>
+              </div>
+
+              <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-4">
+                <h3 class="font-title font-bold text-sm text-white uppercase border-b border-white/5 pb-3">🕒 Últimas Detecciones</h3>
+                <div id="dashboard-recent-container" class="space-y-3 min-h-[150px] flex flex-col justify-center text-slate-500 text-center">
+                  Cargando historial reciente...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Listado de Radios -->
+          <div id="subtab-content-radios" class="subtab-pane hidden space-y-4">
+            <div class="overflow-x-auto border border-white/5 rounded-xl bg-slate-950/40">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="border-b border-white/5 bg-slate-950/80 text-slate-400">
+                    <th class="p-4 uppercase font-bold tracking-wider">Estación</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Ubicación</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Proveedor</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Bitrate</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Estado</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Última Consulta</th>
+                  </tr>
+                </thead>
+                <tbody id="radios-table-body">
+                  <!-- Radios rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 3. Reproducciones (Historial + Buscador) -->
+          <div id="subtab-content-reproducciones" class="subtab-pane hidden space-y-4">
+            <div class="flex gap-4">
+              <input type="text" id="history-search-input" placeholder="Buscar por canción o artista..." class="flex-grow bg-slate-950 border border-white/5 rounded-lg px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-bruna/40 transition-colors" />
+              <select id="history-radio-select" class="bg-slate-950 border border-white/5 rounded-lg px-4 py-2 text-xs text-white focus:outline-none focus:border-gold-bruna/40 transition-colors">
+                <option value="">Todas las Radios</option>
+              </select>
+            </div>
+            
+            <div class="overflow-x-auto border border-white/5 rounded-xl bg-slate-950/40">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="border-b border-white/5 bg-slate-950/80 text-slate-400">
+                    <th class="p-4 uppercase font-bold tracking-wider">Hora / Fecha</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Radio</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Canción</th>
+                    <th class="p-4 uppercase font-bold tracking-wider">Artista</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body">
+                  <!-- History rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 4. Estadísticas Detalladas -->
+          <div id="subtab-content-estadisticas" class="subtab-pane hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg">
+                <h4 class="font-title font-bold text-xs text-slate-400 uppercase tracking-wider mb-4 font-title">Canciones Más Sonadas</h4>
+                <div class="space-y-3" id="stats-tracks-ranking">
+                  <!-- Ranking de canciones -->
+                </div>
+              </div>
+              
+              <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg">
+                <h4 class="font-title font-bold text-xs text-slate-400 uppercase tracking-wider mb-4 font-title">Radios con Mayor Difusión</h4>
+                <div class="space-y-3" id="stats-radios-ranking">
+                  <!-- Ranking de radios -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <ProductionDashboardTab />
 
       </main>
@@ -488,6 +629,7 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
           if (target === 'testimonios') loadTestimonios();
           if (target === 'lanzamientos') loadLanzamientos();
           if (target === 'logs') loadLogs();
+          if (target === 'radio-monitor') loadRadioMonitor();
         });
       });
 
@@ -2633,6 +2775,317 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         fetchComments();
       }
 
-    });
-  </script>
+      // ==========================================
+      // LÓGICA DE PESTAÑA: RADIO MONITOR
+      // ==========================================
+      let isSubtabBound = false;
+      async function loadRadioMonitor() {
+        // Enlazar sub-pestañas internas solo la primera vez
+        if (!isSubtabBound) {
+          const subtabBtns = document.querySelectorAll('.subtab-btn');
+          const subtabPanes = document.querySelectorAll('.subtab-pane');
+          
+          subtabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              const subtab = btn.getAttribute('data-subtab');
+              subtabBtns.forEach(b => {
+                b.classList.remove('active', 'border-gold-bruna', 'text-gold-bruna');
+                b.classList.add('border-transparent', 'text-slate-400');
+              });
+              btn.classList.add('active', 'border-gold-bruna', 'text-gold-bruna');
+              btn.classList.remove('border-transparent', 'text-slate-400');
+              
+              subtabPanes.forEach(pane => {
+                if (pane.id === `subtab-content-${subtab}`) {
+                  pane.classList.remove('hidden');
+                } else {
+                  pane.classList.add('hidden');
+                }
+              });
+            });
+          });
+          
+          // Enlazar buscador de historial
+          document.getElementById('history-search-input')?.addEventListener('input', debounce(() => {
+            fetchHistory();
+          }, 300));
+
+          document.getElementById('history-radio-select')?.addEventListener('change', () => {
+            fetchHistory();
+          });
+
+          // Enlazar disparador de escaneo
+          const btnTrigger = document.getElementById('btn-trigger-scan');
+          if (btnTrigger) {
+            btnTrigger.addEventListener('click', async () => {
+              const origText = btnTrigger.textContent;
+              btnTrigger.textContent = '⚡ Escaneando...';
+              (btnTrigger as HTMLButtonElement).disabled = true;
+
+              try {
+                // Invocamos la Edge Function de Supabase de manera directa y autenticada
+                const { data, error } = await supabase.functions.invoke('radio-monitor', {
+                  method: 'POST'
+                });
+
+                if (error) throw error;
+                alert(`Escaneo finalizado. Procesado: ${data.processed || 0} radios. Coincidencias: ${data.results?.filter((r: any) => r.status === 'DETECTION').length || 0}`);
+                await logAction('Ejecutó sincronización manual del Radio Monitor');
+                loadRadioMonitor(); // Recargar datos
+              } catch (err: any) {
+                alert(`Error al escanear: ${err.message}`);
+              } finally {
+                btnTrigger.textContent = origText;
+                (btnTrigger as HTMLButtonElement).disabled = false;
+              }
+            });
+          }
+
+          isSubtabBound = true;
+        }
+
+        // Carga inicial de datos
+        fetchHealth();
+        fetchStats();
+        fetchLiveAndRecent();
+        fetchRadios();
+        fetchHistory();
+      }
+
+      function debounce(func: Function, wait: number) {
+        let timeout: any;
+        return function(...args: any[]) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(null, args), wait);
+        };
+      }
+
+      async function fetchHealth() {
+        const badge = document.getElementById('monitor-health-badge');
+        if (!badge) return;
+        
+        try {
+          const res = await fetch('/api/radio/health');
+          const data = await res.json();
+          if (data.success && data.health) {
+            const h = data.health;
+            badge.textContent = `Salud: ${h.totalErrors === 0 ? '✓ Óptima' : `⚠️ ${h.totalErrors} Offline`}`;
+            badge.className = `text-xs py-1.5 px-3 rounded-full border ${h.totalErrors === 0 ? 'bg-green-950/20 border-green-500/20 text-green-400' : 'bg-red-950/20 border-red-500/20 text-red-400'}`;
+          }
+        } catch {
+          badge.textContent = 'Estado: Desconectado';
+        }
+      }
+
+      async function fetchStats() {
+        try {
+          const res = await fetch('/api/radio/stats');
+          const data = await res.json();
+          if (data.success && data.stats) {
+            const s = data.stats;
+            document.getElementById('stat-total-plays')!.textContent = s.totalDetections;
+            document.getElementById('stat-active-radios')!.textContent = s.activeRadiosCount;
+            document.getElementById('stat-offline-radios')!.textContent = s.offlineRadiosCount;
+            document.getElementById('stat-last-sync')!.textContent = new Date(data.timestamp).toLocaleTimeString('es-CL');
+
+            // Renderizar ranking de canciones
+            const tracksRanking = document.getElementById('stats-tracks-ranking');
+            if (tracksRanking) {
+              if (s.detectionsByTrack.length === 0) {
+                tracksRanking.innerHTML = '<p class="text-xs text-slate-500 py-4 text-center font-light">Sin reproducciones registradas</p>';
+              } else {
+                tracksRanking.innerHTML = s.detectionsByTrack.map((t: any, idx: number) => `
+                  <div class="flex items-center gap-3 bg-slate-950/40 border border-white/5 p-3 rounded-xl">
+                    <span class="font-title font-extrabold text-gold-bruna text-sm min-w-[20px]">${idx + 1}</span>
+                    <span class="text-xs text-white font-semibold flex-grow truncate">${t.title}</span>
+                    <span class="bg-gold-bruna/10 border border-gold-bruna/20 text-gold-bruna text-[10px] font-bold px-2 py-0.5 rounded-full">${t.count} tocadas</span>
+                  </div>
+                `).join('');
+              }
+            }
+
+            // Renderizar ranking de radios
+            const radiosRanking = document.getElementById('stats-radios-ranking');
+            if (radiosRanking) {
+              if (s.detectionsByRadio.length === 0) {
+                radiosRanking.innerHTML = '<p class="text-xs text-slate-500 py-4 text-center font-light">Sin reproducciones registradas</p>';
+              } else {
+                radiosRanking.innerHTML = s.detectionsByRadio.map((r: any, idx: number) => `
+                  <div class="flex items-center gap-3 bg-slate-950/40 border border-white/5 p-3 rounded-xl">
+                    <span class="font-title font-extrabold text-slate-400 text-sm min-w-[20px]">${idx + 1}</span>
+                    <span class="text-xs text-white font-semibold flex-grow truncate">${r.name}</span>
+                    <span class="bg-slate-900 border border-white/5 text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full">${r.count} tocadas</span>
+                  </div>
+                `).join('');
+              }
+            }
+          }
+        } catch {}
+      }
+
+      async function fetchLiveAndRecent() {
+        const liveContainer = document.getElementById('dashboard-live-container');
+        const recentContainer = document.getElementById('dashboard-recent-container');
+
+        if (!liveContainer || !recentContainer) return;
+
+        try {
+          // En vivo
+          const resLive = await fetch('/api/radio/now');
+          const dataLive = await resLive.json();
+          const live = dataLive.nowPlaying || [];
+
+          if (live.length === 0) {
+            liveContainer.innerHTML = `
+              <div class="flex flex-col items-center gap-2 py-6 text-slate-500">
+                <span class="text-xl">📡</span>
+                <p class="text-xs">No hay reproducciones activas detectadas ahora</p>
+              </div>
+            `;
+          } else {
+            liveContainer.innerHTML = live.map((item: any) => `
+              <div class="flex items-center gap-4 bg-red-950/10 border border-red-500/20 p-4 rounded-xl relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-16 h-16 bg-red-500/5 rounded-full blur-xl"></div>
+                <img src="${item.radio_logo || '/assets/logo-bruna-gold-glow.png'}" class="w-10 h-10 rounded-lg object-cover border border-white/10 bg-slate-950" />
+                <div class="flex-grow min-w-0 text-left">
+                  <span class="text-[9px] font-bold text-red-400 uppercase tracking-widest block animate-pulse">EN VIVO EN ${item.radio_name}</span>
+                  <h4 class="text-xs font-bold text-white font-title uppercase truncate mt-0.5">${item.title}</h4>
+                  <p class="text-[10px] text-gold-bruna truncate font-semibold">${item.artist}</p>
+                </div>
+              </div>
+            `).join('');
+          }
+
+          // Historial corto (últimos 5)
+          const resRecent = await fetch('/api/radio/history?limit=5');
+          const dataRecent = await resRecent.json();
+          const history = dataRecent.history || [];
+
+          if (history.length === 0) {
+            recentContainer.innerHTML = `
+              <div class="flex flex-col items-center gap-2 py-6 text-slate-500">
+                <span class="text-xl">🕒</span>
+                <p class="text-xs">Sin registros recientes de reproducción</p>
+              </div>
+            `;
+          } else {
+            recentContainer.innerHTML = history.map((item: any) => {
+              const d = new Date(item.detected_at);
+              const timeStr = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) + ' ' + d.toLocaleDateString('es-CL');
+              return `
+                <div class="flex items-center gap-3 bg-slate-950/40 border border-white/5 p-3 rounded-xl hover:border-gold-bruna/10 transition-colors">
+                  <img src="${item.radio_logo || '/assets/logo-bruna-gold-glow.png'}" class="w-8 h-8 rounded object-cover border border-white/10 bg-slate-950" />
+                  <div class="flex-grow min-w-0 text-left">
+                    <h4 class="text-[11px] font-bold text-white truncate leading-tight">${item.title}</h4>
+                    <p class="text-[9px] text-slate-500 font-semibold truncate mt-0.5">${item.radio_name} — ${timeStr}</p>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        } catch {}
+      }
+
+      async function fetchRadios() {
+        const tbody = document.getElementById('radios-table-body');
+        const select = document.getElementById('history-radio-select');
+        if (!tbody) return;
+
+        try {
+          const res = await fetch('/api/radio/radios?onlyActive=false');
+          const data = await res.json();
+          const radios = data.radios || [];
+
+          // Actualizar select para filtros
+          if (select && select.children.length === 1) {
+            select.innerHTML = '<option value="">Todas las Radios</option>' + 
+              radios.map((r: any) => `<option value="${r.id}">${r.nombre}</option>`).join('');
+          }
+
+          if (radios.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">No hay radios registradas en el catálogo</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = radios.map((r: any) => {
+            const lastQuery = r.ultima_actualizacion ? new Date(r.ultima_actualizacion).toLocaleString('es-CL', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Nunca';
+            const statusClass = r.activo 
+              ? (r.verificado ? 'bg-green-950/45 border-green-500/20 text-green-400' : 'bg-amber-950/45 border-amber-500/20 text-amber-400')
+              : 'bg-red-950/45 border-red-500/20 text-red-400';
+            const statusText = r.activo 
+              ? (r.verificado ? '✓ ONLINE' : '⚠️ CONSULTADA')
+              : '✗ INACTIVA';
+
+            const linkHtml = r.sitio_web ? '<a href="' + r.sitio_web + '" target="_blank" class="text-[10px] text-gold-bruna hover:underline">Visitar sitio web</a>' : '';
+
+            return `
+              <tr class="border-b border-white/5 hover:bg-white/[0.01]">
+                <td class="p-4 flex items-center gap-3">
+                  <img src="${r.logo_url || '/assets/logo-bruna-gold-glow.png'}" class="w-8 h-8 rounded object-cover border border-white/10 bg-slate-950" />
+                  <div class="text-left">
+                    <span class="font-bold text-white block">${r.nombre}</span>
+                    ${linkHtml}
+                  </div>
+                </td>
+                <td class="p-4 text-slate-400 text-left">${r.ciudad || ''}${r.ciudad && r.region ? ', ' : ''}${r.region || ''}</td>
+                <td class="p-4 text-slate-400 font-mono text-left">${r.provider_name}</td>
+                <td class="p-4 text-slate-400 font-mono text-left">${r.bitrate ? `${r.bitrate} kbps` : 'Desconocido'}</td>
+                <td class="p-4 text-left">
+                  <span class="text-[9px] font-bold px-2 py-0.5 border rounded ${statusClass}">${statusText}</span>
+                </td>
+                <td class="p-4 text-slate-450 font-mono text-left">${lastQuery}</td>
+              </tr>
+            `;
+          }).join('');
+        } catch {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-red-400">Error al consultar catálogo de radios</td></tr>';
+        }
+      }
+
+      async function fetchHistory() {
+        const tbody = document.getElementById('history-table-body');
+        if (!tbody) return;
+
+        const search = (document.getElementById('history-search-input') as HTMLInputElement)?.value || '';
+        const radioId = (document.getElementById('history-radio-select') as HTMLSelectElement)?.value || '';
+
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-slate-450 uppercase animate-pulse">Cargando reproducciones históricas...</td></tr>';
+
+        try {
+          const url = new URL('/api/radio/history', window.location.origin);
+          url.searchParams.set('limit', '50');
+          if (search) url.searchParams.set('search', search);
+          if (radioId) url.searchParams.set('radioId', radioId);
+
+          const res = await fetch(url.toString());
+          const data = await res.json();
+          const history = data.history || [];
+
+          if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">No se encontraron reproducciones en el historial para esta búsqueda</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = history.map((item: any) => {
+            const d = new Date(item.detected_at);
+            const dateStr = d.toLocaleDateString('es-CL') + ' ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            return `
+              <tr class="border-b border-white/5 hover:bg-white/[0.01]">
+                <td class="p-4 text-slate-400 font-mono text-left">${dateStr}</td>
+                <td class="p-4 flex items-center gap-3">
+                  <img src="${item.radio_logo || '/assets/logo-bruna-gold-glow.png'}" class="w-6 h-6 rounded object-cover border border-white/10 bg-slate-950" />
+                  <span class="font-bold text-white">${item.radio_name}</span>
+                </td>
+                <td class="p-4 text-gold-bruna font-bold font-title uppercase text-left">${item.title}</td>
+                <td class="p-4 text-slate-400 font-semibold text-left">${item.artist}</td>
+              </tr>
+            `;
+          }).join('');
+        } catch {
+          tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-red-400">Error al consultar el historial de reproducciones</td></tr>';
+        }
+      }
+
+  });
+</script>
 </Layout>
