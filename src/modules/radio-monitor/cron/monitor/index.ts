@@ -246,7 +246,18 @@ async function getStreamTheWorldMetadata(streamUrl: string, metadataUrl?: string
 // 3. HANDLER PRINCIPAL DE LA EDGE FUNCTION
 // ==========================================
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+};
+
 Deno.serve(async (req) => {
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   // Solo permitir peticiones POST o GET para disparar el cron
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''; // Usamos service role para bypass RLS y escribir auditorías
@@ -254,7 +265,7 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !supabaseKey) {
     return new Response(JSON.stringify({ error: 'Faltan variables de entorno de Supabase' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 
@@ -400,12 +411,12 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true, processed: radios?.length || 0, results }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
     return new Response(JSON.stringify({ success: false, error: error.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });
