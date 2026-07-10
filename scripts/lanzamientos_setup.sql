@@ -103,7 +103,7 @@ insert into public.lanzamientos (
   'https://res.cloudinary.com/dhgifjpkh/image/upload/v1781892645/compressed_PORTADA-01_nxu3ws.webp',
   true,
   true,
-  '¡La espera está por terminar! Descubre la historia detrás de este nuevo éxito tropical de Banda Bruna.',
+  '¡La espera ya terminó! Descubre la historia detrás de este nuevo éxito tropical de Banda Bruna.',
   '«Ahogado en un bar» nace de la necesidad de contar historias cotidianas a través del contagioso ritmo de la cumbia tropical de Banda Bruna. El proceso creativo comenzó en el sur de Chile, donde combinamos el folclor urbano y la energía de los metales y las percusiones. El rodaje se llevó a cabo en Cervecería Maquehue y Centro de Eventos Araucaria, en la comuna de Padre las Casas, capturando la esencia perfecta y bohemia que la canción relata. Bajo la dirección de Agencia CK, logramos un estándar cinematográfico del cual estamos profundamente orgullosos y ansiosos de compartir.',
   array[
     'https://res.cloudinary.com/dhgifjpkh/image/upload/v1781910903/compressed_IMG_6752_muxcrr.webp',
