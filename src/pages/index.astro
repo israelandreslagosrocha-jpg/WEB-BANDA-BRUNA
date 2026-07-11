@@ -104,6 +104,9 @@ try {
 
   if (dbLanzamientos && dbLanzamientos.length > 0) {
     activeLanzamiento = dbLanzamientos[0];
+    if (activeLanzamiento.slug === 'ahogado-en-un-bar') {
+      activeLanzamiento.imagen_desktop = 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp';
+    }
   }
 } catch (err) {
   console.error("Error al cargar lanzamiento activo:", err);
@@ -126,6 +129,8 @@ try {
       <!-- Background glow effects -->
       <div class="absolute inset-0 z-0 pointer-events-none select-none">
         <div class="absolute top-1/2 -translate-y-1/2 right-12 w-96 h-96 rounded-full blur-[120px] opacity-25" style={`background-color: ${activeLanzamiento.color_principal};`}></div>
+        <!-- Canvas para las luces interactivas -->
+        <canvas id="lanzamiento-lights-canvas" class="absolute inset-0 w-full h-full opacity-60"></canvas>
       </div>
 
       <!-- Main Layout -->
@@ -317,6 +322,139 @@ try {
         let timerInterval;
         updateTimer();
         timerInterval = setInterval(updateTimer, 1000);
+
+        // --- EFECTO DE LUCES INTERACTIVAS EN CANVAS ---
+        const canvas = document.getElementById('lanzamiento-lights-canvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          let width = canvas.width = canvas.offsetWidth;
+          let height = canvas.height = canvas.offsetHeight;
+
+          const particles = [];
+          const colors = [
+            'rgba(214, 175, 55, ', // Dorado
+            'rgba(226, 28, 28, ',  // Rojo
+            'rgba(255, 255, 255, ' // Blanco
+          ];
+
+          let mouse = { x: null, y: null };
+
+          window.addEventListener('resize', () => {
+            if (!canvas) return;
+            width = canvas.width = canvas.offsetWidth;
+            height = canvas.height = canvas.offsetHeight;
+          });
+
+          block.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            
+            // Generar destellos de chispas en la posición del mouse de forma ocasional
+            if (Math.random() < 0.3) {
+              createSpark(mouse.x, mouse.y);
+            }
+          });
+
+          block.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+          });
+
+          class Particle {
+            constructor(x, y, isSpark = false) {
+              this.x = x || Math.random() * width;
+              this.y = y || Math.random() * height + (isSpark ? 0 : 50);
+              this.isSpark = isSpark;
+              this.size = isSpark ? Math.random() * 2 + 1 : Math.random() * 25 + 5;
+              this.baseColor = colors[Math.floor(Math.random() * colors.length)];
+              this.opacity = Math.random() * 0.5 + 0.1;
+              this.fadeSpeed = isSpark ? Math.random() * 0.03 + 0.01 : Math.random() * 0.005 + 0.001;
+              this.vx = isSpark ? (Math.random() - 0.5) * 3 : (Math.random() - 0.5) * 0.6;
+              this.vy = isSpark ? (Math.random() - 0.5) * 3 : -Math.random() * 0.5 - 0.1;
+            }
+
+            update() {
+              this.x += this.vx;
+              this.y += this.vy;
+              this.opacity -= this.fadeSpeed;
+
+              // En caso de ser una partícula flotante común, rebota suave en bordes X
+              if (!this.isSpark) {
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+              }
+
+              // Interacción con el cursor (orbes huyen sutilmente)
+              if (mouse.x !== null && mouse.y !== null && !this.isSpark) {
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 100) {
+                  const force = (100 - dist) / 100;
+                  this.vx += (dx / dist) * force * 0.1;
+                  this.vy += (dy / dist) * force * 0.1;
+                }
+              }
+            }
+
+            draw() {
+              ctx.save();
+              ctx.beginPath();
+              
+              if (this.isSpark) {
+                // Dibujar destellos con brillo radial
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.baseColor + this.opacity + ')';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(214, 175, 55, 0.8)';
+                ctx.fill();
+              } else {
+                // Dibujar orbes suaves de luz desenfocados (bokeh)
+                const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                grad.addColorStop(0, this.baseColor + this.opacity + ')');
+                grad.addColorStop(0.5, this.baseColor + (this.opacity * 0.4) + ')');
+                grad.addColorStop(1, this.baseColor + '0)');
+                ctx.fillStyle = grad;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              ctx.restore();
+            }
+          }
+
+          function createSpark(x, y) {
+            particles.push(new Particle(x, y, true));
+          }
+
+          // Generar orbes iniciales
+          for (let i = 0; i < 15; i++) {
+            particles.push(new Particle());
+          }
+
+          function animate() {
+            if (!canvas) return;
+            ctx.clearRect(0, 0, width, height);
+
+            // Generar orbes de repuesto a medida que se desvanecen
+            if (particles.filter(p => !p.isSpark).length < 15 && Math.random() < 0.05) {
+              particles.push(new Particle(Math.random() * width, height + 30, false));
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+              const p = particles[i];
+              p.update();
+              p.draw();
+
+              if (p.opacity <= 0 || p.x < -50 || p.x > width + 50 || p.y < -50) {
+                particles.splice(i, 1);
+              }
+            }
+
+            requestAnimationFrame(animate);
+          }
+
+          animate();
+        }
       })();
     </script>
   )}

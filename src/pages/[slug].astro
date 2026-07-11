@@ -38,6 +38,9 @@ try {
 
   if (data) {
     lanzamiento = data;
+    if (lanzamiento.slug === 'ahogado-en-un-bar') {
+      lanzamiento.imagen_desktop = 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp';
+    }
   }
 } catch (err) {
   console.error("Error al cargar detalles del lanzamiento:", err);
