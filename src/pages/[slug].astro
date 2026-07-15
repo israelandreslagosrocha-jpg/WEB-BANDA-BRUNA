@@ -77,6 +77,8 @@ function getYouTubeId(url: string) {
 
 const youtubeId = getYouTubeId(lanzamiento.plataformas_links?.youtube || '');
 const hasYoutube = !!youtubeId;
+const youtubeViews = lanzamiento.plataformas_links?.youtube_views || (lanzamiento.slug === 'ahogado-en-un-bar' ? 14087 : 0);
+const youtubeLikes = lanzamiento.plataformas_links?.youtube_likes || (lanzamiento.slug === 'ahogado-en-un-bar' ? 218 : 0);
 
 // Extraer ID de Instagram
 function getInstagramId(url: string) {
@@ -373,9 +375,34 @@ const allDetrasCamaras = [
             <div class="w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-2xl text-slate-355">
               🔒
             </div>
-            <span class="text-xs font-bold tracking-widest text-slate-350 uppercase">El Videoclip Oficial se desbloqueará en el estreno</span>
           </div>
         </div>
+
+        <!-- INDICADORES DINÁMICOS DE YOUTUBE -->
+        {hasYoutube && (
+          <div 
+            id="youtube-stats-indicators" 
+            class={`grid grid-cols-2 gap-4 mt-2 ${isReleased ? '' : 'hidden opacity-0 transition-all duration-500'}`}
+          >
+            <!-- Reproducciones -->
+            <div class="flex flex-col items-center bg-slate-900/40 border border-white/5 rounded-2xl py-4 px-3 backdrop-blur-md transition-all hover:scale-102 hover:border-gold-bruna/20 duration-300">
+              <div class="w-8 h-8 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna mb-2 shadow-md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </div>
+              <span class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeViews}>0</span>
+              <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Visualizaciones YouTube</span>
+            </div>
+
+            <!-- Likes -->
+            <div class="flex flex-col items-center bg-slate-900/40 border border-white/5 rounded-2xl py-4 px-3 backdrop-blur-md transition-all hover:scale-102 hover:border-gold-bruna/20 duration-300">
+              <div class="w-8 h-8 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna mb-2 shadow-md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
+              </div>
+              <span class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeLikes}>0</span>
+              <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Me Gusta YouTube</span>
+            </div>
+          </div>
+        )}
       </div>
     </section>
 
@@ -991,6 +1018,15 @@ const allDetrasCamaras = [
           const lockOver = card.querySelector('.locked-overlay');
           if (lockOver) lockOver.style.display = 'none';
         });
+
+        // 5. Mostrar indicadores de estadísticas y animar
+        const statsIndicators = document.getElementById('youtube-stats-indicators');
+        if (statsIndicators) {
+          statsIndicators.classList.remove('hidden', 'opacity-0');
+        }
+        if (typeof setupCountUp === 'function') {
+          setupCountUp();
+        }
       }
 
       const initialDistance = launchDate - new Date().getTime();
@@ -1289,6 +1325,67 @@ const allDetrasCamaras = [
       // Carga inicial y auto-recarga cada 10 segundos
       loadMuroComentarios();
       setInterval(loadMuroComentarios, 10000);
+
+      // COUNT UP ANIMATION LOGIC FOR STATISTICS
+      function setupCountUp() {
+        const counters = document.querySelectorAll('[data-count-target]');
+        if (counters.length === 0) return;
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const counter = entry.target;
+              const target = parseFloat(counter.getAttribute('data-count-target'));
+              const duration = 2000; // 2 seconds animation
+              const startTime = performance.now();
+              const prefix = counter.getAttribute('data-count-prefix') || '';
+              const suffix = counter.getAttribute('data-count-suffix') || '';
+              const isDecimal = counter.hasAttribute('data-count-decimal');
+
+              function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function outQuad
+                const easeProgress = progress * (2 - progress);
+                
+                let currentVal = easeProgress * target;
+                
+                if (isDecimal) {
+                  counter.textContent = prefix + currentVal.toFixed(1).replace('.', ',') + suffix;
+                } else {
+                  counter.textContent = prefix + Math.floor(currentVal).toLocaleString('es-CL') + suffix;
+                }
+
+                if (progress < 1) {
+                  requestAnimationFrame(animate);
+                } else {
+                  if (isDecimal) {
+                    counter.textContent = prefix + target.toFixed(1).replace('.', ',') + suffix;
+                  } else {
+                    counter.textContent = prefix + target.toLocaleString('es-CL') + suffix;
+                  }
+                }
+              }
+
+              requestAnimationFrame(animate);
+              observer.unobserve(counter);
+            }
+          });
+        }, { threshold: 0.1 });
+
+        counters.forEach(counter => {
+          observer.observe(counter);
+        });
+      }
+
+      // Hacer disponible globalmente para poder llamarla desde unlockMediaAndLinks
+      window.setupCountUp = setupCountUp;
+
+      // Si ya está desbloqueado de inicio, animar de inmediato
+      if (initialDistance <= 0) {
+        setupCountUp();
+      }
     });
   </script>
 

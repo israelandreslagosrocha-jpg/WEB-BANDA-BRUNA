@@ -50,6 +50,27 @@ export const getVideoPlaylists = () => {
 export const getInstagramFeed = () => {
   return [
     {
+      id: "ig_trivia_1",
+      imageUrl: "/assets/images/instagram/trivia_ensayos.webp",
+      likes: 69,
+      comments: 29,
+      caption: `BIENVENIDOS A LA TRIVIA BRUNA CAPITULO 1:
+¿QUIEN LLEGA MAS TARDE A LOS ENSAYOS?
+.
+.
+.
+.
+.
+.
+.
+.
+.
+#cumbia #chile #viral #bandabruna #musica`,
+      username: "@banda_bruna",
+      timeAgo: "Hace 1 día",
+      link: "https://www.instagram.com/p/DawSBQZJykb/"
+    },
+    {
       id: "ig_lanzamiento",
       imageUrl: "/assets/images/instagram/lanzamiento_reel.webp",
       likes: 624,
@@ -117,6 +138,16 @@ export const getFacebookFeed = () => {
 
 export const getTikTokFeed = () => {
   return [
+    {
+      id: "tt_vivo_1",
+      imageUrl: "/assets/images/tiktok/tiktok_vivo.webp",
+      likes: 40,
+      comments: 3,
+      caption: "#musicaenvivo #bandabruna #ahogadoenunbar #productora #municipalidad",
+      username: "@bandabrunaoficial",
+      timeAgo: "Hace 2 días",
+      link: "https://www.tiktok.com/@bandabrunaoficial/video/7661480080421555463"
+    },
     {
       id: "tt_nuevo",
       imageUrl: "/assets/images/tiktok/tiktok_nuevo.webp",

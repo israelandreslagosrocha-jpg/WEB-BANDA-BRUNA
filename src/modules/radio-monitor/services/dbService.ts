@@ -193,12 +193,12 @@ export class DbService {
     // Conteo de radios activas vs inactivas
     const { data: radios, error: radiosError } = await supabase
       .from('radios')
-      .select('activo');
+      .select('activo, verificado');
 
     if (radiosError) throw radiosError;
 
     const activeRadiosCount = radios.filter(r => r.activo).length;
-    const offlineRadiosCount = radios.filter(r => !r.activo).length;
+    const offlineRadiosCount = radios.filter(r => r.activo && r.verificado === false).length;
 
     // Ranking de canciones monitoreadas más sonadas (Top 10)
     const { data: trackStats, error: trackStatsError } = await supabase

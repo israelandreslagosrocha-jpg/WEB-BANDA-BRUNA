@@ -1,10 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
+import { supabase } from '../../../services/supabaseClient.js';
 
-// ==========================================
-// 1. UTILIDADES Y MATCHER DE ALIAS (Deno compatible)
-// ==========================================
+export const prerender = false;
 
-function normalizeText(text: string): string {
+// 1. UTILIDADES Y MATCHER DE ALIAS
+function normalizeText(text) {
   if (!text) return '';
   return text
     .toLowerCase()
@@ -15,7 +14,7 @@ function normalizeText(text: string): string {
     .trim();
 }
 
-function matchesAlias(value: string, aliases: string[]): boolean {
+function matchesAlias(value, aliases) {
   if (!value || !aliases || aliases.length === 0) return false;
   
   const normalizedValue = normalizeText(value);
@@ -36,24 +35,13 @@ function matchesAlias(value: string, aliases: string[]): boolean {
   return false;
 }
 
-function cleanMetadataText(text: string): string {
+function cleanMetadataText(text) {
   if (!text) return '';
   return text.replace(/\s+/g, ' ').trim();
 }
 
-// ==========================================
-// 2. LÓGICA DE PROVEEDORES DE STREAMING
-// ==========================================
-
-interface NowPlayingResult {
-  artist: string;
-  title: string;
-  artwork?: string;
-  online: boolean;
-  raw?: any;
-}
-
-async function getIcecastMetadata(streamUrl: string, metadataUrl?: string): Promise<NowPlayingResult> {
+// 2. PROVEEDORES DE STREAMING
+async function getIcecastMetadata(streamUrl, metadataUrl) {
   let jsonUrl = metadataUrl;
   if (!jsonUrl) {
     try {
@@ -98,12 +86,12 @@ async function getIcecastMetadata(streamUrl: string, metadataUrl?: string): Prom
       return { artist: cleanMetadataText(parts[0]), title: cleanMetadataText(parts.slice(1).join(' - ')), online: true, raw: data };
     }
     return { artist: '', title: cleanMetadataText(titleString || song), online: !!titleString, raw: data };
-  } catch (error: any) {
+  } catch (error) {
     return { artist: '', title: '', online: false, raw: { error: error.message } };
   }
 }
 
-async function getShoutcastMetadata(streamUrl: string, metadataUrl?: string): Promise<NowPlayingResult> {
+async function getShoutcastMetadata(streamUrl, metadataUrl) {
   let statsUrl = metadataUrl;
   if (!statsUrl) {
     try {
@@ -128,8 +116,7 @@ async function getShoutcastMetadata(streamUrl: string, metadataUrl?: string): Pr
       return { artist: '', title: cleanMetadataText(title), online: !!title, raw: data };
     }
     throw new Error('Stats JSON fail');
-  } catch (v2Error: any) {
-    // Fallback Shoutcast v1 7.html
+  } catch (v2Error) {
     try {
       const parsed = new URL(streamUrl);
       parsed.pathname = '/7.html';
@@ -155,7 +142,7 @@ async function getShoutcastMetadata(streamUrl: string, metadataUrl?: string): Pr
   }
 }
 
-async function getAzuraMetadata(streamUrl: string, metadataUrl?: string): Promise<NowPlayingResult> {
+async function getAzuraMetadata(streamUrl, metadataUrl) {
   let apiUrl = metadataUrl;
   if (!apiUrl) {
     try {
@@ -184,12 +171,12 @@ async function getAzuraMetadata(streamUrl: string, metadataUrl?: string): Promis
       online: true,
       raw: data
     };
-  } catch (error: any) {
+  } catch (error) {
     return { artist: '', title: '', online: false, raw: { error: error.message } };
   }
 }
 
-async function getStreamTheWorldMetadata(streamUrl: string, metadataUrl?: string): Promise<NowPlayingResult> {
+async function getStreamTheWorldMetadata(streamUrl, metadataUrl) {
   let code = metadataUrl;
   if (!code) {
     try {
@@ -237,41 +224,16 @@ async function getStreamTheWorldMetadata(streamUrl: string, metadataUrl?: string
       online: !!altTitleMatch,
       raw: { xml }
     };
-  } catch (error: any) {
+  } catch (error) {
     return { artist: '', title: '', online: false, raw: { error: error.message } };
   }
 }
 
-// ==========================================
-// 3. HANDLER PRINCIPAL DE LA EDGE FUNCTION
-// ==========================================
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-};
-
-Deno.serve(async (req) => {
-  // Handle CORS preflight request
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
-  // Solo permitir peticiones POST o GET para disparar el cron
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''; // Usamos service role para bypass RLS y escribir auditorías
-  
-  if (!supabaseUrl || !supabaseKey) {
-    return new Response(JSON.stringify({ error: 'Faltan variables de entorno de Supabase' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
+// 3. HANDLER PRINCIPAL DE LA API ROUTE
+export async function GET({ request }) {
   try {
+    console.log('Iniciando escaneo del Radio Monitor...');
+
     // 1. Obtener radios activas
     const { data: radios, error: radiosError } = await supabase
       .from('radios')
@@ -295,7 +257,6 @@ Deno.serve(async (req) => {
 
     if (tracksError) throw tracksError;
 
-    // Aplanamos todos los alias de artistas y canciones monitoreadas
     const artistAliases = (artists || []).flatMap(a => a.aliases || []);
     const trackAliases = (tracks || []).flatMap(t => t.aliases || []);
 
@@ -304,7 +265,7 @@ Deno.serve(async (req) => {
     // 4. Procesar radios en paralelo
     const scanPromises = (radios || []).map(async (radio) => {
       const provider = radio.radio_providers?.nombre;
-      let nowPlaying: NowPlayingResult = { artist: '', title: '', online: false };
+      let nowPlaying = { artist: '', title: '', online: false, raw: null, artwork: null };
 
       try {
         if (provider === 'Icecast') {
@@ -316,11 +277,10 @@ Deno.serve(async (req) => {
         } else if (provider === 'StreamTheWorld') {
           nowPlaying = await getStreamTheWorldMetadata(radio.stream_url, radio.metadata_url);
         } else {
-          // Proveedor genérico: intentamos Icecast por defecto
           nowPlaying = await getIcecastMetadata(radio.stream_url, radio.metadata_url);
         }
-      } catch (err: any) {
-        nowPlaying = { artist: '', title: '', online: false, raw: { exception: err.message } };
+      } catch (err) {
+        nowPlaying = { artist: '', title: '', online: false, raw: { exception: err.message }, artwork: null };
       }
 
       // Actualizar timestamp de última consulta de la radio
@@ -338,9 +298,9 @@ Deno.serve(async (req) => {
       const mentionsArtistInTitle = matchesAlias(nowPlaying.title, artistAliases);
 
       // Lógica de coincidencia estricta:
-      // 1. Si la radio nos entrega tanto el artista como el título del tema:
-      //    Ambos deben coincidir: el artista debe ser Banda Bruna, y el título debe ser una de sus canciones.
-      // 2. Si la radio nos entrega solo el título (donde a veces viene el artista junto, ej. "Banda Bruna - Agonía"):
+      // 1. Si la radio nos entrega tanto el artista como el título:
+      //    Ambos deben coincidir (el artista debe ser Banda Bruna y la canción una de sus canciones).
+      // 2. Si la radio nos entrega solo el título:
       //    El título debe coincidir con la canción, y además debe mencionar explícitamente a Banda Bruna en el título.
       let isMatch = false;
       if (nowPlaying.online) {
@@ -353,8 +313,6 @@ Deno.serve(async (req) => {
 
       if (isMatch) {
         // Encontramos una coincidencia. Registramos la detección.
-        
-        // Buscamos el nombre correcto del artista y canción
         const matchedArtist = (artists || []).find(a => matchesAlias(nowPlaying.artist, a.aliases))?.nombre || nowPlaying.artist || 'Banda Bruna';
         const matchedTrack = (tracks || []).find(t => matchesAlias(nowPlaying.title, t.aliases))?.titulo || nowPlaying.title;
 
@@ -399,7 +357,6 @@ Deno.serve(async (req) => {
         results.push({ radio: radio.nombre, status: 'DETECTION', artist: matchedArtist, track: matchedTrack });
       } else {
         // No está sonando nada monitoreado o la radio está caída.
-        // Si antes estaba registrado que sonaba Banda Bruna en esta radio, limpiamos su now_playing
         const { data: currentNp } = await supabase
           .from('now_playing')
           .select('*')
@@ -424,14 +381,23 @@ Deno.serve(async (req) => {
 
     await Promise.all(scanPromises);
 
-    return new Response(JSON.stringify({ success: true, processed: radios?.length || 0, results }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      processed: radios?.length || 0, 
+      results 
+    }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+
+  } catch (error) {
+    console.error('Error al escanear radios:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' }
     });
   }
-});
+}
