@@ -2388,6 +2388,14 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
                   <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Deezer (URL)</label>
                   <input type="text" id="plat-deezer" value="${links.deezer || ''}" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
                 </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Visualizaciones YouTube (Manual)</label>
+                  <input type="number" id="plat-youtube-views" value="${links.youtube_views || ''}" placeholder="ej: 14314" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Me Gusta YouTube (Manual)</label>
+                  <input type="number" id="plat-youtube-likes" value="${links.youtube_likes || ''}" placeholder="ej: 219" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna/40" />
+                </div>
               </div>
 
               <!-- SEO Meta -->
@@ -2482,7 +2490,9 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
             apple_music: (document.getElementById('plat-apple') as HTMLInputElement).value.trim(),
             youtube_music: (document.getElementById('plat-ytmusic') as HTMLInputElement).value.trim(),
             amazon_music: (document.getElementById('plat-amazon') as HTMLInputElement).value.trim(),
-            deezer: (document.getElementById('plat-deezer') as HTMLInputElement).value.trim()
+            deezer: (document.getElementById('plat-deezer') as HTMLInputElement).value.trim(),
+            youtube_views: parseInt((document.getElementById('plat-youtube-views') as HTMLInputElement).value) || null,
+            youtube_likes: parseInt((document.getElementById('plat-youtube-likes') as HTMLInputElement).value) || null
           };
 
           const meta_title = (document.getElementById('lan-meta-title') as HTMLInputElement).value;

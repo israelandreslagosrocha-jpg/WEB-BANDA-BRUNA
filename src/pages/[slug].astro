@@ -389,7 +389,7 @@ const allDetrasCamaras = [
               <div class="w-8 h-8 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna mb-2 shadow-md">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
               </div>
-              <span class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeViews}>0</span>
+              <span id="yt-views-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeViews}>0</span>
               <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Visualizaciones YouTube</span>
             </div>
 
@@ -398,7 +398,7 @@ const allDetrasCamaras = [
               <div class="w-8 h-8 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna mb-2 shadow-md">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
               </div>
-              <span class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeLikes}>0</span>
+              <span id="yt-likes-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeLikes}>0</span>
               <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Me Gusta YouTube</span>
             </div>
           </div>
@@ -826,7 +826,7 @@ const allDetrasCamaras = [
       const slug = root.getAttribute('data-slug') || 'ahogado-en-un-bar';
 
       if (supabaseUrl && supabaseKey) {
-        fetch(`${supabaseUrl}/rest/v1/lanzamientos?slug=eq.${slug}&select=fecha_lanzamiento`, {
+        fetch(`${supabaseUrl}/rest/v1/lanzamientos?slug=eq.${slug}&select=fecha_lanzamiento,plataformas_links`, {
           headers: {
             'apikey': supabaseKey,
             'Authorization': `Bearer ${supabaseKey}`
@@ -834,12 +834,44 @@ const allDetrasCamaras = [
         })
         .then(res => res.json())
         .then(data => {
-          if (data && data.length > 0 && data[0].fecha_lanzamiento) {
-            launchDate = new Date(data[0].fecha_lanzamiento).getTime();
-            updateTimer();
+          if (data && data.length > 0) {
+            const item = data[0];
+            
+            // 1. Actualizar fecha de lanzamiento
+            if (item.fecha_lanzamiento) {
+              launchDate = new Date(item.fecha_lanzamiento).getTime();
+              updateTimer();
+            }
+            
+            // 2. Actualizar estadísticas de YouTube
+            if (item.plataformas_links) {
+              const views = item.plataformas_links.youtube_views;
+              const likes = item.plataformas_links.youtube_likes;
+              
+              let updated = false;
+              if (views !== undefined && views !== null) {
+                const viewsEl = document.getElementById('yt-views-counter');
+                if (viewsEl) {
+                  viewsEl.setAttribute('data-count-target', views.toString());
+                  updated = true;
+                }
+              }
+              if (likes !== undefined && likes !== null) {
+                const likesEl = document.getElementById('yt-likes-counter');
+                if (likesEl) {
+                  likesEl.setAttribute('data-count-target', likes.toString());
+                  updated = true;
+                }
+              }
+              
+              // Si la fecha ya pasó y los contadores cambiaron, relanzar la animación
+              if (updated && (launchDate - new Date().getTime() <= 0) && typeof window.setupCountUp === 'function') {
+                window.setupCountUp();
+              }
+            }
           }
         })
-        .catch(err => console.error("Error al obtener fecha en tiempo real:", err));
+        .catch(err => console.error("Error al obtener datos en tiempo real de Supabase:", err));
       }
       const badgeEstado = document.getElementById('badge-estado-lanzamiento');
       const countdownSection = document.getElementById('countdown-landing');
