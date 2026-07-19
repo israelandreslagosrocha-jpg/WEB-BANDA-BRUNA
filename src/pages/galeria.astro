@@ -1,29 +1,501 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const galleryPhotos = Array.from({ length: 10 }, (_, i) => ({
-  src: `/assets/images/gallery/gallery_${i + 1}.webp`,
-  alt: `Banda Bruna Presentación en Vivo ${i + 1}`
+// Excluimos la foto 7 del array de fotos locales [1, 2, 3, 4, 5, 6, 8, 9, 10]
+const generalPhotos = [1, 2, 3, 4, 5, 6, 8, 9, 10].map((num) => ({
+  src: `/assets/images/gallery/gallery_${num}.webp`,
+  alt: `Banda Bruna Presentación en Vivo ${num}`
 }));
+
+const albums = [
+  {
+    id: "puerto-saavedra-2026",
+    title: "Puerto Saavedra 2026",
+    year: 2026,
+    photos: [
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414125/compressed_DSC01108_gh6sl8.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01050_r8fjdr.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC00953_zemfwn.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01039_k96lbp.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414122/compressed_DSC01037_drvqlo.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414122/compressed_DSC01030_yuidzw.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC01078_caezrq.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414121/compressed_DSC01017_nbg8tc.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414121/compressed_DSC00912_yegttw.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC01015_snc4y3.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00983_tcabl4.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00959_qbmc83.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414118/compressed_DSC00938_epjivn.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414118/compressed_DSC00924_qjmiv5.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414119/compressed_DSC00958_eysbdz.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414118/compressed_DSC00921_tgwxsj.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414117/compressed_DSC00914_loo0xh.webp"
+    ]
+  },
+  {
+    id: "queule-2025",
+    title: "QUEULE 2025",
+    year: 2025,
+    photos: [
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414193/compressed_20250322-_DSC8451_tfvkgj.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414183/compressed_20250322-_DSC7731_smf5lp.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414183/compressed_20250322-_DSC7739_tb9nj8.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414184/compressed_20250322-_DSC7733_n2jspy.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414185/compressed_20250322-_DSC7769_i9pnfx.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414185/compressed_20250322-_DSC7966_ghpzc1.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414186/compressed_20250322-_DSC8028_wiqaof.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414187/compressed_20250322-_DSC8119_nvwckz.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414187/compressed_20250322-_DSC8127_jnqybt.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414188/compressed_20250322-_DSC8213_xl4fbg.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8247_lb1txw.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8302_iiqi8k.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414190/compressed_20250322-_DSC8316_gw0iie.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8356_zoar8n.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8359_pl7ubh.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414192/compressed_20250322-_DSC8362_vb3okd.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414193/compressed_20250322-_DSC8372_g0wkcl.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414194/compressed_20250322-_DSC8379_vsqowt.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414194/compressed_20250322-_DSC8207_jzso2d.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414195/compressed_20250322-_DSC8054_ryv5zg.webp"
+    ]
+  },
+  {
+    id: "expo-gorbea-2025",
+    title: "Expo Gorbea 2025",
+    year: 2025,
+    photos: [
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414182/compressed_20250322-_DSC8018_bqynkm.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414173/compressed_DSC00670_duu8r5.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414170/compressed_20250201230328_DSC00046_pr6oiu.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414170/compressed_20250201225753_DSC00006_hpdyo2.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414171/compressed_20250201230649_DSC00072_kyujor.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201230759_DSC00081_1_jv8mqo.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201232706_DSC01024_1_ci04km.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414173/compressed_20250201233944_DSC00544_1_cimbba.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414174/compressed_DSC00936_dkot0h.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414174/compressed_DSC00980_rz46x7.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414175/compressed_DSC00999_1_kiadap.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414176/compressed_DSC01011_ovbmg4.webp"
+    ]
+  },
+  {
+    id: "feria-costumbrista-tolten-2025",
+    title: "Feria Costumbrista Toltén 2025",
+    year: 2025,
+    photos: [
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414150/compressed_DSC02307_ca2wcv.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414149/compressed_DSC02279_dxk9xl.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414149/compressed_DSC02239_scfany.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414150/compressed_DSC02287_pqb5lj.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414151/compressed_DSC02309_nj8muq.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02343_1_k3npmc.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02356_1_l5mqsc.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414153/compressed_DSC02483_1_wx22zr.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414169/compressed_20250201230030_DSC00027_xk8lqc.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1781892642/compressed_DSC02295-scaled_habavd.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1781892642/compressed_DSC01118-scaled_qdzzx0.webp"
+    ]
+  },
+  {
+    id: "expo-freire-2025",
+    title: "Expo Freire 2025",
+    year: 2025,
+    photos: [
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414136/compressed_DSC00739_ebt6ni.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414136/compressed_DSC00864_cfbibm.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414138/compressed_DSC00917_kdb5d6.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414137/compressed_DSC00928_wrv3pg.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414137/compressed_DSC00845_ximkxy.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414138/compressed_DSC00771_pcbg7z.webp"
+    ]
+  },
+  {
+    id: "lautaro-2024",
+    title: "Lautaro 2024",
+    year: 2024,
+    photos: [
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09068_slsmnu.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09105_ngy5pw.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09016_xwet1n.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09063_kj4tkq.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09146_g28o4o.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09116_arjwcx.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09153_uzblup.webp",
+      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09167_ixrfvl.webp"
+    ]
+  }
+];
 ---
 
 <Layout title="Galería | Banda Bruna - Fotos de Conciertos y Escenarios" description="Explora la galería oficial de fotos de Banda Bruna: presentaciones en vivo, interacción con el público y escenarios en festivales de Chile.">
-  <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+  <section class="max-w-7xl mx-auto px-6 py-16 md:py-24">
     
-    <div class="text-center mb-16">
+    <div class="text-center mb-16 scroll-reveal">
       <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">REGISTRO FOTOGRÁFICO</span>
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-title uppercase">GALERÍA</h1>
-      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold font-title uppercase tracking-tight">GALERÍA</h1>
+      <div class="w-16 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
-    <!-- Gallery Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {galleryPhotos.map((photo) => (
-        <div class="relative aspect-square rounded-xl overflow-hidden border border-white/5 group bg-slate-900">
-          <img src={photo.src} alt={photo.alt} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-        </div>
-      ))}
+    <!-- Escenarios en Vivo Section -->
+    <div class="mb-20">
+      <div class="text-center md:text-left mb-10 border-b border-white/5 pb-4">
+        <h2 class="text-xl sm:text-2xl font-extrabold font-title text-gold-bruna tracking-widest uppercase">ESCENARIOS EN VIVO</h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">Nuestra trayectoria en imágenes a lo largo del país.</p>
+      </div>
+
+      <!-- Iteración de Álbumes -->
+      <div class="space-y-16">
+        {albums.map((album) => (
+          <div class="scroll-reveal" id={`album-section-${album.id}`}>
+            <!-- Encabezado de álbum con controles -->
+            <div class="flex items-center justify-between mb-5 px-1">
+              <div class="flex items-baseline gap-2">
+                <h3 class="text-base sm:text-lg font-bold font-title uppercase tracking-wider text-white flex items-center gap-2">
+                  <span class="w-1.5 h-5 bg-gold-bruna block rounded-sm"></span>
+                  {album.title}
+                </h3>
+              </div>
+              
+              <!-- Controles de navegación manual -->
+              <div class="flex gap-2">
+                <button 
+                  class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-gold-bruna hover:text-black hover:border-gold-bruna transition-all active:scale-90 cursor-pointer text-slate-400 hover:text-black bg-slate-950/30"
+                  aria-label={`Deslizar fotos de ${album.title} a la izquierda`}
+                  data-nav-prev={album.id}
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button 
+                  class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-gold-bruna hover:text-black hover:border-gold-bruna transition-all active:scale-90 cursor-pointer text-slate-400 hover:text-black bg-slate-950/30"
+                  aria-label={`Deslizar fotos de ${album.title} a la derecha`}
+                  data-nav-next={album.id}
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Slider Horizontal Contenedor -->
+            <div 
+              id={`slider-${album.id}`}
+              class="flex gap-4 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-4 px-1 scroll-smooth"
+            >
+              {album.photos.map((photoUrl, idx) => (
+                <div 
+                  class="flex-shrink-0 w-[285px] sm:w-[350px] md:w-[380px] aspect-[4/3] rounded-lg overflow-hidden border border-white/5 bg-slate-900 snap-start group relative cursor-pointer shadow-md shadow-black/40 hover:border-gold-bruna/40 hover:shadow-gold-bruna/10 transition-all duration-300"
+                  data-album={album.id}
+                  data-index={idx}
+                  data-photo-url={photoUrl}
+                >
+                  <img 
+                    src={photoUrl} 
+                    alt={`${album.title} - Foto de presentación en vivo`} 
+                    class="w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-500 pointer-events-none" 
+                    loading="lazy"
+                  />
+                  <!-- Efecto Hover / Detalle Lupa -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 pointer-events-none">
+                    <span class="text-xs font-semibold tracking-widest text-gold-bruna flex items-center gap-1.5 uppercase font-title">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" /></svg>
+                      Ampliar Imagen
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Registro Histórico General Section -->
+    <div class="scroll-reveal">
+      <div class="text-center md:text-left mb-10 border-b border-white/5 pb-4">
+        <h2 class="text-xl sm:text-2xl font-extrabold font-title text-gold-bruna tracking-widest uppercase">REGISTRO HISTÓRICO</h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">Imágenes de archivo de nuestras presentaciones.</p>
+      </div>
+
+      <!-- Grid General -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {generalPhotos.map((photo, idx) => (
+          <div 
+            class="relative aspect-square rounded-lg overflow-hidden border border-white/5 group bg-slate-900 cursor-pointer shadow-md shadow-black/40 hover:border-gold-bruna/40 transition-all duration-300"
+            data-general-photo
+            data-album="general-photos"
+            data-index={idx}
+            data-photo-url={photo.src}
+          >
+            <img 
+              src={photo.src} 
+              alt={photo.alt} 
+              class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 pointer-events-none" 
+              loading="lazy" 
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 pointer-events-none">
+              <span class="text-xs font-semibold tracking-widest text-gold-bruna flex items-center gap-1.5 uppercase font-title">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" /></svg>
+                Ampliar Imagen
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
 
   </section>
+
+  <!-- Lightbox Dialog Visualizer -->
+  <dialog 
+    id="lightbox-dialog" 
+    class="bg-transparent border-none outline-none p-0 m-0 w-screen h-screen max-w-none max-h-none overflow-hidden backdrop:bg-black/90 backdrop:backdrop-blur-md hidden flex-col items-center justify-center z-[100]"
+  >
+    <div class="relative w-full h-full flex flex-col items-center justify-center px-4 py-8 select-none">
+      
+      <!-- Botón Cerrar (Esquina Superior) -->
+      <button 
+        id="lightbox-close" 
+        class="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-slate-900/60 border border-white/10 hover:bg-slate-800 hover:text-gold-bruna flex items-center justify-center text-white text-xl transition-all cursor-pointer z-[110]"
+        aria-label="Cerrar visualizador"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+
+      <!-- Main Visual Container -->
+      <div class="relative flex items-center justify-center w-full max-w-5xl h-[70vh] sm:h-[78vh] group">
+        
+        <!-- Flecha Izquierda (Permanente y Destacada) -->
+        <button 
+          id="lightbox-prev" 
+          class="absolute left-1 sm:left-4 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-slate-900/90 border border-gold-bruna/40 text-gold-bruna hover:bg-gold-bruna hover:text-black flex items-center justify-center transition-all active:scale-90 shadow-2xl cursor-pointer z-[120] opacity-100"
+          aria-label="Imagen anterior"
+          title="Imagen anterior"
+        >
+          <svg class="w-6 h-6 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+
+        <!-- Imagen del Visualizador (Clic para avanzar) -->
+        <img 
+          id="lightbox-img" 
+          src="" 
+          alt="Vista ampliada de galería" 
+          class="max-w-full max-h-full object-contain rounded-md shadow-2xl transition-all duration-300 transform scale-95 opacity-0 select-none cursor-pointer"
+          title="Haz clic para ver la siguiente foto"
+        />
+
+        <!-- Flecha Derecha (Permanente y Destacada) -->
+        <button 
+          id="lightbox-next" 
+          class="absolute right-1 sm:right-4 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-slate-900/90 border border-gold-bruna/40 text-gold-bruna hover:bg-gold-bruna hover:text-black flex items-center justify-center transition-all active:scale-90 shadow-2xl cursor-pointer z-[120] opacity-100"
+          aria-label="Siguiente imagen"
+          title="Siguiente imagen"
+        >
+          <svg class="w-6 h-6 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+        </button>
+      </div>
+
+      <!-- Leyendas Inferiores -->
+      <div class="mt-5 text-center max-w-lg px-6">
+        <h4 id="lightbox-caption" class="text-gold-bruna font-title font-extrabold text-sm sm:text-base tracking-widest uppercase mb-1"></h4>
+        <p id="lightbox-counter" class="text-slate-400 text-[10px] sm:text-xs font-semibold font-mono tracking-wider"></p>
+      </div>
+
+    </div>
+  </dialog>
 </Layout>
+
+<!-- Metadata de los Álbumes para JavaScript cliente -->
+{albums.map((album) => (
+  <div 
+    class="hidden" 
+    data-album-meta 
+    data-album-id={album.id} 
+    data-album-title={album.title} 
+    data-album-photos={JSON.stringify(album.photos)}
+  />
+))}
+<div 
+  class="hidden" 
+  data-album-meta 
+  data-album-id="general-photos" 
+  data-album-title="Registro Histórico" 
+  data-album-photos={JSON.stringify(generalPhotos.map(p => p.src))}
+/>
+
+<style is:global>
+  /* Ocultar barra de scroll en navegadores */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+
+<script>
+  function initGallery() {
+    // 1. Controladores de navegación de sliders horizontales
+    const prevButtons = document.querySelectorAll('[data-nav-prev]');
+    const nextButtons = document.querySelectorAll('[data-nav-next]');
+
+    prevButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const albumId = btn.getAttribute('data-nav-prev');
+        const slider = document.getElementById(`slider-${albumId}`);
+        if (slider) {
+          // Desplazar 75% del ancho visible del contenedor
+          const scrollAmount = slider.clientWidth * 0.75;
+          slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        }
+      });
+    });
+
+    nextButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const albumId = btn.getAttribute('data-nav-next');
+        const slider = document.getElementById(`slider-${albumId}`);
+        if (slider) {
+          const scrollAmount = slider.clientWidth * 0.75;
+          slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // 2. Controladores e Interactividad de Lightbox
+    const lightbox = document.getElementById('lightbox-dialog') as HTMLDialogElement | null;
+    const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+
+    if (!lightbox || !lightboxImg) return;
+
+    let currentAlbumId = '';
+    let currentPhotos: string[] = [];
+    let currentIndex = 0;
+    let currentAlbumTitle = '';
+
+    // Cargar metadatos de los álbumes y Registro Histórico desde los divs de metadata
+    const albumsMeta: Record<string, { title: string; photos: string[] }> = {};
+    document.querySelectorAll('[data-album-meta]').forEach(el => {
+      const id = el.getAttribute('data-album-id') || '';
+      const title = el.getAttribute('data-album-title') || '';
+      const photos = JSON.parse(el.getAttribute('data-album-photos') || '[]');
+      if (id) {
+        albumsMeta[id] = { title, photos };
+      }
+    });
+
+    function openLightbox(albumId: string, index: number) {
+      const meta = albumsMeta[albumId];
+      if (!meta) return;
+
+      currentAlbumId = albumId;
+      currentPhotos = meta.photos;
+      currentIndex = index;
+      currentAlbumTitle = meta.title;
+
+      updateLightboxContent();
+
+      lightbox!.style.display = 'flex';
+      lightbox!.showModal();
+      document.body.style.overflow = 'hidden'; // Detener scroll de fondo
+    }
+
+    function closeLightbox() {
+      lightbox!.style.display = 'none';
+      lightbox!.close();
+      document.body.style.overflow = ''; // Restaurar scroll de fondo
+      if (lightboxImg) {
+        lightboxImg.src = '';
+        lightboxImg.classList.add('scale-95', 'opacity-0');
+      }
+    }
+
+    function updateLightboxContent() {
+      if (!lightboxImg || !lightboxCaption || !lightboxCounter) return;
+
+      // Animación de desvanecimiento de salida
+      lightboxImg.classList.add('scale-95', 'opacity-0');
+
+      setTimeout(() => {
+        const photoUrl = currentPhotos[currentIndex];
+        if (!photoUrl) return;
+
+        lightboxImg.src = photoUrl;
+        lightboxImg.alt = `${currentAlbumTitle} - Foto ${currentIndex + 1}`;
+        lightboxCaption.textContent = currentAlbumTitle;
+        lightboxCounter.textContent = `Foto ${currentIndex + 1} de ${currentPhotos.length}`;
+        
+        lightboxImg.onload = () => {
+          lightboxImg.classList.remove('scale-95', 'opacity-0');
+        };
+
+        if (lightboxImg.complete) {
+          lightboxImg.classList.remove('scale-95', 'opacity-0');
+        }
+      }, 100);
+    }
+
+    function navigateLightbox(direction: number) {
+      if (currentPhotos.length <= 1) return;
+      currentIndex = (currentIndex + direction + currentPhotos.length) % currentPhotos.length;
+      updateLightboxContent();
+    }
+
+    // Agregar event listener a las imágenes del slider de los álbumes y del grid general
+    document.querySelectorAll('[data-photo-url]').forEach(el => {
+      el.addEventListener('click', () => {
+        const albumId = el.getAttribute('data-album') || '';
+        const index = parseInt(el.getAttribute('data-index') || '0', 10);
+        openLightbox(albumId, index);
+      });
+    });
+
+    // Control de eventos del modal
+    lightboxClose?.addEventListener('click', closeLightbox);
+    lightboxPrev?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateLightbox(-1);
+    });
+    lightboxNext?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateLightbox(1);
+    });
+
+    // Clic en la imagen ampliada avanza a la siguiente foto
+    lightboxImg?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigateLightbox(1);
+    });
+
+    // Cerrar dialog al presionar el backdrop (zona externa)
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
+
+    // Accesibilidad por teclado
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightbox.open) return;
+      if (e.key === 'ArrowLeft') {
+        navigateLightbox(-1);
+      } else if (e.key === 'ArrowRight') {
+        navigateLightbox(1);
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    };
+    
+    // Limpieza y asignación de evento global
+    window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+  }
+
+  // Carga inicial y soporte para transiciones de Astro (View Transitions)
+  document.addEventListener('DOMContentLoaded', initGallery);
+  document.addEventListener('astro:after-swap', initGallery);
+</script>

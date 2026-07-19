@@ -3,10 +3,70 @@ import Layout from '../layouts/Layout.astro';
 import { getSpotifyAlbum } from '../services/socialApi.js';
 
 const spotifyData = getSpotifyAlbum();
+
+// Lanzamientos oficiales con sus portadas cuadradas originales
+const discographyReleases = [
+  {
+    title: "Ahogado en un Bar",
+    year: "2026",
+    type: "Single & Videoclip",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp",
+    link: "/ahogado-en-un-bar",
+    spotifyUrl: "https://open.spotify.com/intl-es/album/44B8oavHkAoN0QreYYnGsi"
+  },
+  {
+    title: "Te Juro",
+    year: "2025",
+    type: "Single",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425904/compressed_BB_Te_Juro_vlzmnd.webp",
+    link: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+    spotifyUrl: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+  },
+  {
+    title: "Luna Amiga",
+    year: "2025",
+    type: "Single & Videoclip",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425903/compressed_BB_Luna_Amiga_gwcdtz.webp",
+    link: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+    spotifyUrl: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+  },
+  {
+    title: "No sufriré por nadie",
+    year: "2025",
+    type: "Single",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_no_sufrire_por_nadie_lz0foh.webp",
+    link: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+    spotifyUrl: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+  },
+  {
+    title: "Para no verte más",
+    year: "2025",
+    type: "Single",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_para_no_verte_mas_jypafa.webp",
+    link: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+    spotifyUrl: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+  },
+  {
+    title: "La boda del chupacabras",
+    year: "2025",
+    type: "Single",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425900/compressed_BB_-_La_boda_del_chupacabras_pubr58.webp",
+    link: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+    spotifyUrl: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+  },
+  {
+    title: "Agonía",
+    year: "2025",
+    type: "Single & Sesión",
+    cover: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425900/compressed_BB_-_Agonia_dib6tk.webp",
+    link: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D",
+    spotifyUrl: "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"
+  }
+];
 ---
 
 <Layout title="Música | Banda Bruna - Discografía y Plataformas de Streaming" description="Escucha a Banda Bruna. Catálogo de canciones, reproductor de Spotify oficial, y enlaces a YouTube Music, Apple Music y Deezer.">
-  <section class="max-w-5xl mx-auto px-6 py-16 md:py-24">
+  <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
     
     <div class="text-center mb-16">
       <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">DISCOGRAFÍA</span>
@@ -14,6 +74,7 @@ const spotifyData = getSpotifyAlbum();
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
+    <!-- 1. Reproductor de Spotify (Izquierda) + Temas Más Escuchados y Plataformas (Derecha) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
       
       <!-- Spotify Embed (Left) -->
@@ -106,5 +167,131 @@ const spotifyData = getSpotifyAlbum();
 
     </div>
 
+    <!-- 2. Slide Dinámico de Portadas de Lanzamientos (Ubicado justo debajo del reproductor y los temas más escuchados) -->
+    <div class="mt-20 border-t border-white/5 pt-12">
+      <div class="flex items-center justify-between mb-8 px-1">
+        <div>
+          <span class="text-gold-bruna text-xs tracking-widest font-bold uppercase block mb-1">CATÁLOGO & DISCOGRAFÍA</span>
+          <h2 class="font-title font-bold text-2xl text-white uppercase tracking-wide flex items-center gap-2">
+            <span class="w-1.5 h-6 bg-gold-bruna block rounded-sm"></span>
+            Todos los Lanzamientos
+          </h2>
+        </div>
+
+        <!-- Controles de navegación manual del slider -->
+        <div class="flex gap-2">
+          <button 
+            id="releases-prev"
+            class="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center hover:bg-gold-bruna hover:text-black hover:border-gold-bruna transition-all active:scale-90 cursor-pointer text-slate-400 hover:text-black bg-slate-900/60"
+            aria-label="Lanzamientos anteriores"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <button 
+            id="releases-next"
+            class="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center hover:bg-gold-bruna hover:text-black hover:border-gold-bruna transition-all active:scale-90 cursor-pointer text-slate-400 hover:text-black bg-slate-900/60"
+            aria-label="Lanzamientos siguientes"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Carrusel deslizable horizontal de Fotos Cuadradas -->
+      <div 
+        id="releases-slider"
+        class="flex gap-6 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-6 px-1 scroll-smooth"
+      >
+        {discographyReleases.map((release) => (
+          <div 
+            class="flex-shrink-0 w-[210px] sm:w-[240px] md:w-[260px] bg-slate-900/80 border border-white/5 rounded-xl overflow-hidden group snap-start transition-all hover:border-gold-bruna/40 hover:shadow-xl hover:shadow-gold-bruna/5 flex flex-col justify-between"
+          >
+            <!-- Foto Cuadrada (aspect-square) -->
+            <a 
+              href={release.link} 
+              target={release.link.startsWith('http') ? '_blank' : '_self'} 
+              rel="noopener" 
+              class="relative w-full aspect-square overflow-hidden bg-black block cursor-pointer"
+            >
+              <img 
+                src={release.cover} 
+                alt={`Portada de ${release.title}`} 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                loading="lazy"
+              />
+              <!-- Badge del Año en la esquina superior derecha -->
+              <div class="absolute top-3 right-3 bg-black/80 backdrop-blur-md border border-white/10 text-gold-bruna text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-md shadow-md">
+                {release.year}
+              </div>
+              <!-- Overlay con botón play al pasar el mouse -->
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-gold-bruna text-black flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform pl-0.5">
+                  ▶
+                </div>
+              </div>
+            </a>
+
+            <!-- Pie de foto: Título y Año -->
+            <div class="p-4 flex flex-col justify-between flex-grow">
+              <div>
+                <span class="text-[10px] font-bold text-gold-bruna tracking-widest uppercase block mb-1 font-title">
+                  {release.type}
+                </span>
+                <h3 class="font-bold text-white text-sm sm:text-base group-hover:text-gold-bruna transition-colors line-clamp-1 leading-snug">
+                  {release.title}
+                </h3>
+              </div>
+              <div class="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                <span class="text-xs text-slate-400 font-mono font-semibold">{release.year}</span>
+                <a 
+                  href={release.spotifyUrl} 
+                  target="_blank" 
+                  rel="noopener" 
+                  class="text-[10px] text-green-400 hover:text-green-300 font-bold uppercase tracking-wider flex items-center gap-1"
+                >
+                  <span>Escuchar</span>
+                  <span>🎧</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
   </section>
 </Layout>
+
+<style is:global>
+  /* Ocultar barra de scroll para navegadores */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+
+<script>
+  function initMusicSlider() {
+    const prevBtn = document.getElementById('releases-prev');
+    const nextBtn = document.getElementById('releases-next');
+    const slider = document.getElementById('releases-slider');
+
+    if (slider && prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => {
+        const scrollAmount = slider.clientWidth * 0.75;
+        slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      });
+
+      nextBtn.addEventListener('click', () => {
+        const scrollAmount = slider.clientWidth * 0.75;
+        slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initMusicSlider);
+  document.addEventListener('astro:after-swap', initMusicSlider);
+</script>

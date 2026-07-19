@@ -62,6 +62,25 @@ const experienciaImages = [
   "/assets/images/experiencia/experiencia_5.webp"
 ];
 
+const heroImages = [
+  "/assets/images/hero/hero_1.webp",
+  "/assets/images/hero/hero_2.webp",
+  "/assets/images/hero/hero_3.webp",
+  "/assets/images/hero/hero_4.webp",
+  "/assets/images/hero/hero_5.webp",
+  "/assets/images/hero/hero_6.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB29_ncdsn8.webp",
+  // Fotos adicionales para el Hero Slide:
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8302_iiqi8k.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01050_r8fjdr.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00983_tcabl4.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC00953_zemfwn.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414182/compressed_20250322-_DSC8018_bqynkm.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8359_pl7ubh.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02356_1_l5mqsc.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201230759_DSC00081_1_jv8mqo.webp"
+];
+
 // Cargar estadísticas desde Supabase
 const { data: dbConfig } = await supabase
   .from('configuracion')
@@ -464,20 +483,12 @@ try {
     
     <!-- Background Slider/Carousel -->
     <div class="absolute inset-0 z-0 w-full h-full overflow-hidden">
-      <!-- Slide 1 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-100 scale-100" style="background-image: url('/assets/images/hero/hero_1.webp');"></div>
-      <!-- Slide 2 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_2.webp');"></div>
-      <!-- Slide 3 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_3.webp');"></div>
-      <!-- Slide 4 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_4.webp');"></div>
-      <!-- Slide 5 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_5.webp');"></div>
-      <!-- Slide 6 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('/assets/images/hero/hero_6.webp');"></div>
-      <!-- Slide 7 -->
-      <div class="hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-0 scale-105" style="background-image: url('https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB29_ncdsn8.webp');"></div>
+      {heroImages.map((src, index) => (
+        <div 
+          class={`hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 ${index === 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`} 
+          style={`background-image: url('${src}');`}
+        ></div>
+      ))}
       
       <!-- Dark overlay for readability -->
       <div class="absolute inset-0 bg-black/55 z-1"></div>
