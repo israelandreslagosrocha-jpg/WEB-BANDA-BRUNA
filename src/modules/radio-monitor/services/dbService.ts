@@ -78,6 +78,7 @@ export class DbService {
     let query = supabase
       .from('radio_tracks')
       .select('*, radios(nombre, logo_url)')
+      .ilike('artist', '%Banda Bruna%')
       .order('detected_at', { ascending: false });
 
     if (filters?.radioId) {
