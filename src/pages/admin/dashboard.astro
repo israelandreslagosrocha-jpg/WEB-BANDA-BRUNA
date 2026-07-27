@@ -134,21 +134,47 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
 
           <form id="rider-form" class="flex flex-col gap-6">
             <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Lista de Canales (Input List)</h3>
-              <div class="max-h-[350px] overflow-y-auto pr-2 flex flex-col gap-2" id="canales-container">
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Lista de Canales (Input List)</h3>
+                  <p class="text-[10px] text-slate-400">Agrega, edita o elimina los canales de entrada para el show.</p>
+                </div>
+                <button type="button" id="btn-add-canal" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer flex items-center gap-1">
+                  + Agregar Canal
+                </button>
+              </div>
+              <div class="max-h-[400px] overflow-y-auto pr-2 flex flex-col gap-2" id="canales-container">
                 <!-- Se inyectarán dinámicamente -->
               </div>
             </div>
 
             <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Mezclas de Monitoreo</h3>
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Mezclas de Monitoreo</h3>
+                  <p class="text-[10px] text-slate-400">Agrega, edita o elimina las mezclas de monitoreo y retorno en escenario.</p>
+                </div>
+                <button type="button" id="btn-add-monitor" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer flex items-center gap-1">
+                  + Agregar Mezcla
+                </button>
+              </div>
               <div class="flex flex-col gap-2.5" id="monitores-container">
                 <!-- Se inyectarán dinámicamente -->
               </div>
             </div>
 
             <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
-              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Requerimientos Técnicos</h3>
+              <div class="mb-4">
+                <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider mb-1">Requerimientos de Backline por Instrumento</h3>
+                <p class="text-[10px] text-slate-400">Gestiona los requerimientos específicos de equipos, amplificadores y atriles para cada instrumento.</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="backline-instruments-container">
+                <!-- Se inyectarán dinámicamente los 7 instrumentos -->
+              </div>
+            </div>
+
+            <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5">
+              <h3 class="font-title font-bold text-sm text-gold-bruna mb-4 uppercase tracking-wider">Requerimientos Técnicos Generales</h3>
               <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Requerimientos de Audio (P.A. & FOH) - Salto de línea por ítem</label>
@@ -1327,21 +1353,67 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
       }
 
       // ==========================================
-      // LÓGICA DE PESTAÑA: RIDER TÉCNICO (CON PDF)
+      // LÓGICA DE PESTAÑA: RIDER TÉCNICO (CON PDF Y BACKLINE)
       // ==========================================
+      const BACKLINE_INSTRUMENTS = [
+        { id: 'vocal', name: 'Voz Vocal', icon: '🎤', defaultItems: ['Micrófono inalámbrico Shure Beta 58', 'Atril de micrófono con brazo jirafa', 'Agua mineral a temperatura ambiente', 'Toalla limpia en escenario'] },
+        { id: 'bajo', name: 'Bajo', icon: '🎸', defaultItems: ['Cabezal de bajo a tubos de mínimo 300W (Ampeg / GK)', 'Gabinete de 4x10" o 8x10"', 'Línea directa activa (DI) de alta calidad', 'Atril de bajo en escenario'] },
+        { id: 'guitarra', name: 'Guitarra', icon: '🎸', defaultItems: ['Amplificador de guitarra valvular de mínimo 40W (Fender / Marshall)', 'Caja directa para guitarra acústica', 'Atril de guitarra en escenario', 'Alimentación eléctrica 220V cercana'] },
+        { id: 'piano', name: 'Piano / Teclado', icon: '🎹', defaultItems: ['Soporte doble de teclado tipo "X" o "Z" reforzado', '2 Cajas Directas pasivas de alta gama', 'Toma de corriente 220V certificada', 'Atril de partitura con luz LED'] },
+        { id: 'guiro', name: 'Güiro', icon: '🪵', defaultItems: ['Atril/Soporte para percusión menor', 'Güiro metálico profesional con rascador de metal', 'Micrófono de percusión SM57 o clip', 'Punto de hidratación'] },
+        { id: 'congas', name: 'Congas', icon: '🪘', defaultItems: ['Par de congas (Quinto 11" y Conga 11.75") con soporte', 'Bongó profesional con soporte de pie', 'Tarima sólida de 2x2 metros (altura 40cm)', 'Atril de platillo para chimes'] },
+        { id: 'timbal', name: 'Timbal / Batería', icon: '🥁', defaultItems: ['Bombo de 22" (con orificio para mic)', 'Toms aéreos 10" y 12", Tom de piso 14" o 16"', 'Atril de caja y atril de Hi-Hat profesional', '5 atriles de platillo de doble felpa', 'Silla neumática para baterista'] }
+      ];
+
+      function renderChannelRow(ch: any) {
+        const cat = ch.categoria || 'bateria';
+        return `
+          <div class="flex items-center gap-2 bg-slate-900 border border-white/5 p-2 rounded-lg group" data-channel-row data-channel-id="${ch.id || ''}">
+            <input type="number" value="${ch.canal !== undefined && ch.canal !== null ? ch.canal : ''}" placeholder="Ch" class="w-14 font-title font-bold text-xs text-gold-bruna bg-slate-950 border border-white/5 rounded p-2 text-center outline-none focus:border-gold-bruna" data-field="canal" />
+            <input type="text" value="${ch.instrumento || ''}" placeholder="Instrumento / Fuente" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/3 focus:border-gold-bruna/50" data-field="instrumento" />
+            <input type="text" value="${ch.conexion || ''}" placeholder="Micrófono / DI" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/3 focus:border-gold-bruna/50" data-field="conexion" />
+            <select class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-slate-300 outline-none w-1/4 focus:border-gold-bruna/50" data-field="categoria">
+              <option value="bateria" ${cat === 'bateria' ? 'selected' : ''}>Batería</option>
+              <option value="percusion" ${cat === 'percusion' ? 'selected' : ''}>Percusión</option>
+              <option value="cuerdas" ${cat === 'cuerdas' ? 'selected' : ''}>Cuerdas / Armonía</option>
+              <option value="voces" ${cat === 'voces' ? 'selected' : ''}>Voces</option>
+              <option value="otros" ${cat === 'otros' ? 'selected' : ''}>Otros</option>
+            </select>
+            <button type="button" class="btn-delete-channel p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors cursor-pointer" title="Eliminar canal">
+              🗑️
+            </button>
+          </div>
+        `;
+      }
+
+      function renderMonitorRow(m: any) {
+        return `
+          <div class="flex items-center gap-2 bg-slate-900 border border-white/5 p-2 rounded-lg group" data-monitor-row data-monitor-id="${m.id || ''}">
+            <input type="text" value="${m.mezcla !== undefined && m.mezcla !== null ? m.mezcla : ''}" placeholder="Mix #" class="w-20 font-title font-bold text-xs text-gold-bruna bg-slate-950 border border-white/5 rounded p-2 text-center outline-none focus:border-gold-bruna" data-field="mezcla" />
+            <input type="text" value="${m.envio || ''}" placeholder="Asignación (ej: Voz Main / Batería)" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="envio" />
+            <input type="text" value="${m.sistema || ''}" placeholder="Sistema (ej: IN EAR)" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="sistema" />
+            <button type="button" class="btn-delete-monitor p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors cursor-pointer" title="Eliminar mezcla">
+              🗑️
+            </button>
+          </div>
+        `;
+      }
+
       async function loadRider() {
         const canalesContainer = document.getElementById('canales-container');
         const monitoresContainer = document.getElementById('monitores-container');
+        const backlineContainer = document.getElementById('backline-instruments-container');
         
         const reqAudio = document.getElementById('req-audio') as HTMLTextAreaElement;
         const reqMonitores = document.getElementById('req-monitores') as HTMLTextAreaElement;
         const reqLuces = document.getElementById('req-luces') as HTMLTextAreaElement;
         const reqLogistica = document.getElementById('req-logistica') as HTMLTextAreaElement;
 
-        if (!canalesContainer || !monitoresContainer || !reqAudio || !reqMonitores || !reqLuces || !reqLogistica) return;
+        if (!canalesContainer || !monitoresContainer || !backlineContainer || !reqAudio || !reqMonitores || !reqLuces || !reqLogistica) return;
 
         canalesContainer.innerHTML = '<p class="text-xs text-slate-400 animate-pulse">Cargando canales...</p>';
         monitoresContainer.innerHTML = '<p class="text-xs text-slate-400 animate-pulse">Cargando mezclas...</p>';
+        backlineContainer.innerHTML = '<p class="text-xs text-slate-400 animate-pulse">Cargando requerimientos de backline...</p>';
 
         // Cargar Canales
         const { data: canales, error: errCanales } = await supabase
@@ -1365,54 +1437,145 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
           .from('rider_stageplot')
           .select('*');
 
-        if (errCanales || !canales) {
-          canalesContainer.innerHTML = '<p class="text-xs text-red-400">Error al cargar canales.</p>';
+        if (errCanales || !canales || canales.length === 0) {
+          canalesContainer.innerHTML = renderChannelRow({ canal: 1, instrumento: '', conexion: '', categoria: 'bateria' });
         } else {
-          canalesContainer.innerHTML = canales.map((ch: any) => `
-            <div class="flex items-center gap-3 bg-slate-900 border border-white/5 p-2 rounded-lg" data-channel-row="${ch.canal}" data-channel-id="${ch.id}">
-              <span class="w-8 font-title font-bold text-xs text-gold-bruna pl-2">${ch.canal}</span>
-              <input type="text" value="${ch.instrumento}" placeholder="Instrumento" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="instrumento" />
-              <input type="text" value="${ch.conexion}" placeholder="Micrófono / DI" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="conexion" />
-              <input type="hidden" value="${ch.categoria}" data-field="categoria" />
-            </div>
-          `).join('');
+          canalesContainer.innerHTML = canales.map((ch: any) => renderChannelRow(ch)).join('');
         }
 
-        if (errMonitores || !monitores) {
-          monitoresContainer.innerHTML = '<p class="text-xs text-red-400">Error al cargar mezclas de monitoreo.</p>';
+        if (errMonitores || !monitores || monitores.length === 0) {
+          monitoresContainer.innerHTML = renderMonitorRow({ mezcla: 1, envio: '', sistema: '' });
         } else {
-          monitoresContainer.innerHTML = monitores.map((m: any) => `
-            <div class="flex items-center gap-3 bg-slate-900 border border-white/5 p-2 rounded-lg" data-monitor-row="${m.mezcla}" data-monitor-id="${m.id}">
-              <span class="w-8 font-title font-bold text-xs text-gold-bruna pl-2">Mix ${m.mezcla}</span>
-              <input type="text" value="${m.envio}" placeholder="Asignación" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="envio" />
-              <input type="text" value="${m.sistema}" placeholder="Sistema (ej: IN EAR)" class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none w-1/2 focus:border-gold-bruna/50" data-field="sistema" />
-            </div>
-          `).join('');
+          monitoresContainer.innerHTML = monitores.map((m: any) => renderMonitorRow(m)).join('');
         }
 
-        if (errReqs || !reqs) {
-          reqAudio.value = '';
-          reqMonitores.value = '';
-          reqLuces.value = '';
-          reqLogistica.value = '';
-        } else {
+        // Renderizar Tarjetas de Backline por Instrumento
+        const reqsMap: Record<string, string[]> = {};
+        if (reqs) {
           reqs.forEach((r: any) => {
-            const val = (r.items || []).join('\n');
-            if (r.categoria === 'audio') reqAudio.value = val;
-            if (r.categoria === 'monitores') reqMonitores.value = val;
-            if (r.categoria === 'luces') reqLuces.value = val;
-            if (r.categoria === 'logistica') reqLogistica.value = val;
+            reqsMap[r.categoria] = r.items || [];
           });
         }
 
-        // Cargar Stageplot a la variable global y renderizar
+        reqAudio.value = (reqsMap['audio'] || []).join('\n');
+        reqMonitores.value = (reqsMap['monitores'] || []).join('\n');
+        reqLuces.value = (reqsMap['luces'] || []).join('\n');
+        reqLogistica.value = (reqsMap['logistica'] || []).join('\n');
+
+        backlineContainer.innerHTML = BACKLINE_INSTRUMENTS.map(inst => {
+          const items = reqsMap[`backline_${inst.id}`] || inst.defaultItems;
+          return `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col justify-between" data-backline-instrument="${inst.id}">
+              <div>
+                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-white/5">
+                  <span class="text-lg">${inst.icon}</span>
+                  <h4 class="font-title font-bold text-xs uppercase text-gold-bruna tracking-wider">${inst.name}</h4>
+                </div>
+                <div class="flex flex-col gap-1.5 mb-3" id="backline-items-${inst.id}">
+                  ${items.map((itemText: string) => `
+                    <div class="flex items-center justify-between gap-2 bg-slate-950/80 border border-white/5 p-2 rounded text-xs text-slate-300">
+                      <span class="backline-item-text flex-grow">${itemText}</span>
+                      <button type="button" class="btn-delete-backline-item text-slate-400 hover:text-red-400 text-xs px-1" title="Quitar requerimiento">✕</button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                <input type="text" placeholder="Nuevo requerimiento para ${inst.name}..." class="bg-slate-950 border border-white/5 rounded p-2 text-xs text-white outline-none flex-grow focus:border-gold-bruna" id="input-add-backline-${inst.id}" />
+                <button type="button" class="btn-add-backline-item bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold px-3 py-2 rounded text-[10px] uppercase cursor-pointer whitespace-nowrap" data-inst-id="${inst.id}">
+                  + Añadir
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Cargar Stageplot
         if (!errStage && stageData) {
           stageElements = stageData;
         } else {
           stageElements = [];
         }
         renderStageElements();
+        bindRiderDynamicEvents();
       }
+
+      function bindRiderDynamicEvents() {
+        // Evento eliminar canal
+        document.querySelectorAll('.btn-delete-channel').forEach(btn => {
+          (btn as HTMLElement).onclick = (e) => {
+            const row = (e.target as HTMLElement).closest('[data-channel-row]');
+            if (row) row.remove();
+          };
+        });
+
+        // Evento eliminar mezcla
+        document.querySelectorAll('.btn-delete-monitor').forEach(btn => {
+          (btn as HTMLElement).onclick = (e) => {
+            const row = (e.target as HTMLElement).closest('[data-monitor-row]');
+            if (row) row.remove();
+          };
+        });
+
+        // Evento eliminar item de backline
+        document.querySelectorAll('.btn-delete-backline-item').forEach(btn => {
+          (btn as HTMLElement).onclick = (e) => {
+            const itemRow = (e.target as HTMLElement).closest('div');
+            if (itemRow) itemRow.remove();
+          };
+        });
+
+        // Evento añadir item de backline
+        document.querySelectorAll('.btn-add-backline-item').forEach(btn => {
+          (btn as HTMLElement).onclick = () => {
+            const instId = btn.getAttribute('data-inst-id');
+            if (!instId) return;
+            const input = document.getElementById(`input-add-backline-${instId}`) as HTMLInputElement;
+            const container = document.getElementById(`backline-items-${instId}`);
+            if (!input || !container || !input.value.trim()) return;
+
+            const text = input.value.trim();
+            const newItemHtml = `
+              <div class="flex items-center justify-between gap-2 bg-slate-950/80 border border-white/5 p-2 rounded text-xs text-slate-300">
+                <span class="backline-item-text flex-grow">${text}</span>
+                <button type="button" class="btn-delete-backline-item text-slate-400 hover:text-red-400 text-xs px-1" title="Quitar requerimiento">✕</button>
+              </div>
+            `;
+            container.insertAdjacentHTML('beforeend', newItemHtml);
+            input.value = '';
+
+            // Re-bind delete event for new item
+            const newDeleteBtn = container.lastElementChild?.querySelector('.btn-delete-backline-item');
+            if (newDeleteBtn) {
+              (newDeleteBtn as HTMLElement).onclick = () => {
+                newDeleteBtn.closest('div')?.remove();
+              };
+            }
+          };
+        });
+      }
+
+      // Botón agregar canal
+      document.getElementById('btn-add-canal')?.addEventListener('click', () => {
+        const container = document.getElementById('canales-container');
+        if (!container) return;
+        const currentRowsCount = container.querySelectorAll('[data-channel-row]').length;
+        const nextCh = currentRowsCount + 1;
+        const newRowHtml = renderChannelRow({ canal: nextCh, instrumento: '', conexion: '', categoria: 'bateria' });
+        container.insertAdjacentHTML('beforeend', newRowHtml);
+        bindRiderDynamicEvents();
+      });
+
+      // Botón agregar mezcla
+      document.getElementById('btn-add-monitor')?.addEventListener('click', () => {
+        const container = document.getElementById('monitores-container');
+        if (!container) return;
+        const currentRowsCount = container.querySelectorAll('[data-monitor-row]').length;
+        const nextMix = currentRowsCount + 1;
+        const newRowHtml = renderMonitorRow({ mezcla: nextMix, envio: '', sistema: 'IN EAR' });
+        container.insertAdjacentHTML('beforeend', newRowHtml);
+        bindRiderDynamicEvents();
+      });
 
       // Iconos SVG del Stage Plot
       function getStageIconSvg(type: string): string {
@@ -1625,53 +1788,92 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
       document.getElementById('rider-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const submitBtn = e.target.querySelector('button[type="submit"]') as HTMLButtonElement;
+        const submitBtn = (e.target as HTMLElement).querySelector('button[type="submit"]') as HTMLButtonElement;
         const origText = submitBtn.textContent;
         submitBtn.textContent = 'Guardando cambios...';
         submitBtn.disabled = true;
 
         try {
-          // 1. Guardar Canales
+          // 1. Guardar Canales (Clean replace in block)
           const channelRows = document.querySelectorAll('[data-channel-row]');
-          for (const row of channelRows) {
-            const id = row.getAttribute('data-channel-id');
-            const instrumento = (row.querySelector('[data-field="instrumento"]') as HTMLInputElement).value;
-            const conexion = (row.querySelector('[data-field="conexion"]') as HTMLInputElement).value;
-            const categoria = (row.querySelector('[data-field="categoria"]') as HTMLInputElement).value;
+          const canalesToSave: any[] = [];
+          let idx = 1;
+          channelRows.forEach(row => {
+            const chVal = parseInt((row.querySelector('[data-field="canal"]') as HTMLInputElement).value) || idx;
+            const instrumento = (row.querySelector('[data-field="instrumento"]') as HTMLInputElement).value.trim();
+            const conexion = (row.querySelector('[data-field="conexion"]') as HTMLInputElement).value.trim();
+            const categoria = (row.querySelector('[data-field="categoria"]') as HTMLSelectElement).value;
 
-            if (id) {
-              await supabase.from('rider_canales').update({ instrumento, conexion, categoria }).eq('id', id);
+            if (instrumento || conexion) {
+              canalesToSave.push({ canal: chVal, instrumento, conexion, categoria });
             }
+            idx++;
+          });
+
+          await supabase.from('rider_canales').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          if (canalesToSave.length > 0) {
+            const { error: errSaveCh } = await supabase.from('rider_canales').insert(canalesToSave);
+            if (errSaveCh) throw errSaveCh;
           }
 
-          // 2. Guardar Monitores
+          // 2. Guardar Monitores (Clean replace in block)
           const monitorRows = document.querySelectorAll('[data-monitor-row]');
-          for (const row of monitorRows) {
-            const id = row.getAttribute('data-monitor-id');
-            const envio = (row.querySelector('[data-field="envio"]') as HTMLInputElement).value;
-            const sistema = (row.querySelector('[data-field="sistema"]') as HTMLInputElement).value;
+          const monitoresToSave: any[] = [];
+          let mIdx = 1;
+          monitorRows.forEach(row => {
+            const mezclaVal = (row.querySelector('[data-field="mezcla"]') as HTMLInputElement).value.trim() || `Mix ${mIdx}`;
+            const envio = (row.querySelector('[data-field="envio"]') as HTMLInputElement).value.trim();
+            const sistema = (row.querySelector('[data-field="sistema"]') as HTMLInputElement).value.trim();
 
-            if (id) {
-              await supabase.from('rider_monitores').update({ envio, sistema }).eq('id', id);
+            if (envio || sistema) {
+              monitoresToSave.push({ mezcla: mezclaVal, envio, sistema });
             }
+            mIdx++;
+          });
+
+          await supabase.from('rider_monitores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          if (monitoresToSave.length > 0) {
+            const { error: errSaveMon } = await supabase.from('rider_monitores').insert(monitoresToSave);
+            if (errSaveMon) throw errSaveMon;
           }
 
-          // 3. Guardar Requerimientos
+          // 3. Guardar Requerimientos Generales y Backline por Instrumento
           const reqAudio = (document.getElementById('req-audio') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
           const reqMonitores = (document.getElementById('req-monitores') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
           const reqLuces = (document.getElementById('req-luces') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
           const reqLogistica = (document.getElementById('req-logistica') as HTMLTextAreaElement).value.split('\n').filter(l => l.trim() !== '');
 
-          await supabase.from('rider_requerimientos').update({ items: reqAudio }).eq('categoria', 'audio');
-          await supabase.from('rider_requerimientos').update({ items: reqMonitores }).eq('categoria', 'monitores');
-          await supabase.from('rider_requerimientos').update({ items: reqLuces }).eq('categoria', 'luces');
-          await supabase.from('rider_requerimientos').update({ items: reqLogistica }).eq('categoria', 'logistica');
+          const reqUpdates: { categoria: string; items: string[] }[] = [
+            { categoria: 'audio', items: reqAudio },
+            { categoria: 'monitores', items: reqMonitores },
+            { categoria: 'luces', items: reqLuces },
+            { categoria: 'logistica', items: reqLogistica }
+          ];
+
+          BACKLINE_INSTRUMENTS.forEach(inst => {
+            const container = document.getElementById(`backline-items-${inst.id}`);
+            if (container) {
+              const itemElements = container.querySelectorAll('.backline-item-text');
+              const items: string[] = [];
+              itemElements.forEach(el => {
+                const text = el.textContent?.trim();
+                if (text) items.push(text);
+              });
+              reqUpdates.push({ categoria: `backline_${inst.id}`, items });
+            }
+          });
+
+          for (const req of reqUpdates) {
+            const { data: existing } = await supabase.from('rider_requerimientos').select('id').eq('categoria', req.categoria).maybeSingle();
+            if (existing) {
+              await supabase.from('rider_requerimientos').update({ items: req.items }).eq('categoria', req.categoria);
+            } else {
+              await supabase.from('rider_requerimientos').insert({ categoria: req.categoria, items: req.items });
+            }
+          }
 
           // 4. Guardar Stageplot (Re-inserción limpia en bloque)
-          // Borrar todos los elementos actuales
           await supabase.from('rider_stageplot').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-          
-          // Insertar los elementos actuales sin el prefijo "new-" en el ID si lo tuvieran
           const itemsToInsert = stageElements.map(el => {
             const item: any = {
               nombre: el.nombre,
@@ -1681,7 +1883,6 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
               canal: el.canal || null,
               retorno: el.retorno || null
             };
-            // Si el id es un UUID válido y no autogenerado localmente
             if (el.id && !el.id.startsWith('new-')) {
               item.id = el.id;
             }
@@ -1693,9 +1894,9 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
             if (insertErr) throw insertErr;
           }
 
-          await logAction('Actualizó especificaciones del Rider Técnico y Stage Plot en Supabase');
-          alert('¡Rider Técnico y Stage Plot guardados exitosamente en Supabase!');
-          loadRider(); // Recargar datos limpios
+          await logAction('Actualizó especificaciones del Rider Técnico, Canales, Monitoreo y Backline en Supabase');
+          alert('¡Rider Técnico, Input List, Monitoreo y Backline guardados exitosamente!');
+          loadRider();
         } catch (err) {
           console.error("Error al guardar rider:", err);
           alert('Ocurrió un error al guardar los cambios en Supabase.');
@@ -1740,17 +1941,17 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         const channelRows = document.querySelectorAll('[data-channel-row]');
         let yPos = 62;
         channelRows.forEach((row) => {
-          const ch = row.getAttribute('data-channel-row');
-          const instrumento = (row.querySelector('[data-field="instrumento"]') as HTMLInputElement).value;
-          const conexion = (row.querySelector('[data-field="conexion"]') as HTMLInputElement).value;
+          const ch = (row.querySelector('[data-field="canal"]') as HTMLInputElement)?.value || '';
+          const instrumento = (row.querySelector('[data-field="instrumento"]') as HTMLInputElement)?.value || '';
+          const conexion = (row.querySelector('[data-field="conexion"]') as HTMLInputElement)?.value || '';
           
           if (yPos < 280) {
-            doc.text(`${ch}. ${instrumento} - ${conexion}`, 20, yPos);
+            doc.text(`Ch ${ch}: ${instrumento} (${conexion})`, 20, yPos);
             yPos += 4.5;
           }
         });
 
-        // Crear una nueva página para monitores y requerimientos
+        // Crear una nueva página para monitores, backline y requerimientos
         doc.addPage();
         doc.setFillColor(9, 13, 22); // Fondo oscuro
         doc.rect(0, 0, 210, 297, 'F');
@@ -1766,9 +1967,9 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         let yMon = 35;
         const monitorRows = document.querySelectorAll('[data-monitor-row]');
         monitorRows.forEach((row) => {
-          const mezcla = row.getAttribute('data-monitor-row');
-          const envio = (row.querySelector('[data-field="envio"]') as HTMLInputElement).value;
-          const sistema = (row.querySelector('[data-field="sistema"]') as HTMLInputElement).value;
+          const mezcla = (row.querySelector('[data-field="mezcla"]') as HTMLInputElement)?.value || '';
+          const envio = (row.querySelector('[data-field="envio"]') as HTMLInputElement)?.value || '';
+          const sistema = (row.querySelector('[data-field="sistema"]') as HTMLInputElement)?.value || '';
           
           doc.text(`Mezcla ${mezcla}: ${envio} (${sistema})`, 20, yMon);
           yMon += 6;
@@ -1777,34 +1978,35 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         yMon += 10;
         doc.setTextColor(212, 175, 55);
         doc.setFont('Helvetica', 'bold');
-        doc.text("REQUERIMIENTOS TÉCNICOS ADICIONALES", 20, yMon);
+        doc.text("REQUERIMIENTOS DE BACKLINE POR INSTRUMENTO", 20, yMon);
         
         doc.setTextColor(255, 255, 255);
         doc.setFont('Helvetica', 'normal');
         doc.setFontSize(8);
         yMon += 8;
 
-        const reqAudio = (document.getElementById('req-audio') as HTMLTextAreaElement).value;
-        const reqMonitores = (document.getElementById('req-monitores') as HTMLTextAreaElement).value;
+        BACKLINE_INSTRUMENTS.forEach(inst => {
+          const container = document.getElementById(`backline-items-${inst.id}`);
+          if (container && yMon < 270) {
+            doc.setTextColor(212, 175, 55);
+            doc.setFont('Helvetica', 'bold');
+            doc.text(`${inst.name.toUpperCase()}:`, 20, yMon);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('Helvetica', 'normal');
+            yMon += 4.5;
 
-        doc.setTextColor(212, 175, 55);
-        doc.setFont('Helvetica', 'bold');
-        doc.text("AUDIO (P.A. & FOH):", 20, yMon);
-        doc.setTextColor(255, 255, 255);
-        doc.setFont('Helvetica', 'normal');
-        yMon += 5;
-        const audioLines = doc.splitTextToSize(reqAudio, 170);
-        doc.text(audioLines, 20, yMon);
-
-        yMon += (audioLines.length * 4) + 5;
-        doc.setTextColor(212, 175, 55);
-        doc.setFont('Helvetica', 'bold');
-        doc.text("MONITORES & ILUMINACION:", 20, yMon);
-        doc.setTextColor(255, 255, 255);
-        doc.setFont('Helvetica', 'normal');
-        yMon += 5;
-        const monLines = doc.splitTextToSize(reqMonitores, 170);
-        doc.text(monLines, 20, yMon);
+            const itemElements = container.querySelectorAll('.backline-item-text');
+            itemElements.forEach(el => {
+              const text = el.textContent?.trim();
+              if (text && yMon < 280) {
+                const lines = doc.splitTextToSize(`• ${text}`, 165);
+                doc.text(lines, 25, yMon);
+                yMon += (lines.length * 3.5) + 1;
+              }
+            });
+            yMon += 3;
+          }
+        });
 
         // Descarga
         doc.save("Rider_Tecnico_Banda_Bruna.pdf");
