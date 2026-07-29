@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { supabase } from '../services/supabaseClient.js';
 import FeaturedCampaignBanner from '../components/FeaturedCampaignBanner.astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 
 interface Props {
   title?: string;
@@ -455,5 +456,6 @@ const getWhatsAppLink = (phone: string) => {
     />
   </a>
 
+  <SpeedInsights />
 </body>
 </html>
