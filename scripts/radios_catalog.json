@@ -138,5 +138,19 @@
     "bitrate": 128,
     "formato": "mp3",
     "activo": true
+  },
+  {
+    "nombre": "Radio Alegría Online (San Carlos)",
+    "slug": "radio-alegria-online-san-carlos",
+    "region": "Ñuble",
+    "ciudad": "San Carlos",
+    "logo_url": "https://alegriaradioonline.cl/assets/logo-principal.webp",
+    "sitio_web": "https://alegriaradioonline.cl/",
+    "stream_url": "https://sonic.portalfoxmix.club/8288/stream",
+    "metadata_url": "https://sonic.portalfoxmix.club/8288/stats",
+    "provider_name": "Shoutcast",
+    "bitrate": 128,
+    "formato": "mp3",
+    "activo": true
   }
 ]

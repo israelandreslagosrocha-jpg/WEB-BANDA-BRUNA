@@ -105,41 +105,52 @@ async function getShoutcastMetadata(streamUrl, metadataUrl) {
   }
 
   try {
-    const response = await fetch(statsUrl + '?json=1', { signal: AbortSignal.timeout(3000) });
+    const response = await fetch(statsUrl + (statsUrl.includes('?') ? '&json=1' : '?json=1'), { signal: AbortSignal.timeout(3000) });
     if (response.ok) {
-      const data = await response.json();
-      const title = data.songtitle || '';
-      if (title.includes(' - ')) {
-        const parts = title.split(' - ');
-        return { artist: cleanMetadataText(parts[0]), title: cleanMetadataText(parts.slice(1).join(' - ')), online: true, raw: data };
+      const text = await response.text();
+      let title = '';
+      if (text.includes('<SONGTITLE>')) {
+        const match = text.match(/<SONGTITLE>(.*?)<\/SONGTITLE>/i);
+        if (match) title = match[1];
+      } else {
+        try {
+          const data = JSON.parse(text);
+          title = data.songtitle || '';
+        } catch {}
       }
-      return { artist: '', title: cleanMetadataText(title), online: !!title, raw: data };
+      if (title) {
+        if (title.includes(' - ')) {
+          const parts = title.split(' - ');
+          return { artist: cleanMetadataText(parts[0]), title: cleanMetadataText(parts.slice(1).join(' - ')), online: true, raw: text };
+        }
+        return { artist: '', title: cleanMetadataText(title), online: true, raw: text };
+      }
     }
-    throw new Error('Stats JSON fail');
-  } catch (v2Error) {
-    try {
-      const parsed = new URL(streamUrl);
-      parsed.pathname = '/7.html';
-      parsed.search = '';
-      const v1Response = await fetch(parsed.toString(), { signal: AbortSignal.timeout(3000) });
-      if (v1Response.ok) {
-        const text = await v1Response.text();
-        const match = text.match(/<body>(.*)<\/body>/i);
-        if (match && match[1]) {
-          const parts = match[1].split(',');
-          if (parts.length >= 7) {
-            const title = parts.slice(6).join(',');
-            if (title.includes(' - ')) {
-              const p = title.split(' - ');
-              return { artist: cleanMetadataText(p[0]), title: cleanMetadataText(p.slice(1).join(' - ')), online: true, raw: { v1: text } };
-            }
-            return { artist: '', title: cleanMetadataText(title), online: !!title, raw: { v1: text } };
+  } catch (v2Error) {}
+
+  try {
+    const parsed = new URL(streamUrl);
+    parsed.pathname = '/7.html';
+    parsed.search = '';
+    const v1Response = await fetch(parsed.toString(), { signal: AbortSignal.timeout(3000) });
+    if (v1Response.ok) {
+      const text = await v1Response.text();
+      const match = text.match(/<body>(.*)<\/body>/i);
+      if (match && match[1]) {
+        const parts = match[1].split(',');
+        if (parts.length >= 7) {
+          const title = parts.slice(6).join(',');
+          if (title.includes(' - ')) {
+            const p = title.split(' - ');
+            return { artist: cleanMetadataText(p[0]), title: cleanMetadataText(p.slice(1).join(' - ')), online: true, raw: { v1: text } };
           }
+          return { artist: '', title: cleanMetadataText(title), online: !!title, raw: { v1: text } };
         }
       }
-    } catch {}
-    return { artist: '', title: '', online: false, raw: { error: v2Error.message } };
-  }
+    }
+  } catch {}
+
+  return { artist: '', title: '', online: false, raw: {} };
 }
 
 async function getAzuraMetadata(streamUrl, metadataUrl) {
