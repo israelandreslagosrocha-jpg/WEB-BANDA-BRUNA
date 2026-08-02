@@ -531,14 +531,45 @@ try {
       <!-- Top Title Section (Modern, thinner font, not covering background) -->
       <div class="w-full text-center lg:text-left border-b border-white/5 pb-4">
         {imminentEvent && (
-          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-gold-bruna/80 text-gold-bruna text-xs font-bold tracking-widest uppercase mb-3 shadow-[0_0_25px_rgba(214,175,55,0.45)] animate-pulse">
+          <div 
+            id="imminent-event-badge"
+            data-event-date={imminentEvent.fecha}
+            class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-gold-bruna/80 text-gold-bruna text-xs font-bold tracking-widest uppercase mb-3 shadow-[0_0_25px_rgba(214,175,55,0.45)] animate-pulse"
+          >
             <span class="text-sm">✨</span>
             <span>PRÓXIMO SHOW EN VIVO: {imminentEvent.nombre} ({imminentEvent.day} DE {imminentEvent.monthName} · {imminentEvent.ciudad})</span>
-            <span class="bg-gold-bruna text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full ml-1 uppercase shadow">
+            <span id="imminent-event-days-tag" class="bg-gold-bruna text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full ml-1 uppercase shadow">
               {imminentEvent.diffDays === 0 ? '¡HOY MISMO!' : `¡EN ${imminentEvent.diffDays} DÍAS!`}
             </span>
           </div>
         )}
+
+        <script is:inline>
+          (function() {
+            const badge = document.getElementById('imminent-event-badge');
+            const tag = document.getElementById('imminent-event-days-tag');
+            if (!badge || !tag) return;
+            const eventDateStr = badge.getAttribute('data-event-date');
+            if (!eventDateStr) return;
+
+            const eventDate = new Date(eventDateStr + 'T12:00:00');
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            const diffTime = eventDate.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+              badge.style.display = 'none';
+            } else if (diffDays === 0) {
+              tag.textContent = '¡HOY MISMO!';
+            } else if (diffDays === 1) {
+              tag.textContent = '¡MAÑANA!';
+            } else {
+              tag.textContent = `¡EN ${diffDays} DÍAS!`;
+            }
+          })();
+        </script>
         <span class="text-xs tracking-[0.4em] font-semibold text-gold-bruna uppercase block mb-1">
           CUMBIA · SHOW EN VIVO · EXPERIENCIA BRUNA
         </span>
