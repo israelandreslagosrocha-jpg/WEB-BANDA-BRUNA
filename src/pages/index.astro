@@ -27,12 +27,30 @@ const { data: rawEvents } = await supabase
 
 const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SET", "OCT", "NOV", "DIC"];
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+let imminentEvent = null;
+
 const upcomingEvents = (rawEvents || []).map((event: any) => {
   const d = new Date(event.fecha + 'T12:00:00'); // Evitar descalces de zona horaria
   const day = d.getDate();
   const monthName = months[d.getMonth()];
   const year = d.getFullYear();
   const fullDateStr = event.fecha.replace(/-/g, '');
+
+  const diffTime = d.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const isWithinOneWeek = diffDays >= 0 && diffDays <= 7;
+
+  if (isWithinOneWeek && !imminentEvent) {
+    imminentEvent = {
+      ...event,
+      day,
+      monthName,
+      diffDays
+    };
+  }
 
   const isNegociacion = (event.lugar && event.lugar.toLowerCase().includes('negociación')) || 
                         (event.lugar && event.lugar.toLowerCase().includes('negociacion')) ||
@@ -50,7 +68,9 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
     location: event.ciudad || '',
     mapUrl: '#',
     statusType: isNegociacion ? 'pending' : 'confirmed',
-    fullDate: fullDateStr
+    fullDate: fullDateStr,
+    isWithinOneWeek,
+    diffDays
   };
 }).slice(0, 5);
 
@@ -510,6 +530,15 @@ try {
       
       <!-- Top Title Section (Modern, thinner font, not covering background) -->
       <div class="w-full text-center lg:text-left border-b border-white/5 pb-4">
+        {imminentEvent && (
+          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-gold-bruna/80 text-gold-bruna text-xs font-bold tracking-widest uppercase mb-3 shadow-[0_0_25px_rgba(214,175,55,0.45)] animate-pulse">
+            <span class="text-sm">✨</span>
+            <span>PRÓXIMO SHOW EN VIVO: {imminentEvent.nombre} ({imminentEvent.day} DE {imminentEvent.monthName} · {imminentEvent.ciudad})</span>
+            <span class="bg-gold-bruna text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full ml-1 uppercase shadow">
+              {imminentEvent.diffDays === 0 ? '¡HOY MISMO!' : `¡EN ${imminentEvent.diffDays} DÍAS!`}
+            </span>
+          </div>
+        )}
         <span class="text-xs tracking-[0.4em] font-semibold text-gold-bruna uppercase block mb-1">
           CUMBIA · SHOW EN VIVO · EXPERIENCIA BRUNA
         </span>
@@ -537,16 +566,13 @@ try {
           </div>
 
           <!-- Card 2: Instagram Featured Post -->
-          <a href="https://www.instagram.com/reel/DZpvNd-uBjx/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-4 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
+          <a href="https://www.instagram.com/p/DbYouSGRZUo/" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-4 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
             <div class="flex gap-3.5 items-stretch h-full overflow-hidden">
-              <!-- Video Thumbnail aspect-video 16:9 -->
-              <div class="relative w-5/12 aspect-video rounded-lg overflow-hidden bg-slate-900 border border-white/10 flex-shrink-0 self-start">
-                <img src="/assets/images/instagram/reel_cover.webp" alt="Instagram Video" class="w-full h-full object-cover object-center group-hover/insta:scale-105 transition-transform duration-500" />
-                <!-- Play icon overlay -->
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 text-white flex items-center justify-center text-xs shadow-md">
-                    <span class="pl-0.5">▶</span>
-                  </div>
+              <!-- Post Image Thumbnail -->
+              <div class="relative w-5/12 aspect-square rounded-lg overflow-hidden bg-slate-900 border border-white/10 flex-shrink-0 self-start">
+                <img src="/assets/images/instagram/expo_familia_event.webp" alt="Instagram Post Anuncio Evento" class="w-full h-full object-cover object-center group-hover/insta:scale-105 transition-transform duration-500" />
+                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                  <span class="text-white text-[9px] bg-pink-600/80 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">SHOW</span>
                 </div>
               </div>
               <!-- Content -->
@@ -557,7 +583,7 @@ try {
                     <span class="text-[9px] text-slate-400 font-bold">@banda_bruna</span>
                   </div>
                   <p class="text-[11px] text-slate-300 leading-relaxed font-light line-clamp-6">
-                    "Un pequeño resumen del proceso de grabación de nuestro siguiente videoclip junto a nuestros queridos amigos de @agenciack.cl 🔥!! Queremos agradecer la notable participación de @melvaruizg y @alejandrostefanini 🫂!! Agradecemos profundamente a @cervezamaquehue 🍻 por la buena atención y por su colaboración para la realización de este vídeoclip!!🎸 BANDA BRUNA BB!!🎶♥️ #bandabruna #cumbia #chile #musica #viral"
+                    "¡El ritmo de la cumbia clásica se toma Temuco! 💃🕺 Banda Bruna llega a Expo Mundo Familia 2026 con toda la fiesta y el sabor de los grandes éxitos. ¡Prepárense para presenciar un show imperdible! 🎶 Expo Mundo Familia 2026 se enorgullece en anunciar la confirmación estelar de Banda Bruna en el escenario del Estadio Germán Becker... 💃🕺"
                   </p>
                 </div>
               </div>
@@ -669,10 +695,10 @@ try {
           {upcomingEvents.length > 0 ? (
             <ul class="flex flex-col gap-4 list-none p-0 m-0">
               {upcomingEvents.map(event => (
-                <li class="flex items-center justify-between gap-4 pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                <li class={`flex items-center justify-between gap-4 p-3 rounded-lg transition-all ${event.isWithinOneWeek ? 'bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border border-gold-bruna/70 shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse' : 'pb-4 border-b border-white/5 last:border-0 last:pb-0'}`}>
                   <div class="flex items-center gap-3">
                     <div class="flex flex-col text-left leading-none min-w-[32px]">
-                      <span class="text-2xl font-extrabold font-title text-white tracking-tighter">{event.date}</span>
+                      <span class={`text-2xl font-extrabold font-title tracking-tighter ${event.isWithinOneWeek ? 'text-gold-bruna' : 'text-white'}`}>{event.date}</span>
                       <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
                     </div>
                     <div>
@@ -681,15 +707,22 @@ try {
                     </div>
                   </div>
                   
-                  {event.statusType === 'confirmed' ? (
-                    <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
-                      CONFIRMADO
-                    </span>
-                  ) : (
-                    <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex-shrink-0">
-                      POR CONFIRMAR
-                    </span>
-                  )}
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                    {event.isWithinOneWeek && (
+                      <span class="bg-gold-bruna text-black text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                        ✨ ¡EN POCOS DÍAS!
+                      </span>
+                    )}
+                    {event.statusType === 'confirmed' ? (
+                      <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+                        CONFIRMADO
+                      </span>
+                    ) : (
+                      <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+                        POR CONFIRMAR
+                      </span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

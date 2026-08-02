@@ -39,10 +39,10 @@ export const getVideoPlaylists = () => {
     ],
     "instagram": [
       { id: "ig_reel_Dag495zuVO9", title: "Banda Bruna BB - Reel Oficial 🎵✨", url: "https://www.instagram.com/reel/Dag495zuVO9/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8302_iiqi8k.webp", duration: "0:45", category: "Instagram Reel" },
-      { id: "ig_reel_DZpvNd-uBjx", title: "Un pequeño resumen del proceso de grabación de nuestro videoclip... 🎬", url: "https://www.instagram.com/reel/DZpvNd-uBjx/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01050_r8fjdr.webp", duration: "0:45", category: "Instagram Reel" },
+      { id: "ig_post_DbYouSGRZUo", title: "¡Anuncio de show en vivo en Expo Familia Temuco! 🎸🔥", url: "https://www.instagram.com/p/DbYouSGRZUo/", thumbnail: "/assets/images/instagram/expo_familia_event.webp", duration: "0:45", category: "Instagram Post" },
       { id: "ig_reel_Dan6pQYJJT7", title: "Agencia CK & Banda Bruna - Producción y show audiovisual 🔥", url: "https://www.instagram.com/reel/Dan6pQYJJT7/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00983_tcabl4.webp", duration: "0:50", category: "Instagram Reel" },
       { id: "ig_reel_DarYCJZupXO", title: "Momentos inolvidables en el escenario con el público 🎶❤️", url: "https://www.instagram.com/reel/DarYCJZupXO/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC00953_zemfwn.webp", duration: "0:40", category: "Instagram Reel" },
-      { id: "ig_reel_DawSBQZJykb", title: "TRIVIA BRUNA CAPÍTULO 1: ¿Quién llega más tarde a los ensayos? 🤣🥁", url: "https://www.instagram.com/reel/DawSBQZJykb/", thumbnail: "/assets/images/instagram/trivia_ensayos.webp", duration: "1:00", category: "Instagram Reel" }
+      { id: "ig_post_DbYouSGRZUo_2", title: "¡Nos vemos este 8 de Agosto en la Expo Familia Temuco! 🎤🔥", url: "https://www.instagram.com/p/DbYouSGRZUo/", thumbnail: "/assets/images/instagram/expo_familia_event.webp", duration: "0:45", category: "Instagram Post" }
     ]
   };
 };
@@ -50,25 +50,16 @@ export const getVideoPlaylists = () => {
 export const getInstagramFeed = () => {
   return [
     {
-      id: "ig_trivia_1",
-      imageUrl: "/assets/images/instagram/trivia_ensayos.webp",
-      likes: 69,
-      comments: 29,
-      caption: `BIENVENIDOS A LA TRIVIA BRUNA CAPITULO 1:
-¿QUIEN LLEGA MAS TARDE A LOS ENSAYOS?
-.
-.
-.
-.
-.
-.
-.
-.
-.
-#cumbia #chile #viral #bandabruna #musica`,
+      id: "ig_evento_expo",
+      imageUrl: "/assets/images/instagram/expo_familia_event.webp",
+      likes: 89,
+      comments: 26,
+      caption: `¡El ritmo de la cumbia clásica se toma Temuco! 💃🕺 Banda Bruna llega a Expo Mundo Familia 2026 con toda la fiesta y el sabor de los grandes éxitos.
+¡Prepárense para presenciar un show imperdible! 🎶 El talentoso equipo llegará al escenario de la cancha 3 del Estadio Germán Becker el 8 y 9 de agosto para ofrecer un espectáculo único en vivo. 🎉
+#ExpoMundoFamilia #BandaBruna #CumbiaChilena #Temuco #MusicaEnVivo`,
       username: "@banda_bruna",
-      timeAgo: "Hace 1 día",
-      link: "https://www.instagram.com/p/DawSBQZJykb/"
+      timeAgo: "Hace 4 días",
+      link: "https://www.instagram.com/p/DbYouSGRZUo/"
     },
     {
       id: "ig_lanzamiento",
