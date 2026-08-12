@@ -198,47 +198,89 @@ const testimonios = dbTestimonios || [];
   </section>
 
   <!-- Section: Testimonios / Reseñas de Clientes (Dynamic from Supabase) -->
-  {testimonios.length > 0 && (
-    <section class="border-t border-white/5 bg-slate-950/40 py-16 md:py-24 px-6 mt-12 w-full">
-      <div class="max-w-4xl mx-auto text-center">
-        <div class="mb-12">
-          <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">RESPALDO COMERCIAL</span>
-          <h2 class="text-2xl md:text-3xl font-extrabold font-title uppercase text-white font-title">Opiniones de Nuestros Clientes</h2>
-          <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {testimonios.slice(0, 4).map((item, idx) => (
-            <blockquote class="bg-slate-900 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
-              <div>
-                <span class="text-gold-bruna text-4xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
-                <div class="flex gap-0.5 text-gold-bruna text-[10px] mb-3 pl-2">
-                  {'★'.repeat(item.calificacion)}{'☆'.repeat(5 - item.calificacion)}
-                </div>
-                <p class="text-xs text-slate-350 italic font-light relative z-10 pl-2 leading-relaxed mb-4">
-                  "{item.contenido}"
-                </p>
-              </div>
-              <cite class="block pl-2 not-italic border-t border-white/5 pt-3">
-                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
-                {item.cargo_cliente || item.organizacion_cliente ? (
-                  <span class="text-[9px] text-slate-500 uppercase tracking-wide block mt-0.5">
-                    {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
-                  </span>
-                ) : null}
-              </cite>
-            </blockquote>
-          ))}
-        </div>
+  <section id="testimonios-section" class="border-t border-white/5 bg-slate-950/40 py-16 md:py-24 px-6 mt-12 w-full hidden">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="mb-12">
+        <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">RESPALDO COMERCIAL</span>
+        <h2 class="text-2xl md:text-3xl font-extrabold font-title uppercase text-white font-title">Opiniones de Nuestros Clientes</h2>
+        <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
       </div>
-    </section>
-  )}
+
+      <div id="testimonios-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        {testimonios.slice(0, 4).map((item, idx) => (
+          <blockquote class="bg-slate-900 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
+            <div>
+              <span class="text-gold-bruna text-4xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
+              <div class="flex gap-0.5 text-gold-bruna text-[10px] mb-3 pl-2">
+                {'★'.repeat(item.calificacion)}{'☆'.repeat(5 - item.calificacion)}
+              </div>
+              <p class="text-xs text-slate-350 italic font-light relative z-10 pl-2 leading-relaxed mb-4">
+                "{item.contenido}"
+              </p>
+            </div>
+            <cite class="block pl-2 not-italic border-t border-white/5 pt-3">
+              <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
+              {item.cargo_cliente || item.organizacion_cliente ? (
+                <span class="text-[9px] text-slate-500 uppercase tracking-wide block mt-0.5">
+                  {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
+                </span>
+              ) : null}
+            </cite>
+          </blockquote>
+        ))}
+      </div>
+    </div>
+  </section>
 
   <script>
     import { supabase } from '../services/supabaseClient.js';
     import { sendEmail } from '../services/emailService.js';
 
+    async function loadDynamicTestimonios() {
+      const section = document.getElementById('testimonios-section');
+      const grid = document.getElementById('testimonios-grid');
+      if (!section || !grid) return;
+
+      try {
+        const { data: dbTestimonios, error } = await supabase
+          .from('testimonios')
+          .select('*')
+          .eq('aprobado', true)
+          .order('created_at', { ascending: false });
+
+        if (error || !dbTestimonios || dbTestimonios.length === 0) {
+          if (grid.children.length === 0) section.classList.add('hidden');
+          return;
+        }
+
+        section.classList.remove('hidden');
+        grid.innerHTML = dbTestimonios.slice(0, 4).map((item: any) => {
+          const rating = item.calificacion || 5;
+          const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+          const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).join(' — ');
+          return `
+            <blockquote class="bg-slate-900 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
+              <div>
+                <span class="text-gold-bruna text-4xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
+                <div class="flex gap-0.5 text-gold-bruna text-[10px] mb-3 pl-2">${stars}</div>
+                <p class="text-xs text-slate-350 italic font-light relative z-10 pl-2 leading-relaxed mb-4">
+                  "${item.contenido}"
+                </p>
+              </div>
+              <cite class="block pl-2 not-italic border-t border-white/5 pt-3">
+                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${item.nombre_cliente}</strong>
+                ${sub ? `<span class="text-[9px] text-slate-500 uppercase tracking-wide block mt-0.5">${sub}</span>` : ''}
+              </cite>
+            </blockquote>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error("Error al cargar testimonios:", err);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      loadDynamicTestimonios();
       const form = document.getElementById('quote-form-extended');
       const feedback = document.getElementById('ext-form-feedback');
       const nameInput = document.getElementById('ext-name');

@@ -43,6 +43,8 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
   const diffTime = eventDateMidnight.getTime() - today.getTime();
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   const isWithinOneWeek = diffDays >= 0 && diffDays <= 7;
+  const isPast = diffDays < 0 || event.fecha === '2026-08-08';
+  const videoUrl = event.video_url || (event.fecha === '2026-08-08' ? 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4' : null);
 
   if (isWithinOneWeek && !imminentEvent) {
     imminentEvent = {
@@ -71,7 +73,9 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
     statusType: isNegociacion ? 'pending' : 'confirmed',
     fullDate: fullDateStr,
     isWithinOneWeek,
-    diffDays
+    diffDays,
+    isPast,
+    videoUrl
   };
 }).slice(0, 5);
 
@@ -598,13 +602,13 @@ try {
           </div>
 
           <!-- Card 2: Instagram Featured Post -->
-          <a href="https://www.instagram.com/p/DbYouSGRZUo/" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-4 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
+          <a href="https://www.instagram.com/p/Db8kRMfuips/" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-4 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
             <div class="flex gap-3.5 items-stretch h-full overflow-hidden">
               <!-- Post Image Thumbnail -->
               <div class="relative w-5/12 aspect-square rounded-lg overflow-hidden bg-slate-900 border border-white/10 flex-shrink-0 self-start">
-                <img src="/assets/images/instagram/expo_familia_event.webp" alt="Instagram Post Anuncio Evento" class="w-full h-full object-cover object-center group-hover/insta:scale-105 transition-transform duration-500" />
+                <img src="/assets/images/instagram/ig_fuimos_enganados.webp" alt="Instagram Post Reel Fuimos Engañados" class="w-full h-full object-cover object-center group-hover/insta:scale-105 transition-transform duration-500" />
                 <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <span class="text-white text-[9px] bg-pink-600/80 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">SHOW</span>
+                  <span class="text-white text-[9px] bg-pink-600/80 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">REEL</span>
                 </div>
               </div>
               <!-- Content -->
@@ -615,7 +619,7 @@ try {
                     <span class="text-[9px] text-slate-400 font-bold">@banda_bruna</span>
                   </div>
                   <p class="text-[11px] text-slate-300 leading-relaxed font-light line-clamp-6">
-                    "¡El ritmo de la cumbia clásica se toma Temuco! 💃🕺 Banda Bruna llega a Expo Mundo Familia 2026 con toda la fiesta y el sabor de los grandes éxitos. ¡Prepárense para presenciar un show imperdible! 🎶 Expo Mundo Familia 2026 se enorgullece en anunciar la confirmación estelar de Banda Bruna en el escenario del Estadio Germán Becker... 💃🕺"
+                    "🛑🚨 FUIMOS ENGAÑADOS!!! 😔🤥 😡😡 Esa no era esa la pregunta... Pero igual quedo chistoso el reel!! Comenta y comparte! #humor #comedia #parati #memes #cumbia"
                   </p>
                 </div>
               </div>
@@ -727,10 +731,24 @@ try {
           {upcomingEvents.length > 0 ? (
             <ul class="flex flex-col gap-4 list-none p-0 m-0">
               {upcomingEvents.map(event => (
-                <li class={`flex items-center justify-between gap-4 p-3 rounded-lg transition-all ${event.isWithinOneWeek ? 'bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border border-gold-bruna/70 shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse' : 'pb-4 border-b border-white/5 last:border-0 last:pb-0'}`}>
+                <li 
+                  class={`flex items-center justify-between gap-4 p-3 rounded-lg transition-all ${
+                    event.isPast 
+                      ? 'opacity-75 hover:opacity-100 bg-slate-950/80 border border-white/5 hover:border-gold-bruna/50 cursor-pointer group/pastevent' 
+                      : event.isWithinOneWeek 
+                      ? 'bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border border-gold-bruna/70 shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse' 
+                      : 'pb-4 border-b border-white/5 last:border-0 last:pb-0'
+                  }`}
+                  {...(event.isPast && event.videoUrl ? {
+                    'data-open-event-video': event.videoUrl,
+                    'data-event-title': `${event.title} — ${event.location}`
+                  } : {})}
+                >
                   <div class="flex items-center gap-3">
                     <div class="flex flex-col text-left leading-none min-w-[32px]">
-                      <span class={`text-2xl font-extrabold font-title tracking-tighter ${event.isWithinOneWeek ? 'text-gold-bruna' : 'text-white'}`}>{event.date}</span>
+                      <span class={`text-2xl font-extrabold font-title tracking-tighter ${event.isPast ? 'text-slate-400 group-hover/pastevent:text-gold-bruna' : event.isWithinOneWeek ? 'text-gold-bruna' : 'text-white'}`}>
+                        {event.date}
+                      </span>
                       <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
                     </div>
                     <div>
@@ -740,19 +758,27 @@ try {
                   </div>
                   
                   <div class="flex flex-col items-end gap-1 flex-shrink-0">
-                    {event.isWithinOneWeek && (
-                      <span class="bg-gold-bruna text-black text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-                        {event.diffDays === 0 ? '✨ ¡HOY MISMO!' : event.diffDays === 1 ? '✨ ¡MAÑANA!' : '✨ ¡EN POCOS DÍAS!'}
-                      </span>
-                    )}
-                    {event.statusType === 'confirmed' ? (
-                      <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
-                        CONFIRMADO
+                    {event.isPast ? (
+                      <span class="bg-slate-800/90 border border-slate-700 text-slate-300 group-hover/pastevent:text-gold-bruna group-hover/pastevent:border-gold-bruna/50 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex items-center gap-1 transition-colors">
+                        <span>🎬 SHOW REALIZADO</span>
                       </span>
                     ) : (
-                      <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
-                        POR CONFIRMAR
-                      </span>
+                      <>
+                        {event.isWithinOneWeek && (
+                          <span class="bg-gold-bruna text-black text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                            {event.diffDays === 0 ? '✨ ¡HOY MISMO!' : event.diffDays === 1 ? '✨ ¡MAÑANA!' : '✨ ¡EN POCOS DÍAS!'}
+                          </span>
+                        )}
+                        {event.statusType === 'confirmed' ? (
+                          <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+                            CONFIRMADO
+                          </span>
+                        ) : (
+                          <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+                            POR CONFIRMAR
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
                 </li>
@@ -836,10 +862,10 @@ try {
         </div>
       </div>
 
-      <!-- Card 2: Instagram (Video Post) -->
-      <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
+      <!-- Card 2: Instagram (Video Post - Día del Minero) -->
+      <a href={instagramFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
         <div class="relative aspect-video bg-black overflow-hidden">
-          <img src={instagramFeed[0].imageUrl} alt="Instagram Video" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+          <img src={instagramFeed[1].imageUrl} alt="Instagram Video Día del Minero" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
           <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/25 transition-all">
             <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
               <span class="text-xs pl-0.5">▶</span>
@@ -849,12 +875,12 @@ try {
         </div>
         <div class="p-5 flex-grow flex flex-col justify-between text-left">
           <div>
-            <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">ÚLTIMO LANZAMIENTO INSTAGRAM</span>
+            <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">DÍA DEL MINERO</span>
             <p class="text-xs text-slate-300 leading-relaxed font-light line-clamp-5 mb-2 whitespace-pre-line">
-              {instagramFeed[0].caption}
+              {instagramFeed[1].caption}
             </p>
           </div>
-          <span class="text-[10px] text-slate-500 font-semibold block mt-4">{instagramFeed[0].timeAgo}</span>
+          <span class="text-[10px] text-slate-500 font-semibold block mt-4">{instagramFeed[1].timeAgo}</span>
         </div>
       </a>
 
@@ -1100,7 +1126,7 @@ try {
       <!-- Row of 5 social media cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         
-        <!-- Card 1 (Instagram) -->
+        <!-- Card 1 (Instagram - Fuimos Engañados) -->
         <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
@@ -1108,11 +1134,14 @@ try {
             </div>
             <div>
               <span class="text-[10px] font-bold text-white block">{instagramFeed[0].username}</span>
-              <span class="text-[8px] text-slate-500 block">Hace 1 día</span>
+              <span class="text-[8px] text-slate-500 block">{instagramFeed[0].timeAgo}</span>
             </div>
           </div>
           <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={instagramFeed[0].imageUrl} alt="Instagram Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <img src={instagramFeed[0].imageUrl} alt="Instagram Reel Fuimos Engañados" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <span class="text-white text-lg">🎬</span>
+            </div>
           </div>
           <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[0].caption}</p>
           <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
@@ -1121,7 +1150,7 @@ try {
           </div>
         </a>
 
-        <!-- Card 2 (Instagram Reels Mockup) -->
+        <!-- Card 2 (Instagram - Día del Minero) -->
         <a href={instagramFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
@@ -1129,11 +1158,11 @@ try {
             </div>
             <div>
               <span class="text-[10px] font-bold text-white block">{instagramFeed[1].username}</span>
-              <span class="text-[8px] text-slate-500 block">Hace 2 días</span>
+              <span class="text-[8px] text-slate-500 block">{instagramFeed[1].timeAgo}</span>
             </div>
           </div>
           <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={instagramFeed[1].imageUrl} alt="Instagram Reels" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <img src={instagramFeed[1].imageUrl} alt="Instagram Reel Día del Minero" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
             <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
               <span class="text-white text-lg">🎬</span>
             </div>
@@ -1145,7 +1174,7 @@ try {
           </div>
         </a>
 
-        <!-- Card 3 (Facebook) -->
+        <!-- Card 3 (Facebook - Fiestas Patrias) -->
         <a href={facebookFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 mb-3">
@@ -1158,7 +1187,7 @@ try {
               </div>
             </div>
             <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-              <img src={facebookFeed[0].imageUrl} alt="Facebook stage post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+              <img src={facebookFeed[0].imageUrl} alt="Facebook Fiestas Patrias" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
             </div>
             <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{facebookFeed[0].caption}</p>
           </div>
@@ -1168,30 +1197,30 @@ try {
           </div>
         </a>
 
-        <!-- Card 4 (YouTube) -->
-        <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
+        <!-- Card 4 (Facebook - Saludo Diego Urrutia) -->
+        <a href={facebookFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 mb-3">
-              <div class="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-white">
-                <span class="text-[8px]">▶</span>
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
               </div>
               <div>
-                <span class="text-[10px] font-bold text-white block">Banda Bruna Oficial</span>
-                <span class="text-[8px] text-slate-500 block">Hace 3 días</span>
+                <span class="text-[10px] font-bold text-white block">Banda Bruna</span>
+                <span class="text-[8px] text-slate-500 block">{facebookFeed[1].timeAgo}</span>
               </div>
             </div>
             <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-              <img src={latestVideo.thumbnail} alt="YouTube thumbnail" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+              <img src={facebookFeed[1].imageUrl} alt="Facebook Saludo Diego Urrutia" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
             </div>
-            <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">¡Nuevo videoclip ya disponible en nuestro canal oficial! Escucha "Ahogado en un bar".</p>
+            <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{facebookFeed[1].caption}</p>
           </div>
           <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>❤️ 1.2K</span>
-            <span>💬 78</span>
+            <span>👍 {facebookFeed[1].likes}</span>
+            <span>💬 {facebookFeed[1].comments}</span>
           </div>
         </a>
 
-        <!-- Card 5 (TikTok) -->
+        <!-- Card 5 (TikTok - Día del Minero) -->
         <a href={tiktokFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
           <div class="flex items-center gap-2 mb-3">
             <div class="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white border border-white/10">
@@ -1204,7 +1233,7 @@ try {
             </div>
           </div>
           <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={tiktokFeed[0].imageUrl} alt="TikTok Post" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
+            <img src={tiktokFeed[0].imageUrl} alt="TikTok Día del Minero" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
           </div>
           <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{tiktokFeed[0].caption}</p>
           <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
@@ -1219,45 +1248,43 @@ try {
   </section>
 
   <!-- Section: Testimonios / Reseñas (Dynamic from Supabase) -->
-  {testimonios.length > 0 && (
-    <section class="bg-gradient-to-b from-bg-darkest via-slate-950/20 to-bg-darkest py-24 px-6 border-t border-white/5 scroll-reveal">
-      <div class="max-w-[1400px] mx-auto">
-        <div class="text-center mb-16">
-          <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">RESPALDO</span>
-          <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">Opiniones de Nuestros Clientes</h2>
-          <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
-          <p class="text-xs text-slate-400 font-light mt-4 max-w-md mx-auto">
-            La experiencia de productores, municipalidades y particulares que ya han vivido la potencia de Banda Bruna.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {testimonios.map((item, idx) => (
-            <blockquote class="bg-slate-900/60 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
-              <div>
-                <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
-                <!-- Stars -->
-                <div class="flex gap-0.5 text-gold-bruna text-xs mb-3.5 pl-3">
-                  {'★'.repeat(item.calificacion)}{'☆'.repeat(5 - item.calificacion)}
-                </div>
-                <p class="text-xs text-slate-350 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
-                  "{item.contenido}"
-                </p>
-              </div>
-              <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
-                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
-                {item.cargo_cliente || item.organizacion_cliente ? (
-                  <span class="text-[9.5px] text-slate-500 uppercase tracking-wide block mt-1 leading-tight">
-                    {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
-                  </span>
-                ) : null}
-              </cite>
-            </blockquote>
-          ))}
-        </div>
+  <section id="testimonios-section" class="bg-gradient-to-b from-bg-darkest via-slate-950/20 to-bg-darkest py-24 px-6 border-t border-white/5 scroll-reveal hidden">
+    <div class="max-w-[1400px] mx-auto">
+      <div class="text-center mb-16">
+        <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">RESPALDO</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">Opiniones de Nuestros Clientes</h2>
+        <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
+        <p class="text-xs text-slate-400 font-light mt-4 max-w-md mx-auto">
+          La experiencia de productores, municipalidades y particulares que ya han vivido la potencia de Banda Bruna.
+        </p>
       </div>
-    </section>
-  )}
+
+      <div id="testimonios-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {testimonios.map((item, idx) => (
+          <blockquote class="bg-slate-900/60 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
+            <div>
+              <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
+              <!-- Stars -->
+              <div class="flex gap-0.5 text-gold-bruna text-xs mb-3.5 pl-3">
+                {'★'.repeat(item.calificacion)}{'☆'.repeat(5 - item.calificacion)}
+              </div>
+              <p class="text-xs text-slate-350 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
+                "{item.contenido}"
+              </p>
+            </div>
+            <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
+              <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
+              {item.cargo_cliente || item.organizacion_cliente ? (
+                <span class="text-[9.5px] text-slate-500 uppercase tracking-wide block mt-1 leading-tight">
+                  {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
+                </span>
+              ) : null}
+            </cite>
+          </blockquote>
+        ))}
+      </div>
+    </div>
+  </section>
 
   <!-- Section: Contrataciones (Form & Contact details) -->
   <section id="contacto" class="max-w-[1400px] mx-auto px-6 py-24 scroll-reveal">
@@ -1863,11 +1890,140 @@ try {
       updateCarousel(0);
     }
 
+    // CARGA DINÁMICA DE TESTIMONIOS APROBADOS DESDE SUPABASE EN TIEMPO REAL
+    async function loadDynamicTestimonios() {
+      const section = document.getElementById('testimonios-section');
+      const grid = document.getElementById('testimonios-grid');
+      if (!section || !grid) return;
+
+      try {
+        const { data: dbTestimonios, error } = await supabase
+          .from('testimonios')
+          .select('*')
+          .eq('aprobado', true)
+          .order('created_at', { ascending: false });
+
+        if (error || !dbTestimonios || dbTestimonios.length === 0) {
+          if (grid.children.length === 0) {
+            section.classList.add('hidden');
+          }
+          return;
+        }
+
+        section.classList.remove('hidden');
+        grid.innerHTML = dbTestimonios.map((item: any) => {
+          const rating = item.calificacion || 5;
+          const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+          const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).join(' — ');
+          return `
+            <blockquote class="bg-slate-900/60 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
+              <div>
+                <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
+                <div class="flex gap-0.5 text-gold-bruna text-xs mb-3.5 pl-3">${stars}</div>
+                <p class="text-xs text-slate-350 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
+                  "${item.contenido}"
+                </p>
+              </div>
+              <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
+                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${item.nombre_cliente}</strong>
+                ${sub ? `<span class="text-[9.5px] text-slate-500 uppercase tracking-wide block mt-1 leading-tight">${sub}</span>` : ''}
+              </cite>
+            </blockquote>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error("Error al cargar testimonios:", err);
+      }
+    }
+
+    // MODAL DE VIDEO DE EVENTOS PASADOS
+    function setupEventVideoModal() {
+      const modal = document.getElementById('event-video-modal');
+      const modalCard = document.getElementById('event-video-modal-card');
+      const player = document.getElementById('event-video-player') as HTMLVideoElement;
+      const titleEl = document.getElementById('event-video-modal-title');
+      const closeBtn = document.getElementById('close-event-video-modal');
+
+      if (!modal || !player) return;
+
+      function openModal(videoUrl: string, title: string) {
+        player.src = videoUrl;
+        if (titleEl) titleEl.textContent = title || 'Resumen de Show';
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          if (modalCard) modalCard.classList.remove('scale-95');
+        }, 10);
+        player.play().catch(() => {});
+      }
+
+      function closeModal() {
+        modal.classList.add('opacity-0');
+        if (modalCard) modalCard.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          player.pause();
+          player.src = '';
+        }, 300);
+      }
+
+      document.querySelectorAll('[data-open-event-video]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const videoUrl = el.getAttribute('data-open-event-video');
+          const title = el.getAttribute('data-event-title');
+          if (videoUrl) openModal(videoUrl, title || '');
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+    }
+
     setupHomeVideoCarousel();
+    loadDynamicTestimonios();
+    setupEventVideoModal();
 
     document.addEventListener('astro:after-swap', () => {
       setupCountUp();
       setupHomeVideoCarousel();
+      loadDynamicTestimonios();
+      setupEventVideoModal();
     });
   </script>
+
+  <!-- Modal Emergente de Video para Eventos Pasados -->
+  <div id="event-video-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 hidden opacity-0 transition-opacity duration-300">
+    <div id="event-video-modal-card" class="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden max-w-2xl w-full shadow-2xl relative flex flex-col transform scale-95 transition-transform duration-300">
+      <!-- Header del Modal -->
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-slate-950">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <span class="text-[9px] bg-gold-bruna/20 text-gold-bruna font-bold px-2 py-0.5 rounded border border-gold-bruna/30 uppercase tracking-wider flex-shrink-0">SHOW REALIZADO</span>
+          <h3 id="event-video-modal-title" class="text-xs font-bold font-title text-white uppercase tracking-wide truncate">Resumen del Evento</h3>
+        </div>
+        <button type="button" id="close-event-video-modal" aria-label="Cerrar modal" class="text-slate-400 hover:text-white text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors flex-shrink-0">
+          ✕
+        </button>
+      </div>
+      <!-- Reproductor de Video -->
+      <div class="relative aspect-video bg-black flex items-center justify-center">
+        <video id="event-video-player" controls class="w-full h-full object-contain"></video>
+      </div>
+      <!-- Footer del Modal -->
+      <div class="p-3.5 bg-slate-950/90 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+        <span class="flex items-center gap-1.5 font-light">
+          <span>🎬</span> Cobertura de presentación en vivo
+        </span>
+        <span class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">BANDA BRUNA LIVE</span>
+      </div>
+    </div>
+  </div>
 </Layout>

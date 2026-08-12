@@ -3147,6 +3147,29 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
           const dataLive = await resLive.json();
           const live = dataLive.nowPlaying || [];
 
+          const trackCoversDashboard: Record<string, string> = {
+            'ahogado en un bar': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp',
+            'te juro': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425904/compressed_BB_Te_Juro_vlzmnd.webp',
+            'luna amiga': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425903/compressed_BB_Luna_Amiga_gwcdtz.webp',
+            'no sufriré por nadie': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_no_sufrire_por_nadie_lz0foh.webp',
+            'no sufrire por nadie': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_no_sufrire_por_nadie_lz0foh.webp',
+            'para no verte más': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_para_no_verte_mas_jypafa.webp',
+            'para no verte mas': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_para_no_verte_mas_jypafa.webp',
+            'la boda del chupacabras': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425900/compressed_BB_-_La_boda_del_chupacabras_pubr58.webp',
+            'agonía': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425899/compressed_BB_-_Agonia_ay01t9.webp',
+            'agonia': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425899/compressed_BB_-_Agonia_ay01t9.webp'
+          };
+          const DEFAULT_DASHBOARD_COVER = 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp';
+
+          function getSongCover(title?: string): string {
+            if (!title) return DEFAULT_DASHBOARD_COVER;
+            const t = title.toLowerCase().trim();
+            for (const key in trackCoversDashboard) {
+              if (t.includes(key)) return trackCoversDashboard[key];
+            }
+            return DEFAULT_DASHBOARD_COVER;
+          }
+
           if (live.length === 0) {
             liveContainer.innerHTML = `
               <div class="flex flex-col items-center gap-2 py-6 text-slate-500">
@@ -3158,7 +3181,7 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
             liveContainer.innerHTML = live.map((item: any) => `
               <div class="flex items-center gap-4 bg-red-950/10 border border-red-500/20 p-4 rounded-xl relative overflow-hidden group">
                 <div class="absolute -right-6 -bottom-6 w-16 h-16 bg-red-500/5 rounded-full blur-xl"></div>
-                <img src="${item.radio_logo || '/assets/logo-bruna-gold-glow.png'}" class="w-10 h-10 rounded-lg object-cover border border-white/10 bg-slate-950" />
+                <img src="${getSongCover(item.title)}" alt="${item.title}" class="w-12 h-12 rounded-lg object-cover border border-white/10 bg-slate-950 shadow" />
                 <div class="flex-grow min-w-0 text-left">
                   <span class="text-[9px] font-bold text-red-400 uppercase tracking-widest block animate-pulse">EN VIVO EN ${item.radio_name}</span>
                   <h4 class="text-xs font-bold text-white font-title uppercase truncate mt-0.5">${item.title}</h4>
@@ -3186,10 +3209,10 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
               const timeStr = d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) + ' ' + d.toLocaleDateString('es-CL');
               return `
                 <div class="flex items-center gap-3 bg-slate-950/40 border border-white/5 p-3 rounded-xl hover:border-gold-bruna/10 transition-colors">
-                  <img src="${item.radio_logo || '/assets/logo-bruna-gold-glow.png'}" class="w-8 h-8 rounded object-cover border border-white/10 bg-slate-950" />
+                  <img src="${getSongCover(item.title)}" alt="${item.title}" class="w-9 h-9 rounded-lg object-cover border border-white/10 bg-slate-950 shadow" />
                   <div class="flex-grow min-w-0 text-left">
                     <h4 class="text-[11px] font-bold text-white truncate leading-tight">${item.title}</h4>
-                    <p class="text-[9px] text-slate-500 font-semibold truncate mt-0.5">${item.radio_name} — ${timeStr}</p>
+                    <p class="text-[9px] text-slate-500 font-semibold truncate mt-0.5">📻 ${item.radio_name} — ${timeStr}</p>
                   </div>
                 </div>
               `;

@@ -83,6 +83,33 @@
     return 'recientemente';
   }
 
+  const trackCovers: Record<string, string> = {
+    'ahogado en un bar': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp',
+    'te juro': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425904/compressed_BB_Te_Juro_vlzmnd.webp',
+    'luna amiga': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425903/compressed_BB_Luna_Amiga_gwcdtz.webp',
+    'no sufriré por nadie': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_no_sufrire_por_nadie_lz0foh.webp',
+    'no sufrire por nadie': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_no_sufrire_por_nadie_lz0foh.webp',
+    'para no verte más': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_para_no_verte_mas_jypafa.webp',
+    'para no verte mas': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425901/compressed_BB_para_no_verte_mas_jypafa.webp',
+    'la boda del chupacabras': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425900/compressed_BB_-_La_boda_del_chupacabras_pubr58.webp',
+    'agonía': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425899/compressed_BB_-_Agonia_ay01t9.webp',
+    'agonia': 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1784425899/compressed_BB_-_Agonia_ay01t9.webp'
+  };
+
+  const DEFAULT_TRACK_COVER = 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp';
+
+  function getTrackCover(title?: string, artwork?: string): string {
+    if (artwork) return artwork;
+    if (!title) return DEFAULT_TRACK_COVER;
+    const cleanTitle = title.toLowerCase().trim();
+    for (const key in trackCovers) {
+      if (cleanTitle.includes(key)) {
+        return trackCovers[key];
+      }
+    }
+    return DEFAULT_TRACK_COVER;
+  }
+
   async function updateRadioWidget() {
     if (!contentContainer) return;
 
@@ -101,6 +128,7 @@
       // 1. SECCIÓN EN VIVO (Si hay alguna radio emitiendo Banda Bruna en tiempo real)
       if (liveDetections.length > 0) {
         const current = liveDetections[0];
+        const trackCover = getTrackCover(current.title, current.artwork);
         html += `
           <div class="rounded-xl border border-red-500/30 bg-red-950/20 p-4 relative overflow-hidden group/live">
             <div class="flex items-center justify-between w-full border-b border-red-500/20 pb-2.5 mb-3">
@@ -123,15 +151,17 @@
 
             <div class="flex items-center gap-3.5">
               <img 
-                src="${current.radio_logo || '/assets/logo-bruna-gold-glow.png'}" 
-                alt="${current.radio_name}" 
-                class="w-12 h-12 rounded-lg object-cover border border-white/10 bg-slate-900 flex-shrink-0"
-                onerror="this.src='/assets/logo-bruna-gold-glow.png'"
+                src="${trackCover}" 
+                alt="${current.title}" 
+                class="w-14 h-14 rounded-lg object-cover border border-white/10 bg-slate-900 flex-shrink-0 shadow-lg"
+                onerror="this.src='${DEFAULT_TRACK_COVER}'"
               />
               <div class="flex-1 min-w-0">
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">${current.radio_name || 'Radio Online'}</p>
+                <span class="text-[9px] bg-white/10 border border-white/10 text-slate-300 font-bold px-2 py-0.5 rounded uppercase tracking-wider inline-block mb-1">
+                  📻 ${current.radio_name || 'Radio Online'}
+                </span>
                 <h4 class="text-sm font-extrabold text-white truncate font-title leading-tight">${current.title}</h4>
-                <p class="text-xs text-gold-bruna font-medium truncate mt-0.5">${current.artist}</p>
+                <p class="text-xs text-gold-bruna font-medium truncate mt-0.5">${current.artist || 'Banda Bruna'}</p>
               </div>
             </div>
 
@@ -169,32 +199,35 @@
         html += `
           <!-- Contenedor con barra de desplazamiento movible (scrollable) para el historial -->
           <div class="max-h-[220px] overflow-y-auto custom-scrollbar flex flex-col gap-2 pr-1">
-            ${historyList.map(item => `
-              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-gold-bruna/30 transition-all duration-300 group/item">
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                  <img 
-                    src="${item.radio_logo || '/assets/logo-bruna-gold-glow.png'}" 
-                    alt="${item.radio_name}" 
-                    class="w-9 h-9 rounded-lg object-cover border border-white/10 bg-slate-950 flex-shrink-0"
-                    onerror="this.src='/assets/logo-bruna-gold-glow.png'"
-                  />
-                  <div class="min-w-0 flex-1">
-                    <p class="text-xs font-extrabold text-white font-title truncate group-hover/item:text-gold-bruna transition-colors">
-                      ${item.title}
-                    </p>
-                    <p class="text-[11px] font-semibold text-slate-400 truncate">
-                      ${item.radio_name || 'Radio Online'}
-                    </p>
+            ${historyList.map(item => {
+              const coverUrl = getTrackCover(item.title);
+              return `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-gold-bruna/30 transition-all duration-300 group/item">
+                  <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <img 
+                      src="${coverUrl}" 
+                      alt="${item.title}" 
+                      class="w-10 h-10 rounded-lg object-cover border border-white/10 bg-slate-950 flex-shrink-0 shadow"
+                      onerror="this.src='${DEFAULT_TRACK_COVER}'"
+                    />
+                    <div class="min-w-0 flex-1">
+                      <p class="text-xs font-extrabold text-white font-title truncate group-hover/item:text-gold-bruna transition-colors">
+                        ${item.title}
+                      </p>
+                      <p class="text-[11px] font-semibold text-slate-400 truncate flex items-center gap-1">
+                        <span>📻</span> ${item.radio_name || 'Radio Online'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="text-right flex-shrink-0 ml-3">
+                    <span class="text-[10px] font-mono text-gold-bruna/90 font-semibold block">
+                      ${formatDate(item.detected_at)}
+                    </span>
                   </div>
                 </div>
-
-                <div class="text-right flex-shrink-0 ml-3">
-                  <span class="text-[10px] font-mono text-gold-bruna/90 font-semibold block">
-                    ${formatDate(item.detected_at)}
-                  </span>
-                </div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         `;
       } else {
