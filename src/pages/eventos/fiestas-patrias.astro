@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { supabase } from '../../services/supabaseClient.js';
+import QuoteForm from '../../components/forms/QuoteForm.astro';
 
 // Extraer ID de YouTube para reproducir en Lightbox
 function getYouTubeId(url: string) {
@@ -511,152 +511,19 @@ const faqs = [
       <div class="grid grid-cols-1 gap-8 scroll-reveal">
         
         <!-- Form Wrapper -->
-        <div id="booking-form-container" class="bg-slate-900/60 border border-white/5 backdrop-blur-md rounded-2xl p-6 md:p-10 shadow-2xl">
-          <form id="quote-form-extended" class="flex flex-col gap-6 text-left" novalidate>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col gap-2">
-                <label for="ext-name" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Nombre del Contacto / Productor</label>
-                <input 
-                  type="text" 
-                  id="ext-name" 
-                  name="name" 
-                  placeholder="Ingresa tu nombre completo" 
-                  required
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden" id="ext-name-err">Por favor ingresa tu nombre.</span>
-              </div>
-              
-              <div class="flex flex-col gap-2">
-                <label for="ext-phone" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono de Contacto</label>
-                <input 
-                  type="tel" 
-                  id="ext-phone" 
-                  name="phone" 
-                  placeholder="+56 9 1234 5678" 
-                  required
-                  autocomplete="tel"
-                  inputmode="tel"
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden" id="ext-phone-err">Por favor ingresa tu teléfono.</span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col gap-2">
-                <label for="ext-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Correo Electrónico</label>
-                <input 
-                  type="email" 
-                  id="ext-email" 
-                  name="email" 
-                  placeholder="ejemplo@correo.com" 
-                  required
-                  autocomplete="email"
-                  inputmode="email"
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden" id="ext-email-err">Por favor ingresa un correo válido.</span>
-              </div>
-              
-              <div class="flex flex-col gap-2">
-                <label for="ext-type" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Tipo de Evento</label>
-                <!-- Disabled or locked selection for thematic landing, but sent in payload -->
-                <select 
-                  id="ext-type" 
-                  name="event-type"
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
-                >
-                  <option value="fiestas-patrias" selected>Fiestas Patrias / Fondas / Ramadas</option>
-                  <option value="municipal">Festival Municipal / Show Público</option>
-                  <option value="corporativo">Evento Corporativo / Empresa</option>
-                  <option value="privado">Celebración Privada / Cumpleaños</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col gap-2">
-                <label for="ext-date" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Fecha Tentativa del Evento (Septiembre 2026)</label>
-                <input 
-                  type="date" 
-                  id="ext-date" 
-                  name="event-date"
-                  required
-                  min="2026-09-01"
-                  max="2026-09-30"
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
-                />
-                <span class="text-[10px] text-red-400 hidden" id="ext-date-err">Por favor selecciona la fecha.</span>
-              </div>
-              
-              <div class="flex flex-col gap-2">
-                <label for="ext-city" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Ciudad o Comuna del Evento</label>
-                <input 
-                  type="text" 
-                  id="ext-city" 
-                  name="city" 
-                  placeholder="Ej: Temuco, Valdivia, Santiago" 
-                  required
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden" id="ext-city-err">Por favor ingresa la comuna.</span>
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label for="ext-message" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Mensaje o Detalles Adicionales</label>
-              <textarea 
-                id="ext-message" 
-                name="message" 
-                rows="5" 
-                placeholder="Indica detalles del escenario, presupuesto estimado, requerimientos de amplificación..."
-                class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
-              ></textarea>
-            </div>
-
-            <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-3.5 rounded text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer">
-              SOLICITAR RESERVA FIESTAS PATRIAS
-            </button>
-            
-            <div id="ext-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border" role="alert"></div>
-
-          </form>
-        </div>
-
-        <!-- Success Panel (Hidden by default) -->
-        <div id="success-panel" class="hidden bg-slate-900 border border-white/5 rounded-2xl p-8 md:p-10 shadow-2xl text-center flex flex-col items-center gap-6">
-          <div class="w-16 h-16 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-3xl animate-bounce">
-            ✓
-          </div>
-          <div>
-            <h3 class="font-title font-extrabold text-2xl text-white uppercase tracking-wide">¡Solicitud Procesada!</h3>
-            <p class="text-slate-300 text-sm font-light mt-2 max-w-lg mx-auto">
-              Hemos enviado los detalles a <strong class="text-white">contacto@bandabruna.cl</strong>. Tu manager se pondrá en contacto a la brevedad.
-            </p>
-          </div>
-
-          <div class="w-full max-w-md border-t border-white/5 pt-6 mt-2 flex flex-col gap-4">
-            <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">ENVIAR AVISO DIRECTO A BOOKING</span>
-            <p class="text-slate-400 text-xs font-light leading-relaxed">
-              Haz clic abajo para alertar por WhatsApp y asegurar prioridad en tu fecha:
-            </p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-              <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
-                💬 Jaime Cárdenas
-              </a>
-              <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
-                💬 César Bruna
-              </a>
-            </div>
-          </div>
-
-          <button id="btn-reset-form" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-2 px-6 rounded transition-colors uppercase font-bold tracking-wider cursor-pointer">
-            Nueva Cotización
-          </button>
-        </div>
+        <QuoteForm 
+          origin="fiestas-patrias" 
+          subject="Nueva Cotización - Fiestas Patrias / Fondas" 
+          categories={[
+            { value: "fiestas-patrias", label: "Fiestas Patrias / Fondas / Ramadas", selected: true },
+            { value: "municipal", label: "Festival Municipal Dieciochero" },
+            { value: "corporativo", label: "Celebración de Empresa (18 Septiembre)" },
+            { value: "privado", label: "Celebración Privada / Cumpleaños" }
+          ]}
+          messageLabel="Mensaje o Detalles Adicionales"
+          messagePlaceholder="Indica detalles del escenario, presupuesto estimado, requerimientos de amplificación..."
+          submitButtonText="SOLICITAR RESERVA FIESTAS PATRIAS"
+        />
 
       </div>
     </div>
@@ -664,161 +531,7 @@ const faqs = [
 </Layout>
 
 <script>
-  import { supabase } from '../../services/supabaseClient.js';
-  import { sendEmail } from '../../services/emailService.js';
-
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('quote-form-extended') as HTMLFormElement;
-    const feedback = document.getElementById('ext-form-feedback');
-    const nameInput = document.getElementById('ext-name') as HTMLInputElement;
-    const phoneInput = document.getElementById('ext-phone') as HTMLInputElement;
-    const emailInput = document.getElementById('ext-email') as HTMLInputElement;
-    const dateInput = document.getElementById('ext-date') as HTMLInputElement;
-    const cityInput = document.getElementById('ext-city') as HTMLInputElement;
-    const typeSelect = document.getElementById('ext-type') as HTMLSelectElement;
-
-    const nameErr = document.getElementById('ext-name-err');
-    const phoneErr = document.getElementById('ext-phone-err');
-    const emailErr = document.getElementById('ext-email-err');
-    const dateErr = document.getElementById('ext-date-err');
-    const cityErr = document.getElementById('ext-city-err');
-    
-    const formContainer = document.getElementById('booking-form-container');
-    const successPanel = document.getElementById('success-panel');
-    const resetBtn = document.getElementById('btn-reset-form');
-
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        nameErr?.classList.add('hidden');
-        phoneErr?.classList.add('hidden');
-        emailErr?.classList.add('hidden');
-        dateErr?.classList.add('hidden');
-        cityErr?.classList.add('hidden');
-        if (feedback) feedback.classList.add('hidden');
-
-        let valid = true;
-
-        if (!nameInput.value.trim()) {
-          nameErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!phoneInput.value.trim()) {
-          phoneErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
-          emailErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!dateInput.value) {
-          dateErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!cityInput.value.trim()) {
-          cityErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!valid) return;
-
-        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-        const origText = btn.textContent;
-        btn.textContent = 'Enviando...';
-        btn.disabled = true;
-
-        const nameVal = nameInput.value.trim();
-        const phoneVal = phoneInput.value.trim();
-        const emailVal = emailInput.value.trim();
-        const typeVal = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : 'Fiestas Patrias';
-        const dateVal = dateInput.value;
-        const cityVal = cityInput.value.trim();
-        const msgVal = (document.getElementById('ext-message') as HTMLTextAreaElement).value.trim() || 'Sin detalles adicionales.';
-
-        // Guardar cotización en Supabase
-        supabase.from('cotizaciones').insert([
-          {
-            nombre: nameVal,
-            telefono: phoneVal,
-            email: emailVal,
-            fecha_evento: dateVal || null,
-            ciudad: cityVal,
-            tipo_evento: typeVal,
-            mensaje: msgVal
-          }
-        ]).then(({ error }) => {
-          if (error) {
-            console.error('Error al guardar en Supabase:', error);
-          } else {
-            console.log('Cotización guardada exitosamente en Supabase');
-          }
-        });
-
-        // Enviar correo asíncronamente con Web3Forms
-        sendEmail({
-          Asunto: "Nueva Cotización Fiestas Patrias",
-          Nombre: nameVal,
-          Teléfono: phoneVal,
-          Email: emailVal,
-          "Tipo de Evento": typeVal,
-          "Fecha Tentativa": dateVal,
-          "Ciudad/Comuna": cityVal,
-          "Detalles/Mensaje": msgVal
-        })
-        .then(() => {
-          btn.textContent = origText;
-          btn.disabled = false;
-
-          // Formatear mensaje para WhatsApp
-          const waMessage = `*Nueva Solicitud de Fiestas Patrias - Banda Bruna*\n\n` +
-            `👤 *Contacto:* ${nameVal}\n` +
-            `📞 *Fono:* ${phoneVal}\n` +
-            `📧 *Email:* ${emailVal}\n` +
-            `🎭 *Evento:* ${typeVal}\n` +
-            `📅 *Fecha:* ${dateVal}\n` +
-            `📍 *Ciudad/Comuna:* ${cityVal}\n` +
-            `📝 *Detalles:* ${msgVal}`;
-          
-          const encodedMessage = encodeURIComponent(waMessage);
-
-          // Configurar botones de WhatsApp
-          const btnJaime = document.getElementById('btn-wa-jaime') as HTMLAnchorElement;
-          const btnCesar = document.getElementById('btn-wa-cesar') as HTMLAnchorElement;
-          if (btnJaime) btnJaime.href = `https://wa.me/56990021689?text=${encodedMessage}`;
-          if (btnCesar) btnCesar.href = `https://wa.me/56976149408?text=${encodedMessage}`;
-
-          // Intentar abrir WhatsApp automáticamente con Jaime
-          window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
-
-          // Ocultar formulario y mostrar panel de éxito
-          formContainer?.classList.add('hidden');
-          successPanel?.classList.remove('hidden');
-
-          form.reset();
-        })
-        .catch(() => {
-          btn.textContent = origText;
-          btn.disabled = false;
-          if (feedback) {
-            feedback.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos directamente a través de WhatsApp.';
-            feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 block';
-          }
-        });
-      });
-    }
-
-    if (resetBtn && formContainer && successPanel) {
-      resetBtn.addEventListener('click', () => {
-        successPanel.classList.add('hidden');
-        formContainer.classList.remove('hidden');
-      });
-    }
-
     // ==========================================
     // INTERACTIVIDAD DE VIDEOS VERTICALES 9:16
     // ==========================================

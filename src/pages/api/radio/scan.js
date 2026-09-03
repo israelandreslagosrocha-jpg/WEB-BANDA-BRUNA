@@ -242,8 +242,69 @@ async function getStreamTheWorldMetadata(streamUrl, metadataUrl) {
 
 // 3. HANDLER PRINCIPAL DE LA API ROUTE
 export async function GET({ request }) {
+  // 3.1. AUTENTICACIÓN ESTRICTA (Exclusivamente vía encabezado Authorization: Bearer <CRON_SECRET>)
+  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
+  if (!cronSecret) {
+    console.error('Error de configuración: CRON_SECRET no está definido en las variables de entorno.');
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Servicio no configurado' 
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
+  if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'No autorizado' 
+    }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
-    console.log('Iniciando escaneo del Radio Monitor...');
+    // 3.2. CONTROL PERSISTENTE DE CONCURRENCIA (Ventana mínima de 60 segundos entre escaneos)
+    const COOLDOWN_SECONDS = 60;
+    const { data: latestRadio } = await supabase
+      .from('radios')
+      .select('id, ultima_actualizacion')
+      .eq('activo', true)
+      .order('ultima_actualizacion', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (latestRadio?.ultima_actualizacion) {
+      const lastScanTime = new Date(latestRadio.ultima_actualizacion).getTime();
+      const elapsedSeconds = (Date.now() - lastScanTime) / 1000;
+      if (elapsedSeconds < COOLDOWN_SECONDS) {
+        const waitSeconds = Math.ceil(COOLDOWN_SECONDS - elapsedSeconds);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Escaneo en curso o ejecutado recientemente. Espere antes de reintentar.',
+          retryAfterSeconds: waitSeconds
+        }), {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(waitSeconds)
+          }
+        });
+      }
+    }
+
+    // Adquisición inmediata del bloqueo en base de datos para impedir concurrencia entre instancias
+    if (latestRadio?.id) {
+      await supabase
+        .from('radios')
+        .update({ ultima_actualizacion: new Date().toISOString() })
+        .eq('id', latestRadio.id);
+    }
+
+    console.log('Iniciando escaneo autorizado del Radio Monitor...');
 
     // 1. Obtener radios activas
     const { data: radios, error: radiosError } = await supabase
@@ -402,10 +463,10 @@ export async function GET({ request }) {
     });
 
   } catch (error) {
-    console.error('Error al escanear radios:', error);
+    console.error('Error interno al escanear radios:', error?.message || error);
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: 'Error interno durante el procesamiento del escaneo radial' 
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

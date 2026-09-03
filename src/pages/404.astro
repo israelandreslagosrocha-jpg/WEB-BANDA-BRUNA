@@ -1,0 +1,73 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="Página no encontrada (404) | Banda Bruna - Orquesta Oficial" 
+  description="La página solicitada no está disponible. Explora la música, agenda de presentaciones o cotiza el show en vivo de Banda Bruna para tu evento."
+>
+  <meta name="robots" content="noindex, follow" slot="head" />
+
+  <section class="min-h-[75vh] flex items-center justify-center py-20 px-6 relative overflow-hidden">
+    <!-- Glow decorativo de fondo -->
+    <div class="absolute w-96 h-96 bg-gold-bruna/10 rounded-full blur-3xl pointer-events-none -top-10 left-1/2 -translate-x-1/2"></div>
+
+    <div class="max-w-2xl w-full mx-auto text-center relative z-10">
+      
+      <!-- Código de estado con estilo de marca -->
+      <span class="text-gold-bruna font-mono font-extrabold text-7xl sm:text-8xl tracking-tight block mb-2 opacity-90 drop-shadow-sm">404</span>
+      
+      <!-- Encabezado principal H1 -->
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-title uppercase tracking-wide text-white mb-4">
+        PÁGINA NO ENCONTRADA
+      </h1>
+      
+      <div class="w-12 h-0.5 bg-gold-bruna mx-auto mb-6"></div>
+
+      <!-- Explicación clara y sin claims inventados -->
+      <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg mx-auto mb-10">
+        El enlace que seguiste no existe, cambió de dirección o ya no está disponible. Pero la música no se detiene: te ayudamos a encontrar lo que buscas o a cotizar tu próximo evento.
+      </p>
+
+      <!-- CTA Principal Comercial (CRO) -->
+      <div class="mb-12">
+        <a 
+          href="/contrataciones/" 
+          class="inline-flex items-center justify-center gap-2.5 bg-gold-bruna hover:bg-gold-bruna-hover text-slate-950 font-bold px-8 py-4 rounded-xl transition-all shadow-lg shadow-gold-bruna/20 uppercase tracking-wider text-sm sm:text-base hover:scale-[1.02] duration-200"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          COTIZAR SHOW O EVENTO
+        </a>
+        <span class="text-[11px] text-slate-400 block mt-2 tracking-wide font-medium">Atención rápida para festivales, municipalidades, bodas y empresas</span>
+      </div>
+
+      <!-- Enlaces útiles de recuperación de navegación -->
+      <div class="border-t border-white/10 pt-8">
+        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-4">SECCIONES RECOMENDADAS</p>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto text-left">
+          <a href="/" class="bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-gold-bruna/40 rounded-lg p-3 transition-colors group">
+            <span class="text-xs font-bold text-white group-hover:text-gold-bruna block transition-colors">Inicio</span>
+            <span class="text-[10px] text-slate-400 block leading-tight mt-0.5">Portada principal</span>
+          </a>
+
+          <a href="/agenda/" class="bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-gold-bruna/40 rounded-lg p-3 transition-colors group">
+            <span class="text-xs font-bold text-white group-hover:text-gold-bruna block transition-colors">Agenda</span>
+            <span class="text-[10px] text-slate-400 block leading-tight mt-0.5">Shows en vivo</span>
+          </a>
+
+          <a href="/eventos/" class="bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-gold-bruna/40 rounded-lg p-3 transition-colors group">
+            <span class="text-xs font-bold text-white group-hover:text-gold-bruna block transition-colors">Eventos</span>
+            <span class="text-[10px] text-slate-400 block leading-tight mt-0.5">Tipos de show</span>
+          </a>
+
+          <a href="/contacto/" class="bg-slate-900/60 hover:bg-slate-900 border border-white/5 hover:border-gold-bruna/40 rounded-lg p-3 transition-colors group">
+            <span class="text-xs font-bold text-white group-hover:text-gold-bruna block transition-colors">Contacto</span>
+            <span class="text-[10px] text-slate-400 block leading-tight mt-0.5">Canales oficiales</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</Layout>

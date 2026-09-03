@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { supabase } from '../../services/supabaseClient.js';
+import QuoteForm from '../../components/forms/QuoteForm.astro';
 
 // Videos provistos por el usuario de la fiesta de fin de año 2025-2026 en Hotel FRONTERA de Temuco
 const videos = [
@@ -422,148 +422,20 @@ const faqs = [
         </div>
 
         <!-- Form container -->
-        <div id="booking-form-container" class="bg-slate-900/60 border border-white/5 backdrop-blur-md rounded-2xl p-6 md:p-10 shadow-2xl">
-          <form id="quote-form-extended" class="flex flex-col gap-6 text-left" novalidate>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col gap-2">
-                <label for="ext-name" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Nombre de Contacto / Encargado RRHH</label>
-                <input 
-                  type="text" 
-                  id="ext-name" 
-                  name="name" 
-                  placeholder="Ingresa tu nombre completo" 
-                  required
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-name-err">Por favor ingresa tu nombre.</span>
-              </div>
-              
-              <div class="flex flex-col gap-2">
-                <label for="ext-phone" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono Móvil</label>
-                <input 
-                  type="tel" 
-                  id="ext-phone" 
-                  name="phone" 
-                  placeholder="+56 9 1234 5678" 
-                  required
-                  autocomplete="tel"
-                  inputmode="tel"
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-phone-err">Por favor ingresa tu teléfono.</span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col gap-2">
-                <label for="ext-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Correo Electrónico (Empresa o Personal)</label>
-                <input 
-                  type="email" 
-                  id="ext-email" 
-                  name="email" 
-                  placeholder="ejemplo@empresa.com" 
-                  required
-                  autocomplete="email"
-                  inputmode="email"
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-email-err">Por favor ingresa un correo válido.</span>
-              </div>
-              
-              <div class="flex flex-col gap-2">
-                <label for="ext-company" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Nombre de la Empresa / Organización</label>
-                <input 
-                  type="text" 
-                  id="ext-company" 
-                  name="company" 
-                  placeholder="Razón social o Nombre fantasía" 
-                  required
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-company-err">Por favor ingresa la empresa.</span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="flex flex-col gap-2">
-                <label for="ext-date" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Fecha Tentativa</label>
-                <input 
-                  type="date" 
-                  id="ext-date" 
-                  name="event-date"
-                  required
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
-                />
-                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-date-err">Por favor selecciona la fecha.</span>
-              </div>
-              
-              <div class="flex flex-col gap-2">
-                <label for="ext-city" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Ciudad o Comuna</label>
-                <input 
-                  type="text" 
-                  id="ext-city" 
-                  name="city" 
-                  placeholder="Ej: Temuco, Santiago, Concepción" 
-                  required
-                  class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
-                />
-                <span class="text-[10px] text-red-400 hidden font-bold" id="ext-city-err">Por favor ingresa la ciudad.</span>
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label for="ext-message" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Especificaciones del Salón y Producción Requerida</label>
-              <textarea 
-                id="ext-message" 
-                name="message" 
-                rows="5" 
-                placeholder="Indícanos si el evento es en hotel, centro de eventos, aire libre, estimación de asistentes y si requieres que proveamos la producción técnica completa de sonido, escenario e iluminación..."
-                class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
-              ></textarea>
-            </div>
-
-            <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-3.5 rounded text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer">
-              SOLICITAR COTIZACIÓN CORPORATIVA
-            </button>
-            
-            <div id="ext-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border font-bold" role="alert"></div>
-
-          </form>
-        </div>
-
-        <!-- Success Panel (Hidden by default) -->
-        <div id="success-panel" class="hidden bg-slate-900 border border-white/5 rounded-2xl p-8 md:p-10 shadow-2xl text-center flex flex-col items-center gap-6">
-          <div class="w-16 h-16 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-3xl animate-bounce">
-            ✓
-          </div>
-          <div>
-            <h3 class="font-title font-extrabold text-2xl text-white uppercase tracking-wide">¡Solicitud Registrada!</h3>
-            <p class="text-slate-300 text-sm font-light mt-2 max-w-lg mx-auto">
-              Hemos registrado tu cotización en nuestra base de datos. Se ha enviado un correo de respaldo con todos los detalles a <strong class="text-white">contacto@bandabruna.cl</strong>.
-            </p>
-          </div>
-
-          <div class="w-full max-w-md border-t border-white/5 pt-6 mt-2 flex flex-col gap-4">
-            <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">NOTIFICAR INMEDIATAMENTE AL STAFF COMERCIAL</span>
-            <p class="text-slate-400 text-xs font-light leading-relaxed">
-              Haz clic en cualquiera de los siguientes botones para enviar la notificación directamente por WhatsApp y acelerar el proceso de revisión:
-            </p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-              <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
-                💬 Jaime Cárdenas
-              </a>
-              <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
-                💬 César Bruna
-              </a>
-            </div>
-          </div>
-
-          <button id="btn-reset-form" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-2 px-6 rounded transition-colors uppercase font-bold tracking-wider cursor-pointer">
-            Cotizar Otro Show
-          </button>
-        </div>
+        <QuoteForm 
+          origin="eventos-corporativos" 
+          subject="Nueva Cotización - Eventos Corporativos" 
+          customField={{
+            name: "company",
+            label: "Nombre de la Empresa / Organización",
+            placeholder: "Razón social o Nombre fantasía",
+            errorMessage: "Por favor ingresa la empresa.",
+            eventTypePrefix: "Evento Corporativo / Empresa"
+          }}
+          messageLabel="Especificaciones del Salón y Producción Requerida"
+          messagePlaceholder="Indícanos si el evento es en hotel, centro de eventos, aire libre, estimación de asistentes y si requieres que proveamos la producción técnica completa de sonido, escenario e iluminación..."
+          submitButtonText="SOLICITAR COTIZACIÓN CORPORATIVA"
+        />
 
       </div>
     </div>
@@ -571,176 +443,8 @@ const faqs = [
 </Layout>
 
 <script>
-  import { supabase } from '../../services/supabaseClient.js';
-  import { sendEmail } from '../../services/emailService.js';
-
   document.addEventListener('DOMContentLoaded', () => {
-    // ==========================================
-    // FORMULARIO DE COTIZACIÓN
-    // ==========================================
-    const form = document.getElementById('quote-form-extended') as HTMLFormElement;
-    const feedback = document.getElementById('ext-form-feedback');
-    const nameInput = document.getElementById('ext-name') as HTMLInputElement;
-    const phoneInput = document.getElementById('ext-phone') as HTMLInputElement;
-    const emailInput = document.getElementById('ext-email') as HTMLInputElement;
-    const companyInput = document.getElementById('ext-company') as HTMLInputElement;
-    const dateInput = document.getElementById('ext-date') as HTMLInputElement;
-    const cityInput = document.getElementById('ext-city') as HTMLInputElement;
-
-    const nameErr = document.getElementById('ext-name-err');
-    const phoneErr = document.getElementById('ext-phone-err');
-    const emailErr = document.getElementById('ext-email-err');
-    const companyErr = document.getElementById('ext-company-err');
-    const dateErr = document.getElementById('ext-date-err');
-    const cityErr = document.getElementById('ext-city-err');
     
-    const formContainer = document.getElementById('booking-form-container');
-    const successPanel = document.getElementById('success-panel');
-    const resetBtn = document.getElementById('btn-reset-form');
-
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        nameErr?.classList.add('hidden');
-        phoneErr?.classList.add('hidden');
-        emailErr?.classList.add('hidden');
-        companyErr?.classList.add('hidden');
-        dateErr?.classList.add('hidden');
-        cityErr?.classList.add('hidden');
-        if (feedback) feedback.classList.add('hidden');
-
-        let valid = true;
-
-        if (!nameInput.value.trim()) {
-          nameErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!phoneInput.value.trim()) {
-          phoneErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
-          emailErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!companyInput.value.trim()) {
-          companyErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!dateInput.value) {
-          dateErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!cityInput.value.trim()) {
-          cityErr?.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!valid) return;
-
-        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-        const origText = btn.textContent;
-        btn.textContent = 'Enviando...';
-        btn.disabled = true;
-
-        const nameVal = nameInput.value.trim();
-        const phoneVal = phoneInput.value.trim();
-        const emailVal = emailInput.value.trim();
-        const companyVal = companyInput.value.trim();
-        const typeVal = 'Evento Corporativo / Empresa';
-        const dateVal = dateInput.value;
-        const cityVal = cityInput.value.trim();
-        const msgVal = (document.getElementById('ext-message') as HTMLTextAreaElement).value.trim() || 'Sin detalles adicionales.';
-
-        // Guardar cotización en Supabase
-        supabase.from('cotizaciones').insert([
-          {
-            nombre: nameVal,
-            telefono: phoneVal,
-            email: emailVal,
-            fecha_evento: dateVal || null,
-            ciudad: cityVal,
-            tipo_evento: `${typeVal} (${companyVal})`,
-            mensaje: msgVal
-          }
-        ]).then(({ error }) => {
-          if (error) {
-            console.error('Error al guardar en Supabase:', error);
-          } else {
-            console.log('Cotización guardada exitosamente en Supabase');
-          }
-        });
-
-        // Enviar correo asíncronamente con Web3Forms
-        sendEmail({
-          Asunto: "Nueva Cotización Corporativa - Banda Bruna",
-          Nombre: nameVal,
-          "Empresa / Organización": companyVal,
-          Teléfono: phoneVal,
-          Email: emailVal,
-          "Tipo de Evento": typeVal,
-          "Fecha Tentativa": dateVal,
-          "Ciudad/Comuna": cityVal,
-          "Detalles/Mensaje": msgVal
-        })
-        .then(() => {
-          btn.textContent = origText;
-          btn.disabled = false;
-
-          // Formatear mensaje para WhatsApp
-          const waMessage = `*Nueva Solicitud de Cotización Corporativa*\n\n` +
-            `👤 *Contacto:* ${nameVal}\n` +
-            `🏢 *Empresa:* ${companyVal}\n` +
-            `📞 *Fono:* ${phoneVal}\n` +
-            `📧 *Email:* ${emailVal}\n` +
-            `🎭 *Evento:* ${typeVal}\n` +
-            `📅 *Fecha:* ${dateVal}\n` +
-            `📍 *Ciudad/Comuna:* ${cityVal}\n` +
-            `📝 *Detalles:* ${msgVal}`;
-          
-          const encodedMessage = encodeURIComponent(waMessage);
-
-          // Configurar botones de WhatsApp
-          const btnJaime = document.getElementById('btn-wa-jaime') as HTMLAnchorElement;
-          const btnCesar = document.getElementById('btn-wa-cesar') as HTMLAnchorElement;
-          if (btnJaime) btnJaime.href = `https://wa.me/56990021689?text=${encodedMessage}`;
-          if (btnCesar) btnCesar.href = `https://wa.me/56976149408?text=${encodedMessage}`;
-
-          // Intentar abrir WhatsApp automáticamente con Jaime
-          window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
-
-          // Ocultar formulario y mostrar panel de éxito
-          formContainer?.classList.add('hidden');
-          successPanel?.classList.remove('hidden');
-
-          form.reset();
-        })
-        .catch(() => {
-          btn.textContent = origText;
-          btn.disabled = false;
-          if (feedback) {
-            feedback.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos directamente a través de WhatsApp.';
-            feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 block';
-          }
-        });
-      });
-    }
-
-    if (resetBtn && formContainer && successPanel) {
-      resetBtn.addEventListener('click', () => {
-        successPanel.classList.add('hidden');
-        formContainer.classList.remove('hidden');
-      });
-    }
-
-    // ==========================================
-    // INTERACTIVIDAD DE VIDEOS VERTICALES 9:16
     // ==========================================
     const track = document.getElementById('vertical-video-track');
     const prevBtn = document.getElementById('prev-vertical');

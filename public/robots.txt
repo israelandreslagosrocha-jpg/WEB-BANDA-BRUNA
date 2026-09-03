@@ -1,8 +1,9 @@
-# robots.txt for Banda Bruna (https://bandabruna.cl)
+# robots.txt for Banda Bruna (https://www.bandabruna.cl)
 
 User-agent: *
 Allow: /
 
 # Host & Sitemap
-Host: https://bandabruna.cl
-Sitemap: https://bandabruna.cl/sitemap.xml
+Host: https://www.bandabruna.cl
+Sitemap: https://www.bandabruna.cl/sitemap-index.xml
+Sitemap: https://www.bandabruna.cl/sitemap-0.xml

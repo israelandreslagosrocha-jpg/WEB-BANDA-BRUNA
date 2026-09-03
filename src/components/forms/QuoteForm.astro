@@ -1,0 +1,426 @@
+---
+export interface CategoryOption {
+  value: string;
+  label: string;
+  selected?: boolean;
+}
+
+export interface CustomFieldConfig {
+  name: string;
+  label: string;
+  placeholder: string;
+  errorMessage: string;
+  eventTypePrefix: string;
+}
+
+interface Props {
+  origin?: string;
+  subject?: string;
+  title?: string;
+  categories?: CategoryOption[];
+  defaultCategory?: string;
+  customField?: CustomFieldConfig;
+  messageLabel?: string;
+  messagePlaceholder?: string;
+  submitButtonText?: string;
+}
+
+const {
+  origin = 'contrataciones',
+  subject = 'Nueva Cotización desde Sitio Web',
+  title = '',
+  categories,
+  defaultCategory = '',
+  customField,
+  messageLabel = 'Detalles del Requerimiento / Horarios / Duración',
+  messagePlaceholder = 'Indica detalles del escenario, amplificación (si la provee el productor), duración estimada del show...',
+  submitButtonText = 'ENVIAR SOLICITUD DE COTIZACIÓN'
+} = Astro.props;
+
+// Catálogo único y oficial de categorías de eventos
+const DEFAULT_CATEGORIES: CategoryOption[] = [
+  { value: "municipal", label: "Festival Municipal / Show Público" },
+  { value: "fiestas-patrias", label: "Fiestas Patrias / Fondas" },
+  { value: "corporativo", label: "Evento Corporativo / Empresa" },
+  { value: "privado", label: "Celebración Privada / Cumpleaños" },
+  { value: "aniversario", label: "Aniversario Regional / Gremial" },
+  { value: "festival", label: "Festival Musical Independiente" },
+  { value: "colegio-universidad", label: "Evento Estudiantil / Graduación" },
+  { value: "matrimonio", label: "Matrimonio / Boda" },
+  { value: "produccion", label: "Producciones / Programas de Medios" }
+];
+
+const resolvedCategories = categories || DEFAULT_CATEGORIES;
+---
+
+<!-- Form Wrapper Container -->
+<div id="booking-form-container" class="bg-slate-900/60 border border-white/5 backdrop-blur-md rounded-2xl p-6 md:p-10 shadow-2xl">
+  {title && (
+    <h2 class="font-title font-bold text-xl md:text-2xl text-white mb-6 uppercase border-b border-white/5 pb-3">
+      {title}
+    </h2>
+  )}
+  
+  <form id="quote-form-extended" class="flex flex-col gap-6 text-left" novalidate data-origin={origin} data-subject={subject}>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col gap-2">
+        <label for="ext-name" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+          {customField ? (customField.name === 'company' ? 'Nombre de Contacto / Encargado RRHH' : 'Nombre de Contacto / Encargado de Cultura') : 'Nombre del Contacto / Productor'}
+        </label>
+        <input 
+          type="text" 
+          id="ext-name" 
+          name="name" 
+          placeholder="Ingresa tu nombre completo" 
+          required
+          autocomplete="name"
+          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+        />
+        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-name-err">Por favor ingresa tu nombre.</span>
+      </div>
+      
+      <div class="flex flex-col gap-2">
+        <label for="ext-phone" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono de Contacto</label>
+        <input 
+          type="tel" 
+          id="ext-phone" 
+          name="phone" 
+          placeholder="+56 9 1234 5678" 
+          required
+          autocomplete="tel"
+          inputmode="tel"
+          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+        />
+        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-phone-err">Por favor ingresa tu teléfono.</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col gap-2">
+        <label for="ext-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Correo Electrónico</label>
+        <input 
+          type="email" 
+          id="ext-email" 
+          name="email" 
+          placeholder="ejemplo@correo.com" 
+          required
+          autocomplete="email"
+          inputmode="email"
+          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+        />
+        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-email-err">Por favor ingresa un correo válido.</span>
+      </div>
+      
+      {customField ? (
+        <div class="flex flex-col gap-2">
+          <label for="ext-custom-field" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+            {customField.label}
+          </label>
+          <input 
+            type="text" 
+            id="ext-custom-field" 
+            name={customField.name} 
+            placeholder={customField.placeholder} 
+            required
+            data-prefix={customField.eventTypePrefix}
+            class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+          />
+          <span class="text-[10px] text-red-400 hidden font-bold" id="ext-custom-err">{customField.errorMessage}</span>
+        </div>
+      ) : (
+        <div class="flex flex-col gap-2">
+          <label for="ext-type" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Tipo de Evento</label>
+          <select 
+            id="ext-type" 
+            name="event-type"
+            class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+          >
+            {resolvedCategories.map(cat => (
+              <option value={cat.value} selected={cat.selected || cat.value === defaultCategory}>
+                {cat.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="flex flex-col gap-2">
+        <label for="ext-date" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Fecha Tentativa del Evento</label>
+        <input 
+          type="date" 
+          id="ext-date" 
+          name="event-date"
+          required
+          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+        />
+        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-date-err">Por favor selecciona la fecha.</span>
+      </div>
+      
+      <div class="flex flex-col gap-2">
+        <label for="ext-city" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Ciudad o Comuna del Evento</label>
+        <input 
+          type="text" 
+          id="ext-city" 
+          name="city" 
+          placeholder="Ej: Temuco, Valdivia, Santiago" 
+          required
+          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+        />
+        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-city-err">Por favor ingresa la comuna.</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="ext-message" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+        {messageLabel}
+      </label>
+      <textarea 
+        id="ext-message" 
+        name="message" 
+        rows="5" 
+        placeholder={messagePlaceholder}
+        class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
+      ></textarea>
+    </div>
+
+    <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-3.5 rounded text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer">
+      {submitButtonText}
+    </button>
+    
+    <div id="ext-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border font-bold" role="alert"></div>
+
+  </form>
+</div>
+
+<!-- Success Panel (Hidden by default) -->
+<div id="success-panel" class="hidden bg-slate-900 border border-white/5 rounded-2xl p-8 md:p-10 shadow-2xl text-center flex flex-col items-center gap-6">
+  <div class="w-16 h-16 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-3xl animate-bounce">
+    ✓
+  </div>
+  <div>
+    <h3 class="font-title font-extrabold text-2xl text-white uppercase tracking-wide">¡Cotización Recibida!</h3>
+    <p class="text-slate-300 text-sm font-light mt-2 max-w-lg mx-auto">
+      Hemos registrado tu solicitud y enviado un correo de respaldo con todos los detalles a <strong class="text-white">contacto@bandabruna.cl</strong>.
+    </p>
+  </div>
+
+  <div class="w-full max-w-md border-t border-white/5 pt-6 mt-2 flex flex-col gap-4">
+    <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">NOTIFICAR INMEDIATAMENTE AL STAFF COMERCIAL</span>
+    <p class="text-slate-400 text-xs font-light leading-relaxed">
+      Haz clic en cualquiera de los siguientes botones para enviar la notificación directamente por WhatsApp y acelerar el proceso de revisión:
+    </p>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+      <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+        💬 Jaime Cárdenas
+      </a>
+      <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+        💬 César Bruna
+      </a>
+    </div>
+  </div>
+
+  <button type="button" id="btn-reset-form" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-2 px-6 rounded transition-colors uppercase font-bold tracking-wider cursor-pointer">
+    Cotizar Otro Show
+  </button>
+</div>
+
+<script>
+  import { supabase } from '../../services/supabaseClient.js';
+  import { sendEmail } from '../../services/emailService.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('quote-form-extended') as HTMLFormElement | null;
+    const formContainer = document.getElementById('booking-form-container');
+    const successPanel = document.getElementById('success-panel');
+    const resetBtn = document.getElementById('btn-reset-form');
+    const feedback = document.getElementById('ext-form-feedback');
+
+    if (!form) return;
+
+    const nameInput = document.getElementById('ext-name') as HTMLInputElement | null;
+    const phoneInput = document.getElementById('ext-phone') as HTMLInputElement | null;
+    const emailInput = document.getElementById('ext-email') as HTMLInputElement | null;
+    const dateInput = document.getElementById('ext-date') as HTMLInputElement | null;
+    const cityInput = document.getElementById('ext-city') as HTMLInputElement | null;
+    const typeSelect = document.getElementById('ext-type') as HTMLSelectElement | null;
+    const customFieldInput = document.getElementById('ext-custom-field') as HTMLInputElement | null;
+    const messageInput = document.getElementById('ext-message') as HTMLTextAreaElement | null;
+
+    const nameErr = document.getElementById('ext-name-err');
+    const phoneErr = document.getElementById('ext-phone-err');
+    const emailErr = document.getElementById('ext-email-err');
+    const dateErr = document.getElementById('ext-date-err');
+    const cityErr = document.getElementById('ext-city-err');
+    const customErr = document.getElementById('ext-custom-err');
+
+    // Pre-llenado de campos mediante parámetros en la URL (querystring)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('name') && nameInput) nameInput.value = decodeURIComponent(urlParams.get('name') || '');
+    if (urlParams.has('email') && emailInput) emailInput.value = decodeURIComponent(urlParams.get('email') || '');
+    if (urlParams.has('phone') && phoneInput) phoneInput.value = decodeURIComponent(urlParams.get('phone') || '');
+    if (urlParams.has('city') && cityInput) cityInput.value = decodeURIComponent(urlParams.get('city') || '');
+    if (urlParams.has('date') && dateInput) dateInput.value = decodeURIComponent(urlParams.get('date') || '');
+    if (urlParams.has('type') && typeSelect) {
+      typeSelect.value = decodeURIComponent(urlParams.get('type') || '');
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      nameErr?.classList.add('hidden');
+      phoneErr?.classList.add('hidden');
+      emailErr?.classList.add('hidden');
+      dateErr?.classList.add('hidden');
+      cityErr?.classList.add('hidden');
+      customErr?.classList.add('hidden');
+      if (feedback) feedback.classList.add('hidden');
+
+      let valid = true;
+
+      if (!nameInput || !nameInput.value.trim()) {
+        nameErr?.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (!phoneInput || !phoneInput.value.trim()) {
+        phoneErr?.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (!emailInput || !emailInput.value.trim() || !emailInput.checkValidity()) {
+        emailErr?.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (customFieldInput && !customFieldInput.value.trim()) {
+        customErr?.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (!dateInput || !dateInput.value) {
+        dateErr?.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (!cityInput || !cityInput.value.trim()) {
+        cityErr?.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+      const origText = btn ? btn.textContent : 'ENVIAR SOLICITUD DE COTIZACIÓN';
+      if (btn) {
+        btn.textContent = 'Enviando...';
+        btn.disabled = true;
+      }
+
+      const nameVal = nameInput ? nameInput.value.trim() : '';
+      const phoneVal = phoneInput ? phoneInput.value.trim() : '';
+      const emailVal = emailInput ? emailInput.value.trim() : '';
+      const dateVal = dateInput ? dateInput.value : '';
+      const cityVal = cityInput ? cityInput.value.trim() : '';
+      const msgVal = messageInput && messageInput.value.trim() ? messageInput.value.trim() : 'Sin detalles adicionales.';
+
+      let typeVal = '';
+      if (customFieldInput) {
+        const prefix = customFieldInput.getAttribute('data-prefix') || 'Evento';
+        const customVal = customFieldInput.value.trim();
+        typeVal = `${prefix} (${customVal})`;
+      } else if (typeSelect) {
+        typeVal = typeSelect.options[typeSelect.selectedIndex]?.text || '';
+      }
+
+      const origin = form.getAttribute('data-origin') || 'web';
+      const subject = form.getAttribute('data-subject') || 'Nueva Cotización desde el Sitio Web';
+
+      // 1. Guardar cotización en Supabase
+      supabase.from('cotizaciones').insert([
+        {
+          nombre: nameVal,
+          telefono: phoneVal,
+          email: emailVal,
+          fecha_evento: dateVal || null,
+          ciudad: cityVal,
+          tipo_evento: typeVal,
+          mensaje: msgVal
+        }
+      ]).then(({ error }) => {
+        if (error) {
+          console.error('Error al guardar en Supabase:', error);
+        } else {
+          console.log(`Cotización guardada exitosamente en Supabase (Origen: ${origin})`);
+        }
+      });
+
+      // 2. Enviar correo asíncronamente con Web3Forms
+      sendEmail({
+        Asunto: subject,
+        Nombre: nameVal,
+        Teléfono: phoneVal,
+        Email: emailVal,
+        "Tipo de Evento": typeVal,
+        "Fecha Tentativa": dateVal,
+        "Ciudad/Comuna": cityVal,
+        "Detalles/Mensaje": msgVal,
+        "Origen": origin
+      })
+      .then(() => {
+        if (btn) {
+          btn.textContent = origText;
+          btn.disabled = false;
+        }
+
+        // 3. Formatear mensaje para WhatsApp
+        const waMessage = `*Nueva Solicitud de Cotización - Banda Bruna*\n\n` +
+          `👤 *Contacto:* ${nameVal}\n` +
+          `📞 *Fono:* ${phoneVal}\n` +
+          `📧 *Email:* ${emailVal}\n` +
+          `🎭 *Evento:* ${typeVal}\n` +
+          `📅 *Fecha:* ${dateVal}\n` +
+          `📍 *Ciudad/Comuna:* ${cityVal}\n` +
+          `📝 *Detalles:* ${msgVal}`;
+
+        const encodedMessage = encodeURIComponent(waMessage);
+
+        // Configurar botones de WhatsApp
+        const btnJaime = document.getElementById('btn-wa-jaime') as HTMLAnchorElement | null;
+        const btnCesar = document.getElementById('btn-wa-cesar') as HTMLAnchorElement | null;
+        if (btnJaime) btnJaime.href = `https://wa.me/56990021689?text=${encodedMessage}`;
+        if (btnCesar) btnCesar.href = `https://wa.me/56976149408?text=${encodedMessage}`;
+
+        // Intentar abrir WhatsApp automáticamente con Jaime
+        window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
+
+        // Ocultar formulario y mostrar panel de éxito
+        formContainer?.classList.add('hidden');
+        successPanel?.classList.remove('hidden');
+
+        form.reset();
+      })
+      .catch((err) => {
+        console.error('Error al enviar correo:', err);
+        if (btn) {
+          btn.textContent = origText;
+          btn.disabled = false;
+        }
+        if (feedback) {
+          feedback.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos directamente a través de WhatsApp.';
+          feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 block font-bold';
+        }
+      });
+    });
+
+    if (resetBtn && formContainer && successPanel) {
+      resetBtn.addEventListener('click', () => {
+        successPanel.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+      });
+    }
+  });
+</script>

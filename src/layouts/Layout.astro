@@ -16,6 +16,17 @@ const {
 
 const currentPath = Astro.url.pathname;
 
+// Canonical URL oficial y normalizada (excluye parámetros de consulta, fragmentos y /admin)
+const canonicalOrigin = 'https://www.bandabruna.cl';
+let cleanPath = Astro.url.pathname;
+if (!cleanPath.endsWith('/') && !cleanPath.includes('.')) {
+  cleanPath = `${cleanPath}/`;
+}
+const canonicalURL = new URL(cleanPath, canonicalOrigin).href;
+const isAdmin = cleanPath.startsWith('/admin');
+const isContrataciones = cleanPath.startsWith('/contrataciones');
+const isHome = cleanPath === '/';
+
 // Helper to determine active link styling
 const getLinkClass = (path: string) => {
   const isActive = currentPath === path || currentPath === `${path}/` || (path !== '/' && currentPath.startsWith(path));
@@ -75,6 +86,9 @@ const getWhatsAppLink = (phone: string) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
   
+  <!-- Canonical URL (SEO Oficial) -->
+  {!isAdmin && <link rel="canonical" href={canonicalURL} />}
+
   <!-- SEO Meta Tags -->
   <meta name="description" content={description}>
   <meta name="keywords" content="banda bruna, banda bruna temuco, orquesta banda bruna, grupo musical temuco, cumbia chilena, cumbia sureña, show en vivo temuco, fiestas costumbristas, matrimonios, eventos corporativos, festivales, música en vivo">
@@ -82,7 +96,7 @@ const getWhatsAppLink = (phone: string) => {
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content={Astro.url.href}>
+  <meta property="og:url" content={!isAdmin ? canonicalURL : Astro.url.href}>
   <meta property="og:title" content={title}>
   <meta property="og:description" content={description}>
   <meta property="og:image" content="https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB29_ncdsn8.webp">
@@ -169,6 +183,11 @@ const getWhatsAppLink = (phone: string) => {
     .whatsapp-glow {
       animation: phone-vr-glow 2.5s infinite ease-in-out;
     }
+    @media (prefers-reduced-motion: reduce) {
+      #mobile-sticky-cta {
+        transition: none !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-bg-darkest text-white selection:bg-gold-bruna/30 selection:text-gold-bruna min-h-screen flex flex-col">
@@ -218,24 +237,27 @@ const getWhatsAppLink = (phone: string) => {
       </div>
 
       <!-- Mobile Nav Links Drawer -->
-      <div id="nav-menu" class="fixed top-0 right-[-100%] w-[300px] h-screen bg-slate-950/98 backdrop-blur-xl border-l border-white/5 p-8 pt-24 flex flex-col gap-6 lg:hidden z-40 transition-all duration-300 list-none overflow-y-auto">
-        <ul class="flex flex-col gap-4 list-none p-0 m-0 font-title font-bold text-xs tracking-widest text-left">
-          <li><a href="/" class="block py-2.5 border-b border-white/5">INICIO</a></li>
-          <li><a href="/eventos" class="block py-2.5 border-b border-white/5">EVENTOS</a></li>
-          <li><a href="/banda" class="block py-2.5 border-b border-white/5">BANDA</a></li>
-          <li><a href="/integrantes" class="block py-2.5 border-b border-white/5">INTEGRANTES</a></li>
-          <li><a href="/musica" class="block py-2.5 border-b border-white/5">MÚSICA</a></li>
-          <li><a href="/videos" class="block py-2.5 border-b border-white/5">VIDEOS</a></li>
-          <li><a href="/agenda" class="block py-2.5 border-b border-white/5">AGENDA</a></li>
-          <li><a href="/noticias" class="block py-2.5 border-b border-white/5">NOTICIAS</a></li>
-          <li><a href="/galeria" class="block py-2.5 border-b border-white/5">GALERÍA</a></li>
-          <li><a href="/epk" class="block py-2.5 border-b border-white/5">DOSSIER - RIDER</a></li>
-          <li><a href="/contacto" class="block py-2.5 border-b border-white/5">CONTACTO</a></li>
-          <li class="mt-6">
-            <a href="/contrataciones" class="w-full bg-gold-bruna text-black text-center py-3 rounded font-bold block cursor-pointer">
-              COTIZAR EVENTO
-            </a>
-          </li>
+      <div id="nav-menu" class="fixed top-0 right-[-100%] w-[300px] h-screen bg-slate-950/98 backdrop-blur-xl border-l border-white/5 p-6 pt-24 flex flex-col lg:hidden z-40 transition-all duration-300 list-none overflow-y-auto">
+        
+        <!-- Featured Commercial Action at Top of Drawer (Immediate Access) -->
+        <div class="mb-4 pb-4 border-b border-white/10 flex-shrink-0">
+          <a href="/contrataciones" class="w-full bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black text-center py-3 rounded-lg font-extrabold text-xs uppercase tracking-wider block shadow-lg shadow-gold-bruna/20 active:scale-95 transition-all">
+            COTIZAR EVENTO
+          </a>
+        </div>
+
+        <ul class="flex flex-col gap-3 list-none p-0 m-0 font-title font-bold text-xs tracking-widest text-left">
+          <li><a href="/" class="block py-2 border-b border-white/5">INICIO</a></li>
+          <li><a href="/eventos" class="block py-2 border-b border-white/5">EVENTOS</a></li>
+          <li><a href="/banda" class="block py-2 border-b border-white/5">BANDA</a></li>
+          <li><a href="/integrantes" class="block py-2 border-b border-white/5">INTEGRANTES</a></li>
+          <li><a href="/musica" class="block py-2 border-b border-white/5">MÚSICA</a></li>
+          <li><a href="/videos" class="block py-2 border-b border-white/5">VIDEOS</a></li>
+          <li><a href="/agenda" class="block py-2 border-b border-white/5">AGENDA</a></li>
+          <li><a href="/noticias" class="block py-2 border-b border-white/5">NOTICIAS</a></li>
+          <li><a href="/galeria" class="block py-2 border-b border-white/5">GALERÍA</a></li>
+          <li><a href="/epk" class="block py-2 border-b border-white/5">DOSSIER - RIDER</a></li>
+          <li><a href="/contacto" class="block py-2 border-b border-white/5">CONTACTO</a></li>
         </ul>
       </div>
 
@@ -246,7 +268,7 @@ const getWhatsAppLink = (phone: string) => {
   </header>
 
   <!-- Page Content -->
-  <main class="flex-grow pt-20">
+  <main class={`flex-grow pt-20 ${!isContrataciones && !isAdmin ? 'pb-20 md:pb-0' : ''}`}>
     <FeaturedCampaignBanner />
     <slot />
   </main>
@@ -324,17 +346,31 @@ const getWhatsAppLink = (phone: string) => {
 
   <!-- Interactive Scripts (Header Shrinking & Mobile Navigation Menu Drawer) -->
   <script>
-    // Header Scroll Action
+    // Header Scroll Action & Sticky Bar Trigger
     const header = document.getElementById('main-header');
+    const stickyBar = document.getElementById('mobile-sticky-cta');
+    const scrollThreshold = stickyBar ? parseInt(stickyBar.dataset.scrollThreshold || '0', 10) : 0;
+    let isInputFocused = false;
+
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > 40) {
         header.classList.add('py-2', 'shadow-2xl', 'shadow-black/60');
         header.classList.remove('py-4');
       } else {
         header.classList.remove('py-2', 'shadow-2xl', 'shadow-black/60');
         header.classList.add('py-4');
       }
-    });
+
+      // En Home (scrollThreshold > 0): mostrar tras scrollY > 380px, ocultar al volver al Hero
+      if (stickyBar && scrollThreshold > 0 && !isInputFocused) {
+        if (currentScrollY > scrollThreshold) {
+          stickyBar.classList.remove('translate-y-full');
+        } else {
+          stickyBar.classList.add('translate-y-full');
+        }
+      }
+    }, { passive: true });
 
     // Mobile Drawer Toggle
     const navToggle = document.getElementById('nav-toggle');
@@ -435,26 +471,79 @@ const getWhatsAppLink = (phone: string) => {
     reveals.forEach(el => {
       observer.observe(el);
     });
+
+    // Ocultar Sticky Bar al enfocar inputs en móviles para no estorbar el teclado virtual
+    if (stickyBar) {
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.addEventListener('focus', () => {
+          isInputFocused = true;
+          stickyBar.classList.add('translate-y-full');
+        });
+        el.addEventListener('blur', () => {
+          isInputFocused = false;
+          if (scrollThreshold > 0) {
+            if (window.scrollY > scrollThreshold) {
+              stickyBar.classList.remove('translate-y-full');
+            }
+          } else {
+            stickyBar.classList.remove('translate-y-full');
+          }
+        });
+      });
+    }
   </script>
 
-  <!-- Floating WhatsApp Button (Mobile Only) -->
-  <a 
-    href={getWhatsAppLink(config.telefono_principal)}
-    target="_blank" 
-    rel="noopener"
-    class="fixed bottom-6 right-6 z-40 bg-[#25D366] w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/25 active:scale-95 md:hidden cursor-pointer border border-white/10 hover:scale-105 transition-all whatsapp-glow"
-    aria-label="Contactar por WhatsApp"
-    id="whatsapp-floating-button"
-  >
-    <img 
-      src="/assets/images/logos/whatsapp.webp" 
-      alt="WhatsApp" 
-      class="w-full h-full object-contain rounded-full"
-      loading="lazy"
-      width="48"
-      height="48"
-    />
-  </a>
+  <!-- Sticky Action Bar (Mobile Only - Excluido de /contrataciones/ y /admin) -->
+  {!isContrataciones && !isAdmin && (
+    <aside 
+      id="mobile-sticky-cta" 
+      data-scroll-threshold={isHome ? "380" : "0"}
+      class={`fixed bottom-0 left-0 w-full z-40 md:hidden bg-slate-950/95 backdrop-blur-xl border-t border-white/10 px-4 py-2.5 shadow-[0_-8px_25px_rgba(0,0,0,0.6)] transition-transform duration-300 ${isHome ? 'translate-y-full' : ''}`}
+      style="padding-bottom: max(0.625rem, env(safe-area-inset-bottom));"
+      aria-label="Acciones de contratación rápida"
+    >
+      <div class="flex items-center gap-3 max-w-md mx-auto">
+        <a 
+          href="/contrataciones" 
+          class="flex-1 bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold text-xs py-3 px-3 rounded-lg text-center uppercase tracking-wider shadow-md active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          COTIZAR
+        </a>
+        <a 
+          href={getWhatsAppLink(config.telefono_principal)} 
+          target="_blank" 
+          rel="noopener" 
+          class="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-black font-extrabold text-xs py-3 px-3 rounded-lg text-center uppercase tracking-wider shadow-md active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+          aria-label="Contactar a Banda Bruna por WhatsApp"
+        >
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
+          WHATSAPP
+        </a>
+      </div>
+    </aside>
+  )}
+
+  <!-- Floating WhatsApp Button (Solo en /contrataciones/ donde no hay sticky bar) -->
+  {isContrataciones && (
+    <a 
+      href={getWhatsAppLink(config.telefono_principal)}
+      target="_blank" 
+      rel="noopener"
+      class="fixed bottom-6 right-6 z-40 bg-[#25D366] w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/25 active:scale-95 md:hidden cursor-pointer border border-white/10 hover:scale-105 transition-all whatsapp-glow"
+      aria-label="Contactar por WhatsApp"
+      id="whatsapp-floating-button"
+    >
+      <img 
+        src="/assets/images/logos/whatsapp.webp" 
+        alt="WhatsApp" 
+        class="w-full h-full object-contain rounded-full"
+        loading="lazy"
+        width="48"
+        height="48"
+      />
+    </a>
+  )}
 
   <SpeedInsights />
 </body>

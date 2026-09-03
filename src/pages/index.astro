@@ -581,6 +581,26 @@ try {
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.15em] leading-tight text-white uppercase font-sans">
           MÚSICA EN VIVO PARA <span class="text-gold-bruna font-semibold">EVENTOS, FESTIVALES Y CELEBRACIONES</span>
         </h1>
+
+        <!-- Mobile-Only Hero Quick Action Buttons (Within 1st Viewport) -->
+        <div class="flex lg:hidden flex-row gap-3 justify-center mt-5">
+          <a 
+            href="/contrataciones" 
+            class="flex-1 max-w-[190px] bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold text-xs py-3.5 px-3 rounded-lg shadow-lg shadow-gold-bruna/20 uppercase tracking-wider text-center flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            COTIZAR EVENTO
+          </a>
+          <a 
+            href={`https://wa.me/${config.telefono_principal ? config.telefono_principal.replace(/\+/g, '').replace(/\s+/g, '') : '56990021689'}`} 
+            target="_blank" 
+            rel="noopener"
+            class="flex-1 max-w-[160px] bg-slate-900/90 border border-green-500/30 text-green-400 font-bold text-xs py-3.5 px-3 rounded-lg uppercase tracking-wider text-center flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
+            WHATSAPP
+          </a>
+        </div>
       </div>
 
       <!-- Bottom Action Section (Pushed to left/right corners) -->
@@ -1045,7 +1065,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">+{stats.musiciansTrajectory}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Músicos con + de 15 años de trayectoria musical</span>
       </div>
 
@@ -1054,7 +1074,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.stageYears} data-count-prefix="+">0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.stageYears} data-count-prefix="+">+{stats.stageYears}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Años en escenarios</span>
       </div>
 
@@ -1063,7 +1083,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.instagramFollowers}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.instagramFollowers}>{Number(stats.instagramFollowers).toLocaleString('es-CL')}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores Instagram</span>
       </a>
 
@@ -1072,7 +1092,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 320 512" fill="currentColor"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.facebookFriends / 1000} data-count-suffix=" mil" data-count-decimal>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.facebookFriends}>{Number(stats.facebookFriends).toLocaleString('es-CL')}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Amigos Facebook</span>
       </a>
 
@@ -1081,7 +1101,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 576 512" fill="currentColor"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.youtubeSubscribers}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.youtubeSubscribers}>{Number(stats.youtubeSubscribers).toLocaleString('es-CL')}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Suscriptores YouTube</span>
       </a>
 
@@ -1090,7 +1110,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
           <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.tiktokFollowers}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.tiktokFollowers}>{Number(stats.tiktokFollowers).toLocaleString('es-CL')}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores TikTok</span>
       </a>
 
@@ -1099,7 +1119,7 @@ try {
         <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.regions}>0</span>
+        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.regions}>{stats.regions}</span>
         <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Regiones de Chile</span>
       </div>
 
@@ -1346,7 +1366,7 @@ try {
                   name="name" 
                   placeholder="Nombre completo" 
                   required
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
                 />
                 <span class="text-[9px] text-red-400 hidden" id="qh-name-err">Ingresa tu nombre.</span>
               </div>
@@ -1360,7 +1380,7 @@ try {
                   required
                   autocomplete="tel"
                   inputmode="tel"
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
                 />
                 <span class="text-[9px] text-red-400 hidden" id="qh-phone-err">Ingresa tu teléfono.</span>
               </div>
@@ -1377,7 +1397,7 @@ try {
                   placeholder="Tu correo" 
                   required
                   inputmode="email"
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
                 />
                 <span class="text-[9px] text-red-400 hidden" id="qh-email-err">Ingresa un correo válido.</span>
               </div>
@@ -1386,7 +1406,7 @@ try {
                 <select 
                   id="qh-type" 
                   name="event-type"
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
                 >
                   <option value="" disabled selected>Tipo de evento</option>
                   <option value="municipal">Festival Municipal / Show Público</option>
@@ -1408,7 +1428,7 @@ try {
                   id="qh-date" 
                   name="event-date"
                   required
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
                 />
                 <span class="text-[9px] text-red-400 hidden" id="qh-date-err">Selecciona la fecha.</span>
               </div>
@@ -1420,7 +1440,7 @@ try {
                   name="city" 
                   placeholder="Ciudad / Comuna del evento" 
                   required
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors"
+                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
                 />
                 <span class="text-[9px] text-red-400 hidden" id="qh-city-err">Ingresa la comuna.</span>
               </div>
@@ -1434,7 +1454,7 @@ try {
                 name="message" 
                 rows="4" 
                 placeholder="Detalles adicionales del show (escenario, horarios, duración, etc.)"
-                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-xs outline-none focus:border-gold-bruna transition-colors resize-none"
+                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors resize-none"
               ></textarea>
             </div>
 
@@ -1785,11 +1805,16 @@ try {
       const counters = document.querySelectorAll('[data-count-target]');
       if (counters.length === 0) return;
 
+      // Respetar preferencia de accesibilidad (prefers-reduced-motion)
+      // Si el usuario tiene desactivadas las animaciones, el HTML SSR ya contiene el valor real final.
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const counter = entry.target;
-            const target = parseFloat(counter.getAttribute('data-count-target'));
+            const target = parseFloat(counter.getAttribute('data-count-target') || '0');
             const duration = 2000; // 2 seconds animation
             const startTime = performance.now();
             const prefix = counter.getAttribute('data-count-prefix') || '';
