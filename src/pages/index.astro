@@ -44,12 +44,30 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
   const isUpcoming = diffDays >= 0 && !isPast;
   const videoUrl = event.video_url || (event.fecha === '2026-08-08' ? 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4' : null);
 
+  // Metadatos parseados desde descripcion
+  let meta: any = {};
+  try {
+    if (event.descripcion && typeof event.descripcion === 'string' && event.descripcion.trim().startsWith('{')) {
+      meta = JSON.parse(event.descripcion);
+    }
+  } catch (e) {}
+
+  const isBocaDeLobos = event.fecha === '2026-09-18';
+  const tieneEntradas = meta.tiene_entradas !== undefined 
+    ? Boolean(meta.tiene_entradas) 
+    : (isBocaDeLobos ? true : false);
+  const ticketUrl = meta.ticket_url || (isBocaDeLobos ? 'https://portaldisc.com/evento/bandabrunaenbocadelobos' : null);
+  const imagenFlyer = event.imagen || (isBocaDeLobos ? '/assets/images/flyers/flyer_boca_de_lobos.webp' : null);
+
   if (isUpcoming && !imminentEvent) {
     imminentEvent = {
       ...event,
       day,
       monthName,
-      diffDays
+      diffDays,
+      tieneEntradas,
+      ticketUrl,
+      imagen: imagenFlyer
     };
   }
 
@@ -77,7 +95,9 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
     diffDays,
     isPast,
     videoUrl,
-    imagen: event.imagen || null
+    imagen: imagenFlyer,
+    tieneEntradas,
+    ticketUrl
   };
 }).slice(0, 5);
 
@@ -111,10 +131,10 @@ const config = dbConfig || {};
 const stats = {
   musiciansTrajectory: config.cant_trayectoria !== undefined && config.cant_trayectoria !== null ? config.cant_trayectoria : socialStats.musiciansTrajectory,
   stageYears: config.cant_escenarios !== undefined && config.cant_escenarios !== null ? config.cant_escenarios : socialStats.stageYears,
-  instagramFollowers: config.cant_instagram !== undefined && config.cant_instagram !== null ? config.cant_instagram : socialStats.instagramFollowers,
-  facebookFriends: config.cant_facebook !== undefined && config.cant_facebook !== null ? config.cant_facebook : socialStats.facebookFriends,
-  youtubeSubscribers: config.cant_youtube !== undefined && config.cant_youtube !== null ? config.cant_youtube : socialStats.youtubeSubscribers,
-  tiktokFollowers: config.cant_tiktok !== undefined && config.cant_tiktok !== null ? config.cant_tiktok : socialStats.tiktokFollowers,
+  instagramFollowers: Math.max(Number(config.cant_instagram) || 0, Number(socialStats.instagramFollowers) || 0, 3359),
+  facebookFriends: Math.max(Number(config.cant_facebook) || 0, Number(socialStats.facebookFriends) || 0, 5000),
+  youtubeSubscribers: Math.max(Number(config.cant_youtube) || 0, Number(socialStats.youtubeSubscribers) || 0, 911),
+  tiktokFollowers: Math.max(Number(config.cant_tiktok) || 0, Number(socialStats.tiktokFollowers) || 0, 1136),
   regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : socialStats.regions
 };
 
@@ -610,7 +630,7 @@ try {
 
       <!-- Subtítulo en Plus Jakarta Sans -->
       <p class="text-sm sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl drop-shadow">
-        +15 años de trayectoria musical llevando la fuerza, el ritmo y el sonido de la cumbia sureña en directo a todo Chile.
+        Músicos con más de 15 años de trayectoria musical llevando la fuerza, el ritmo y el sonido de la cumbia sureña en directo a todo Chile.
       </p>
 
       <!-- Máximo Dos CTAs Principales (Mínimo 48px de área táctil) -->
@@ -628,7 +648,7 @@ try {
           rel="noopener"
           class="inline-flex items-center justify-center gap-2.5 bg-slate-950/80 hover:bg-slate-900 border border-green-500/40 hover:border-green-400 text-green-400 hover:text-green-300 font-bold text-xs sm:text-sm tracking-wider uppercase px-7 py-3.5 min-h-[48px] rounded-lg backdrop-blur-md active:scale-[0.98] transition-all"
         >
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12c0 1.83.49 3.55 1.34 5.03L2 22l5.12-1.34A9.93 9.93 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm3.89 13.91c-.24.67-1.19 1.25-1.74 1.33-.49.07-1.12.1-3.23-.77-2.69-1.12-4.41-3.86-4.54-4.04-.13-.18-1.08-1.44-1.08-2.75 0-1.31.68-1.95.93-2.22.24-.27.53-.34.71-.34.18 0 .36 0 .51.01.17.01.39-.06.61.46.22.53.76 1.85.83 1.99.07.14.11.3.02.48-.09.18-.14.29-.27.45-.14.16-.29.35-.41.47-.14.14-.28.29-.12.57.16.27.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.17 1.34.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.6-.14.24.09 1.53.72 1.79.85.27.14.44.2.51.31.06.12.06.69-.18 1.36z"/></svg>
           WHATSAPP OFICIAL
         </a>
       </div>
@@ -658,7 +678,7 @@ try {
             +{stats.musiciansTrajectory}
           </span>
           <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">
-            Años de Trayectoria
+            Trayectoria de los Músicos
           </span>
         </div>
 
@@ -825,6 +845,16 @@ try {
                         <span>🖼️</span> VER FLYER
                       </button>
                     )}
+                    {event.tieneEntradas && event.ticketUrl && (
+                      <a 
+                        href={event.ticketUrl} 
+                        target="_blank" 
+                        rel="noopener"
+                        class="text-[8px] text-amber-400 hover:text-amber-300 hover:underline font-extrabold flex items-center gap-1 cursor-pointer mt-0.5 tracking-wider uppercase"
+                      >
+                        <span>🎟️</span> Comprar Entradas
+                      </a>
+                    )}
                   </div>
                 </li>
               ))}
@@ -913,7 +943,7 @@ try {
           UNA ORQUESTA CONSOLIDADA EN GRANDES ESCENARIOS
         </h2>
         <p class="text-xs sm:text-sm text-slate-300 font-light mt-3 leading-relaxed">
-          Más de una década y media entregando un espectáculo de cumbia sureña de alto nivel para municipios, festivales masivos y producciones en todo el país.
+          Músicos profesionales con más de 15 años de trayectoria en los escenarios, entregando un espectáculo de cumbia sureña de alto nivel para municipios, festivales masivos y producciones en todo el país.
         </p>
       </div>
 
@@ -928,9 +958,9 @@ try {
           <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">
             +{stats.musiciansTrajectory} AÑOS
           </span>
-          <h3 class="text-xs font-bold text-gold-bruna uppercase tracking-wider mb-2">De Trayectoria Musical</h3>
+          <h3 class="text-xs font-bold text-gold-bruna uppercase tracking-wider mb-2">Trayectoria de sus Músicos</h3>
           <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Experiencia comprobada en fiestas masivas, festivales y celebraciones de alta exigencia técnica.
+            Músicos con experiencia comprobada en fiestas masivas, festivales y celebraciones de alta exigencia técnica.
           </p>
         </div>
 
@@ -1524,18 +1554,18 @@ try {
                 <div>
                   <div class="flex items-center justify-between mb-3">
                     <span class="bg-pink-600/20 border border-pink-500/30 text-pink-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                      INSTAGRAM REEL
+                      INSTAGRAM OFICIAL
                     </span>
                     <span class="text-[9px] text-slate-500 font-mono">@banda_bruna</span>
                   </div>
                   <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
-                    <img src={instagramFeed[0].imageUrl} alt="Instagram Reel" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <img src={instagramFeed[0].imageUrl} alt="Instagram Oficial Banda Bruna" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <span class="text-white text-base">🎬</span>
+                      <span class="text-white text-base">📸</span>
                     </div>
                   </div>
                   <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
-                    En Vivo en Escenarios de Chile
+                    Fiestas Patrias en Vivo — Temuco
                   </h3>
                   <p class="text-[11px] text-slate-300 font-light line-clamp-2">
                     {instagramFeed[0].caption}
@@ -1543,7 +1573,7 @@ try {
                 </div>
                 <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
                   <span>{instagramFeed[0].timeAgo}</span>
-                  <span class="text-gold-bruna font-bold group-hover:underline">Ver Reel →</span>
+                  <span class="text-gold-bruna font-bold group-hover:underline">Ver Publicación →</span>
                 </div>
               </a>
 

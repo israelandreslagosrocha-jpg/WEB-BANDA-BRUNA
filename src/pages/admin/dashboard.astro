@@ -346,7 +346,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
               <input type="number" id="conf-stats-tiktok" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
             </div>
             <div class="flex flex-col gap-2">
-              <label for="conf-stats-trayectoria" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Trayectoria (Cantidad Músicos)</label>
+              <label for="conf-stats-trayectoria" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Trayectoria Músicos (Años)</label>
               <input type="number" id="conf-stats-trayectoria" min="0" class="bg-slate-950 border border-white/5 rounded p-3 text-white text-xs outline-none focus:border-gold-bruna" />
             </div>
             <div class="flex flex-col gap-2">
@@ -1003,6 +1003,15 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           if (data) evento = data;
         }
 
+        let meta = { tiene_entradas: false, ticket_url: '' };
+        try {
+          if (evento.descripcion && evento.descripcion.trim().startsWith('{')) {
+            meta = JSON.parse(evento.descripcion);
+          }
+        } catch (e) {}
+        const hasTickets = meta.tiene_entradas || false;
+        const ticketUrl = meta.ticket_url || '';
+
         modal.innerHTML = `
           <div class="bg-slate-900 border border-white/5 w-full max-w-md rounded-2xl p-6 md:p-8 flex flex-col gap-5">
             <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Presentación' : 'Crear Nuevo Show'}</h3>
@@ -1018,12 +1027,25 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Lugar / Recinto</label>
-                <input type="text" id="ev-venue" value="${evento.lugar || ''}" placeholder="ej: Olimpo Club / Gimnasio Municipal" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+                <input type="text" id="ev-venue" value="${evento.lugar || ''}" placeholder="ej: Boca de Lobos / Olimpo Club" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Ciudad / Comuna</label>
                 <input type="text" id="ev-city" value="${evento.ciudad || ''}" required placeholder="ej: Temuco" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
+
+              <!-- Switch: ¿Es con entradas a la venta? -->
+              <div class="flex items-center gap-2.5 p-3 bg-slate-950/80 rounded-xl border border-white/5">
+                <input type="checkbox" id="ev-has-tickets" ${hasTickets ? 'checked' : ''} class="w-4 h-4 accent-[#d4af37] cursor-pointer" />
+                <label for="ev-has-tickets" class="text-xs font-bold text-white cursor-pointer select-none">¿Es con entradas a la venta?</label>
+              </div>
+
+              <!-- Enlace para comprar entradas (Visible solo si marcado) -->
+              <div id="ev-tickets-container" class="flex flex-col gap-1 ${hasTickets ? '' : 'hidden'}">
+                <label class="text-[9px] font-bold text-gold-bruna uppercase tracking-wider">Enlace para comprar entradas (PortalTickets / Passline / etc.)</label>
+                <input type="url" id="ev-ticket-url" value="${ticketUrl}" placeholder="https://portaldisc.com/evento/..." class="bg-slate-950 border border-gold-bruna/30 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+              </div>
+
               <div class="flex flex-col gap-1">
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Flyer / Afiche del Show (Subir Imagen)</label>
                 <input type="file" id="ev-flyer" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
@@ -1044,6 +1066,17 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
 
         modal.classList.remove('hidden');
 
+        // Toggle ticket URL container
+        const chkTickets = document.getElementById('ev-has-tickets') as HTMLInputElement;
+        const ticketsContainer = document.getElementById('ev-tickets-container');
+        chkTickets?.addEventListener('change', () => {
+          if (chkTickets.checked) {
+            ticketsContainer?.classList.remove('hidden');
+          } else {
+            ticketsContainer?.classList.add('hidden');
+          }
+        });
+
         // Close event
         document.getElementById('btn-modal-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
 
@@ -1056,6 +1089,8 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           const ciudad = (document.getElementById('ev-city') as HTMLInputElement).value;
           const flyerFileInput = document.getElementById('ev-flyer') as HTMLInputElement;
           const flyerUrlInput = document.getElementById('ev-flyer-url') as HTMLInputElement;
+          const hasTicketsChecked = (document.getElementById('ev-has-tickets') as HTMLInputElement)?.checked || false;
+          const finalTicketUrl = (document.getElementById('ev-ticket-url') as HTMLInputElement)?.value.trim() || '';
 
           let imagen = flyerUrlInput.value.trim() || evento.imagen || null;
 
@@ -1066,7 +1101,20 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
             }
           }
 
-          const payload = { nombre, fecha, lugar, ciudad, imagen, publicado: true };
+          const metaPayload = {
+            tiene_entradas: hasTicketsChecked,
+            ticket_url: hasTicketsChecked ? finalTicketUrl : ''
+          };
+
+          const payload = {
+            nombre,
+            fecha,
+            lugar,
+            ciudad,
+            imagen,
+            descripcion: JSON.stringify(metaPayload),
+            publicado: true
+          };
 
           let success = false;
           if (id) {

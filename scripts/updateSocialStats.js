@@ -10,10 +10,10 @@ const statsFilePath = path.join(__dirname, '..', 'src', 'data', 'socialStats.jso
 let stats = {
   musiciansTrajectory: 15,
   stageYears: 10,
-  instagramFollowers: 3190,
-  facebookFriends: 4900,
-  youtubeSubscribers: 577,
-  tiktokFollowers: 1095,
+  instagramFollowers: 3359,
+  facebookFriends: 5000,
+  youtubeSubscribers: 911,
+  tiktokFollowers: 1136,
   regions: 5,
   lastUpdated: new Date().toISOString()
 };
@@ -66,16 +66,16 @@ async function fetchStatsFromGoogleSheets() {
         
         if (!isNaN(value) && value > 0) {
           if (platform === 'youtube') {
-            stats.youtubeSubscribers = value;
+            stats.youtubeSubscribers = Math.max(value, 911);
             updatedCount++;
           } else if (platform === 'instagram') {
-            stats.instagramFollowers = value;
+            stats.instagramFollowers = Math.max(value, 3359);
             updatedCount++;
           } else if (platform === 'tiktok') {
-            stats.tiktokFollowers = value;
+            stats.tiktokFollowers = Math.max(value, 1136);
             updatedCount++;
           } else if (platform === 'facebook') {
-            stats.facebookFriends = value;
+            stats.facebookFriends = Math.max(value, 5000);
             updatedCount++;
           }
         }
@@ -88,8 +88,60 @@ async function fetchStatsFromGoogleSheets() {
   }
 }
 
+// 3. Obtener estadísticas del videoclip oficial "Ahogado en un Bar"
+async function fetchYouTubeVideoStats() {
+  const launchStatsFilePath = path.join(__dirname, '..', 'src', 'data', 'launchStats.json');
+  let currentLaunchStats = {
+    slug: 'ahogado-en-un-bar',
+    youtube_id: 'mZhYl60ENAs',
+    youtube_views: 26249,
+    youtube_likes: 239,
+    lastUpdated: new Date().toISOString()
+  };
+
+  if (fs.existsSync(launchStatsFilePath)) {
+    try {
+      currentLaunchStats = { ...currentLaunchStats, ...JSON.parse(fs.readFileSync(launchStatsFilePath, 'utf8')) };
+    } catch {}
+  }
+
+  try {
+    console.log('Consultando estadísticas de YouTube para "Ahogado en un Bar"...');
+    const res = await fetch('https://www.youtube.com/watch?v=mZhYl60ENAs', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    if (res.ok) {
+      const html = await res.text();
+      const viewMatch = html.match(/"viewCount":"(\d+)"/);
+      const likeMatch = html.match(/"likeCount":"(\d+)"/);
+
+      if (viewMatch && parseInt(viewMatch[1], 10) > 0) {
+        currentLaunchStats.youtube_views = parseInt(viewMatch[1], 10);
+      }
+      if (likeMatch && parseInt(likeMatch[1], 10) > 0) {
+        currentLaunchStats.youtube_likes = parseInt(likeMatch[1], 10);
+      }
+      currentLaunchStats.lastUpdated = new Date().toISOString();
+      console.log('Estadísticas de YouTube actualizadas:', currentLaunchStats);
+    }
+  } catch (err) {
+    console.warn('No se pudo obtener datos en vivo de YouTube, manteniendo estadísticas previas:', err.message);
+  }
+
+  try {
+    const dir = path.dirname(launchStatsFilePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(launchStatsFilePath, JSON.stringify(currentLaunchStats, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error al guardar launchStats.json:', err.message);
+  }
+}
+
 async function run() {
   await fetchStatsFromGoogleSheets();
+  await fetchYouTubeVideoStats();
   
   // Guardar fecha de actualización
   stats.lastUpdated = new Date().toISOString();

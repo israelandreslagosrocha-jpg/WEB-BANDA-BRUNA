@@ -26,29 +26,40 @@ export const getVideoPlaylists = () => {
     "facebook": [
       { id: "fb_fiestas_patrias", title: "Continuamos trabajando para brindar un buen espectáculo estas fiestas patrias!! 🇨🇱🎵", url: "https://www.facebook.com/share/r/1BkeWALAF3/", thumbnail: "/assets/images/facebook/fb_fiestas_patrias.webp", duration: "0:45", category: "Facebook Reel" },
       { id: "fb_saludo_diego_urrutia", title: "¡Saludo especial de Diego Urrutia en ExpoMundoFamilia! 🎭🎤", url: "https://www.facebook.com/share/r/1H8uHmWAuZ/", thumbnail: "/assets/images/facebook/fb_saludo_diego_urrutia.webp", duration: "0:50", category: "Facebook Reel" },
-      { id: "fb_reel_1572889367878240", title: "Banda Bruna BB - Presentación y ritmo tropical en vivo 🎸🔥", url: "https://www.facebook.com/reel/1572889367878240/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414125/compressed_DSC01108_gh6sl8.webp", duration: "0:45", category: "Facebook Reel" },
-      { id: "fb_reel_4520812758195702", title: "¡Vivimos una fiesta inolvidable sobre el escenario! 🎉 Banda Bruna", url: "https://www.facebook.com/reel/4520812758195702/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414193/compressed_20250322-_DSC8451_tfvkgj.webp", duration: "0:35", category: "Facebook Reel" },
-      { id: "fb_reel_1919974456057548", title: "Show en vivo y energía contagiosa con todo el público 💃🕺", url: "https://www.facebook.com/reel/1919974456057548/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414183/compressed_20250322-_DSC7731_smf5lp.webp", duration: "0:50", category: "Facebook Reel" }
+      { id: "fb1", title: "Banda Bruna BB - Presentación y ritmo tropical en vivo 🎸🔥", url: "https://www.facebook.com/reel/918184277458701", thumbnail: "/assets/images/facebook/fb_reel_1.webp", duration: "0:45", category: "Facebook Reel" },
+      { id: "fb2", title: "¡Vivimos una fiesta inolvidable sobre el escenario! 🎉 Banda Bruna", url: "https://www.facebook.com/reel/465715206013627", thumbnail: "/assets/images/facebook/fb_reel_2.webp", duration: "0:35", category: "Facebook Reel" },
+      { id: "fb3", title: "Show en vivo y energía contagiosa con todo el público 💃🕺", url: "https://www.facebook.com/reel/447781014945781", thumbnail: "/assets/images/facebook/fb_reel_3.webp", duration: "0:50", category: "Facebook Reel" }
     ],
     "tiktok": [
       { id: "tt_dia_del_minero", title: "Banda Bruna BB - Día del Minero ⛏️🎶 #minero #bandabruna #musicaenvivo", url: "https://www.tiktok.com/@bandabrunaoficial/video/7672900759847013650", thumbnail: "/assets/images/tiktok/tiktok_minero.webp", duration: "0:56", category: "TikTok Oficial" },
-      { id: "tt_7659982007669214471", title: "Banda Bruna BB - Show en vivo y backstage 🥁🔥 #cumbia #musica", url: "https://www.tiktok.com/@bandabrunaoficial/video/7659982007669214471", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414182/compressed_20250322-_DSC8018_bqynkm.webp", duration: "0:45", category: "TikTok Oficial" },
-      { id: "tt_7660903502633372946", title: "¡Gracias por cantar y bailar con nosotros en cada escenario! ❤️", url: "https://www.tiktok.com/@bandabrunaoficial/video/7660903502633372946", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8359_pl7ubh.webp", duration: "0:50", category: "TikTok Oficial" },
-      { id: "tt_7661073934871317768", title: "Ritmo, cumbia y alegría sureña sobre el escenario 🎬✨ #bandabruna", url: "https://www.tiktok.com/@bandabrunaoficial/video/7661073934871317768", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02356_1_l5mqsc.webp", duration: "0:40", category: "TikTok Oficial" },
-      { id: "tt_7661480080421555463", title: "La previa y toda la energía del concierto de Banda Bruna 🎷🎶", url: "https://www.tiktok.com/@bandabrunaoficial/video/7661480080421555463", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201230759_DSC00081_1_jv8mqo.webp", duration: "0:35", category: "TikTok Oficial" }
+      { id: "tt_vivo", title: "La previa y toda la energía del concierto de Banda Bruna 🎷🎶 #musicaenvivo", url: "https://www.tiktok.com/@bandabrunaoficial/video/7661480080421555463", thumbnail: "/assets/images/tiktok/tiktok_vivo.webp", duration: "0:45", category: "TikTok Oficial" },
+      { id: "tt1", title: "Show en vivo y producción de Banda Bruna 🎬 #productora #cumbia", url: "https://www.tiktok.com/@bandabrunaoficial/video/7552604759543270667", thumbnail: "/assets/images/tiktok/tiktok_1.webp", duration: "1:00", category: "TikTok Oficial" },
+      { id: "tt2", title: "Boroa Norte Toltén Chile... ¡Banda Bruna BB en el escenario! 🥁🔥", url: "https://www.tiktok.com/@bandabrunaoficial/video/7328464244482034949", thumbnail: "/assets/images/tiktok/tiktok_2.webp", duration: "1:15", category: "TikTok Oficial" },
+      { id: "tt3", title: "Tributo a Antonio Ríos - El Maestro 🎶 #cumbia #musicaenvivo", url: "https://www.tiktok.com/@bandabrunaoficial/video/7523401411820817669", thumbnail: "/assets/images/tiktok/tiktok_3.webp", duration: "0:45", category: "TikTok Oficial" }
     ],
     "instagram": [
+      { id: "ig_boca_de_lobos", title: "🎸 BANDA BRUNA EN VIVO — BOCA DE LOBOS, TEMUCO (18 Sep)", url: "https://www.instagram.com/p/Dc2aAJzuUC8/", thumbnail: "/assets/images/instagram/ig_boca_de_lobos.webp", duration: "0:45", category: "Instagram Reel" },
       { id: "ig_fuimos_enganados", title: "🛑🚨 FUIMOS ENGAÑADOS!!! 😔🤥 😡😡 Reel Humor Banda Bruna", url: "https://www.instagram.com/p/Db8kRMfuips/", thumbnail: "/assets/images/instagram/ig_fuimos_enganados.webp", duration: "0:45", category: "Instagram Reel" },
       { id: "ig_dia_del_minero", title: "Con cariños para los mineros ⛏️🎶 Canción de cumbia suena en vez del himno", url: "https://www.instagram.com/p/Db63NyKJ9bf/", thumbnail: "/assets/images/instagram/ig_dia_del_minero.webp", duration: "0:56", category: "Instagram Reel" },
-      { id: "ig_reel_Dag495zuVO9", title: "Banda Bruna BB - Reel Oficial 🎵✨", url: "https://www.instagram.com/reel/Dag495zuVO9/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8302_iiqi8k.webp", duration: "0:45", category: "Instagram Reel" },
-      { id: "ig_reel_Dan6pQYJJT7", title: "Agencia CK & Banda Bruna - Producción y show audiovisual 🔥", url: "https://www.instagram.com/reel/Dan6pQYJJT7/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00983_tcabl4.webp", duration: "0:50", category: "Instagram Reel" },
-      { id: "ig_reel_DarYCJZupXO", title: "Momentos inolvidables en el escenario con el público 🎶❤️", url: "https://www.instagram.com/reel/DarYCJZupXO/", thumbnail: "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC00953_zemfwn.webp", duration: "0:40", category: "Instagram Reel" }
+      { id: "ig_trivia", title: "TRIVIA BRUNA: ¿Quién llega más tarde a los ensayos? 🤣🥁", url: "https://www.instagram.com/reel/DawSBQZJykb/", thumbnail: "/assets/images/instagram/trivia_ensayos.webp", duration: "1:00", category: "Instagram Reel" },
+      { id: "ig_lanzamiento", title: "🔥 ¡YA DISPONIBLE \"AHOGADO EN UN BAR\"! Videoclip Oficial 🍻", url: "https://www.instagram.com/p/DaY5-_YCctx/", thumbnail: "/assets/images/instagram/lanzamiento_reel.webp", duration: "0:50", category: "Instagram Reel" }
     ]
   };
 };
 
 export const getInstagramFeed = () => {
   return [
+    {
+      id: "ig_boca_de_lobos",
+      imageUrl: "/assets/images/instagram/ig_boca_de_lobos.webp",
+      likes: 30,
+      comments: 5,
+      caption: `🎸 BANDA BRUNA EN VIVO — BOCA DE LOBOS, TEMUCO 🇨🇱🎶
+Este 18 de septiembre, prepárate para una noche de música en vivo junto a Banda Bruna en Boca de Lobos, Temuco. Entradas disponibles en PortalTickets.`,
+      username: "@banda_bruna",
+      timeAgo: "Reciente",
+      link: "https://www.instagram.com/p/Dc2aAJzuUC8/"
+    },
     {
       id: "ig_fuimos_enganados",
       imageUrl: "/assets/images/instagram/ig_fuimos_enganados.webp",
@@ -91,16 +102,6 @@ El videoclip oficial ya está activo. Agradecemos a todos por su inmenso apoyo. 
       username: "@banda_bruna",
       timeAgo: "Hace 2 días",
       link: "https://www.instagram.com/p/DaiUuuLKw3s/"
-    },
-    {
-      id: "ig2",
-      imageUrl: "/assets/images/instagram/segunda_publicacion.webp",
-      likes: 512,
-      comments: 31,
-      caption: "Próximamente en todas nuestras plataformas",
-      username: "@banda_bruna",
-      timeAgo: "Hace 2 días",
-      link: "https://www.instagram.com/p/DZkqDn1uNpC/"
     }
   ];
 };

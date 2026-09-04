@@ -51,7 +51,7 @@ const defaultLayoutId = layouts.length > 0 ? layouts[0].id : '';
         <!-- CTA Directo para Omitir / Descargas -->
         <div class="flex flex-wrap justify-center gap-4 mt-8">
           <a href="#sec-descargas" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-transform hover:scale-[1.03] text-center font-title shadow-lg shadow-gold-bruna/10">
-            Descargar Rider PDF
+            Descargas Técnicas
           </a>
           <a href="#sec-iluminacion" class="bg-slate-900 border border-white/10 hover:border-gold-bruna/30 text-white px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-transform hover:scale-[1.03] text-center font-title">
             Ver Iluminación
@@ -311,39 +311,131 @@ const defaultLayoutId = layouts.length > 0 ? layouts[0].id : '';
     }
   }
 
-  // Cargar Documentos de Descarga del layout
+  // Cargar Documentos de Descarga oficiales de Banda Bruna
   async function loadDownloads() {
     const container = document.getElementById('downloads-grid-container');
     if (!container) return;
 
-    container.innerHTML = '<p class="text-xs text-slate-450 uppercase animate-pulse">Cargando descargas...</p>';
+    // Catálogo oficial estricto en el orden solicitado
+    const officialDownloads = [
+      {
+        id: 'rider-completo',
+        categoria: 'DOCUMENTO GENERAL',
+        titulo: 'Rider Técnico Completo',
+        descripcion: 'Documentación integral consolidada de audio, iluminación, backline y requerimientos escénicos.',
+        disponible: false,
+        estado_badge: 'Aún por completar',
+        badge_class: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+        url: null,
+        boton_label: 'Próximamente disponible'
+      },
+      {
+        id: 'input-list',
+        categoria: 'AUDIO & CONEXIONES',
+        titulo: 'Input List & Audio Patch PDF',
+        descripcion: 'Ficha técnica oficial de 26 canales, microfonía sugerida, direct boxes, secuencias e indicaciones para consola.',
+        disponible: true,
+        estado_badge: 'PDF Oficial',
+        badge_class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        url: '/assets/downloads/input_list_banda_bruna.pdf',
+        boton_label: 'Descargar PDF ➔'
+      },
+      {
+        id: 'planta-luces',
+        categoria: 'ILUMINACIÓN & DMX',
+        titulo: 'Planta de Luces e Iluminación',
+        descripcion: 'Diagrama de distribución de puentes, móviles beam, wash, cegadoras, DMX patch y requerimientos eléctricos.',
+        disponible: true,
+        estado_badge: 'PDF Oficial',
+        badge_class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        url: '/assets/downloads/planta_luces_banda_bruna.pdf',
+        boton_label: 'Descargar PDF ➔'
+      },
+      {
+        id: 'stage-plot',
+        categoria: 'ESCENARIO & MONTAJE',
+        titulo: 'Stage Plot y Distribución',
+        descripcion: 'Disposición física en escenario, tarimas de batería/congas, tomas de corriente 220V y envíos auxiliares.',
+        disponible: true,
+        estado_badge: 'PDF Oficial',
+        badge_class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        url: '/assets/downloads/stage_plot_banda_bruna.pdf',
+        boton_label: 'Descargar PDF ➔'
+      },
+      {
+        id: 'logos-oficiales',
+        categoria: 'PRENSA & MEDIOS',
+        titulo: 'Logos Oficiales (Vector & PNG)',
+        descripcion: 'Pack de archivos gráficos en alta resolución con transparencias para afiches, pantallas LED y prensa.',
+        disponible: true,
+        estado_badge: 'Pack ZIP',
+        badge_class: 'bg-gold-bruna/10 text-gold-bruna border-gold-bruna/20',
+        url: '/assets/downloads/logos.zip',
+        boton_label: 'Descargar ZIP ➔'
+      },
+      {
+        id: 'sesion-fotos',
+        categoria: 'PRENSA & MEDIOS',
+        titulo: 'Sesión Fotográfica Oficial',
+        descripcion: 'Fotografías de estudio y prensa en alta definición para medios de comunicación, eventos y festivales.',
+        disponible: true,
+        estado_badge: 'Pack ZIP',
+        badge_class: 'bg-gold-bruna/10 text-gold-bruna border-gold-bruna/20',
+        url: '/assets/downloads/fotos_prensa.zip',
+        boton_label: 'Descargar ZIP ➔'
+      }
+    ];
 
-    const { data, error } = await supabase
-      .from('downloads')
-      .select('*')
-      .or(`layout_id.eq.${currentLayoutId},layout_id.is.null`)
-      .order('orden', { ascending: true });
+    try {
+      // Intentar enriquecer o verificar con Supabase si existe configuración personalizada
+      const { data } = await supabase
+        .from('downloads')
+        .select('*')
+        .or(`layout_id.eq.${currentLayoutId},layout_id.is.null`)
+        .order('orden', { ascending: true });
 
-    if (!error && data && data.length > 0) {
-      container.innerHTML = data.map(d => `
-        <div class="bg-slate-950/60 border border-white/5 p-5 rounded-2xl flex flex-col justify-between hover:border-gold-bruna/20 transition-all group">
-          <div class="mb-4">
-            <span class="text-[9px] text-slate-500 font-mono uppercase tracking-wider block mb-1">${d.categoria}</span>
-            <h4 class="font-title font-bold text-sm text-white uppercase">${d.titulo}</h4>
-          </div>
-          <a 
-            href="${d.pdf_url || d.imagen_url || '#'}" 
-            download 
-            class="w-full text-center bg-slate-900 hover:bg-slate-800 border border-white/10 hover:border-gold-bruna/30 text-white font-semibold py-2.5 rounded-lg text-xs transition-colors cursor-pointer uppercase tracking-wider font-title"
-          >
-            Descargar Archivo ➔
-          </a>
-        </div>
-      `).join('');
-    } else {
-      container.innerHTML = `
-        <p class="text-xs text-slate-500 italic xl:col-span-3 text-center py-6">No hay archivos adicionales configurados para descargar en esta versión.</p>
-      `;
+      if (data && data.length > 0) {
+        data.forEach(dbItem => {
+          const match = officialDownloads.find(d => 
+            d.titulo.toLowerCase().includes(dbItem.titulo.toLowerCase()) || 
+            dbItem.titulo.toLowerCase().includes(d.titulo.toLowerCase())
+          );
+          if (match && dbItem.pdf_url && match.id !== 'rider-completo') {
+            match.url = dbItem.pdf_url;
+          }
+        });
+      }
+    } catch {
+      // Usar catálogo predeterminado
     }
+
+    container.innerHTML = officialDownloads.map(d => `
+      <div class="bg-slate-950/60 border border-white/5 p-6 rounded-2xl flex flex-col justify-between hover:border-gold-bruna/20 transition-all group relative overflow-hidden">
+        <div class="mb-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-[9px] text-slate-500 font-mono uppercase tracking-wider block">${d.categoria}</span>
+            <span class="${d.badge_class} border text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+              ${d.estado_badge}
+            </span>
+          </div>
+          <h4 class="font-title font-bold text-sm text-white uppercase mb-2 group-hover:text-gold-bruna transition-colors">${d.titulo}</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">${d.descripcion}</p>
+        </div>
+
+        ${d.disponible && d.url ? `
+          <a 
+            href="${d.url}" 
+            download 
+            class="w-full text-center bg-slate-900 hover:bg-gold-bruna hover:text-black border border-white/10 hover:border-gold-bruna/30 text-white font-semibold py-2.5 rounded-lg text-xs transition-all cursor-pointer uppercase tracking-wider font-title flex items-center justify-center gap-2 shadow-sm"
+          >
+            ${d.boton_label}
+          </a>
+        ` : `
+          <div class="w-full text-center bg-slate-900/40 border border-white/5 text-slate-500 font-medium py-2.5 rounded-lg text-xs tracking-wider uppercase font-title cursor-not-allowed select-none flex items-center justify-center gap-1.5">
+            <span class="text-amber-400/60">⏳</span> ${d.boton_label}
+          </div>
+        `}
+      </div>
+    `).join('');
   }
 </script>

@@ -118,68 +118,78 @@ function generateInputListPDF(canales, layoutName, logoPath) {
 
   drawHeader(doc, 'Input List & Audio Patch', `Ficha Oficial: ${layoutName}`, logoPath);
 
-  // Metadatos de la ficha (Dos columnas estables, sin usar doc.y dinámico relativo para evitar encimamientos)
-  const colY = 125;
-  doc.fillColor(COLOR_TEXT).fontSize(10).font('Helvetica-Bold').text('Detalles del Montaje:', 40, colY);
-  doc.font('Helvetica').fontSize(8.5).text(`Versión: ${layoutName}\nCanales en uso: ${canales.length}\nÚltima actualización: Julio 2026`, 40, colY + 14, { lineGap: 2 });
+  // 1. Contacto ante dudas técnicas (Subcabecera limpia)
+  const contactY = 116;
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('CONTACTO ANTE DUDAS TÉCNICAS:', 40, contactY);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(8).text(
+    'Dirección Técnica: contacto@bandabruna.cl  •  Teléfonos: +56 9 9002 1689 / +56 9 7614 9408  •  Temuco, Chile', 
+    40, contactY + 12
+  );
 
-  doc.font('Helvetica-Bold').text('Notas de Consola:', 300, colY);
-  doc.font('Helvetica').fontSize(8)
-     .text('1. Consola digital (Midas M32, Behringer X32 o superior) requerida.\n2. EQ paramétrica de 4 bandas, gate y compressor activos por canal.\n3. Monitoreo inalámbrico in-ear y mezcla independiente por integrante.', 300, colY + 14, { width: 250, lineGap: 2 });
-
-  // Tabla Canales (Comienza a Y fijo = 190 para evitar colisión con las notas)
-  let currentY = 190;
-  const colWidths = [30, 130, 240, 115];
+  // 2. Tabla Canales (Comienza a Y fijo = 145)
+  let currentY = 145;
+  const colWidths = [32, 138, 230, 115];
   const colTitles = ['Ch', 'Instrumento / Fuente', 'Micrófono / Conexión sugerida', 'Categoría'];
 
   // Cabecera de la Tabla
-  doc.rect(40, currentY, 515, 20).fill(COLOR_PRIMARY);
+  doc.rect(40, currentY, 515, 18).fill(COLOR_PRIMARY);
   let currentX = 40;
-  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(8.5);
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(8);
   for (let i = 0; i < colTitles.length; i++) {
-    doc.text(colTitles[i], currentX + 6, currentY + 6, { width: colWidths[i] - 12 });
+    doc.text(colTitles[i], currentX + 6, currentY + 5, { width: colWidths[i] - 12 });
     currentX += colWidths[i];
   }
 
-  currentY += 20;
-  doc.font('Helvetica').fontSize(8);
+  currentY += 18;
+  doc.font('Helvetica').fontSize(7.5);
 
   canales.forEach((c, idx) => {
+    const rowHeight = 17;
     // Zebra striping
     if (idx % 2 === 1) {
-      doc.rect(40, currentY, 515, 18).fill(COLOR_LIGHT_BG);
+      doc.rect(40, currentY, 515, rowHeight).fill(COLOR_LIGHT_BG);
     }
     
     doc.fillColor(COLOR_TEXT);
     let drawX = 40;
     
-    doc.text(c.canal.toString(), drawX + 6, currentY + 5, { width: colWidths[0] - 12, align: 'center' });
+    // Canal
+    doc.font('Helvetica-Bold');
+    doc.text(c.canal.toString(), drawX + 6, currentY + 4, { width: colWidths[0] - 12, align: 'center' });
     drawX += colWidths[0];
     
+    // Instrumento
     doc.font('Helvetica-Bold');
-    doc.text(c.instrumento, drawX + 6, currentY + 5, { width: colWidths[1] - 12 });
+    doc.text(c.instrumento, drawX + 6, currentY + 4, { width: colWidths[1] - 12 });
     drawX += colWidths[1];
     
+    // Conexión
     doc.font('Helvetica');
-    doc.text(c.conexion, drawX + 6, currentY + 5, { width: colWidths[2] - 12 });
+    doc.text(c.conexion, drawX + 6, currentY + 4, { width: colWidths[2] - 12 });
     drawX += colWidths[2];
     
+    // Categoría
     doc.fillColor(COLOR_MUTED);
-    doc.text(c.categoria, drawX + 6, currentY + 5, { width: colWidths[3] - 12 });
+    doc.text(c.categoria, drawX + 6, currentY + 4, { width: colWidths[3] - 12 });
     
-    doc.rect(40, currentY + 18, 515, 0.5).fill(COLOR_BORDER);
-    currentY += 18;
+    doc.rect(40, currentY + rowHeight, 515, 0.5).fill(COLOR_BORDER);
+    currentY += rowHeight;
   });
 
-  // Requerimientos Generales adicionales
-  doc.y = currentY + 15;
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(9.5).text('SISTEMA DE MONITOREO (RETORNOS):', 40);
-  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(8).text(
-    '• Aux 1 (IEM): César Bruna (Voz Principal) • Aux 2 (IEM): Fabián Garrido (Güiro/Animación)\n' +
-    '• Aux 3 (IEM): Vicente Núñez (Gtr/Dir/Coros) • Aux 4 (IEM): Gerson Ulloa (Bajo/Coros)\n' +
-    '• Aux 5 (IEM): Israel Lagos Rocha (Teclados) • Aux 6 (Wedge): Jaime C. Quilodrán (Timbal)\n' +
-    '• Aux 7 (Wedge): Jaime C. Sanhueza (Congas)', 40, doc.y + 4, { lineGap: 2 }
-  );
+  // 3. Pie de página: Web Oficial y Redes Sociales
+  const footerCardY = currentY + 14;
+  doc.rect(40, footerCardY, 515, 36).fill(COLOR_LIGHT_BG);
+  doc.rect(40, footerCardY, 515, 36).stroke(COLOR_BORDER);
+
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8)
+     .text('PÁGINA WEB OFICIAL:', 52, footerCardY + 8);
+  doc.fillColor(COLOR_GOLD).font('Helvetica-Bold').fontSize(8)
+     .text('www.bandabruna.cl', 160, footerCardY + 8);
+
+  doc.fillColor(COLOR_MUTED).font('Helvetica-Bold').fontSize(7)
+     .text('REDES SOCIALES OFICIALES:', 52, footerCardY + 22);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(7)
+     .text('Instagram: @banda_bruna  •  YouTube: @bandabrunaoficial  •  Facebook: Banda Bruna  •  TikTok: @bandabrunaoficial', 170, footerCardY + 22);
 
   drawFooter(doc, 1);
   doc.end();
@@ -579,25 +589,32 @@ async function main() {
   // Cargar canales
   let canales = [];
   const defaultCanales = [
-    { canal: 1, instrumento: 'KICK', conexion: 'SHURE PGA52', categoria: 'Batería' },
-    { canal: 2, instrumento: 'SNARE', conexion: 'SHURE PGA57', categoria: 'Batería' },
-    { canal: 3, instrumento: 'TIMBAL HIGH', conexion: 'SHURE PGA56', categoria: 'Batería' },
-    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE PGA56', categoria: 'Batería' },
-    { canal: 5, instrumento: 'OCTAPAD', conexion: 'CAJA DIRECTA (DI)', categoria: 'Batería' },
-    { canal: 6, instrumento: 'OH L', conexion: 'SHURE PGA81', categoria: 'Batería' },
-    { canal: 7, instrumento: 'OH R', conexion: 'SHURE PGA81', categoria: 'Batería' },
-    { canal: 8, instrumento: 'CONGA HIGH', conexion: 'SHURE PGA56', categoria: 'Percusión' },
-    { canal: 9, instrumento: 'CONGA LOW', conexion: 'SHURE PGA56', categoria: 'Percusión' },
-    { canal: 10, instrumento: 'BONGOS', conexion: 'SHURE SM57', categoria: 'Percusión' },
-    { canal: 11, instrumento: 'CHIMES', conexion: 'SHURE SM57', categoria: 'Percusión' },
-    { canal: 12, instrumento: 'BASS (DI)', conexion: 'CAJA DIRECTA ACTIVA', categoria: 'Cuerdas / Armonía' },
-    { canal: 13, instrumento: 'GTR ACUSTICA', conexion: 'CAJA DIRECTA', categoria: 'Cuerdas / Armonía' },
-    { canal: 14, instrumento: 'GTR ELECTRICA', conexion: 'MIC (SM57 / PGA57)', categoria: 'Cuerdas / Armonía' },
-    { canal: 15, instrumento: 'TECLADO L', conexion: 'CAJA DIRECTA L', categoria: 'Cuerdas / Armonía' },
-    { canal: 16, instrumento: 'TECLADO R', conexion: 'CAJA DIRECTA R', categoria: 'Cuerdas / Armonía' },
-    { canal: 17, instrumento: 'VOZ MAIN (CÉSAR BRUNA)', conexion: 'SHURE BETA 58 WIRELESS', categoria: 'Voces' },
-    { canal: 18, instrumento: 'VOZ CORO (VICENTE NUÑEZ)', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 19, instrumento: 'VOZ CORO (GERSON ULLOA)', conexion: 'SHURE SM58', categoria: 'Voces' }
+    { canal: 1, instrumento: 'KICK', conexion: 'SHURE BETA 91', categoria: 'Batería' },
+    { canal: 2, instrumento: 'SNARE', conexion: 'SENNHEISER E609', categoria: 'Batería' },
+    { canal: 3, instrumento: 'TIMBAL HI', conexion: 'SHURE SM57', categoria: 'Batería' },
+    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE SM57', categoria: 'Batería' },
+    { canal: 5, instrumento: 'OH ACCESORIOS', conexion: 'SM 81', categoria: 'Batería' },
+    { canal: 6, instrumento: 'OH HI HAT', conexion: 'SM 81', categoria: 'Batería' },
+    { canal: 7, instrumento: 'BASS', conexion: 'XLR', categoria: 'Cuerdas / Armonía' },
+    { canal: 8, instrumento: 'GUITAR', conexion: 'SENNHEISER E906', categoria: 'Cuerdas / Armonía' },
+    { canal: 9, instrumento: 'TECLADO L', conexion: 'D.I.', categoria: 'Cuerdas / Armonía' },
+    { canal: 10, instrumento: 'TECLADO R', conexion: 'D.I.', categoria: 'Cuerdas / Armonía' },
+    { canal: 11, instrumento: 'CONGA HI', conexion: 'BETA 56A', categoria: 'Percusión' },
+    { canal: 12, instrumento: 'CONGA LOW', conexion: 'BETA 56A', categoria: 'Percusión' },
+    { canal: 13, instrumento: 'BONGO', conexion: 'BETA 57A', categoria: 'Percusión' },
+    { canal: 14, instrumento: 'CHIMES', conexion: 'SM 81', categoria: 'Percusión' },
+    { canal: 15, instrumento: 'VOZ BAJO', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 16, instrumento: 'VOZ GUITARRA', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 17, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 18, instrumento: 'VOZ BATERIA', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 19, instrumento: 'VOCAL', conexion: 'G4/BETA 58 INAL.', categoria: 'Voces' },
+    { canal: 20, instrumento: 'TALKBACK', conexion: 'SHURE SM 58', categoria: 'Voces' },
+    { canal: 21, instrumento: 'OCTAPAD', conexion: 'DIRECT LINE L', categoria: 'Batería' },
+    { canal: 22, instrumento: 'GUIRO', conexion: 'DIRECT LINE R (BETA 98H/C)', categoria: 'Percusión' },
+    { canal: 23, instrumento: 'CLICK', conexion: 'USB', categoria: 'Secuencia / Otros' },
+    { canal: 24, instrumento: 'GUIA', conexion: 'USB', categoria: 'Secuencia / Otros' },
+    { canal: 25, instrumento: 'SECUENCIA L', conexion: 'USB', categoria: 'Secuencia / Otros' },
+    { canal: 26, instrumento: 'SECUENCIA R', conexion: 'USB', categoria: 'Secuencia / Otros' }
   ];
 
   if (!useFallback && supabase) {

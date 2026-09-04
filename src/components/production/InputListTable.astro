@@ -24,6 +24,9 @@
       <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="voces">
         Voces
       </button>
+      <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="otros">
+        Secuencia / Otros
+      </button>
     </div>
   </div>
 
@@ -53,25 +56,32 @@
   let selectedCategory = 'all';
 
   const defaultCanales = [
-    { canal: 1, instrumento: 'KICK', conexion: 'SHURE PGA52', categoria: 'bateria' },
-    { canal: 2, instrumento: 'SNARE', conexion: 'SHURE PGA57', categoria: 'bateria' },
-    { canal: 3, instrumento: 'TIMBAL HIGH', conexion: 'SHURE PGA56', categoria: 'bateria' },
-    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE PGA56', categoria: 'bateria' },
-    { canal: 5, instrumento: 'OCTAPAD', conexion: 'CAJA DIRECTA (DI)', categoria: 'bateria' },
-    { canal: 6, instrumento: 'OH L', conexion: 'SHURE PGA81', categoria: 'bateria' },
-    { canal: 7, instrumento: 'OH R', conexion: 'SHURE PGA81', categoria: 'bateria' },
-    { canal: 8, instrumento: 'CONGA HIGH', conexion: 'SHURE PGA56', categoria: 'percusion' },
-    { canal: 9, instrumento: 'CONGA LOW', conexion: 'SHURE PGA56', categoria: 'percusion' },
-    { canal: 10, instrumento: 'BONGOS', conexion: 'SHURE SM57', categoria: 'percusion' },
-    { canal: 11, instrumento: 'CHIMES', conexion: 'SHURE SM57', categoria: 'percusion' },
-    { canal: 12, instrumento: 'BASS (DI)', conexion: 'CAJA DIRECTA ACTIVA', categoria: 'cuerdas' },
-    { canal: 13, instrumento: 'GTR ACUSTICA', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
-    { canal: 14, instrumento: 'GTR ELECTRICA', conexion: 'MIC (SM57 / PGA57)', categoria: 'cuerdas' },
-    { canal: 15, instrumento: 'TECLADO L', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
-    { canal: 16, instrumento: 'TECLADO R', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
-    { canal: 17, instrumento: 'VOZ MAIN (BRUNA)', conexion: 'SHURE BETA 58 WIRELESS', categoria: 'voces' },
-    { canal: 18, instrumento: 'VOZ CORO (GTR)', conexion: 'SHURE SM58', categoria: 'voces' },
-    { canal: 19, instrumento: 'VOZ CORO (TECL)', conexion: 'SHURE SM58', categoria: 'voces' }
+    { canal: 1, instrumento: 'KICK', conexion: 'SHURE BETA 91', categoria: 'bateria' },
+    { canal: 2, instrumento: 'SNARE', conexion: 'SENNHEISER E609', categoria: 'bateria' },
+    { canal: 3, instrumento: 'TIMBAL HI', conexion: 'SHURE SM57', categoria: 'bateria' },
+    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE SM57', categoria: 'bateria' },
+    { canal: 5, instrumento: 'OH ACCESORIOS', conexion: 'SM 81', categoria: 'bateria' },
+    { canal: 6, instrumento: 'OH HI HAT', conexion: 'SM 81', categoria: 'bateria' },
+    { canal: 7, instrumento: 'BASS', conexion: 'XLR', categoria: 'cuerdas' },
+    { canal: 8, instrumento: 'GUITAR', conexion: 'SENNHEISER E906', categoria: 'cuerdas' },
+    { canal: 9, instrumento: 'TECLADO L', conexion: 'D.I.', categoria: 'cuerdas' },
+    { canal: 10, instrumento: 'TECLADO R', conexion: 'D.I.', categoria: 'cuerdas' },
+    { canal: 11, instrumento: 'CONGA HI', conexion: 'BETA 56A', categoria: 'percusion' },
+    { canal: 12, instrumento: 'CONGA LOW', conexion: 'BETA 56A', categoria: 'percusion' },
+    { canal: 13, instrumento: 'BONGO', conexion: 'BETA 57A', categoria: 'percusion' },
+    { canal: 14, instrumento: 'CHIMES', conexion: 'SM 81', categoria: 'percusion' },
+    { canal: 15, instrumento: 'VOZ BAJO', conexion: 'SHURE SM58', categoria: 'voces' },
+    { canal: 16, instrumento: 'VOZ GUITARRA', conexion: 'SHURE SM58', categoria: 'voces' },
+    { canal: 17, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'voces' },
+    { canal: 18, instrumento: 'VOZ BATERIA', conexion: 'SHURE SM58', categoria: 'voces' },
+    { canal: 19, instrumento: 'VOCAL', conexion: 'G4/BETA 58 INAL.', categoria: 'voces' },
+    { canal: 20, instrumento: 'TALKBACK', conexion: 'SHURE SM 58', categoria: 'voces' },
+    { canal: 21, instrumento: 'OCTAPAD', conexion: 'DIRECT LINE L', categoria: 'bateria' },
+    { canal: 22, instrumento: 'GUIRO', conexion: 'DIRECT LINE R (BETA 98H/C)', categoria: 'percusion' },
+    { canal: 23, instrumento: 'CLICK', conexion: 'USB', categoria: 'otros' },
+    { canal: 24, instrumento: 'GUIA', conexion: 'USB', categoria: 'otros' },
+    { canal: 25, instrumento: 'SECUENCIA L', conexion: 'USB', categoria: 'otros' },
+    { canal: 26, instrumento: 'SECUENCIA R', conexion: 'USB', categoria: 'otros' }
   ];
 
   // Escuchar cambio de layout
