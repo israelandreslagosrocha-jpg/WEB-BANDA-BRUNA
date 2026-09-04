@@ -30,20 +30,40 @@ const events = (rawEvents || []).map((event: any) => {
                         (event.nombre && event.nombre.toLowerCase().includes('negociación')) ||
                         (event.nombre && event.nombre.toLowerCase().includes('negociacion'));
 
+  // H7-4: Horario real si existe, o 'Horario por confirmar' (no inventar 20:00)
+  const rawHora = event.hora || event.time;
+  const timeDisplay = isNegociacion ? 'Por confirmar' : (rawHora ? (rawHora.includes(':') ? `${rawHora} hrs` : `${rawHora}`) : 'Horario por confirmar');
+
+  // H7-1: mapUrl seguro
+  const hasCustomMap = (event.map_url && event.map_url !== '#' && event.map_url.startsWith('http')) || 
+                       (event.mapUrl && event.mapUrl !== '#' && event.mapUrl.startsWith('http'));
+
+  const venueText = event.lugar || 'Por confirmar';
+  const locationText = event.ciudad || '';
+  const searchTerms = [venueText !== 'Por confirmar' ? venueText : '', locationText].filter(Boolean).join(' ').trim();
+
+  let finalMapUrl: string | null = null;
+  if (hasCustomMap) {
+    finalMapUrl = event.map_url || event.mapUrl;
+  } else if (searchTerms.length > 0) {
+    finalMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchTerms)}`;
+  }
+
   return {
     id: event.id,
     date: isNegociacion ? '—' : day,
     month: monthName,
     year: year,
-    time: isNegociacion ? 'Por confirmar' : "20:00", // Hora por defecto
+    time: timeDisplay,
     title: event.nombre,
-    venue: event.lugar || 'Por confirmar',
-    location: event.ciudad || '',
-    mapUrl: '#',
+    venue: venueText,
+    location: locationText,
+    mapUrl: finalMapUrl,
     statusType: isNegociacion ? 'pending' : 'confirmed',
     fullDate: fullDateStr,
     isPast,
-    videoUrl
+    videoUrl,
+    imagen: event.imagen || null
   };
 });
 
@@ -98,10 +118,14 @@ const getGoogleCalendarUrl = (event: any) => {
                 </div>
                 
                 <div>
-                  <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time === 'Por confirmar' ? 'Por confirmar' : `${event.time} hrs`}</span>
+                  <span class="text-slate-400 text-xs font-semibold">{event.year} — {event.time}</span>
                   <h3 class="font-title font-bold text-xl text-white mt-0.5 mb-1 tracking-wide">{event.title}</h3>
                   <p class="text-sm text-slate-400 font-light">
-                    Recinto: <a href={event.mapUrl} target="_blank" rel="noopener" class="underline hover:text-gold-bruna transition-colors">{event.venue}</a>, <strong>{event.location}</strong>
+                    Recinto: {event.mapUrl ? (
+                      <a href={event.mapUrl} target="_blank" rel="noopener" class="underline hover:text-gold-bruna transition-colors">{event.venue}</a>
+                    ) : (
+                      <span>{event.venue}</span>
+                    )}{event.location ? <>, <strong>{event.location}</strong></> : null}
                   </p>
                 </div>
               </div>
@@ -131,7 +155,17 @@ const getGoogleCalendarUrl = (event: any) => {
                     </div>
 
                     {event.statusType === 'confirmed' && (
-                      <div class="flex gap-3">
+                      <div class="flex flex-wrap gap-2.5">
+                        {event.imagen && (
+                          <button 
+                            type="button" 
+                            data-open-event-flyer={event.imagen} 
+                            data-event-title={`${event.title} — ${event.location || event.venue}`}
+                            class="text-xs bg-gold-bruna/10 border border-gold-bruna/30 hover:bg-gold-bruna/20 text-gold-bruna px-3.5 py-2 rounded transition-colors cursor-pointer flex items-center gap-1.5 font-bold uppercase tracking-wider"
+                          >
+                            <span>🖼️</span> Ver Flyer
+                          </button>
+                        )}
                         <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded transition-colors cursor-pointer">
                           Añadir a Google Calendar
                         </a>
@@ -249,9 +283,88 @@ const getGoogleCalendarUrl = (event: any) => {
     }
 
     setupEventVideoModal();
+    setupEventFlyerModal();
+
+    function setupEventFlyerModal() {
+      const modal = document.getElementById('event-flyer-modal');
+      const modalCard = document.getElementById('event-flyer-modal-card');
+      const imgEl = document.getElementById('event-flyer-modal-image') as HTMLImageElement;
+      const titleEl = document.getElementById('event-flyer-modal-title');
+      const linkEl = document.getElementById('event-flyer-modal-link') as HTMLAnchorElement;
+      const closeBtn = document.getElementById('close-event-flyer-modal');
+
+      if (!modal || !imgEl) return;
+
+      function openModal(url: string, title: string) {
+        imgEl.src = url;
+        if (titleEl) titleEl.textContent = title || 'Afiche Oficial';
+        if (linkEl) linkEl.href = url;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          if (modalCard) modalCard.classList.remove('scale-95');
+        }, 10);
+      }
+
+      function closeModal() {
+        modal.classList.add('opacity-0');
+        if (modalCard) modalCard.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          imgEl.src = '';
+        }, 300);
+      }
+
+      document.querySelectorAll('[data-open-event-flyer]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = el.getAttribute('data-open-event-flyer');
+          const title = el.getAttribute('data-event-title');
+          if (url) openModal(url, title || '');
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+    }
 
     document.addEventListener('astro:after-swap', () => {
       setupEventVideoModal();
+      setupEventFlyerModal();
     });
   </script>
+
+  <!-- Modal Emergente de Flyer / Afiche de Eventos -->
+  <div id="event-flyer-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 hidden opacity-0 transition-opacity duration-300">
+    <div id="event-flyer-modal-card" class="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden max-w-lg w-full shadow-2xl relative flex flex-col transform scale-95 transition-transform duration-300 max-h-[90vh]">
+      <!-- Header del Modal -->
+      <div class="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-slate-950">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <span class="text-[9px] bg-gold-bruna/20 text-gold-bruna font-bold px-2 py-0.5 rounded border border-gold-bruna/30 uppercase tracking-wider flex-shrink-0">AFICHE OFICIAL</span>
+          <h3 id="event-flyer-modal-title" class="text-xs font-bold font-title text-white uppercase tracking-wide truncate">Afiche del Evento</h3>
+        </div>
+        <button type="button" id="close-event-flyer-modal" aria-label="Cerrar modal" class="text-slate-400 hover:text-white text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors flex-shrink-0">
+          ✕
+        </button>
+      </div>
+      <!-- Imagen del Flyer -->
+      <div class="p-2 bg-black flex items-center justify-center overflow-auto flex-grow">
+        <img id="event-flyer-modal-image" src="" alt="Flyer del Evento" class="max-w-full max-h-[70vh] object-contain rounded-lg" />
+      </div>
+      <!-- Footer del Modal -->
+      <div class="p-3.5 bg-slate-950/90 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+        <span class="text-slate-400 font-light flex items-center gap-1.5">
+          <span>📅</span> Presentación oficial confirmada
+        </span>
+        <a id="event-flyer-modal-link" href="#" target="_blank" rel="noopener" class="text-[10px] text-gold-bruna font-bold uppercase tracking-wider hover:underline flex items-center gap-1">
+          Abrir en tamaño completo ↗
+        </a>
+      </div>
+    </div>
+  </div>
 </Layout>

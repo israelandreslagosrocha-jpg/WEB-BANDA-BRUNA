@@ -1,0 +1,573 @@
+---
+// Componente de Curación Editorial de Redes Sociales (P2)
+// Proyecto: Banda Bruna
+---
+
+<section id="tab-curacion-social" class="tab-pane hidden">
+  <div class="flex flex-col gap-6">
+
+    <!-- 1. HEADER & KPI METRICS -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900/60 border border-white/5 p-6 rounded-2xl">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold-bruna/10 text-gold-bruna font-bold uppercase tracking-wider border border-gold-bruna/20">
+            Fase P2 · Editorial
+          </span>
+          <h2 class="font-title font-bold text-xl uppercase text-white">Curación de Redes Sociales</h2>
+        </div>
+        <p class="text-xs text-slate-400">
+          Decisión editorial humana sobre publicaciones descubiertas por YouTube e Instagram. Controla visibilidad y posición en la web.
+        </p>
+      </div>
+      <div id="social-kpi-followers" class="flex items-center gap-4 text-xs font-title bg-slate-950/60 border border-white/5 px-4 py-2 rounded-xl">
+        <span class="flex items-center gap-1.5 text-red-400">
+          <span class="w-2 h-2 rounded-full bg-red-500"></span>
+          YouTube: <strong id="kpi-yt-subs" class="text-white font-mono">—</strong>
+        </span>
+        <span class="text-white/10">|</span>
+        <span class="flex items-center gap-1.5 text-pink-400">
+          <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+          Instagram: <strong id="kpi-ig-followers" class="text-white font-mono">—</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI CARDS GRID -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-900/40 border border-white/5 p-4 rounded-xl flex flex-col gap-1">
+        <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Total Descubiertas</span>
+        <span id="kpi-total" class="text-2xl font-bold font-title text-white">0</span>
+        <span class="text-[10px] text-slate-500">Inventario técnico P1</span>
+      </div>
+      <div class="bg-slate-900/40 border border-emerald-500/20 p-4 rounded-xl flex flex-col gap-1">
+        <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-400">En Web (Aprobadas)</span>
+        <span id="kpi-en-web" class="text-2xl font-bold font-title text-emerald-400">0</span>
+        <span class="text-[10px] text-slate-500">show_on_web = true y disponibles</span>
+      </div>
+      <div class="bg-slate-900/40 border border-white/5 p-4 rounded-xl flex flex-col gap-1">
+        <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Ocultas</span>
+        <span id="kpi-ocultas" class="text-2xl font-bold font-title text-slate-300">0</span>
+        <span class="text-[10px] text-slate-500">show_on_web = false</span>
+      </div>
+      <div class="bg-slate-900/40 border border-red-500/20 p-4 rounded-xl flex flex-col gap-1">
+        <span class="text-[10px] uppercase font-bold tracking-widest text-red-400">No Disponibles</span>
+        <span id="kpi-no-disponibles" class="text-2xl font-bold font-title text-red-400">0</span>
+        <span class="text-[10px] text-slate-500">Marcadas 404 (bloqueadas)</span>
+      </div>
+    </div>
+
+    <!-- 2. BARRA DE FILTROS EDITORIALES -->
+    <div class="bg-slate-900/40 border border-white/5 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Filtro Plataforma -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Plataforma</label>
+          <select id="filter-social-platform" class="bg-slate-950 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer focus:border-gold-bruna">
+            <option value="all">Todas</option>
+            <option value="youtube">YouTube</option>
+            <option value="instagram">Instagram</option>
+          </select>
+        </div>
+
+        <!-- Filtro Estado Editorial -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Estado Web</label>
+          <select id="filter-social-editorial" class="bg-slate-950 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer focus:border-gold-bruna">
+            <option value="all">Todos</option>
+            <option value="web">En Web</option>
+            <option value="hidden">Ocultos</option>
+          </select>
+        </div>
+
+        <!-- Filtro Estado Técnico -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Técnico</label>
+          <select id="filter-social-technical" class="bg-slate-950 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer focus:border-gold-bruna">
+            <option value="all">Todos</option>
+            <option value="available">Disponibles</option>
+            <option value="unavailable">No disponibles (404)</option>
+          </select>
+        </div>
+
+        <!-- Filtro Tipo Contenido -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tipo</label>
+          <select id="filter-social-type" class="bg-slate-950 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer focus:border-gold-bruna">
+            <option value="all">Todos</option>
+            <option value="video">Videos</option>
+            <option value="short">Shorts</option>
+            <option value="reel">Reels</option>
+            <option value="post">Posts</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Ordenación -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ordenar por</label>
+        <select id="filter-social-order" class="bg-slate-950 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer focus:border-gold-bruna">
+          <option value="recent">Más recientes</option>
+          <option value="web_order">Posición en Web</option>
+          <option value="views">Más vistas</option>
+          <option value="likes">Más likes</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Alerta de Conflicto de Posición (Modal / Toast Inline) -->
+    <div id="social-order-conflict-banner" class="hidden bg-amber-950/80 border border-amber-500/40 p-4 rounded-xl text-amber-200 text-xs flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-base">⚠️</span>
+        <span id="social-order-conflict-msg">La posición ya está ocupada por otra publicación.</span>
+      </div>
+      <button id="btn-close-conflict-banner" class="text-xs uppercase font-bold text-amber-300 hover:text-white px-2 py-1 bg-amber-900/50 rounded cursor-pointer">
+        Cerrar
+      </button>
+    </div>
+
+    <!-- 3. LISTADO DE PUBLICACIONES (CARDS) -->
+    <div id="social-posts-loading" class="py-16 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
+      <div class="w-8 h-8 border-2 border-gold-bruna border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-xs uppercase tracking-widest font-title">Cargando publicaciones descubiertas...</p>
+    </div>
+
+    <div id="social-posts-empty" class="hidden py-16 text-center text-slate-500 bg-slate-900/20 border border-white/5 rounded-xl">
+      <p class="text-sm font-title uppercase">No se encontraron publicaciones con los filtros seleccionados.</p>
+    </div>
+
+    <div id="social-posts-grid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Inyectado dinámicamente -->
+    </div>
+
+  </div>
+</section>
+
+<script>
+  import { supabase } from '../../services/supabaseClient.js';
+
+  interface SocialPost {
+    id: string;
+    platform: 'youtube' | 'instagram' | 'tiktok' | 'facebook';
+    external_id: string;
+    url: string;
+    post_type: 'video' | 'short' | 'reel' | 'post' | 'photo';
+    title: string | null;
+    caption: string | null;
+    thumbnail_url: string | null;
+    thumbnail_is_ephemeral: boolean;
+    published_at: string | null;
+    likes: number;
+    views: number;
+    comments: number;
+    disponible: boolean;
+    show_on_web: boolean;
+    web_order: number | null;
+    consecutive_404_count: number;
+    last_scraped_at: string;
+  }
+
+  let allPosts: SocialPost[] = [];
+
+  /**
+   * Carga principal del módulo de curación social.
+   * Expuesto a window para ser invocado desde el despachador de pestañas de dashboard.astro.
+   */
+  async function loadSocialFeedAdmin() {
+    const loadingEl = document.getElementById('social-posts-loading');
+    const gridEl = document.getElementById('social-posts-grid');
+    const emptyEl = document.getElementById('social-posts-empty');
+
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    if (gridEl) gridEl.classList.add('hidden');
+    if (emptyEl) emptyEl.classList.add('hidden');
+
+    try {
+      // 1. Cargar estadísticas de cuentas
+      const { data: accounts } = await supabase.from('social_accounts').select('*');
+      if (accounts) {
+        const yt = accounts.find((a: any) => a.id === 'youtube');
+        const ig = accounts.find((a: any) => a.id === 'instagram');
+        const kpiYt = document.getElementById('kpi-yt-subs');
+        const kpiIg = document.getElementById('kpi-ig-followers');
+        if (kpiYt && yt) kpiYt.textContent = yt.followers_count?.toLocaleString('es-CL') || '0';
+        if (kpiIg && ig) kpiIg.textContent = ig.followers_count?.toLocaleString('es-CL') || '0';
+      }
+
+      // 2. Cargar publicaciones
+      const { data: posts, error } = await supabase
+        .from('social_posts')
+        .select('*')
+        .order('published_at', { ascending: false });
+
+      if (error) throw error;
+      allPosts = (posts || []) as SocialPost[];
+
+      updateKPIs();
+      renderFilteredPosts();
+    } catch (err: any) {
+      console.error('[curacion-social] Error al cargar publicaciones:', err.message);
+    } finally {
+      if (loadingEl) loadingEl.classList.add('hidden');
+    }
+  }
+
+  // Asignar al window
+  (window as any).loadSocialFeedAdmin = loadSocialFeedAdmin;
+
+  /**
+   * Actualiza las tarjetas KPI superiores.
+   */
+  function updateKPIs() {
+    const totalEl = document.getElementById('kpi-total');
+    const enWebEl = document.getElementById('kpi-en-web');
+    const ocultasEl = document.getElementById('kpi-ocultas');
+    const noDispEl = document.getElementById('kpi-no-disponibles');
+
+    const total = allPosts.length;
+    const enWeb = allPosts.filter(p => p.show_on_web && p.disponible).length;
+    const ocultas = allPosts.filter(p => !p.show_on_web).length;
+    const noDisp = allPosts.filter(p => !p.disponible).length;
+
+    if (totalEl) totalEl.textContent = total.toString();
+    if (enWebEl) enWebEl.textContent = enWeb.toString();
+    if (ocultasEl) ocultasEl.textContent = ocultas.toString();
+    if (noDispEl) noDispEl.textContent = noDisp.toString();
+  }
+
+  /**
+   * Filtra y ordena las publicaciones según controles activos.
+   */
+  function renderFilteredPosts() {
+    const gridEl = document.getElementById('social-posts-grid');
+    const emptyEl = document.getElementById('social-posts-empty');
+    if (!gridEl) return;
+
+    const platformFilter = (document.getElementById('filter-social-platform') as HTMLSelectElement)?.value || 'all';
+    const editorialFilter = (document.getElementById('filter-social-editorial') as HTMLSelectElement)?.value || 'all';
+    const technicalFilter = (document.getElementById('filter-social-technical') as HTMLSelectElement)?.value || 'all';
+    const typeFilter = (document.getElementById('filter-social-type') as HTMLSelectElement)?.value || 'all';
+    const orderFilter = (document.getElementById('filter-social-order') as HTMLSelectElement)?.value || 'recent';
+
+    let filtered = [...allPosts];
+
+    if (platformFilter !== 'all') {
+      filtered = filtered.filter(p => p.platform === platformFilter);
+    }
+
+    if (editorialFilter === 'web') {
+      filtered = filtered.filter(p => p.show_on_web);
+    } else if (editorialFilter === 'hidden') {
+      filtered = filtered.filter(p => !p.show_on_web);
+    }
+
+    if (technicalFilter === 'available') {
+      filtered = filtered.filter(p => p.disponible);
+    } else if (technicalFilter === 'unavailable') {
+      filtered = filtered.filter(p => !p.disponible);
+    }
+
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(p => p.post_type === typeFilter);
+    }
+
+    // Ordenación
+    if (orderFilter === 'recent') {
+      filtered.sort((a, b) => new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime());
+    } else if (orderFilter === 'web_order') {
+      filtered.sort((a, b) => {
+        if (a.web_order === null) return 1;
+        if (b.web_order === null) return -1;
+        return a.web_order - b.web_order;
+      });
+    } else if (orderFilter === 'views') {
+      filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+    } else if (orderFilter === 'likes') {
+      filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    }
+
+    if (filtered.length === 0) {
+      gridEl.classList.add('hidden');
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      return;
+    }
+
+    if (emptyEl) emptyEl.classList.add('hidden');
+    gridEl.classList.remove('hidden');
+    gridEl.innerHTML = filtered.map(renderPostCard).join('');
+
+    attachCardEvents();
+  }
+
+  /**
+   * Genera el HTML de una tarjeta con diseño en 2 niveles (Principal Editorial + Secundario Técnico).
+   */
+  function renderPostCard(post: SocialPost): string {
+    const isYt = post.platform === 'youtube';
+    const platformBadgeClass = isYt 
+      ? 'bg-red-500/10 text-red-400 border-red-500/30' 
+      : 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-pink-400 border-pink-500/30';
+    const platformLabel = isYt ? '▶ YouTube' : '📷 Instagram';
+    const typeLabel = post.post_type.toUpperCase();
+
+    const formattedDate = post.published_at 
+      ? new Date(post.published_at).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
+      : 'Fecha no disponible';
+
+    const cleanCaption = post.caption || post.title || 'Sin descripción';
+    const displayCaption = cleanCaption.length > 130 ? cleanCaption.slice(0, 130) + '...' : cleanCaption;
+
+    const viewsText = post.views ? post.views.toLocaleString('es-CL') : '—';
+    const likesText = post.likes ? post.likes.toLocaleString('es-CL') : '—';
+    const commentsText = post.comments ? post.comments.toLocaleString('es-CL') : '—';
+
+    // Regla 6: Si disponible = false, prohibido publicar
+    const isDead = !post.disponible;
+    const publishDisabledAttr = isDead ? 'disabled title="Contenido marcado como 404. No disponible para publicación."' : '';
+    const publishButtonClass = isDead
+      ? 'opacity-40 cursor-not-allowed bg-slate-800 text-slate-500 border-slate-700'
+      : post.show_on_web
+        ? 'bg-slate-900 border border-white/10 hover:border-red-500/40 text-slate-300 hover:text-red-400 cursor-pointer'
+        : 'bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold cursor-pointer';
+
+    const publishButtonText = isDead
+      ? 'No disponible (404)'
+      : post.show_on_web
+        ? '✕ Ocultar de la Web'
+        : '✓ Mostrar en Web';
+
+    const webOrderValue = post.web_order !== null ? post.web_order : '';
+
+    return `
+      <div class="bg-slate-900/60 border ${post.show_on_web ? 'border-emerald-500/40 shadow-lg shadow-emerald-950/20' : 'border-white/5'} rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all" data-post-id="${post.id}">
+        
+        <!-- NIVEL 1: PRINCIPAL EDITORIAL -->
+        <div class="flex flex-col gap-3">
+          <!-- Top Row: Badges -->
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${platformBadgeClass}">
+                ${platformLabel} · ${typeLabel}
+              </span>
+              ${post.show_on_web ? `
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  En Web ${post.web_order ? '#' + post.web_order : ''}
+                </span>
+              ` : `
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-white/5">
+                  Oculto
+                </span>
+              `}
+            </div>
+
+            <div>
+              ${isDead ? `
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-950/60 text-red-400 border border-red-500/30">
+                  404 No disponible
+                </span>
+              ` : `
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-500/20">
+                  Disponible
+                </span>
+              `}
+            </div>
+          </div>
+
+          <!-- Body: Miniatura + Info -->
+          <div class="flex gap-4">
+            <div class="w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-slate-950 border border-white/10 relative">
+              ${post.thumbnail_url ? `
+                <img src="${post.thumbnail_url}" alt="Thumbnail" class="w-full h-full object-cover" loading="lazy" onerror="this.src='/assets/images/logos/logo_main.webp'; this.className='w-full h-full object-contain p-2 opacity-50';" />
+              ` : `
+                <div class="w-full h-full flex items-center justify-center text-slate-600 text-xs">Sin imagen</div>
+              `}
+            </div>
+            
+            <div class="flex flex-col justify-between overflow-hidden flex-1">
+              <div>
+                <span class="text-[10px] font-mono text-slate-400">${formattedDate}</span>
+                <p class="text-xs text-slate-200 mt-1 line-clamp-3 leading-relaxed" title="${escapeHtml(cleanCaption)}">
+                  ${escapeHtml(displayCaption)}
+                </p>
+              </div>
+
+              <!-- Métricas Técnicas Limpias -->
+              <div class="flex items-center gap-3 mt-2 text-[11px] font-mono text-slate-400">
+                <span title="Visualizaciones">👁️ ${viewsText}</span>
+                <span title="Likes">❤️ ${likesText}</span>
+                <span title="Comentarios">💬 ${commentsText}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones Editoriales Principales -->
+        <div class="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button class="btn-toggle-web px-3 py-1.5 rounded text-xs tracking-wider uppercase transition-all ${publishButtonClass}" ${publishDisabledAttr}>
+              ${publishButtonText}
+            </button>
+
+            <a href="${post.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-slate-400 hover:text-gold-bruna px-2 py-1.5 transition-all flex items-center gap-1 font-bold">
+              Ver ↗
+            </a>
+          </div>
+
+          <!-- Asignador de Posición Web -->
+          <div class="flex items-center gap-1.5">
+            <label class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Posición:</label>
+            <input type="number" min="1" max="99" class="input-web-order w-14 bg-slate-950 border border-white/10 rounded px-2 py-1 text-xs text-white text-center font-mono outline-none focus:border-gold-bruna" value="${webOrderValue}" placeholder="—" />
+            <button class="btn-save-order bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer">
+              Fijar
+            </button>
+          </div>
+        </div>
+
+        <!-- NIVEL 2: DETALLES TÉCNICOS PLEGABLES -->
+        <details class="text-[10px] text-slate-500 border-t border-white/5 pt-2 cursor-pointer">
+          <summary class="hover:text-slate-300 transition-all font-mono select-none">
+            🔧 Ver detalles técnicos (P1)
+          </summary>
+          <div class="mt-2 p-2.5 rounded bg-slate-950/60 border border-white/5 flex flex-col gap-1 font-mono text-[10px]">
+            <div><strong>External ID:</strong> <span class="text-slate-300">${post.external_id}</span></div>
+            <div><strong>Miniatura:</strong> <span class="${post.thumbnail_is_ephemeral ? 'text-amber-400' : 'text-emerald-400'}">${post.thumbnail_is_ephemeral ? 'Efímera (Meta)' : 'Permanente (YouTube)'}</span></div>
+            <div><strong>Fallos 404 consecutivos:</strong> <span class="text-slate-300">${post.consecutive_404_count}</span></div>
+            <div><strong>Último scrape:</strong> <span class="text-slate-300">${post.last_scraped_at ? new Date(post.last_scraped_at).toLocaleString('es-CL') : '—'}</span></div>
+          </div>
+        </details>
+
+      </div>
+    `;
+  }
+
+  /**
+   * Conecta los eventos interactivos de las tarjetas.
+   */
+  function attachCardEvents() {
+    const conflictBanner = document.getElementById('social-order-conflict-banner');
+    const conflictMsg = document.getElementById('social-order-conflict-msg');
+
+    // Botón Mostrar/Ocultar
+    document.querySelectorAll('.btn-toggle-web').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const card = (e.target as HTMLElement).closest('[data-post-id]');
+        const postId = card?.getAttribute('data-post-id');
+        if (!postId) return;
+
+        const post = allPosts.find(p => p.id === postId);
+        if (!post) return;
+
+        // Si está marcado como no disponible, prohibido mostrar en web
+        if (!post.disponible && !post.show_on_web) {
+          alert('Esta publicación fue marcada como 404 (no disponible) y no puede ser mostrada en la web.');
+          return;
+        }
+
+        const newShow = !post.show_on_web;
+        const newOrder = newShow ? (post.web_order || getNextAvailableOrder()) : null;
+
+        const { error } = await supabase
+          .from('social_posts')
+          .update({
+            show_on_web: newShow,
+            web_order: newOrder
+          })
+          .eq('id', postId);
+
+        if (error) {
+          alert('Error al actualizar visibilidad: ' + error.message);
+          return;
+        }
+
+        post.show_on_web = newShow;
+        post.web_order = newOrder;
+        updateKPIs();
+        renderFilteredPosts();
+      });
+    });
+
+    // Botón Fijar Posición con Detección de Colisiones
+    document.querySelectorAll('.btn-save-order').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const card = (e.target as HTMLElement).closest('[data-post-id]');
+        const postId = card?.getAttribute('data-post-id');
+        const input = card?.querySelector('.input-web-order') as HTMLInputElement;
+        if (!postId || !input) return;
+
+        const post = allPosts.find(p => p.id === postId);
+        if (!post) return;
+
+        const rawVal = input.value.trim();
+        const targetOrder = rawVal === '' ? null : parseInt(rawVal, 10);
+
+        if (targetOrder !== null && (isNaN(targetOrder) || targetOrder < 1)) {
+          alert('La posición debe ser un número entero mayor o igual a 1.');
+          return;
+        }
+
+        // Validación de colisión en Capa 1 (Dashboard)
+        if (targetOrder !== null) {
+          const occupiedBy = allPosts.find(p => p.id !== postId && p.show_on_web && p.disponible && p.web_order === targetOrder);
+          if (occupiedBy) {
+            const occupantTitle = occupiedBy.title || occupiedBy.caption || occupiedBy.external_id;
+            const shortTitle = occupantTitle.length > 40 ? occupantTitle.slice(0, 40) + '...' : occupantTitle;
+            
+            if (conflictBanner && conflictMsg) {
+              conflictMsg.textContent = `La posición #${targetOrder} ya está ocupada por "${shortTitle}". Por favor elige otra posición libre o cancela.`;
+              conflictBanner.classList.remove('hidden');
+            } else {
+              alert(`La posición #${targetOrder} ya está ocupada por "${shortTitle}". Por favor elige otra posición libre.`);
+            }
+            input.value = post.web_order !== null ? String(post.web_order) : '';
+            return;
+          }
+        }
+
+        // Si no hay colisión, persistir en Supabase
+        const { error } = await supabase
+          .from('social_posts')
+          .update({ web_order: targetOrder })
+          .eq('id', postId);
+
+        if (error) {
+          alert('Error al fijar posición (Capa 2 PostgreSQL): ' + error.message);
+          return;
+        }
+
+        if (conflictBanner) conflictBanner.classList.add('hidden');
+        post.web_order = targetOrder;
+        renderFilteredPosts();
+      });
+    });
+  }
+
+  function getNextAvailableOrder(): number {
+    const occupied = new Set(allPosts.filter(p => p.show_on_web && p.disponible && p.web_order !== null).map(p => p.web_order as number));
+    let order = 1;
+    while (occupied.has(order)) {
+      order++;
+    }
+    return order;
+  }
+
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Event Listeners para Filtros
+  document.addEventListener('DOMContentLoaded', () => {
+    ['filter-social-platform', 'filter-social-editorial', 'filter-social-technical', 'filter-social-type', 'filter-social-order'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', () => {
+        renderFilteredPosts();
+      });
+    });
+
+    document.getElementById('btn-close-conflict-banner')?.addEventListener('click', () => {
+      document.getElementById('social-order-conflict-banner')?.classList.add('hidden');
+    });
+  });
+</script>

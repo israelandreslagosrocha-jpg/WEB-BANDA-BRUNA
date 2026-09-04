@@ -65,7 +65,7 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="flex flex-col gap-2">
-        <label for="ext-name" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+        <label for="ext-name" class="text-xs font-bold text-slate-300 tracking-wider uppercase">
           {customField ? (customField.name === 'company' ? 'Nombre de Contacto / Encargado RRHH' : 'Nombre de Contacto / Encargado de Cultura') : 'Nombre del Contacto / Productor'}
         </label>
         <input 
@@ -75,13 +75,13 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
           placeholder="Ingresa tu nombre completo" 
           required
           autocomplete="name"
-          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+          class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
         />
-        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-name-err">Por favor ingresa tu nombre.</span>
+        <span class="text-xs text-red-400 hidden font-bold" id="ext-name-err">Por favor ingresa tu nombre.</span>
       </div>
       
       <div class="flex flex-col gap-2">
-        <label for="ext-phone" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Teléfono de Contacto</label>
+        <label for="ext-phone" class="text-xs font-bold text-slate-300 tracking-wider uppercase">Teléfono de Contacto</label>
         <input 
           type="tel" 
           id="ext-phone" 
@@ -90,15 +90,15 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
           required
           autocomplete="tel"
           inputmode="tel"
-          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+          class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
         />
-        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-phone-err">Por favor ingresa tu teléfono.</span>
+        <span class="text-xs text-red-400 hidden font-bold" id="ext-phone-err">Por favor ingresa tu teléfono.</span>
       </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="flex flex-col gap-2">
-        <label for="ext-email" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Correo Electrónico</label>
+        <label for="ext-email" class="text-xs font-bold text-slate-300 tracking-wider uppercase">Correo Electrónico</label>
         <input 
           type="email" 
           id="ext-email" 
@@ -107,14 +107,14 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
           required
           autocomplete="email"
           inputmode="email"
-          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+          class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
         />
-        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-email-err">Por favor ingresa un correo válido.</span>
+        <span class="text-xs text-red-400 hidden font-bold" id="ext-email-err">Por favor ingresa un correo válido.</span>
       </div>
       
       {customField ? (
         <div class="flex flex-col gap-2">
-          <label for="ext-custom-field" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+          <label for="ext-custom-field" class="text-xs font-bold text-slate-300 tracking-wider uppercase">
             {customField.label}
           </label>
           <input 
@@ -124,17 +124,17 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
             placeholder={customField.placeholder} 
             required
             data-prefix={customField.eventTypePrefix}
-            class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+            class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
           />
-          <span class="text-[10px] text-red-400 hidden font-bold" id="ext-custom-err">{customField.errorMessage}</span>
+          <span class="text-xs text-red-400 hidden font-bold" id="ext-custom-err">{customField.errorMessage}</span>
         </div>
       ) : (
         <div class="flex flex-col gap-2">
-          <label for="ext-type" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Tipo de Evento</label>
+          <label for="ext-type" class="text-xs font-bold text-slate-300 tracking-wider uppercase">Tipo de Evento</label>
           <select 
             id="ext-type" 
             name="event-type"
-            class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+            class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
           >
             {resolvedCategories.map(cat => (
               <option value={cat.value} selected={cat.selected || cat.value === defaultCategory}>
@@ -148,45 +148,45 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="flex flex-col gap-2">
-        <label for="ext-date" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Fecha Tentativa del Evento</label>
+        <label for="ext-date" class="text-xs font-bold text-slate-300 tracking-wider uppercase">Fecha Tentativa del Evento</label>
         <input 
           type="date" 
           id="ext-date" 
           name="event-date"
           required
-          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
+          class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors cursor-pointer"
         />
-        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-date-err">Por favor selecciona la fecha.</span>
+        <span class="text-xs text-red-400 hidden font-bold" id="ext-date-err">Por favor selecciona la fecha.</span>
       </div>
       
       <div class="flex flex-col gap-2">
-        <label for="ext-city" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Ciudad o Comuna del Evento</label>
+        <label for="ext-city" class="text-xs font-bold text-slate-300 tracking-wider uppercase">Ciudad o Comuna del Evento</label>
         <input 
           type="text" 
           id="ext-city" 
           name="city" 
           placeholder="Ej: Temuco, Valdivia, Santiago" 
           required
-          class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
+          class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors"
         />
-        <span class="text-[10px] text-red-400 hidden font-bold" id="ext-city-err">Por favor ingresa la comuna.</span>
+        <span class="text-xs text-red-400 hidden font-bold" id="ext-city-err">Por favor ingresa la comuna.</span>
       </div>
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="ext-message" class="text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+      <label for="ext-message" class="text-xs font-bold text-slate-300 tracking-wider uppercase">
         {messageLabel}
       </label>
       <textarea 
         id="ext-message" 
         name="message" 
-        rows="5" 
+        rows="4" 
         placeholder={messagePlaceholder}
-        class="bg-slate-950 border border-white/5 rounded-md p-3 text-white text-base md:text-sm outline-none hover:border-white/15 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
+        class="bg-slate-950 border border-white/10 rounded-md p-3.5 text-white text-base md:text-sm outline-none hover:border-white/20 focus:border-gold-bruna focus:bg-slate-950/80 transition-colors resize-none"
       ></textarea>
     </div>
 
-    <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-3.5 rounded text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer">
+    <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-4 px-6 rounded-md text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer min-h-[48px] flex items-center justify-center">
       {submitButtonText}
     </button>
     
@@ -208,22 +208,22 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
   </div>
 
   <div class="w-full max-w-md border-t border-white/5 pt-6 mt-2 flex flex-col gap-4">
-    <span class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">NOTIFICAR INMEDIATAMENTE AL STAFF COMERCIAL</span>
-    <p class="text-slate-400 text-xs font-light leading-relaxed">
+    <span class="text-xs font-bold text-slate-400 tracking-widest uppercase">NOTIFICAR INMEDIATAMENTE AL STAFF COMERCIAL</span>
+    <p class="text-slate-300 text-xs font-light leading-relaxed">
       Haz clic en cualquiera de los siguientes botones para enviar la notificación directamente por WhatsApp y acelerar el proceso de revisión:
     </p>
     
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-      <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+      <a id="btn-wa-jaime" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider min-h-[44px]">
         💬 Jaime Cárdenas
       </a>
-      <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
+      <a id="btn-wa-cesar" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-3.5 px-4 rounded-md transition-all flex items-center justify-center gap-2 uppercase tracking-wider min-h-[44px]">
         💬 César Bruna
       </a>
     </div>
   </div>
 
-  <button type="button" id="btn-reset-form" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-2 px-6 rounded transition-colors uppercase font-bold tracking-wider cursor-pointer">
+  <button type="button" id="btn-reset-form" class="mt-4 border border-white/10 hover:border-gold-bruna text-white hover:text-gold-bruna text-xs py-3 px-6 rounded transition-colors uppercase font-bold tracking-wider cursor-pointer min-h-[44px]">
     Cotizar Otro Show
   </button>
 </div>

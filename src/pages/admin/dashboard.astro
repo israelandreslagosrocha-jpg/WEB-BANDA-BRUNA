@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ProductionDashboardTab from '../../components/admin/ProductionDashboardTab.astro';
+import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro';
 ---
 
 <Layout title="Dashboard de Administración | Banda Bruna" description="Panel de control dinámico oficial de Banda Bruna.">
@@ -58,6 +59,9 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         </button>
         <button data-tab-target="radio-monitor" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📻 Radio Monitor
+        </button>
+        <button data-tab-target="curacion-social" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📱 Curación Social (YouTube / IG)
         </button>
         <button data-tab-target="logs" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📜 Auditoría / Logs
@@ -568,6 +572,7 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         </section>
 
         <ProductionDashboardTab />
+        <SocialFeedAdminTab />
 
       </main>
     </div>
@@ -657,6 +662,11 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
           if (target === 'lanzamientos') loadLanzamientos();
           if (target === 'logs') loadLogs();
           if (target === 'radio-monitor') loadRadioMonitor();
+          if (target === 'curacion-social') {
+            if (typeof (window as any).loadSocialFeedAdmin === 'function') {
+              (window as any).loadSocialFeedAdmin();
+            }
+          }
         });
       });
 
@@ -952,9 +962,17 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
 
         listDiv.innerHTML = data.map(item => `
           <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex justify-between items-center gap-4">
-            <div>
-              <h4 class="font-title font-bold text-sm text-white uppercase">${item.nombre}</h4>
-              <p class="text-[10px] text-slate-500 mt-1">${new Date(item.fecha + 'T12:00:00').toLocaleDateString('es-CL')} — Lugar: ${item.lugar || 'Por Confirmar'}, ${item.ciudad}</p>
+            <div class="flex items-center gap-3.5">
+              ${item.imagen ? `
+                <img src="${item.imagen}" alt="${item.nombre}" class="w-12 h-12 rounded-lg object-cover border border-white/10 flex-shrink-0" />
+              ` : `
+                <div class="w-12 h-12 rounded-lg bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna text-sm font-bold flex-shrink-0">📅</div>
+              `}
+              <div>
+                <h4 class="font-title font-bold text-sm text-white uppercase">${item.nombre}</h4>
+                <p class="text-[10px] text-slate-500 mt-1">${new Date(item.fecha + 'T12:00:00').toLocaleDateString('es-CL')} — Lugar: ${item.lugar || 'Por Confirmar'}, ${item.ciudad}</p>
+                ${item.imagen ? `<span class="text-[9px] text-emerald-400 font-mono">✓ Flyer cargado</span>` : `<span class="text-[9px] text-slate-500 font-mono">Sin flyer adjunto</span>`}
+              </div>
             </div>
             <div class="flex gap-2">
               <button data-edit-evento-id="${item.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Editar</button>
@@ -978,7 +996,7 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
         const modal = document.getElementById('modal-container');
         if (!modal) return;
 
-        let evento = { nombre: '', fecha: '', lugar: '', ciudad: '', descripcion: '', publicado: true };
+        let evento = { nombre: '', fecha: '', lugar: '', ciudad: '', descripcion: '', imagen: '', publicado: true };
 
         if (id) {
           const { data } = await supabase.from('eventos').select('*').eq('id', id).single();
@@ -1000,11 +1018,20 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Lugar / Recinto</label>
-                <input type="text" id="ev-venue" value="${evento.lugar}" placeholder="ej: Gimnasio Municipal" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+                <input type="text" id="ev-venue" value="${evento.lugar || ''}" placeholder="ej: Olimpo Club / Gimnasio Municipal" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Ciudad / Comuna</label>
                 <input type="text" id="ev-city" value="${evento.ciudad || ''}" required placeholder="ej: Temuco" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Flyer / Afiche del Show (Subir Imagen)</label>
+                <input type="file" id="ev-flyer" accept="image/*" class="bg-slate-950 border border-white/5 rounded p-2 text-white text-xs" />
+                ${evento.imagen ? `<p class="text-[9px] text-slate-450 mt-1">Flyer actual: <a href="${evento.imagen}" target="_blank" class="text-gold-bruna underline">Ver imagen</a></p>` : ''}
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">O URL directa del Flyer (Cloudinary u otro)</label>
+                <input type="url" id="ev-flyer-url" value="${evento.imagen || ''}" placeholder="https://res.cloudinary.com/.../flyer.webp" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
 
               <div class="flex gap-3 mt-2 justify-end">
@@ -1027,8 +1054,19 @@ import ProductionDashboardTab from '../../components/admin/ProductionDashboardTa
           const fecha = (document.getElementById('ev-date') as HTMLInputElement).value;
           const lugar = (document.getElementById('ev-venue') as HTMLInputElement).value;
           const ciudad = (document.getElementById('ev-city') as HTMLInputElement).value;
+          const flyerFileInput = document.getElementById('ev-flyer') as HTMLInputElement;
+          const flyerUrlInput = document.getElementById('ev-flyer-url') as HTMLInputElement;
 
-          const payload = { nombre, fecha, lugar, ciudad, publicado: true };
+          let imagen = flyerUrlInput.value.trim() || evento.imagen || null;
+
+          if (flyerFileInput.files && flyerFileInput.files[0]) {
+            const uploaded = await uploadImageToStorage(flyerFileInput.files[0], 'noticias');
+            if (uploaded) {
+              imagen = uploaded;
+            }
+          }
+
+          const payload = { nombre, fecha, lugar, ciudad, imagen, publicado: true };
 
           let success = false;
           if (id) {

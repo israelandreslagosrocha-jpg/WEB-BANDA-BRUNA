@@ -3,20 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import { 
   getLatestVideo, 
   getInstagramFeed, 
-  getFacebookFeed, 
-  getTikTokFeed,
-  getNews 
+  getFacebookFeed 
 } from '../services/socialApi.js';
 import socialStats from '../data/socialStats.json';
 import { supabase } from '../services/supabaseClient.js';
 import NowPlayingWidget from '../modules/radio-monitor/components/NowPlayingWidget.astro';
+import QuoteForm from '../components/forms/QuoteForm.astro';
 
 // Fetch mock social data at build time
 const latestVideo = getLatestVideo();
 const instagramFeed = getInstagramFeed();
 const facebookFeed = getFacebookFeed();
-const tiktokFeed = getTikTokFeed();
-const newsList = getNews();
 
 // Cargar eventos activos desde Supabase ordenados por fecha ascendente
 const { data: rawEvents } = await supabase
@@ -42,11 +39,12 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
   const eventDateMidnight = new Date(event.fecha + 'T00:00:00');
   const diffTime = eventDateMidnight.getTime() - today.getTime();
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-  const isWithinOneWeek = diffDays >= 0 && diffDays <= 7;
   const isPast = diffDays < 0 || event.fecha === '2026-08-08';
+  const isWithinOneWeek = diffDays >= 0 && diffDays <= 7;
+  const isUpcoming = diffDays >= 0 && !isPast;
   const videoUrl = event.video_url || (event.fecha === '2026-08-08' ? 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4' : null);
 
-  if (isWithinOneWeek && !imminentEvent) {
+  if (isUpcoming && !imminentEvent) {
     imminentEvent = {
       ...event,
       day,
@@ -60,12 +58,15 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
                         (event.nombre && event.nombre.toLowerCase().includes('negociación')) ||
                         (event.nombre && event.nombre.toLowerCase().includes('negociacion'));
 
+  const rawHora = event.hora || event.time;
+  const timeDisplay = isNegociacion ? 'Por confirmar' : (rawHora ? (rawHora.includes(':') ? `${rawHora} hrs` : `${rawHora}`) : 'Horario por confirmar');
+
   return {
     id: event.id,
     date: isNegociacion ? '—' : day,
     month: monthName,
     year: year,
-    time: isNegociacion ? 'Por confirmar' : "20:00", // Hora por defecto
+    time: timeDisplay,
     title: event.nombre,
     venue: event.lugar || 'Por confirmar',
     location: event.ciudad || '',
@@ -75,17 +76,10 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
     isWithinOneWeek,
     diffDays,
     isPast,
-    videoUrl
+    videoUrl,
+    imagen: event.imagen || null
   };
 }).slice(0, 5);
-
-const experienciaImages = [
-  "/assets/images/experiencia/experiencia_1.webp",
-  "/assets/images/experiencia/experiencia_2.webp",
-  "/assets/images/experiencia/experiencia_3.webp",
-  "/assets/images/experiencia/experiencia_4.webp",
-  "/assets/images/experiencia/experiencia_5.webp"
-];
 
 const heroImages = [
   "/assets/images/hero/hero_1.webp",
@@ -154,6 +148,26 @@ try {
   }
 } catch (err) {
   console.error("Error al cargar lanzamiento activo:", err);
+}
+
+const isLanzamientoDisponible = activeLanzamiento && new Date(activeLanzamiento.fecha_lanzamiento).getTime() <= Date.now();
+
+// Cargar publicaciones sociales aprobadas editorialmente desde Supabase (P1/P2)
+let editorialSocialPosts: any[] = [];
+try {
+  const { data: dbPosts, error: postsErr } = await supabase
+    .from('social_posts')
+    .select('*')
+    .eq('show_on_web', true)
+    .eq('disponible', true)
+    .order('web_order', { ascending: true })
+    .limit(6);
+
+  if (!postsErr && dbPosts && dbPosts.length > 0) {
+    editorialSocialPosts = dbPosts;
+  }
+} catch (err) {
+  console.error("Error al cargar publicaciones sociales aprobadas:", err);
 }
 ---
 
@@ -279,10 +293,11 @@ try {
             </div>
 
             <a 
+              id="lanzamiento-btn-cta"
               href={`/${activeLanzamiento.slug}`} 
               class="w-full sm:w-auto bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black px-6 py-3 rounded-md font-extrabold text-xs tracking-widest hover:scale-105 active:scale-95 transition-all text-center uppercase shadow-lg shadow-gold-bruna/10 cursor-pointer block whitespace-nowrap"
             >
-              IR AL LANZAMIENTO
+              {isLanzamientoDisponible ? 'VER VIDEOCLIP' : 'IR AL LANZAMIENTO'}
             </a>
           </div>
 
@@ -345,6 +360,10 @@ try {
             const platformContainer = document.getElementById('lanzamiento-plataformas-home');
             if (platformContainer) {
               platformContainer.style.display = 'flex';
+            }
+            const ctaBtn = document.getElementById('lanzamiento-btn-cta');
+            if (ctaBtn) {
+              ctaBtn.textContent = 'VER VIDEOCLIP';
             }
             clearInterval(timerInterval);
             return;
@@ -503,10 +522,14 @@ try {
     </script>
   )}
   
-  <!-- Hero Section with Background Image Slider -->
-  <section class="relative min-h-screen lg:h-screen flex flex-col justify-between overflow-hidden bg-black px-6 md:px-12 pt-24 pb-12 lg:py-0" aria-label="Portada Principal">
+  <link rel="preload" as="image" href={heroImages[0]} fetchpriority="high" slot="head" />
+  
+  <!-- ====================================================================== -->
+  <!-- BLOQUE 01. IMPACTO: HERO ESCÉNICO DOMINANTE                            -->
+  <!-- ====================================================================== -->
+  <section class="relative min-h-[90vh] lg:min-h-screen flex flex-col justify-between overflow-hidden bg-black px-5 sm:px-8 md:px-12 pt-28 pb-12 lg:py-0" aria-label="Portada Principal - Banda Bruna en Vivo">
     
-    <!-- Background Slider/Carousel -->
+    <!-- Background Slider/Carousel con iluminación escénica -->
     <div class="absolute inset-0 z-0 w-full h-full overflow-hidden">
       {heroImages.map((src, index) => (
         <div 
@@ -515,38 +538,41 @@ try {
         ></div>
       ))}
       
-      <!-- Dark overlay for readability -->
-      <div class="absolute inset-0 bg-black/55 z-1"></div>
+      <!-- Viñeta y gradiente escénico atmosférico (#040815) -->
+      <div class="absolute inset-0 bg-gradient-to-t from-[#040815] via-black/60 to-black/45 z-1"></div>
+      <div class="absolute inset-0 bg-radial-gradient from-transparent via-[#040815]/50 to-[#040815] z-1 pointer-events-none"></div>
     </div>
 
-    <!-- Slider Navigation Arrows (Far left and right) -->
-    <button id="hero-prev" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 hover:border-gold-bruna bg-black/40 hover:bg-black/85 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none" aria-label="Imagen anterior">
-      <span class="text-lg md:text-xl">❮</span>
+    <!-- Controles del Slider Hero (Touch target >= 44x44px) -->
+    <button id="hero-prev" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-white/15 hover:border-gold-bruna bg-black/50 hover:bg-black/85 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none backdrop-blur-sm shadow-lg" aria-label="Imagen anterior">
+      <span class="text-lg">❮</span>
     </button>
-    <button id="hero-next" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 hover:border-gold-bruna bg-black/40 hover:bg-black/85 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none" aria-label="Imagen siguiente">
-      <span class="text-lg md:text-xl">❯</span>
+    <button id="hero-next" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-white/15 hover:border-gold-bruna bg-black/50 hover:bg-black/85 text-white hover:text-gold-bruna flex items-center justify-center transition-all cursor-pointer select-none backdrop-blur-sm shadow-lg" aria-label="Imagen siguiente">
+      <span class="text-lg">❯</span>
     </button>
 
-    <!-- Radial backdrop gradient overlay -->
-    <div class="absolute top-0 left-0 w-full h-full z-10 bg-radial-gradient from-transparent via-bg-darkest/65 to-bg-darkest pointer-events-none" aria-hidden="true"></div>
-
-    <!-- Hero Content Layout (Re-structured for corner alignment and maximum background visibility) -->
-    <div class="relative max-w-[1500px] mx-auto w-full lg:h-full z-20 flex flex-col justify-between lg:pt-28 lg:pb-16 gap-8 lg:gap-0">
+    <!-- Contenido Central del Hero: Impacto, Título y 2 CTAs -->
+    <div class="relative max-w-[1400px] mx-auto w-full lg:h-full z-20 flex flex-col justify-center py-12 lg:py-24 gap-6 text-center lg:text-left">
       
-      <!-- Top Title Section (Modern, thinner font, not covering background) -->
-      <div class="w-full text-center lg:text-left border-b border-white/5 pb-4">
-        {imminentEvent && (
+      <!-- Badge superior sutil (Próximo show inminente o Tag de Identidad) -->
+      <div>
+        {imminentEvent ? (
           <div 
             id="imminent-event-badge"
             data-event-date={imminentEvent.fecha}
-            class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/30 to-amber-500/20 border border-gold-bruna/80 text-gold-bruna text-xs font-bold tracking-widest uppercase mb-3 shadow-[0_0_25px_rgba(214,175,55,0.45)] animate-pulse"
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-gold-bruna/70 text-gold-bruna text-xs font-bold tracking-wider uppercase mb-2 shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse"
           >
-            <span class="text-sm">✨</span>
-            <span>PRÓXIMO SHOW EN VIVO: {imminentEvent.nombre} ({imminentEvent.day} DE {imminentEvent.monthName} · 20:00 HRS · {imminentEvent.ciudad})</span>
-            <span id="imminent-event-days-tag" class="bg-gold-bruna text-black text-[9px] font-extrabold px-2.5 py-0.5 rounded-full ml-1 uppercase shadow">
-              {imminentEvent.diffDays === 0 ? '¡HOY MISMO!' : imminentEvent.diffDays === 1 ? '¡MAÑANA!' : `¡EN ${imminentEvent.diffDays} DÍAS!`}
+            <span>✨</span>
+            <span>PRÓXIMO SHOW: {imminentEvent.nombre} ({imminentEvent.day} {imminentEvent.monthName} · {imminentEvent.lugar || imminentEvent.ciudad})</span>
+            <span id="imminent-event-days-tag" class="bg-gold-bruna text-black text-[10px] font-extrabold px-2 py-0.5 rounded-full ml-1 uppercase">
+              {imminentEvent.diffDays === 0 ? '¡HOY!' : imminentEvent.diffDays === 1 ? '¡MAÑANA!' : `¡EN ${imminentEvent.diffDays} DÍAS!`}
             </span>
           </div>
+        ) : (
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-gold-bruna/40 text-gold-bruna text-xs tracking-[0.25em] font-extrabold uppercase mb-2 backdrop-blur-sm">
+            <span class="w-2 h-2 rounded-full bg-gold-bruna animate-ping"></span>
+            ORQUESTA EN VIVO · CUMBIA SUREÑA PROFESIONAL
+          </span>
         )}
 
         <script is:inline>
@@ -567,7 +593,7 @@ try {
             if (diffDays < 0) {
               badge.style.display = 'none';
             } else if (diffDays === 0) {
-              tag.textContent = '¡HOY MISMO!';
+              tag.textContent = '¡HOY!';
             } else if (diffDays === 1) {
               tag.textContent = '¡MAÑANA!';
             } else {
@@ -575,1097 +601,1107 @@ try {
             }
           })();
         </script>
-        <span class="text-xs tracking-[0.4em] font-semibold text-gold-bruna uppercase block mb-1">
-          CUMBIA · SHOW EN VIVO · EXPERIENCIA BRUNA
-        </span>
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.15em] leading-tight text-white uppercase font-sans">
-          MÚSICA EN VIVO PARA <span class="text-gold-bruna font-semibold">EVENTOS, FESTIVALES Y CELEBRACIONES</span>
-        </h1>
-
-        <!-- Mobile-Only Hero Quick Action Buttons (Within 1st Viewport) -->
-        <div class="flex lg:hidden flex-row gap-3 justify-center mt-5">
-          <a 
-            href="/contrataciones" 
-            class="flex-1 max-w-[190px] bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold text-xs py-3.5 px-3 rounded-lg shadow-lg shadow-gold-bruna/20 uppercase tracking-wider text-center flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            COTIZAR EVENTO
-          </a>
-          <a 
-            href={`https://wa.me/${config.telefono_principal ? config.telefono_principal.replace(/\+/g, '').replace(/\s+/g, '') : '56990021689'}`} 
-            target="_blank" 
-            rel="noopener"
-            class="flex-1 max-w-[160px] bg-slate-900/90 border border-green-500/30 text-green-400 font-bold text-xs py-3.5 px-3 rounded-lg uppercase tracking-wider text-center flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-          >
-            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
-            WHATSAPP
-          </a>
-        </div>
       </div>
 
-      <!-- Bottom Action Section (Pushed to left/right corners) -->
-      <div class="flex flex-col lg:flex-row justify-between items-end gap-8 w-full mt-auto">
-        <!-- Left Column: Booking & Instagram CTAs -->
-        <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto max-w-2xl">
-          <!-- Card 1: WhatsApp Booking -->
-          <div class="flex-1 bg-slate-950/65 border border-white/10 rounded-xl p-5 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 hover:border-gold-bruna/30 transition-all">
-            <div>
-              <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1">Cotizaciones</span>
-              <h2 class="text-sm font-bold text-white mb-2 uppercase">Lleva el Show a tu Evento</h2>
-              <p class="text-xs text-slate-300 leading-relaxed font-light">
-                Cotiza fechas para festivales municipales, eventos corporativos o matrimonios.
-              </p>
-            </div>
-            <a href="/contrataciones" class="w-full bg-gold-bruna hover:bg-gold-bruna-hover text-black py-2.5 rounded font-bold text-xs hover:scale-102 transition-all text-center flex items-center justify-center gap-2 uppercase mt-3">
-              COTIZAR EVENTO
-            </a>
-          </div>
+      <!-- Titular Display en Cabinet Grotesk -->
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-white uppercase font-title max-w-4xl drop-shadow-md">
+        MÚSICA EN VIVO PARA <span class="text-gold-bruna">FESTIVALES, MUNICIPALIDADES</span> Y GRANDES CELEBRACIONES
+      </h1>
 
-          <!-- Card 2: Instagram Featured Post -->
-          <a href="https://www.instagram.com/p/Db8kRMfuips/" target="_blank" rel="noopener" class="flex-1 bg-slate-950/65 border border-white/10 hover:border-pink-500/30 rounded-xl p-4 backdrop-blur-md shadow-xl flex flex-col justify-between h-48 transition-all group/insta">
-            <div class="flex gap-3.5 items-stretch h-full overflow-hidden">
-              <!-- Post Image Thumbnail -->
-              <div class="relative w-5/12 aspect-square rounded-lg overflow-hidden bg-slate-900 border border-white/10 flex-shrink-0 self-start">
-                <img src="/assets/images/instagram/ig_fuimos_enganados.webp" alt="Instagram Post Reel Fuimos Engañados" class="w-full h-full object-cover object-center group-hover/insta:scale-105 transition-transform duration-500" />
-                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <span class="text-white text-[9px] bg-pink-600/80 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">REEL</span>
-                </div>
-              </div>
-              <!-- Content -->
-              <div class="flex flex-col justify-between flex-grow h-full text-left overflow-hidden">
-                <div class="overflow-hidden">
-                  <div class="flex items-center gap-1.5 mb-1.5">
-                    <span class="text-[8px] bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider">INSTAGRAM</span>
-                    <span class="text-[9px] text-slate-400 font-bold">@banda_bruna</span>
-                  </div>
-                  <p class="text-[11px] text-slate-300 leading-relaxed font-light line-clamp-6">
-                    "🛑🚨 FUIMOS ENGAÑADOS!!! 😔🤥 😡😡 Esa no era esa la pregunta... Pero igual quedo chistoso el reel!! Comenta y comparte! #humor #comedia #parati #memes #cumbia"
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center justify-between border-t border-white/5 pt-2 mt-auto">
-              <span class="text-[9px] text-slate-400 font-medium group-hover/insta:text-pink-400 transition-colors">Ver en Instagram</span>
-              <span class="text-[10px] text-pink-500 group-hover/insta:translate-x-1 transition-transform">📸 →</span>
-            </div>
-          </a>
-        </div>
+      <!-- Subtítulo en Plus Jakarta Sans -->
+      <p class="text-sm sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed max-w-2xl drop-shadow">
+        +15 años de trayectoria musical llevando la fuerza, el ritmo y el sonido de la cumbia sureña en directo a todo Chile.
+      </p>
 
-        <!-- Right Column: Featured YouTube Video -->
-        <div class="w-full lg:w-auto flex justify-center lg:justify-end">
-          <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="bg-slate-950/65 border border-white/10 hover:border-gold-bruna rounded-xl p-4 w-full max-w-[380px] shadow-2xl hover:translate-y-[-4px] transition-all group block backdrop-blur-md">
-            <div class="relative aspect-video rounded-lg overflow-hidden mb-3 bg-slate-900 border border-white/5">
-              <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-              <!-- Play overlay -->
-              <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/35 transition-colors">
-                <div class="w-12 h-12 rounded-full bg-gold-bruna text-black flex items-center justify-center font-bold text-lg shadow-lg group-hover:scale-110 transition-transform pl-0.5">▶</div>
-              </div>
-              <div class="absolute top-2 left-2 bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-sm uppercase tracking-wider">
-                MÚSICA
-              </div>
-            </div>
-            <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">ÚLTIMO LANZAMIENTO YOUTUBE</span>
-            <h3 class="font-title font-bold text-sm text-white group-hover:text-gold-bruna transition-colors uppercase leading-snug line-clamp-2">
-              {latestVideo.title}
-            </h3>
-            <span class="text-[10px] text-slate-400 block mt-2">Ver en YouTube →</span>
-          </a>
-        </div>
-
+      <!-- Máximo Dos CTAs Principales (Mínimo 48px de área táctil) -->
+      <div class="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start items-stretch sm:items-center pt-2">
+        <a 
+          href="#contacto" 
+          class="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-gold-bruna to-gold-bruna-hover hover:brightness-110 text-black font-extrabold text-xs sm:text-sm tracking-wider uppercase px-7 py-3.5 min-h-[48px] rounded-lg shadow-xl shadow-gold-bruna/20 active:scale-[0.98] transition-all"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          COTIZAR EVENTO
+        </a>
+        <a 
+          href={`https://wa.me/${config.telefono_principal ? config.telefono_principal.replace(/\+/g, '').replace(/\s+/g, '') : '56990021689'}`} 
+          target="_blank" 
+          rel="noopener"
+          class="inline-flex items-center justify-center gap-2.5 bg-slate-950/80 hover:bg-slate-900 border border-green-500/40 hover:border-green-400 text-green-400 hover:text-green-300 font-bold text-xs sm:text-sm tracking-wider uppercase px-7 py-3.5 min-h-[48px] rounded-lg backdrop-blur-md active:scale-[0.98] transition-all"
+        >
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
+          WHATSAPP OFICIAL
+        </a>
       </div>
+
     </div>
 
-    <!-- Centered Down Arrow -->
-    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 text-slate-400 text-xl font-bold animate-bounce" aria-hidden="true">
-      <a href="#lanzamientos" aria-label="Desplazarse abajo">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-      </a>
+    <!-- Indicador de desplazamiento sutil -->
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 text-slate-400 text-sm font-semibold flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity" aria-hidden="true">
+      <span class="text-[10px] tracking-widest uppercase">CONOCE EL SHOW</span>
+      <svg class="w-4 h-4 animate-bounce text-gold-bruna" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
     </div>
   </section>
 
-  <!-- Auto Content Badges Bar -->
-  <div class="border-y border-white/5 bg-slate-950/60 py-6">
-    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6 text-center md:text-left">
-      
-      <!-- Badge 1 -->
-      <div class="flex flex-col md:flex-row items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-950/50 border border-blue-500/10 flex items-center justify-center text-blue-400 flex-shrink-0">
-          <svg class="w-4 h-4 fill-blue-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  <!-- ====================================================================== -->
+  <!-- FRANJA DE MÉTRICAS Y COMUNIDAD EN REDES SOCIALES (EN TIEMPO REAL)       -->
+  <!-- ====================================================================== -->
+  <section class="bg-gradient-to-b from-black via-slate-950 to-[#040815] border-y border-white/10 py-10 px-6" aria-label="Estadísticas y Comunidad de Banda Bruna">
+    <div class="max-w-[1400px] mx-auto">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-6 lg:gap-4 items-center justify-center text-center">
+        
+        <!-- 1. Trayectoria -->
+        <div class="flex flex-col items-center group/stat">
+          <div class="w-10 h-10 rounded-full bg-amber-500/10 border border-gold-bruna/30 flex items-center justify-center text-gold-bruna mb-2 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna transition-all">
+            <span class="text-base">⏳</span>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">
+            +{stats.musiciansTrajectory}
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">
+            Años de Trayectoria
+          </span>
         </div>
-        <div>
-          <span class="text-xs font-bold text-white block tracking-wider uppercase">CONTENIDO AUTOMÁTICO</span>
-          <span class="text-[11px] text-slate-400">Actualizamos nuestra web automáticamente desde YouTube, Instagram y Facebook.</span>
-        </div>
-      </div>
-      
-      <!-- Badge 2 -->
-      <div class="flex flex-col md:flex-row items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-pink-950/40 border border-pink-500/10 flex items-center justify-center text-pink-400 flex-shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-        </div>
-        <div>
-          <span class="text-xs font-bold text-white block tracking-wider uppercase">REDES EN TIEMPO REAL</span>
-          <span class="text-[11px] text-slate-400">Síguenos y mira nuestras últimas publicaciones en tiempo real.</span>
-        </div>
-      </div>
 
-      <!-- Badge 3 -->
-      <div class="flex flex-col md:flex-row items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-amber-950/40 border border-amber-500/10 flex items-center justify-center text-gold-bruna flex-shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <!-- 2. Escenarios -->
+        <div class="flex flex-col items-center group/stat">
+          <div class="w-10 h-10 rounded-full bg-amber-500/10 border border-gold-bruna/30 flex items-center justify-center text-gold-bruna mb-2 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna transition-all">
+            <span class="text-base">✨</span>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.stageYears} data-count-prefix="+">
+            +{stats.stageYears}
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">
+            Años en Escenarios
+          </span>
         </div>
-        <div>
-          <span class="text-xs font-bold text-white block tracking-wider uppercase">AGENDA ACTUALIZADA</span>
-          <span class="text-[11px] text-slate-400">Nuestros próximos shows siempre al día. ¡No te pierdas ninguno!</span>
-        </div>
-      </div>
 
-      <!-- Badge 4 -->
-      <div class="flex flex-col md:flex-row items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-yellow-950/30 border border-yellow-500/10 flex items-center justify-center text-yellow-400 flex-shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+        <!-- 3. Instagram -->
+        <a href={config.instagram || "https://www.instagram.com/banda_bruna/"} target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+          <div class="w-10 h-10 rounded-full bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 mb-2 shadow-md group-hover/stat:border-pink-400 group-hover/stat:bg-pink-500/20 transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.instagramFollowers}>
+            {stats.instagramFollowers.toLocaleString('es-CL')}
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-pink-400 transition-colors">
+            Seguidores Instagram
+          </span>
+        </a>
+
+        <!-- 4. Facebook -->
+        <a href={config.facebook || "https://www.facebook.com/bandabruna"} target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+          <div class="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-2 shadow-md group-hover/stat:border-blue-400 group-hover/stat:bg-blue-500/20 transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.facebookFriends / 1000} data-count-suffix=" mil" data-count-decimal>
+            {(stats.facebookFriends / 1000).toFixed(1).replace('.', ',')} mil
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-blue-400 transition-colors">
+            Amigos Facebook
+          </span>
+        </a>
+
+        <!-- 5. YouTube -->
+        <a href={config.youtube || "https://www.youtube.com/@bandabrunaoficial"} target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+          <div class="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 mb-2 shadow-md group-hover/stat:border-red-400 group-hover/stat:bg-red-500/20 transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.508 9.388.508 9.388.508s7.518 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.youtubeSubscribers}>
+            {stats.youtubeSubscribers.toLocaleString('es-CL')}
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-red-400 transition-colors">
+            Suscriptores YouTube
+          </span>
+        </a>
+
+        <!-- 6. TikTok -->
+        <a href={config.tiktok || "https://www.tiktok.com/@bandabrunaoficial"} target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
+          <div class="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-2 shadow-md group-hover/stat:border-cyan-400 group-hover/stat:bg-cyan-500/20 transition-all">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 2.89 3.5 2.77 1.81-.03 3.33-1.47 3.48-3.28.06-1.25.04-2.5.04-3.75V0l-.41.02z"/></svg>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.tiktokFollowers}>
+            {stats.tiktokFollowers.toLocaleString('es-CL')}
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-cyan-400 transition-colors">
+            Seguidores TikTok
+          </span>
+        </a>
+
+        <!-- 7. Regiones -->
+        <div class="flex flex-col items-center group/stat">
+          <div class="w-10 h-10 rounded-full bg-amber-500/10 border border-gold-bruna/30 flex items-center justify-center text-gold-bruna mb-2 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna transition-all">
+            <span class="text-base">🗺️</span>
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-0.5" data-count-target={stats.regions} data-count-prefix="+">
+            +{stats.regions}
+          </span>
+          <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">
+            Regiones de Chile
+          </span>
         </div>
-        <div>
-          <span class="text-xs font-bold text-white block tracking-wider uppercase">ESCUCHA NUESTRA MÚSICA</span>
-          <span class="text-[11px] text-slate-400">Disponible en Spotify, YouTube Music, Apple Music y más plataformas.</span>
-        </div>
+
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Section: Estado Actual (Eventos, Promo, Radio Monitor) -->
-  <section class="max-w-[1400px] mx-auto px-6 pt-24 pb-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch scroll-reveal">
-    
-    <!-- Columna 1: Próximos Eventos -->
-    <div class="flex flex-col gap-6 w-full h-full justify-between">
-      <div class="flex flex-col gap-6 w-full">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">PRÓXIMOS EVENTOS</h2>
-          <a href="/agenda" class="text-gold-bruna text-[10px] font-bold hover:underline tracking-wider uppercase flex items-center gap-1 flex-shrink-0">
-            Ver agenda completa →
-          </a>
-        </div>
+  <!-- ====================================================================== -->
+  <!-- BLOQUE: ESTADO ACTUAL (AGENDA EN VIVO, BANNER PROMO, RADIO MONITOR)   -->
+  <!-- ====================================================================== -->
+  <section id="estado-actual" class="max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 py-16 scroll-reveal" aria-label="Estado Actual de la Banda">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+      
+      <!-- Columna 1: Próximos Eventos (Agenda en Vivo) -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-left">
+        <div>
+          <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-gold-bruna text-base">📅</span>
+              <h2 class="font-title font-extrabold text-base sm:text-lg text-white uppercase tracking-wider">
+                PRÓXIMOS EVENTOS
+              </h2>
+            </div>
+            <a href="/agenda" class="text-gold-bruna text-[10px] font-bold hover:underline tracking-wider uppercase flex items-center gap-1">
+              Ver Agenda →
+            </a>
+          </div>
 
-        <!-- Events List Timeline -->
-        <div class="bg-slate-900 border border-white/5 rounded-xl p-5 shadow-lg flex flex-col gap-5 text-left flex-grow justify-center">
           {upcomingEvents.length > 0 ? (
-            <ul class="flex flex-col gap-4 list-none p-0 m-0">
-              {upcomingEvents.map(event => (
+            <ul class="flex flex-col gap-3.5 list-none p-0 m-0">
+              {upcomingEvents.map((event: any) => (
                 <li 
-                  class={`flex items-center justify-between gap-4 p-3 rounded-lg transition-all ${
+                  class={`flex items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
                     event.isPast 
-                      ? 'opacity-75 hover:opacity-100 bg-slate-950/80 border border-white/5 hover:border-gold-bruna/50 cursor-pointer group/pastevent' 
+                      ? 'bg-black/40 border-white/5 opacity-80 hover:opacity-100 hover:border-gold-bruna/40 cursor-pointer group/pastevent' 
                       : event.isWithinOneWeek 
-                      ? 'bg-gradient-to-r from-amber-950/40 via-amber-900/30 to-amber-950/40 border border-gold-bruna/70 shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse' 
-                      : 'pb-4 border-b border-white/5 last:border-0 last:pb-0'
+                      ? 'bg-amber-950/30 border-gold-bruna/70 shadow-[0_0_15px_rgba(214,175,55,0.2)]' 
+                      : 'bg-black/20 border-white/5 hover:border-white/20'
                   }`}
                   {...(event.isPast && event.videoUrl ? {
                     'data-open-event-video': event.videoUrl,
                     'data-event-title': `${event.title} — ${event.location}`
                   } : {})}
                 >
-                  <div class="flex items-center gap-3">
-                    <div class="flex flex-col text-left leading-none min-w-[32px]">
-                      <span class={`text-2xl font-extrabold font-title tracking-tighter ${event.isPast ? 'text-slate-400 group-hover/pastevent:text-gold-bruna' : event.isWithinOneWeek ? 'text-gold-bruna' : 'text-white'}`}>
-                        {event.date}
-                      </span>
-                      <span class="text-[9px] text-slate-500 font-bold uppercase mt-0.5 tracking-wider">{event.month}</span>
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex flex-col text-center min-w-[38px] bg-slate-950/90 py-1.5 px-2 rounded-lg border border-white/10 flex-shrink-0">
+                      <span class={`text-lg font-extrabold font-title leading-none ${event.isPast ? 'text-slate-400 group-hover/pastevent:text-gold-bruna' : 'text-gold-bruna'}`}>{event.date}</span>
+                      <span class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">{event.month}</span>
                     </div>
-                    <div>
-                      <h3 class="font-title font-bold text-xs text-white tracking-wide uppercase line-clamp-1">{event.title}</h3>
-                      <span class="text-[10px] text-slate-400">{event.location}</span>
+                    <div class="min-w-0 flex-1">
+                      <h3 class="font-title font-bold text-xs text-white uppercase truncate">{event.title}</h3>
+                      <p class="text-[10px] text-slate-400 truncate mt-0.5">
+                        {event.venue && event.venue !== 'PRONTO' && event.venue !== 'Por confirmar' ? (
+                          <><strong class="text-slate-300 font-medium">{event.venue}</strong>{event.location ? ` · ${event.location}` : ''}</>
+                        ) : (
+                          event.location || event.venue
+                        )}
+                      </p>
                     </div>
                   </div>
                   
-                  <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
                     {event.isPast ? (
-                      <span class="bg-slate-800/90 border border-slate-700 text-slate-300 group-hover/pastevent:text-gold-bruna group-hover/pastevent:border-gold-bruna/50 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide flex items-center gap-1 transition-colors">
+                      <span class="bg-slate-800 text-slate-300 group-hover/pastevent:text-gold-bruna text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
                         <span>🎬 SHOW REALIZADO</span>
                       </span>
                     ) : (
                       <>
                         {event.isWithinOneWeek && (
                           <span class="bg-gold-bruna text-black text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-                            {event.diffDays === 0 ? '✨ ¡HOY MISMO!' : event.diffDays === 1 ? '✨ ¡MAÑANA!' : '✨ ¡EN POCOS DÍAS!'}
+                            {event.diffDays === 0 ? '¡HOY!' : event.diffDays === 1 ? '¡MAÑANA!' : `¡EN ${event.diffDays} DÍAS!`}
                           </span>
                         )}
-                        {event.statusType === 'confirmed' ? (
-                          <span class="bg-green-950/20 border border-green-500/20 text-green-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
-                            CONFIRMADO
-                          </span>
-                        ) : (
-                          <span class="bg-amber-950/20 border border-amber-500/20 text-amber-400 text-[8px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
-                            POR CONFIRMAR
-                          </span>
-                        )}
+                        <span class="bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                          CONFIRMADO
+                        </span>
                       </>
+                    )}
+                    {event.imagen && (
+                      <button 
+                        type="button" 
+                        data-open-event-flyer={event.imagen} 
+                        data-event-title={`${event.title} — ${event.location || event.venue}`}
+                        class="text-[8px] text-gold-bruna hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>🖼️</span> VER FLYER
+                      </button>
                     )}
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <div class="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
-              <span class="text-2xl">✨</span>
-              <h3 class="font-title font-bold text-xs text-white uppercase tracking-wider">Próximas fechas pronto</h3>
-              <p class="text-[10px] text-slate-400 max-w-[240px] mx-auto font-light leading-relaxed">
-                Estamos preparando nuestro nuevo show. ¡Pronto anunciaremos las fechas!
-              </p>
+            <div class="py-8 text-center text-slate-400">
+              <p class="text-xs">Próximas fechas en confirmación.</p>
             </div>
           )}
-          
-          <a href="/agenda" class="w-full text-center border border-white/10 hover:border-gold-bruna bg-slate-950 hover:bg-slate-950/80 text-white font-bold py-2.5 rounded-sm text-[10px] tracking-widest flex items-center justify-center gap-2 transition-colors uppercase cursor-pointer mt-1">
+        </div>
+
+        <div class="pt-5 mt-4 border-t border-white/5">
+          <a 
+            href="/agenda" 
+            class="w-full min-h-[42px] bg-slate-950 hover:bg-slate-900 border border-white/10 hover:border-gold-bruna text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all"
+          >
             <span>📅</span>
-            VER AGENDA COMPLETA
+            <span>Ver Agenda Completa</span>
           </a>
         </div>
       </div>
-    </div>
 
-    <!-- Columna 2: Banner Promo (Fiesta para todos) -->
-    <div class="flex flex-col gap-6 w-full h-full justify-between">
-      <div class="flex flex-col gap-6 w-full h-full">
-        <!-- Espaciador para alinear con el título de los lados en desktop -->
-        <div class="h-[36px] mb-2 hidden md:block"></div>
-        
-        <div class="relative w-full rounded-xl overflow-hidden border border-white/5 bg-slate-950/50 group shadow-lg flex justify-center items-center flex-grow min-h-[300px]">
-          <img src="https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB28_eykyvc.webp" alt="Banda Bruna Show en vivo" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-80 block mx-auto" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent flex items-end p-4 pointer-events-none">
-            <span class="font-title font-bold text-xs text-gold-bruna tracking-widest uppercase">Fiesta para todos !</span>
+      <!-- Columna 2: Banner Promo (Fiesta para todos !) -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group relative">
+        <div class="relative w-full h-full min-h-[360px] flex items-center justify-center overflow-hidden">
+          <img 
+            src="https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB28_eykyvc.webp" 
+            alt="Banda Bruna - Show en vivo" 
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85" 
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent flex flex-col justify-end p-6 pointer-events-none">
+            <span class="text-gold-bruna text-[10px] font-extrabold uppercase tracking-[0.25em] mb-1">
+              EXPERIENCIA EN ESCENARIO
+            </span>
+            <h3 class="font-title font-extrabold text-xl text-white uppercase leading-tight tracking-wide">
+              ¡FIESTA PARA TODOS!
+            </h3>
+            <p class="text-xs text-slate-300 font-light mt-1 max-w-xs">
+              Música 100% en vivo para todas las generaciones con el auténtico sonido de la cumbia sureña.
+            </p>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Columna 3: Detección de Radios (Radio Monitor) -->
-    <div class="flex flex-col gap-6 w-full h-full justify-between">
-      <div class="flex flex-col gap-6 w-full h-full">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">DETECCIÓN DE RADIOS</h2>
+        <div class="p-4 bg-slate-950/90 border-t border-white/5 flex items-center justify-between">
+          <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Shows y Giras 2026</span>
+          <a href="#contacto" class="text-gold-bruna hover:underline text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+            Cotizar Fecha →
+          </a>
         </div>
+      </div>
 
-        <div class="flex-grow flex flex-col justify-center">
-          <!-- Widget de Monitoreo Radial En Vivo -->
+      <!-- Columna 3: Detección de Radios (Radio Monitor en Vivo) -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-left">
+        <div>
+          <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <h2 class="font-title font-extrabold text-base sm:text-lg text-white uppercase tracking-wider">
+                DETECCIÓN DE RADIOS
+              </h2>
+            </div>
+            <span class="text-[9px] text-slate-400 font-mono uppercase tracking-wider">CHILE AIRPLAY</span>
+          </div>
+          <p class="text-xs text-slate-300 font-light mb-4 leading-relaxed">
+            Monitoreo en vivo de emisoras de radio que transmiten canciones de Banda Bruna en directo:
+          </p>
           <NowPlayingWidget />
         </div>
       </div>
-    </div>
 
+    </div>
   </section>
 
-  <!-- Section: Últimos Lanzamientos (Ancho Completo) -->
-  <section id="lanzamientos" class="max-w-[1400px] mx-auto px-6 pt-12 pb-12 flex flex-col gap-6 scroll-reveal">
-    <div>
-      <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider mb-8">ÚLTIMOS LANZAMIENTOS</h2>
-    </div>
-
-    <!-- Grid of 3 columns of cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- ====================================================================== -->
+  <!-- BLOQUE 02. AUTORIDAD: TRAYECTORIA Y RESPALDO EN ESCENARIO             -->
+  <!-- ====================================================================== -->
+  <section class="relative bg-gradient-to-b from-[#040815] via-[#070e24] to-[#040815] border-y border-white/10 py-16 px-6 scroll-reveal" aria-label="Autoridad y Trayectoria">
+    <div class="max-w-[1400px] mx-auto">
       
-      <!-- Card 1: YouTube -->
-      <div class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors">
-        <div class="relative aspect-video bg-black overflow-hidden">
-          <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-          <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
-            <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white">
-              <span class="text-xs pl-0.5">▶</span>
-            </div>
-          </a>
-          <span class="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">YOUTUBE</span>
-        </div>
-        <div class="p-5 flex-grow flex flex-col justify-between text-left">
-          <div>
-            <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase">{latestVideo.title}</h3>
-            <p class="text-xs text-slate-400 mt-2">Videoclip Oficial</p>
-          </div>
-          <span class="text-[10px] text-slate-500 font-semibold block mt-4">{latestVideo.publishedAt}</span>
-        </div>
+      <!-- Encabezado de la Franja de Autoridad -->
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-extrabold tracking-[0.25em] text-gold-bruna uppercase block mb-2">
+          RESPALDO ARTÍSTICO Y PROFESIONAL
+        </span>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-title uppercase text-white leading-tight">
+          UNA ORQUESTA CONSOLIDADA EN GRANDES ESCENARIOS
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 font-light mt-3 leading-relaxed">
+          Más de una década y media entregando un espectáculo de cumbia sureña de alto nivel para municipios, festivales masivos y producciones en todo el país.
+        </p>
       </div>
 
-      <!-- Card 2: Instagram (Video Post - Día del Minero) -->
-      <a href={instagramFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
-        <div class="relative aspect-video bg-black overflow-hidden">
-          <img src={instagramFeed[1].imageUrl} alt="Instagram Video Día del Minero" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-          <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/25 transition-all">
-            <div class="w-10 h-10 bg-black/60 rounded-full border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-              <span class="text-xs pl-0.5">▶</span>
-            </div>
+      <!-- 4 Pilares de Autoridad Factual (Sin vender seguidores como argumento principal) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        
+        <!-- Pilar 1: 15+ Años -->
+        <div class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-6 backdrop-blur-sm text-left hover:border-gold-bruna/40 transition-all group shadow-lg">
+          <div class="w-11 h-11 rounded-lg bg-amber-500/10 border border-gold-bruna/30 flex items-center justify-center text-gold-bruna text-xl mb-4 group-hover:scale-105 transition-transform">
+            ⏳
           </div>
-          <span class="absolute top-2.5 left-2.5 bg-pink-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">INSTAGRAM</span>
+          <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">
+            +{stats.musiciansTrajectory} AÑOS
+          </span>
+          <h3 class="text-xs font-bold text-gold-bruna uppercase tracking-wider mb-2">De Trayectoria Musical</h3>
+          <p class="text-xs text-slate-300 font-light leading-relaxed">
+            Experiencia comprobada en fiestas masivas, festivales y celebraciones de alta exigencia técnica.
+          </p>
         </div>
-        <div class="p-5 flex-grow flex flex-col justify-between text-left">
-          <div>
-            <span class="text-[9px] font-bold tracking-widest text-gold-bruna uppercase block mb-1">DÍA DEL MINERO</span>
-            <p class="text-xs text-slate-300 leading-relaxed font-light line-clamp-5 mb-2 whitespace-pre-line">
-              {instagramFeed[1].caption}
-            </p>
-          </div>
-          <span class="text-[10px] text-slate-500 font-semibold block mt-4">{instagramFeed[1].timeAgo}</span>
-        </div>
-      </a>
 
-      <!-- Card 3: News -->
-      <a href={`/noticias/${newsList[0].slug}`} class="bg-slate-900 border border-white/5 rounded overflow-hidden group flex flex-col justify-between hover:border-gold-bruna transition-colors block cursor-pointer">
-        <div class="relative aspect-video bg-black overflow-hidden border-b border-white/5">
-          {newsList[0].image ? (
-            <img 
-              src={newsList[0].image} 
-              alt={newsList[0].title} 
-              class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" 
-            />
-          ) : (
-            <div class="w-full h-full flex items-center justify-center bg-[#0b132b]">
-              <div class="w-12 h-12 bg-slate-950 rounded-full border border-white/5 flex items-center justify-center text-gold-bruna">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-5M19 20a2 2 0 01-2-2V6m0 14V4"/></svg>
-              </div>
-            </div>
-          )}
-          <span class="absolute top-2.5 left-2.5 bg-amber-500 text-black text-[8px] font-bold px-2 py-0.5 rounded-sm tracking-widest">NOTICIAS</span>
-        </div>
-        <div class="p-5 flex-grow flex flex-col justify-between text-left">
-          <div>
-            <h3 class="font-title font-extrabold text-base text-white tracking-wide group-hover:text-gold-bruna transition-colors uppercase line-clamp-2">{newsList[0].title}</h3>
-            <p class="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed font-light">{newsList[0].summary}</p>
+        <!-- Pilar 2: Escenarios y Regiones -->
+        <div class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-6 backdrop-blur-sm text-left hover:border-gold-bruna/40 transition-all group shadow-lg">
+          <div class="w-11 h-11 rounded-lg bg-blue-500/10 border border-blue-400/30 flex items-center justify-center text-blue-400 text-xl mb-4 group-hover:scale-105 transition-transform">
+            🗺️
           </div>
-          <div class="flex justify-between items-center mt-4 pt-3 border-t border-white/5">
-            <span class="text-[10px] text-slate-500 font-semibold">{newsList[0].publishedAt}</span>
-            <span class="text-[10px] text-gold-bruna font-semibold group-hover:underline">Leer más →</span>
-          </div>
+          <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.regions} data-count-prefix="+">
+            +{stats.regions} REGIONES
+          </span>
+          <h3 class="text-xs font-bold text-gold-bruna uppercase tracking-wider mb-2">Cobertura Interregional</h3>
+          <p class="text-xs text-slate-300 font-light leading-relaxed">
+            Giras y presentaciones constantes en el sur, centro y norte de Chile con despliegue técnico propio.
+          </p>
         </div>
-      </a>
+
+        <!-- Pilar 3: Formación en Vivo Real -->
+        <div class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-6 backdrop-blur-sm text-left hover:border-gold-bruna/40 transition-all group shadow-lg">
+          <div class="w-11 h-11 rounded-lg bg-yellow-500/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400 text-xl mb-4 group-hover:scale-105 transition-transform">
+            🥁
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-1">
+            100% EN DIRECTO
+          </span>
+          <h3 class="text-xs font-bold text-gold-bruna uppercase tracking-wider mb-2">Formación Instrumental</h3>
+          <p class="text-xs text-slate-300 font-light leading-relaxed">
+            Percusión · congas · güiro · bajo · guitarra · piano · voz en vivo sin pistas pregrabadas.
+          </p>
+        </div>
+
+        <!-- Pilar 4: Respaldo B2B Formal -->
+        <div class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-6 backdrop-blur-sm text-left hover:border-gold-bruna/40 transition-all group shadow-lg">
+          <div class="w-11 h-11 rounded-lg bg-green-500/10 border border-green-400/30 flex items-center justify-center text-green-400 text-xl mb-4 group-hover:scale-105 transition-transform">
+            📑
+          </div>
+          <span class="text-2xl sm:text-3xl font-extrabold font-title text-white block mb-1">
+            FACTURACIÓN SII
+          </span>
+          <h3 class="text-xs font-bold text-gold-bruna uppercase tracking-wider mb-2">Formalidad Administrativa</h3>
+          <p class="text-xs text-slate-300 font-light leading-relaxed">
+            Emisión de Factura, contratos formales, orden de compra y ficha técnica / rider descargable.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Sellos de Confianza Institucional y Comercial -->
+      <div class="pt-6 border-t border-white/5 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-slate-300 uppercase tracking-wider font-semibold">
+        <span class="flex items-center gap-2"><span class="text-gold-bruna">✔</span> Festivales Municipales</span>
+        <span class="text-white/20 hidden sm:inline">·</span>
+        <span class="flex items-center gap-2"><span class="text-gold-bruna">✔</span> Eventos Masivos</span>
+        <span class="text-white/20 hidden sm:inline">·</span>
+        <span class="flex items-center gap-2"><span class="text-gold-bruna">✔</span> Rotación Radial en Emisoras</span>
+        <span class="text-white/20 hidden sm:inline">·</span>
+        <span class="flex items-center gap-2"><span class="text-gold-bruna">✔</span> Cumplimiento Técnico Estricto</span>
+      </div>
 
     </div>
   </section>
 
-  <!-- Section: Presentación Destacada En Vivo (Facebook Video Showcase) -->
-  <section class="bg-slate-950/40 border-t border-white/5 pt-12 pb-24 scroll-reveal">
-    <div class="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-left">
+  <!-- ================================================================= -->
+  <!-- BLOQUE 03: SEGMENTACIÓN COMERCIAL Y SOLUCIONES DE CONTRATACIÓN   -->
+  <!-- ================================================================= -->
+  <section id="segmentacion-comercial" class="max-w-[1400px] mx-auto px-6 py-20 border-t border-white/5 scroll-reveal">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <span class="text-gold-bruna text-[11px] tracking-[0.25em] font-bold uppercase block mb-3">
+        SOLUCIONES DE CONTRATACIÓN
+      </span>
+      <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold font-title uppercase text-white tracking-tight leading-tight">
+        UN SHOW ADAPTADO A TU <span class="text-gold-bruna">ESCENARIO Y REQUERIMIENTO</span>
+      </h2>
+      <div class="w-16 h-1 bg-gold-bruna mx-auto mt-4 mb-5"></div>
+      <p class="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+        Ya sea ante miles de personas en un festival municipal o en la intimidad de un matrimonio exclusivo, Banda Bruna garantiza formalidad administrativa, cumplimiento de rider técnico y la energía de una orquesta en directo.
+      </p>
+    </div>
+
+    <!-- Grid de 4 Perfiles Comerciales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
       
-      <!-- Left side: Description -->
-      <div class="lg:col-span-5 flex flex-col justify-center">
-        <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1.5">
-          ESPECTÁCULO RECOMENDADO
-        </span>
-        <h2 class="font-title font-extrabold text-3xl text-white uppercase leading-tight mb-4">
-          Banda Bruna En Vivo
-        </h2>
-        <div class="w-12 h-1 bg-gold-bruna mb-6"></div>
-        <p class="text-sm text-slate-300 font-light leading-relaxed mb-8">
-          Mira una de nuestras presentaciones en vivo más destacadas. Capturamos la esencia de la cumbia sureña tropical con fuerza, ritmo y una entrega única en el escenario que hace bailar a miles de personas.
-        </p>
-        
-        <div class="flex flex-wrap gap-4">
-          <a 
-            href="/videos" 
-            class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold text-xs px-6 py-3 rounded uppercase tracking-wider transition-all hover:scale-102 cursor-pointer"
-          >
-            Ver más videos
-          </a>
+      <!-- Perfil 1: Municipalidades & Festivales Masivos -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-gold-bruna/50 transition-all duration-300 shadow-xl group hover:-translate-y-1">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-gold-bruna/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+              🏛️
+            </div>
+            <span class="text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-gold-bruna/20 text-gold-bruna border border-gold-bruna/40">
+              Alta Convocatoria
+            </span>
+          </div>
+
+          <h3 class="text-lg font-bold font-title text-white uppercase tracking-wide mb-4">
+            Festivales & Municipalidades
+          </h3>
+
+          <div class="space-y-4 text-xs">
+            <div class="bg-black/30 border-l-2 border-amber-500/50 p-3 rounded-r-lg">
+              <strong class="text-gold-bruna uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué necesitas?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Espectáculo masivo de alto impacto, apego a bases de licitación, contrato formal, boleta de garantía, factura SII y rider técnico estricto.
+              </p>
+            </div>
+
+            <div class="bg-black/30 border-l-2 border-emerald-500/50 p-3 rounded-r-lg">
+              <strong class="text-emerald-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué ofrecemos?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Orquesta completa en vivo, repertorio transversal para toda la familia, puntualidad absoluta y coordinación directa con sonidistas de escenario.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-white/5">
           <a 
             href="/contrataciones" 
-            class="border border-white/10 hover:border-gold-bruna bg-transparent hover:bg-white/5 text-white font-bold text-xs px-6 py-3 rounded uppercase tracking-wider transition-all"
+            class="w-full min-h-[44px] bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all shadow-md group-hover:shadow-gold-bruna/20"
           >
-            Cotizar Evento
+            <span>Cotizar Festival</span>
+            <span>→</span>
           </a>
         </div>
       </div>
 
-      <!-- Right side: Video Player Carousel Container -->
-      <div class="lg:col-span-7 w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl relative group">
-        <!-- Slide wrapper -->
-        <div id="home-video-carousel" class="flex w-full h-full transition-transform duration-500 ease-in-out" style="transform: translateX(0%);">
-          <!-- Slide 1 -->
-          <div class="w-full h-full shrink-0 relative flex items-center justify-center">
-            <video 
-              src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
-              class="w-full h-full object-cover bg-slate-950" 
-              controls 
-              preload="metadata"
-              playsinline
-              aria-label="Presentación en vivo de Banda Bruna - Puerto Saavedra"
-            >
-              <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
-            </video>
+      <!-- Perfil 2: Empresas & Corporativos -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-gold-bruna/50 transition-all duration-300 shadow-xl group hover:-translate-y-1">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-400/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+              🏢
+            </div>
+            <span class="text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/40">
+              Corporativo
+            </span>
           </div>
-          <!-- Slide 2 -->
-          <div class="w-full h-full shrink-0 relative flex items-center justify-center">
-            <video 
-              src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4" 
-              class="w-full h-full object-cover bg-slate-950" 
-              controls 
-              preload="metadata"
-              playsinline
-              aria-label="Presentación en vivo de Banda Bruna - Show en Vivo 2"
-            >
-              <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
-            </video>
+
+          <h3 class="text-lg font-bold font-title text-white uppercase tracking-wide mb-4">
+            Empresas & Convenciones
+          </h3>
+
+          <div class="space-y-4 text-xs">
+            <div class="bg-black/30 border-l-2 border-blue-500/50 p-3 rounded-r-lg">
+              <strong class="text-blue-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué necesitas?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Celebrar aniversarios o cierres de año con dinamismo, sobriedad inicial y fiesta garantizada para los colaboradores, con factura y respaldo tributario.
+              </p>
+            </div>
+
+            <div class="bg-black/30 border-l-2 border-emerald-500/50 p-3 rounded-r-lg">
+              <strong class="text-emerald-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué ofrecemos?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Set bailable adaptable a tiempos de protocolo, presentación impecable en escena, factura electrónica inmediata y respuesta en menos de 24 horas.
+              </p>
+            </div>
           </div>
         </div>
 
-        <!-- Carousel Controls (Arrows) -->
-        <button id="home-prev-video" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none font-sans" aria-label="Video anterior">❮</button>
-        <button id="home-next-video" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none font-sans" aria-label="Siguiente video">❯</button>
-        
-        <!-- Slide indicators (dots) -->
-        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="0" aria-label="Video 1"></button>
-          <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="1" aria-label="Video 2"></button>
+        <div class="pt-6 mt-6 border-t border-white/5">
+          <a 
+            href="/contrataciones" 
+            class="w-full min-h-[44px] bg-slate-900 hover:bg-slate-800 border border-white/20 hover:border-gold-bruna text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all"
+          >
+            <span>Cotizar para Empresa</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Perfil 3: Fiestas Costumbristas & Semanas Aniversario -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-gold-bruna/50 transition-all duration-300 shadow-xl group hover:-translate-y-1">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-400/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+              🌾
+            </div>
+            <span class="text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-orange-500/20 text-orange-300 border border-orange-400/40">
+              Tradición & Fiesta
+            </span>
+          </div>
+
+          <h3 class="text-lg font-bold font-title text-white uppercase tracking-wide mb-4">
+            Fiestas Costumbristas
+          </h3>
+
+          <div class="space-y-4 text-xs">
+            <div class="bg-black/30 border-l-2 border-orange-500/50 p-3 rounded-r-lg">
+              <strong class="text-orange-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué necesitas?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Convocatoria comunitaria comprobada, calor popular y una orquesta con experiencia en el sur y centro de Chile que haga bailar a toda la localidad.
+              </p>
+            </div>
+
+            <div class="bg-black/30 border-l-2 border-emerald-500/50 p-3 rounded-r-lg">
+              <strong class="text-emerald-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué ofrecemos?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Cumbia tropical sureña en vivo, conexión inmediata con el público, energía inagotable y un espectáculo probado en semanas aniversario.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-white/5">
+          <a 
+            href="/agenda" 
+            class="w-full min-h-[44px] bg-slate-900 hover:bg-slate-800 border border-white/20 hover:border-gold-bruna text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all"
+          >
+            <span>Ver Disponibilidad</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Perfil 4: Matrimonios & Eventos Privados -->
+      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-gold-bruna/50 transition-all duration-300 shadow-xl group hover:-translate-y-1">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-pink-500/10 border border-pink-400/30 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+              💍
+            </div>
+            <span class="text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-pink-500/20 text-pink-300 border border-pink-400/40">
+              Celebración Privada
+            </span>
+          </div>
+
+          <h3 class="text-lg font-bold font-title text-white uppercase tracking-wide mb-4">
+            Matrimonios & Privados
+          </h3>
+
+          <div class="space-y-4 text-xs">
+            <div class="bg-black/30 border-l-2 border-pink-500/50 p-3 rounded-r-lg">
+              <strong class="text-pink-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué necesitas?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Una pista encendida de inicio a fin, contacto humano directo y la experiencia irrepetible de músicos reales tocando en vivo para tus invitados.
+              </p>
+            </div>
+
+            <div class="bg-black/30 border-l-2 border-emerald-500/50 p-3 rounded-r-lg">
+              <strong class="text-emerald-400 uppercase font-bold tracking-wider block text-[10px] mb-1">¿Qué ofrecemos?</strong>
+              <p class="text-slate-300 font-light leading-relaxed">
+                Repertorio probado para unir a todas las generaciones, calidez en el trato, puntualidad estricta y adaptación al espacio del centro de eventos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-white/5">
+          <a 
+            href="https://wa.me/56990021689?text=Hola,%20me%20gustar%C3%ADa%20cotizar%20a%20Banda%20Bruna%20para%20un%20matrimonio/evento%20privado" 
+            target="_blank" 
+            rel="noopener" 
+            class="w-full min-h-[44px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all shadow-md"
+          >
+            <span>WhatsApp Directo</span>
+            <span>💬</span>
+          </a>
         </div>
       </div>
 
     </div>
   </section>
 
-  <!-- Section: La Experiencia Bruna (Carousel & Stats) -->
-  <section class="max-w-[1400px] mx-auto px-6 py-24 border-t border-white/5 scroll-reveal">
-    <div class="text-left mb-12">
-      <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider relative inline-block pb-3">
-        LA EXPERIENCIA BRUNA
-        <span class="absolute bottom-0 left-0 w-12 h-1 bg-gold-bruna"></span>
-      </h2>
-    </div>
-
-    <!-- Images Carousel slider -->
-    <div class="relative flex items-center justify-center gap-4 mb-16">
+  <!-- ================================================================= -->
+  <!-- BLOQUE 04: EL SONIDO BRUNA EN VIVO Y MÚSICA OFICIAL               -->
+  <!-- ================================================================= -->
+  <section id="musica-y-escenario" class="bg-slate-950/60 border-t border-white/5 py-20 scroll-reveal">
+    <div class="max-w-[1400px] mx-auto px-6">
       
-      <!-- Left arrow -->
-      <button id="exp-prev" class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer flex-shrink-0 select-none" aria-label="Anterior">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      </button>
+      <!-- Encabezado de Sección -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+        <div>
+          <span class="text-gold-bruna text-[11px] tracking-[0.25em] font-bold uppercase block mb-2">
+            EN ESCENARIO Y REPERTORIO
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold font-title uppercase text-white tracking-tight leading-tight">
+            EL SHOW EN DIRECTO: <span class="text-gold-bruna">FUERZA, RITMO Y CONVOCATORIA</span>
+          </h2>
+        </div>
+        <p class="text-xs text-slate-400 max-w-md font-light leading-relaxed">
+          Mira el registro real ante más de 5.000 personas en vivo y accede a nuestros singles oficiales en plataformas digitales.
+        </p>
+      </div>
 
-      <!-- Carousel Container -->
-      <div id="exp-slider-container" class="overflow-hidden w-full rounded-xl">
-        <div id="exp-slider-track" class="flex gap-4 transition-transform duration-500 ease-out" style="transform: translateX(0px);">
-          {experienciaImages.map((imgUrl, index) => (
-            <div class="relative aspect-[4/3] rounded-lg overflow-hidden border border-white/5 bg-slate-900 shrink-0 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[calc(25%-12px)] group/item">
-              <img 
-                src={imgUrl} 
-                alt={`Experiencia Banda Bruna ${index + 1}`} 
-                class="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-500" 
-                loading="lazy" 
-              />
-              <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+      <!-- Layout Asimétrico: 7 Cols Video Masivo / 5 Cols Sencillos & Plataformas -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        
+        <!-- Lado A (7 cols): Showcase de Video Masivo en Explanada -->
+        <div class="lg:col-span-7 flex flex-col justify-between gap-6">
+          <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl group">
+            <video 
+              src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
+              poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.jpg"
+              class="w-full h-full object-cover bg-black" 
+              controls 
+              preload="none"
+              playsinline
+              aria-label="Presentación en vivo de Banda Bruna ante más de 5.000 personas en Puerto Saavedra"
+            >
+              <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+            </video>
+            
+            <div class="absolute top-3 left-3 pointer-events-none">
+              <span class="bg-red-600/90 text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow flex items-center gap-1.5 backdrop-blur-sm">
+                <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                <span>CONCIERTO EN VIVO</span>
+              </span>
             </div>
+          </div>
+
+          <!-- Ficha descriptiva del concierto -->
+          <div class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-5 text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-[10px] text-gold-bruna uppercase font-bold tracking-widest block mb-1">REGISTRO OFICIAL EN ESCENARIO</span>
+              <h3 class="text-base font-bold font-title text-white uppercase tracking-wide">
+                Puerto Saavedra · Explanada Costera
+              </h3>
+              <p class="text-xs text-slate-300 font-light mt-1">
+                Más de 5.000 personas en vivo. Audio directo de consola sin pistas pregrabadas.
+              </p>
+            </div>
+            <div class="flex items-center gap-3 flex-shrink-0 w-full sm:w-auto">
+              <a 
+                href="/videos" 
+                class="min-h-[44px] px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-white/10 hover:border-gold-bruna text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
+              >
+                <span>Ver Más Videos</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lado B (5 cols): Sencillo Oficial + Plataformas Streaming + Descargas Técnicas -->
+        <div class="lg:col-span-5 flex flex-col justify-between gap-6">
+          
+          <!-- Panel 1: Sencillo Oficial Destacado -->
+          <div class="bg-[#0b132b]/90 border border-white/10 rounded-2xl p-5 shadow-xl text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-red-500 text-sm">▶</span>
+                <h3 class="font-title font-extrabold text-xs text-white uppercase tracking-wider">
+                  SENCILLO OFICIAL DESTACADO
+                </h3>
+              </div>
+              <span class="text-[9px] text-gold-bruna font-mono uppercase tracking-wider">YOUTUBE MUSIC</span>
+            </div>
+
+            <a 
+              href={latestVideo.youtubeUrl} 
+              target="_blank" 
+              rel="noopener" 
+              class="group block mb-4"
+            >
+              <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3 border border-white/10">
+                <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div class="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/10 transition-colors">
+                  <div class="w-12 h-12 rounded-full bg-red-600/90 text-white flex items-center justify-center text-lg shadow-xl group-hover:scale-110 transition-transform">
+                    ▶
+                  </div>
+                </div>
+              </div>
+              <h4 class="font-title font-bold text-sm text-white uppercase group-hover:text-gold-bruna transition-colors leading-tight">
+                {latestVideo.title}
+              </h4>
+              <p class="text-xs text-slate-400 mt-1">
+                Videoclip oficial de alta definición disponible en nuestro canal.
+              </p>
+            </a>
+
+            <div class="pt-3 border-t border-white/5 flex items-center justify-between">
+              <span class="text-[10px] text-slate-500">Estreno oficial</span>
+              <a href={latestVideo.youtubeUrl} target="_blank" rel="noopener" class="text-xs text-gold-bruna font-bold uppercase tracking-wider hover:underline flex items-center gap-1">
+                <span>Reproducir en YouTube</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Panel 2: Plataformas Digitales y Riders Técnicos -->
+          <div class="bg-[#0b132b]/90 border border-white/10 rounded-2xl p-5 shadow-xl text-left">
+            <h3 class="font-title font-extrabold text-xs text-white uppercase tracking-wider mb-3">
+              MÚSICA EN PLATAFORMAS & RIDERS
+            </h3>
+            
+            <div class="grid grid-cols-2 gap-2.5 mb-4">
+              <a 
+                href={config.spotify || "https://open.spotify.com/intl-es/artist/3QpgBBp8CypsMEM5rgWo7D"} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-black/40 hover:bg-[#1DB954]/20 border border-white/10 hover:border-[#1DB954]/40 p-2.5 rounded-lg flex items-center gap-2 text-xs text-slate-300 hover:text-white transition-all"
+              >
+                <span class="text-[#1DB954] text-base">🟢</span> Spotify
+              </a>
+              <a 
+                href={config.youtube || "https://www.youtube.com/@bandabrunaoficial"} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-black/40 hover:bg-red-600/20 border border-white/10 hover:border-red-500/40 p-2.5 rounded-lg flex items-center gap-2 text-xs text-slate-300 hover:text-white transition-all"
+              >
+                <span class="text-red-500 text-base">🔴</span> YouTube
+              </a>
+            </div>
+
+            <!-- Descargas de Riders para Sonidistas y Productores -->
+            <div class="border-t border-white/5 pt-3">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                FICHA TÉCNICA Y DOCUMENTACIÓN:
+              </span>
+              <div class="flex flex-wrap gap-2 text-[10px]">
+                <a href="/assets/downloads/stageplot_banda_bruna.pdf" target="_blank" class="px-2.5 py-1 bg-slate-900 border border-white/10 hover:border-gold-bruna rounded text-slate-300 hover:text-white transition-colors">
+                  📄 Stage Plot
+                </a>
+                <a href="/assets/downloads/input_list_banda_bruna.pdf" target="_blank" class="px-2.5 py-1 bg-slate-900 border border-white/10 hover:border-gold-bruna rounded text-slate-300 hover:text-white transition-colors">
+                  🎛️ Input List
+                </a>
+                <a href="/assets/downloads/planta_luces_banda_bruna.pdf" target="_blank" class="px-2.5 py-1 bg-slate-900 border border-white/10 hover:border-gold-bruna rounded text-slate-300 hover:text-white transition-colors">
+                  💡 Planta de Luces
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================================================================= -->
+  <!-- BLOQUE 05: AVAL DE CONFIANZA Y MURO SOCIAL EDITORIAL              -->
+  <!-- ================================================================= -->
+  <section id="confianza-y-comunidad" class="border-t border-white/5 py-20 scroll-reveal">
+    <div class="max-w-[1400px] mx-auto px-6">
+      
+      <!-- Sub-bloque A: Testimonios Reales de Productores y Clientes -->
+      <div id="testimonios-section" class={`${testimonios.length === 0 ? 'hidden' : ''} mb-20`}>
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <span class="text-gold-bruna text-[11px] tracking-[0.25em] font-bold uppercase block mb-2">
+            RESPALDO Y OPINIONES REALES
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold font-title uppercase text-white tracking-tight">
+            LA EXPERIENCIA DE QUIENES <span class="text-gold-bruna">YA VIVIERON EL SHOW</span>
+          </h2>
+          <div class="w-12 h-1 bg-gold-bruna mx-auto mt-3 mb-4"></div>
+          <p class="text-xs text-slate-400 font-light leading-relaxed">
+            Opiniones de comisiones organizadoras, productoras y celebraciones privadas en distintas regiones de Chile.
+          </p>
+        </div>
+
+        <div id="testimonios-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {testimonios.map((item: any) => (
+            <blockquote class="bg-[#0b132b]/80 border border-white/10 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/30 transition-all duration-300 shadow-xl">
+              <div>
+                <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
+                <!-- Calificación en estrellas -->
+                <div class="flex gap-1 text-gold-bruna text-xs mb-3.5 pl-3">
+                  {'★'.repeat(item.calificacion || 5)}{'☆'.repeat(5 - (item.calificacion || 5))}
+                </div>
+                <p class="text-xs text-slate-300 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
+                  "{item.contenido}"
+                </p>
+              </div>
+              <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
+                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
+                {item.cargo_cliente || item.organizacion_cliente ? (
+                  <span class="text-[11px] text-slate-400 uppercase tracking-wide block mt-1 leading-tight">
+                    {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
+                  </span>
+                ) : null}
+              </cite>
+            </blockquote>
           ))}
         </div>
       </div>
 
-      <!-- Right arrow -->
-      <button id="exp-next" class="w-10 h-10 rounded-full border border-white/10 hover:border-gold-bruna bg-slate-950 flex items-center justify-center text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer flex-shrink-0 select-none" aria-label="Siguiente">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      </button>
-      
-    </div>
-
-    <!-- Centered Statistics row -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 text-center max-w-6xl mx-auto">
-      
-      <!-- Trayectoria -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.musiciansTrajectory} data-count-prefix="+">+{stats.musiciansTrajectory}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Músicos con + de 15 años de trayectoria musical</span>
-      </div>
-
-      <!-- Escenarios -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.stageYears} data-count-prefix="+">+{stats.stageYears}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Años en escenarios</span>
-      </div>
-
-      <!-- Instagram -->
-      <a href="https://www.instagram.com/banda_bruna/" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
-          <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.instagramFollowers}>{Number(stats.instagramFollowers).toLocaleString('es-CL')}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores Instagram</span>
-      </a>
-
-      <!-- Facebook -->
-      <a href="https://www.facebook.com/bandabruna" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
-          <svg class="w-4 h-4" viewBox="0 0 320 512" fill="currentColor"><path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.facebookFriends}>{Number(stats.facebookFriends).toLocaleString('es-CL')}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Amigos Facebook</span>
-      </a>
-
-      <!-- YouTube -->
-      <a href="https://www.youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
-          <svg class="w-4 h-4" viewBox="0 0 576 512" fill="currentColor"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.youtubeSubscribers}>{Number(stats.youtubeSubscribers).toLocaleString('es-CL')}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Suscriptores YouTube</span>
-      </a>
-
-      <!-- TikTok -->
-      <a href="https://www.tiktok.com/@bandabrunaoficial" target="_blank" rel="noopener" class="flex flex-col items-center group/stat transition-all hover:scale-105 duration-300">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5 group-hover/stat:border-gold-bruna group-hover/stat:text-white transition-all">
-          <svg class="w-4 h-4" viewBox="0 0 448 512" fill="currentColor"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.tiktokFollowers}>{Number(stats.tiktokFollowers).toLocaleString('es-CL')}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug group-hover/stat:text-gold-bruna transition-colors">Seguidores TikTok</span>
-      </a>
-
-      <!-- Regiones -->
-      <div class="flex flex-col items-center">
-        <div class="w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-gold-bruna mb-3 shadow-md shadow-gold-bruna/5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        </div>
-        <span class="text-3xl sm:text-4xl font-extrabold font-title text-white block mb-1" data-count-target={stats.regions}>{stats.regions}</span>
-        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block leading-snug">Regiones de Chile</span>
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- Section: Síguenos en Tiempo Real (Unified Social Feed Row) -->
-  <section class="bg-slate-950/40 border-t border-white/5 py-24 scroll-reveal">
-    <div class="max-w-[1400px] mx-auto px-6">
-      
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
-        <div>
-          <h2 class="font-title font-extrabold text-2xl text-white uppercase tracking-wider">SÍGUENOS EN TIEMPO REAL</h2>
-        </div>
-        
-        <div class="flex gap-5 mt-4 md:mt-0 font-title font-bold text-[10px] tracking-widest uppercase">
-          <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-pink-600 rounded-full inline-block"></span>Instagram</span>
-          <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block"></span>Facebook</span>
-          <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-red-600 rounded-full inline-block"></span>YouTube</span>
-        </div>
-      </div>
-
-      <!-- Row of 5 social media cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        
-        <!-- Card 1 (Instagram - Fuimos Engañados) -->
-        <a href={instagramFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold text-white block">{instagramFeed[0].username}</span>
-              <span class="text-[8px] text-slate-500 block">{instagramFeed[0].timeAgo}</span>
-            </div>
-          </div>
-          <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={instagramFeed[0].imageUrl} alt="Instagram Reel Fuimos Engañados" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-              <span class="text-white text-lg">🎬</span>
-            </div>
-          </div>
-          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[0].caption}</p>
-          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>❤️ {instagramFeed[0].likes}</span>
-            <span>💬 {instagramFeed[0].comments}</span>
-          </div>
-        </a>
-
-        <!-- Card 2 (Instagram - Día del Minero) -->
-        <a href={instagramFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-white">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold text-white block">{instagramFeed[1].username}</span>
-              <span class="text-[8px] text-slate-500 block">{instagramFeed[1].timeAgo}</span>
-            </div>
-          </div>
-          <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={instagramFeed[1].imageUrl} alt="Instagram Reel Día del Minero" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-              <span class="text-white text-lg">🎬</span>
-            </div>
-          </div>
-          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{instagramFeed[1].caption}</p>
-          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>❤️ {instagramFeed[1].likes}</span>
-            <span>💬 {instagramFeed[1].comments}</span>
-          </div>
-        </a>
-
-        <!-- Card 3 (Facebook - Fiestas Patrias) -->
-        <a href={facebookFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
+      <!-- Sub-bloque B: Muro Social Editorial (P1 / P2) -->
+      <div class="pt-8 border-t border-white/5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
-              </div>
-              <div>
-                <span class="text-[10px] font-bold text-white block">Banda Bruna</span>
-                <span class="text-[8px] text-slate-500 block">{facebookFeed[0].timeAgo}</span>
-              </div>
-            </div>
-            <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-              <img src={facebookFeed[0].imageUrl} alt="Facebook Fiestas Patrias" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            </div>
-            <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{facebookFeed[0].caption}</p>
+            <span class="text-gold-bruna text-[11px] tracking-[0.25em] font-bold uppercase block mb-2">
+              MURO SOCIAL OFICIAL
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold font-title uppercase text-white tracking-tight">
+              COMUNIDAD Y CONTENIDO <span class="text-gold-bruna">EN TIEMPO REAL</span>
+            </h2>
           </div>
-          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>👍 {facebookFeed[0].likes}</span>
-            <span>💬 {facebookFeed[0].comments}</span>
-          </div>
-        </a>
-
-        <!-- Card 4 (Facebook - Saludo Diego Urrutia) -->
-        <a href={facebookFeed[1].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
-              </div>
-              <div>
-                <span class="text-[10px] font-bold text-white block">Banda Bruna</span>
-                <span class="text-[8px] text-slate-500 block">{facebookFeed[1].timeAgo}</span>
-              </div>
-            </div>
-            <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-              <img src={facebookFeed[1].imageUrl} alt="Facebook Saludo Diego Urrutia" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-            </div>
-            <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{facebookFeed[1].caption}</p>
-          </div>
-          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>👍 {facebookFeed[1].likes}</span>
-            <span>💬 {facebookFeed[1].comments}</span>
-          </div>
-        </a>
-
-        <!-- Card 5 (TikTok - Día del Minero) -->
-        <a href={tiktokFeed[0].link} target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 hover:border-gold-bruna rounded p-4 group block transition-all hover:translate-y-[-3px] text-left">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white border border-white/10">
-              <!-- TikTok SVG Icon -->
-              <svg class="w-3 h-3 fill-white" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.74-3.99-1.72-.08-.07-.17-.17-.25-.25v6.59c0 1.71-.4 3.42-1.34 4.81-1.71 2.54-4.96 3.79-7.9 3.12-2.87-.66-5.07-3.05-5.38-6-.42-4.04 2.65-7.75 6.69-8.08 1.12-.09 2.24.1 3.26.59v4.11c-.74-.43-1.6-.61-2.45-.52-1.84.2-3.32 1.7-3.46 3.54-.19 2.5 2.11 4.54 4.55 4.09 1.48-.27 2.58-1.51 2.67-3.01.03-1.88.02-3.76.02-5.64 0-2.3.02-4.6-.01-6.9v-.03z"/></svg>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold text-white block">{tiktokFeed[0].username}</span>
-              <span class="text-[8px] text-slate-500 block">{tiktokFeed[0].timeAgo}</span>
-            </div>
-          </div>
-          <div class="relative aspect-square rounded overflow-hidden bg-slate-950 mb-3 border border-white/5">
-            <img src={tiktokFeed[0].imageUrl} alt="TikTok Día del Minero" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" />
-          </div>
-          <p class="text-[10px] text-slate-300 line-clamp-3 mb-3 leading-relaxed">{tiktokFeed[0].caption}</p>
-          <div class="flex gap-3 border-t border-white/5 pt-2 text-[9px] text-slate-500 font-semibold">
-            <span>❤️ {tiktokFeed[0].likes}</span>
-            <span>💬 {tiktokFeed[0].comments}</span>
-          </div>
-        </a>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Section: Testimonios / Reseñas (Dynamic from Supabase) -->
-  <section id="testimonios-section" class="bg-gradient-to-b from-bg-darkest via-slate-950/20 to-bg-darkest py-24 px-6 border-t border-white/5 scroll-reveal hidden">
-    <div class="max-w-[1400px] mx-auto">
-      <div class="text-center mb-16">
-        <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">RESPALDO</span>
-        <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white">Opiniones de Nuestros Clientes</h2>
-        <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
-        <p class="text-xs text-slate-400 font-light mt-4 max-w-md mx-auto">
-          La experiencia de productores, municipalidades y particulares que ya han vivido la potencia de Banda Bruna.
-        </p>
-      </div>
-
-      <div id="testimonios-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {testimonios.map((item, idx) => (
-          <blockquote class="bg-slate-900/60 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
-            <div>
-              <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
-              <!-- Stars -->
-              <div class="flex gap-0.5 text-gold-bruna text-xs mb-3.5 pl-3">
-                {'★'.repeat(item.calificacion)}{'☆'.repeat(5 - item.calificacion)}
-              </div>
-              <p class="text-xs text-slate-350 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
-                "{item.contenido}"
-              </p>
-            </div>
-            <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
-              <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">{item.nombre_cliente}</strong>
-              {item.cargo_cliente || item.organizacion_cliente ? (
-                <span class="text-[9.5px] text-slate-500 uppercase tracking-wide block mt-1 leading-tight">
-                  {item.cargo_cliente} {item.cargo_cliente && item.organizacion_cliente ? '—' : ''} {item.organizacion_cliente}
-                </span>
-              ) : null}
-            </cite>
-          </blockquote>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Section: Contrataciones (Form & Contact details) -->
-  <section id="contacto" class="max-w-[1400px] mx-auto px-6 py-24 scroll-reveal">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
-      
-      <!-- Direct Contact Points (Left) -->
-      <div class="lg:col-span-5 flex flex-col gap-6 justify-between text-left py-2">
-        <div>
-          <h2 class="font-title font-extrabold text-3xl text-white leading-tight uppercase">
-            ¿QUIERES LLEVAR <br/>
-            <span class="text-gold-bruna">LA EXPERIENCIA BRUNA</span> <br/>
-            A TU EVENTO?
-          </h2>
-        </div>
-
-        <!-- WhatsApp Card -->
-        <a href="https://wa.me/56990021689" target="_blank" rel="noopener" class="bg-slate-900 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-green-500 transition-colors group cursor-pointer">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-green-950/40 border border-green-500/20 text-green-400 flex items-center justify-center">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.688 2.012 14.218.993 12.003.993c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.47 3.387 1.357 4.868l-.993 3.624 3.73-.974h-.002zm11.367-7.374c-.327-.162-1.928-.94-2.224-1.047-.297-.108-.512-.162-.728.162-.215.324-.837 1.047-1.026 1.262-.19.216-.379.243-.705.082-.328-.162-1.38-.503-2.63-1.608-.973-.859-1.63-1.922-1.821-2.247-.19-.325-.02-.5-.184-.66-.147-.146-.327-.379-.49-.569-.164-.189-.219-.324-.327-.54-.109-.217-.055-.407-.027-.57.028-.162.22-1.05.28-1.243.06-.192.12-.324.21-.54.09-.217.045-.406.022-.57-.022-.162-.218-1.047-.726-2.247-.32-.76-.667-.655-.726-.658h-.65c-.215 0-.56.08-.853.38-.293.305-1.12.973-1.12 2.373 0 1.4 1.033 2.75 1.178 2.94.145.19 2.032 3.065 4.92 4.29.686.29 1.222.463 1.64.595.69.217 1.319.186 1.815.112.553-.083 1.928-.779 2.2-1.493.272-.714.272-1.328.19-1.457-.08-.13-.298-.216-.625-.378z"/></svg>
-            </div>
-            <div class="text-left flex-grow pl-3">
-              <span class="text-slate-500 text-[10px] font-bold block uppercase tracking-wider">WHATSAPP</span>
-              <span class="text-white text-sm font-bold tracking-wide">+56 9 9002 1689</span>
-            </div>
-          </div>
-          <span class="text-[9px] text-green-400 font-bold border border-green-500/20 px-3 py-1 bg-green-950/20 group-hover:bg-green-500 group-hover:text-black transition-colors uppercase tracking-wider">ESCRIBIR AHORA</span>
-        </a>
-
-        <!-- Mail Card -->
-        <a href="mailto:contacto@bandabruna.cl" class="bg-slate-900 border border-white/5 rounded-xl p-5 flex items-center justify-between hover:border-gold-bruna transition-colors group cursor-pointer">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-amber-950/40 border border-gold-bruna/20 text-gold-bruna flex items-center justify-center">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            </div>
-            <div class="text-left flex-grow">
-              <span class="text-slate-500 text-[10px] font-bold block uppercase tracking-wider">EMAIL</span>
-              <span class="text-white text-sm font-bold tracking-wide">contacto@bandabruna.cl</span>
-            </div>
-          </div>
-          <span class="text-[9px] text-gold-bruna font-bold border border-gold-bruna/20 px-3 py-1 bg-amber-950/20 group-hover:bg-gold-bruna group-hover:text-black transition-colors uppercase tracking-wider">ENVIAR EMAIL</span>
-        </a>
-      </div>
-
-      <!-- Quotation Form (Right) -->
-      <div class="lg:col-span-7 bg-slate-900 border border-white/5 rounded-xl p-6 md:p-8 shadow-2xl flex flex-col justify-center">
-        
-        <!-- Form Container -->
-        <div id="booking-form-container-home">
-          <form id="quote-form-home" class="flex flex-col gap-5 text-left" novalidate>
-            
-            <!-- Row 1: Nombre & Teléfono -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div class="flex flex-col gap-1.5">
-                <label for="qh-name" class="sr-only">Nombre completo</label>
-                <input 
-                  type="text" 
-                  id="qh-name" 
-                  name="name" 
-                  placeholder="Nombre completo" 
-                  required
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
-                />
-                <span class="text-[9px] text-red-400 hidden" id="qh-name-err">Ingresa tu nombre.</span>
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label for="qh-phone" class="sr-only">Teléfono de contacto</label>
-                <input 
-                  type="tel" 
-                  id="qh-phone" 
-                  name="phone" 
-                  placeholder="Teléfono de contacto" 
-                  required
-                  autocomplete="tel"
-                  inputmode="tel"
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
-                />
-                <span class="text-[9px] text-red-400 hidden" id="qh-phone-err">Ingresa tu teléfono.</span>
-              </div>
-            </div>
-
-            <!-- Row 2: Correo & Tipo de Evento -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div class="flex flex-col gap-1.5">
-                <label for="qh-email" class="sr-only">Tu correo electrónico</label>
-                <input 
-                  type="email" 
-                  id="qh-email" 
-                  name="email" 
-                  placeholder="Tu correo" 
-                  required
-                  inputmode="email"
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
-                />
-                <span class="text-[9px] text-red-400 hidden" id="qh-email-err">Ingresa un correo válido.</span>
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label for="qh-type" class="sr-only">Tipo de evento</label>
-                <select 
-                  id="qh-type" 
-                  name="event-type"
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
-                >
-                  <option value="" disabled selected>Tipo de evento</option>
-                  <option value="municipal">Festival Municipal / Show Público</option>
-                  <option value="costumbrista">Fiesta Costumbrista</option>
-                  <option value="corporativo">Evento Corporativo / Empresa</option>
-                  <option value="matrimonio">Matrimonio / Fiesta Privada</option>
-                  <option value="otro">Otro</option>
-                </select>
-                <span class="text-[9px] text-red-400 hidden" id="qh-type-err">Selecciona tipo de evento.</span>
-              </div>
-            </div>
-
-            <!-- Row 3: Fecha & Ciudad/Comuna -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div class="flex flex-col gap-1.5">
-                <label for="qh-date" class="sr-only">Fecha tentativa del evento</label>
-                <input 
-                  type="date" 
-                  id="qh-date" 
-                  name="event-date"
-                  required
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors cursor-pointer"
-                />
-                <span class="text-[9px] text-red-400 hidden" id="qh-date-err">Selecciona la fecha.</span>
-              </div>
-              <div class="flex flex-col gap-1.5">
-                <label for="qh-city" class="sr-only">Ciudad o comuna del evento</label>
-                <input 
-                  type="text" 
-                  id="qh-city" 
-                  name="city" 
-                  placeholder="Ciudad / Comuna del evento" 
-                  required
-                  class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors"
-                />
-                <span class="text-[9px] text-red-400 hidden" id="qh-city-err">Ingresa la comuna.</span>
-              </div>
-            </div>
-
-            <!-- Textarea: Requerimientos/Detalles -->
-            <div class="flex flex-col gap-1.5">
-              <label for="qh-message" class="sr-only">Detalles adicionales del show</label>
-              <textarea 
-                id="qh-message" 
-                name="message" 
-                rows="4" 
-                placeholder="Detalles adicionales del show (escenario, horarios, duración, etc.)"
-                class="bg-slate-950/80 border border-white/5 rounded-sm p-3 text-white text-base sm:text-xs outline-none focus:border-gold-bruna transition-colors resize-none"
-              ></textarea>
-            </div>
-
-            <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-title font-bold py-3.5 rounded-sm text-xs transition-colors cursor-pointer uppercase tracking-widest mt-2 w-full">
-              ENVIAR SOLICITUD DE COTIZACIÓN
-            </button>
-            
-            <div id="qh-form-feedback" class="hidden text-center text-xs py-2.5 px-4 rounded border" role="alert"></div>
-
-          </form>
-        </div>
-
-        <!-- Success Panel (Hidden by default) -->
-        <div id="success-panel-home" class="hidden text-center flex flex-col items-center gap-5 py-4">
-          <div class="w-14 h-14 rounded-full bg-green-950/40 border border-green-500/30 text-green-400 flex items-center justify-center text-2xl animate-bounce">
-            ✓
-          </div>
-          <div>
-            <h3 class="font-title font-extrabold text-xl text-white uppercase tracking-wide">¡Cotización Procesada!</h3>
-            <p class="text-slate-300 text-xs font-light mt-1.5 max-w-md mx-auto leading-relaxed">
-              Hemos enviado un correo electrónico con todos los detalles de tu cotización a <strong class="text-white">contacto@bandabruna.cl</strong>.
-            </p>
-          </div>
-
-          <div class="w-full max-w-md border-t border-white/5 pt-4 mt-1 flex flex-col gap-3">
-            <span class="text-[9px] font-bold text-slate-500 tracking-widest uppercase">Notificar por WhatsApp</span>
-            <p class="text-slate-400 text-[10px] font-light leading-relaxed">
-              Hemos intentado abrir WhatsApp para avisar a Jaime Cárdenas. Si no se abrió, haz clic en el siguiente botón para abrir el chat con el mensaje:
-            </p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-              <a id="btn-wa-jaime-home" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] py-2.5 px-3 rounded transition-all flex items-center justify-center gap-1.5 uppercase tracking-wide">
-                Jaime Cárdenas
-              </a>
-              <a id="btn-wa-cesar-home" href="#" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] py-2.5 px-3 rounded transition-all flex items-center justify-center gap-1.5 uppercase tracking-wide">
-                César Bruna
-              </a>
-            </div>
-          </div>
-
-          <button id="btn-reset-home-form" class="mt-2 text-slate-400 hover:text-gold-bruna text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer">
-            Cotizar otro show
-          </button>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Script for form submission -->
-  <script>
-    import { supabase } from '../services/supabaseClient.js';
-    import { sendEmail } from '../services/emailService.js';
-
-    const formH = document.getElementById('quote-form-home');
-    const formContainerH = document.getElementById('booking-form-container-home');
-    const successPanelH = document.getElementById('success-panel-home');
-    const feedbackH = document.getElementById('qh-form-feedback');
-    const nameInputH = document.getElementById('qh-name');
-    const phoneInputH = document.getElementById('qh-phone');
-    const emailInputH = document.getElementById('qh-email');
-    const typeInputH = document.getElementById('qh-type');
-    const dateInputH = document.getElementById('qh-date');
-    const cityInputH = document.getElementById('qh-city');
-    const messageInputH = document.getElementById('qh-message');
-
-    const nameErrH = document.getElementById('qh-name-err');
-    const phoneErrH = document.getElementById('qh-phone-err');
-    const emailErrH = document.getElementById('qh-email-err');
-    const typeErrH = document.getElementById('qh-type-err');
-    const dateErrH = document.getElementById('qh-date-err');
-    const cityErrH = document.getElementById('qh-city-err');
-    const btnResetH = document.getElementById('btn-reset-home-form');
-
-    if (formH) {
-      formH.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        nameErrH.classList.add('hidden');
-        phoneErrH.classList.add('hidden');
-        emailErrH.classList.add('hidden');
-        typeErrH.classList.add('hidden');
-        dateErrH.classList.add('hidden');
-        cityErrH.classList.add('hidden');
-        feedbackH.classList.add('hidden');
-
-        let valid = true;
-
-        if (!nameInputH.value.trim()) {
-          nameErrH.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!phoneInputH.value.trim()) {
-          phoneErrH.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!emailInputH.value.trim() || !emailInputH.checkValidity()) {
-          emailErrH.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!typeInputH.value) {
-          typeErrH.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!dateInputH.value) {
-          dateErrH.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!cityInputH.value.trim()) {
-          cityErrH.classList.remove('hidden');
-          valid = false;
-        }
-
-        if (!valid) return;
-
-        const btn = formH.querySelector('button[type="submit"]');
-        const origText = btn.textContent;
-        btn.textContent = 'Enviando...';
-        btn.disabled = true;
-
-        const nameVal = nameInputH.value.trim();
-        const phoneVal = phoneInputH.value.trim();
-        const emailVal = emailInputH.value.trim();
-        const typeVal = typeInputH.options[typeInputH.selectedIndex].text;
-        const dateVal = dateInputH.value;
-        const cityVal = cityInputH.value.trim();
-        const msgVal = messageInputH.value.trim() || 'Sin detalles adicionales.';
-
-        // Guardar cotización en Supabase
-        supabase.from('cotizaciones').insert([
-          {
-            nombre: nameVal,
-            telefono: phoneVal,
-            email: emailVal,
-            fecha_evento: dateVal || null,
-            ciudad: cityVal,
-            tipo_evento: typeVal,
-            mensaje: msgVal
-          }
-        ]).then(({ error }) => {
-          if (error) {
-            console.error('Error al guardar en Supabase:', error);
-          } else {
-            console.log('Cotización guardada exitosamente en Supabase (desde Home)');
-          }
-        });
-
-        // Send email asynchronously using Web3Forms
-        sendEmail({
-          Asunto: "Nueva Cotización desde Home del Sitio Web",
-          Nombre: nameVal,
-          Teléfono: phoneVal,
-          Email: emailVal,
-          "Tipo de Evento": typeVal,
-          "Fecha Tentativa": dateVal,
-          "Ciudad/Comuna": cityVal,
-          "Detalles/Mensaje": msgVal
-        })
-        .then(() => {
-          btn.textContent = origText;
-          btn.disabled = false;
-
-          // Formulate WhatsApp notification message
-          const waMessage = `*Nueva Solicitud de Cotización - Banda Bruna*\n\n` +
-            `👤 *Contacto:* ${nameVal}\n` +
-            `📞 *Fono:* ${phoneVal}\n` +
-            `📧 *Email:* ${emailVal}\n` +
-            `🎭 *Evento:* ${typeVal}\n` +
-            `📅 *Fecha:* ${dateVal}\n` +
-            `📍 *Ciudad/Comuna:* ${cityVal}\n` +
-            `📝 *Detalles:* ${msgVal}`;
           
-          const encodedMessage = encodeURIComponent(waMessage);
+          <div class="flex flex-wrap gap-4 text-[10px] font-title font-bold tracking-wider uppercase">
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-red-600 rounded-full inline-block"></span>YouTube</span>
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-pink-600 rounded-full inline-block"></span>Instagram</span>
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block"></span>Facebook</span>
+            <span class="text-slate-400 flex items-center gap-1.5"><span class="w-2 h-2 bg-cyan-400 rounded-full inline-block"></span>TikTok</span>
+          </div>
+        </div>
 
-          // Configure Jaime and Cesar WhatsApp links for Home success panel
-          const btnJaimeH = document.getElementById('btn-wa-jaime-home');
-          const btnCesarH = document.getElementById('btn-wa-cesar-home');
-          if (btnJaimeH) btnJaimeH.href = `https://wa.me/56990021689?text=${encodedMessage}`;
-          if (btnCesarH) btnCesarH.href = `https://wa.me/56976149408?text=${encodedMessage}`;
+        <!-- Renderizado de Publicaciones Editoriales (Supabase P1/P2 o Fallback Verificado) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {editorialSocialPosts.length > 0 ? (
+            editorialSocialPosts.map((post: any) => (
+              <a 
+                href={post.post_url || post.url || '#'} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
+              >
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-3">
+                    <span class={`text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider ${
+                      post.platform === 'youtube' ? 'bg-red-600/20 text-red-400 border border-red-500/30' :
+                      post.platform === 'instagram' ? 'bg-pink-600/20 text-pink-400 border border-pink-500/30' :
+                      post.platform === 'facebook' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' :
+                      'bg-slate-800 text-white border border-white/20'
+                    }`}>
+                      {post.platform}
+                    </span>
+                    <span class="text-[9px] text-slate-500 font-mono">#{post.web_order}</span>
+                  </div>
 
-          // Try opening Jaime's WhatsApp window automatically
-          window.open(`https://wa.me/56990021689?text=${encodedMessage}`, '_blank');
+                  {post.thumbnail_url && (
+                    <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
+                      <img 
+                        src={post.thumbnail_url} 
+                        alt={post.title || post.caption || 'Publicación Banda Bruna'} 
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        loading="lazy" 
+                      />
+                    </div>
+                  )}
 
-          // Hide form container and show success panel
-          if (formContainerH) formContainerH.classList.add('hidden');
-          if (successPanelH) successPanelH.classList.remove('hidden');
+                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-2 group-hover:text-gold-bruna transition-colors">
+                    {post.title || post.caption || 'Ver publicación oficial'}
+                  </h3>
+                  {post.caption && post.title && (
+                    <p class="text-[11px] text-slate-300 font-light line-clamp-3 leading-relaxed">
+                      {post.caption}
+                    </p>
+                  )}
+                </div>
 
-          formH.reset();
-        })
-        .catch((err) => {
-          btn.textContent = origText;
-          btn.disabled = false;
-          feedbackH.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos por WhatsApp.';
-          feedbackH.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 mt-2 block';
-        });
-      });
-    }
+                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
+                  <span>{post.published_at ? new Date(post.published_at).toLocaleDateString('es-CL') : 'Ver online'}</span>
+                  <span class="text-gold-bruna font-bold group-hover:underline">Abrir →</span>
+                </div>
+              </a>
+            ))
+          ) : (
+            <!-- Fallback Editorial Ordenado con Canales Oficiales Verificados -->
+            <>
+              <!-- Card 1: YouTube Oficial -->
+              <a 
+                href={latestVideo.youtubeUrl} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="bg-red-600/20 border border-red-500/30 text-red-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                      YOUTUBE OFICIAL
+                    </span>
+                    <span class="text-[9px] text-slate-500 font-mono">CANAL OFICIAL</span>
+                  </div>
+                  <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
+                    <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <span class="text-white text-base">▶</span>
+                    </div>
+                  </div>
+                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
+                    {latestVideo.title}
+                  </h3>
+                  <p class="text-[11px] text-slate-300 font-light line-clamp-2">
+                    Videoclip oficial disponible en nuestro canal de YouTube.
+                  </p>
+                </div>
+                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
+                  <span>{latestVideo.publishedAt}</span>
+                  <span class="text-gold-bruna font-bold group-hover:underline">Reproducir →</span>
+                </div>
+              </a>
 
-    if (btnResetH) {
-      btnResetH.addEventListener('click', () => {
-        if (successPanelH) successPanelH.classList.add('hidden');
-        if (formContainerH) formContainerH.classList.remove('hidden');
-      });
-    }
+              <!-- Card 2: Instagram Reel Verificado -->
+              <a 
+                href={instagramFeed[0].link} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="bg-pink-600/20 border border-pink-500/30 text-pink-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                      INSTAGRAM REEL
+                    </span>
+                    <span class="text-[9px] text-slate-500 font-mono">@banda_bruna</span>
+                  </div>
+                  <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
+                    <img src={instagramFeed[0].imageUrl} alt="Instagram Reel" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <span class="text-white text-base">🎬</span>
+                    </div>
+                  </div>
+                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
+                    En Vivo en Escenarios de Chile
+                  </h3>
+                  <p class="text-[11px] text-slate-300 font-light line-clamp-2">
+                    {instagramFeed[0].caption}
+                  </p>
+                </div>
+                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
+                  <span>{instagramFeed[0].timeAgo}</span>
+                  <span class="text-gold-bruna font-bold group-hover:underline">Ver Reel →</span>
+                </div>
+              </a>
 
+              <!-- Card 3: Facebook Post Verificado -->
+              <a 
+                href={facebookFeed[0].link} 
+                target="_blank" 
+                rel="noopener" 
+                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="bg-blue-600/20 border border-blue-500/30 text-blue-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                      FACEBOOK OFICIAL
+                    </span>
+                    <span class="text-[9px] text-slate-500 font-mono">Banda Bruna</span>
+                  </div>
+                  <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
+                    <img src={facebookFeed[0].imageUrl} alt="Facebook Post" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  </div>
+                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
+                    Gira y Celebraciones Masivas
+                  </h3>
+                  <p class="text-[11px] text-slate-300 font-light line-clamp-2">
+                    {facebookFeed[0].caption}
+                  </p>
+                </div>
+                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
+                  <span>{facebookFeed[0].timeAgo}</span>
+                  <span class="text-gold-bruna font-bold group-hover:underline">Ver Post →</span>
+                </div>
+              </a>
+            </>
+          )}
+        </div>
+
+        <!-- Franja de Enlaces Directos a Redes Oficiales -->
+        <div class="mt-10 p-5 rounded-2xl bg-[#0b132b]/60 border border-white/5 flex flex-wrap items-center justify-between gap-4">
+          <span class="text-xs text-slate-300 font-semibold uppercase tracking-wider">
+            Canales Oficiales Verificados:
+          </span>
+          <div class="flex flex-wrap items-center gap-3">
+            <a href="https://www.youtube.com/@bandabrunaoficial" target="_blank" rel="noopener" class="min-h-[44px] px-3.5 py-2 rounded-lg bg-black/40 hover:bg-red-600/20 border border-white/10 hover:border-red-500/40 text-slate-300 hover:text-white text-xs flex items-center gap-2 transition-all">
+              <span class="text-red-500">▶</span> YouTube
+            </a>
+            <a href="https://www.instagram.com/banda_bruna/" target="_blank" rel="noopener" class="min-h-[44px] px-3.5 py-2 rounded-lg bg-black/40 hover:bg-pink-600/20 border border-white/10 hover:border-pink-500/40 text-slate-300 hover:text-white text-xs flex items-center gap-2 transition-all">
+              <span class="text-pink-500">📷</span> Instagram
+            </a>
+            <a href="https://www.facebook.com/bandabruna" target="_blank" rel="noopener" class="min-h-[44px] px-3.5 py-2 rounded-lg bg-black/40 hover:bg-blue-600/20 border border-white/10 hover:border-blue-500/40 text-slate-300 hover:text-white text-xs flex items-center gap-2 transition-all">
+              <span class="text-blue-500">👥</span> Facebook
+            </a>
+            <a href="https://www.tiktok.com/@bandabrunaoficial" target="_blank" rel="noopener" class="min-h-[44px] px-3.5 py-2 rounded-lg bg-black/40 hover:bg-slate-800 border border-white/10 hover:border-cyan-400 text-slate-300 hover:text-white text-xs flex items-center gap-2 transition-all">
+              <span class="text-cyan-400">🎵</span> TikTok
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================================================================= -->
+  <!-- BLOQUE 06: CONVERSIÓN Y CIERRE COMERCIAL FORMAL                   -->
+  <!-- ================================================================= -->
+  <section id="contacto" class="max-w-[1400px] mx-auto px-6 py-20 border-t border-white/5 scroll-reveal">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+      
+      <!-- Canales de Contacto Directo y Respaldo B2B (Lado Izquierdo - 5 cols) -->
+      <div class="lg:col-span-5 flex flex-col justify-between text-left py-2 gap-6">
+        <div>
+          <span class="text-gold-bruna text-[11px] tracking-[0.25em] font-bold uppercase block mb-2">
+            COTIZACIÓN DIRECTA
+          </span>
+          <h2 class="font-title font-extrabold text-3xl sm:text-4xl text-white leading-tight uppercase">
+            LLEVA LA FIESTA Y LA POTENCIA DE <span class="text-gold-bruna">BANDA BRUNA</span> A TU EVENTO
+          </h2>
+          <div class="w-12 h-1 bg-gold-bruna mt-3 mb-4"></div>
+          <p class="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+            Atendemos directamente a municipalidades, comisiones de festivales, empresas y celebraciones privadas. Garantizamos contrato formal, Factura SII y puntualidad técnica estricta.
+          </p>
+        </div>
+
+        <!-- Canales Directos -->
+        <div class="flex flex-col gap-3.5">
+          <!-- WhatsApp Card -->
+          <a 
+            href={`https://wa.me/${config.telefono_principal ? config.telefono_principal.replace(/\+/g, '').replace(/\s+/g, '') : '56990021689'}?text=Hola,%20quisiera%20cotizar%20a%20Banda%20Bruna%20para%20un%20evento`} 
+            target="_blank" 
+            rel="noopener" 
+            class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-4 flex items-center justify-between hover:border-emerald-500/60 transition-all group min-h-[48px]"
+          >
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl flex-shrink-0">
+                💬
+              </div>
+              <div class="text-left">
+                <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">WHATSAPP DIRECTO</span>
+                <span class="text-white text-sm font-bold tracking-wide">+56 9 9002 1689</span>
+              </div>
+            </div>
+            <span class="text-[9px] text-emerald-400 font-bold border border-emerald-500/30 px-3 py-1.5 rounded bg-emerald-950/30 group-hover:bg-emerald-500 group-hover:text-black transition-colors uppercase tracking-wider flex-shrink-0">
+              Chatear →
+            </span>
+          </a>
+
+          <!-- Email Card -->
+          <a 
+            href="mailto:contacto@bandabruna.cl" 
+            class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-4 flex items-center justify-between hover:border-gold-bruna transition-all group min-h-[48px]"
+          >
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-lg bg-amber-500/10 border border-gold-bruna/30 text-gold-bruna flex items-center justify-center text-xl flex-shrink-0">
+                ✉️
+              </div>
+              <div class="text-left">
+                <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">CORREO INSTITUCIONAL</span>
+                <span class="text-white text-sm font-bold tracking-wide">contacto@bandabruna.cl</span>
+              </div>
+            </div>
+            <span class="text-[9px] text-gold-bruna font-bold border border-gold-bruna/30 px-3 py-1.5 rounded bg-amber-950/30 group-hover:bg-gold-bruna group-hover:text-black transition-colors uppercase tracking-wider flex-shrink-0">
+              Escribir →
+            </span>
+          </a>
+        </div>
+
+        <!-- Sellos de Formalidad y Respaldo -->
+        <div class="pt-4 border-t border-white/5 space-y-2 text-xs text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">✔</span>
+            <span>Emisión de Factura electrónica y Contrato formal</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">✔</span>
+            <span>Ficha técnica y Rider oficial para sonidistas de escenario</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">✔</span>
+            <span>Respuesta a solicitudes comerciales en menos de 24 horas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario Unificado de Cotización (Lado Derecho - 7 cols) -->
+      <div class="lg:col-span-7">
+        <QuoteForm 
+          origin="home" 
+          subject="Nueva Cotización desde Portada Oficial" 
+          title="Cotiza el Show para tu Evento" 
+        />
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- Interactive Scripts (Sliders, Counters, Video Player Modals) -->
+  <script>
     // HERO BACKGROUND SLIDER LOGIC
     const slides = document.querySelectorAll('.hero-slide');
     const prevBtn = document.getElementById('hero-prev');
@@ -1714,99 +1750,12 @@ try {
     showSlide(0);
     startAutoplay();
 
-    // EXPERIENCIA BRUNA SLIDER LOGIC
-    function setupExperienciaSlider() {
-      const prevBtn = document.getElementById('exp-prev');
-      const nextBtn = document.getElementById('exp-next');
-      const track = document.getElementById('exp-slider-track');
-      const container = document.getElementById('exp-slider-container');
-      
-      if (!track || !container || !prevBtn || !nextBtn) return;
-      
-      const items = track.children;
-      if (items.length === 0) return;
-      
-      let expIndex = 0;
-      let itemWidth = items[0] ? items[0].getBoundingClientRect().width : 0;
-      const gap = 16; // gap-4 is 16px
-      
-      function getVisibleItemsCount() {
-        const width = window.innerWidth;
-        if (width >= 768) return 4;
-        if (width >= 640) return 3;
-        return 2;
-      }
-      
-      function updateSlider() {
-        const visibleCount = getVisibleItemsCount();
-        const maxIndex = items.length - visibleCount;
-        
-        if (expIndex < 0) expIndex = 0;
-        if (expIndex > maxIndex) expIndex = maxIndex;
-        
-        const offset = expIndex * (itemWidth + gap);
-        
-        track.style.transform = `translateX(-${offset}px)`;
-        
-        prevBtn.disabled = expIndex === 0;
-        nextBtn.disabled = expIndex === maxIndex;
-      }
-      
-      const newPrev = prevBtn.cloneNode(true);
-      prevBtn.parentNode.replaceChild(newPrev, prevBtn);
-      newPrev.addEventListener('click', () => {
-        expIndex--;
-        updateSlider();
-      });
-      
-      const newNext = nextBtn.cloneNode(true);
-      nextBtn.parentNode.replaceChild(newNext, nextBtn);
-      newNext.addEventListener('click', () => {
-        expIndex++;
-        updateSlider();
-      });
-      
-      function handleResize() {
-        itemWidth = items[0] ? items[0].getBoundingClientRect().width : 0;
-        updateSlider();
-      }
-      
-      window.addEventListener('resize', handleResize);
-      
-      let startX = 0;
-      container.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-      }, { passive: true });
-      
-      container.addEventListener('touchend', (e) => {
-        const endX = e.changedTouches[0].clientX;
-        const diff = startX - endX;
-        const visibleCount = getVisibleItemsCount();
-        const maxIndex = items.length - visibleCount;
-        
-        if (Math.abs(diff) > 40) {
-          if (diff > 0 && expIndex < maxIndex) {
-            expIndex++;
-          } else if (diff < 0 && expIndex > 0) {
-            expIndex--;
-          }
-          updateSlider();
-        }
-      }, { passive: true });
-      
-      updateSlider();
-    }
-
-    setupExperienciaSlider();
-    document.addEventListener('astro:after-swap', setupExperienciaSlider);
-
     // COUNT UP ANIMATION LOGIC FOR STATISTICS
     function setupCountUp() {
       const counters = document.querySelectorAll('[data-count-target]');
       if (counters.length === 0) return;
 
       // Respetar preferencia de accesibilidad (prefers-reduced-motion)
-      // Si el usuario tiene desactivadas las animaciones, el HTML SSR ya contiene el valor real final.
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReducedMotion) return;
 
@@ -1860,61 +1809,6 @@ try {
 
     setupCountUp();
 
-    // CONTROL DEL CARRUSEL DE VIDEOS DESTACADOS DEL HOME
-    function setupHomeVideoCarousel() {
-      const carousel = document.getElementById('home-video-carousel');
-      const prevBtn = document.getElementById('home-prev-video');
-      const nextBtn = document.getElementById('home-next-video');
-      const dots = document.querySelectorAll('[data-home-slide]');
-      const videos = document.querySelectorAll('#home-video-carousel video') as NodeListOf<HTMLVideoElement>;
-
-      if (!carousel || videos.length === 0) return;
-
-      let currentSlide = 0;
-
-      function updateCarousel(index: number) {
-        // Pausar todos los videos de este carrusel
-        videos.forEach(vid => vid.pause());
-
-        currentSlide = index;
-        carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-        // Actualizar dots
-        dots.forEach((dot, idx) => {
-          if (idx === currentSlide) {
-            dot.classList.add('bg-white');
-            dot.classList.remove('bg-white/40');
-          } else {
-            dot.classList.remove('bg-white');
-            dot.classList.add('bg-white/40');
-          }
-        });
-      }
-
-      if (prevBtn && nextBtn) {
-        prevBtn.addEventListener('click', () => {
-          let index = currentSlide - 1;
-          if (index < 0) index = videos.length - 1;
-          updateCarousel(index);
-        });
-
-        nextBtn.addEventListener('click', () => {
-          let index = currentSlide + 1;
-          if (index >= videos.length) index = 0;
-          updateCarousel(index);
-        });
-      }
-
-      dots.forEach((dot, idx) => {
-        dot.addEventListener('click', () => {
-          updateCarousel(idx);
-        });
-      });
-
-      // Inicializar primer estado
-      updateCarousel(0);
-    }
-
     // CARGA DINÁMICA DE TESTIMONIOS APROBADOS DESDE SUPABASE EN TIEMPO REAL
     async function loadDynamicTestimonios() {
       const section = document.getElementById('testimonios-section');
@@ -1941,17 +1835,17 @@ try {
           const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
           const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).join(' — ');
           return `
-            <blockquote class="bg-slate-900/60 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
+            <blockquote class="bg-[#0b132b]/80 border border-white/10 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/30 transition-all duration-300 shadow-xl">
               <div>
                 <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
-                <div class="flex gap-0.5 text-gold-bruna text-xs mb-3.5 pl-3">${stars}</div>
-                <p class="text-xs text-slate-350 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
+                <div class="flex gap-1 text-gold-bruna text-xs mb-3.5 pl-3">${stars}</div>
+                <p class="text-xs text-slate-300 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
                   "${item.contenido}"
                 </p>
               </div>
               <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
                 <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${item.nombre_cliente}</strong>
-                ${sub ? `<span class="text-[9.5px] text-slate-500 uppercase tracking-wide block mt-1 leading-tight">${sub}</span>` : ''}
+                ${sub ? `<span class="text-[11px] text-slate-400 uppercase tracking-wide block mt-1 leading-tight">${sub}</span>` : ''}
               </cite>
             </blockquote>
           `;
@@ -2013,15 +1907,63 @@ try {
       });
     }
 
-    setupHomeVideoCarousel();
     loadDynamicTestimonios();
     setupEventVideoModal();
+    setupEventFlyerModal();
+
+    function setupEventFlyerModal() {
+      const modal = document.getElementById('event-flyer-modal');
+      const modalCard = document.getElementById('event-flyer-modal-card');
+      const imgEl = document.getElementById('event-flyer-modal-image') as HTMLImageElement;
+      const titleEl = document.getElementById('event-flyer-modal-title');
+      const linkEl = document.getElementById('event-flyer-modal-link') as HTMLAnchorElement;
+      const closeBtn = document.getElementById('close-event-flyer-modal');
+
+      if (!modal || !imgEl) return;
+
+      function openModal(url: string, title: string) {
+        imgEl.src = url;
+        if (titleEl) titleEl.textContent = title || 'Afiche Oficial';
+        if (linkEl) linkEl.href = url;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          if (modalCard) modalCard.classList.remove('scale-95');
+        }, 10);
+      }
+
+      function closeModal() {
+        modal.classList.add('opacity-0');
+        if (modalCard) modalCard.classList.add('scale-95');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          imgEl.src = '';
+        }, 300);
+      }
+
+      document.querySelectorAll('[data-open-event-flyer]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = el.getAttribute('data-open-event-flyer');
+          const title = el.getAttribute('data-event-title');
+          if (url) openModal(url, title || '');
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+    }
 
     document.addEventListener('astro:after-swap', () => {
       setupCountUp();
-      setupHomeVideoCarousel();
       loadDynamicTestimonios();
       setupEventVideoModal();
+      setupEventFlyerModal();
     });
   </script>
 
@@ -2048,6 +1990,35 @@ try {
           <span>🎬</span> Cobertura de presentación en vivo
         </span>
         <span class="text-[9px] text-slate-500 font-mono tracking-widest uppercase">BANDA BRUNA LIVE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Emergente de Flyer / Afiche de Eventos -->
+  <div id="event-flyer-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 hidden opacity-0 transition-opacity duration-300">
+    <div id="event-flyer-modal-card" class="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden max-w-lg w-full shadow-2xl relative flex flex-col transform scale-95 transition-transform duration-300 max-h-[90vh]">
+      <!-- Header del Modal -->
+      <div class="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-slate-950">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <span class="text-[9px] bg-gold-bruna/20 text-gold-bruna font-bold px-2 py-0.5 rounded border border-gold-bruna/30 uppercase tracking-wider flex-shrink-0">AFICHE OFICIAL</span>
+          <h3 id="event-flyer-modal-title" class="text-xs font-bold font-title text-white uppercase tracking-wide truncate">Afiche del Evento</h3>
+        </div>
+        <button type="button" id="close-event-flyer-modal" aria-label="Cerrar modal" class="text-slate-400 hover:text-white text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors flex-shrink-0">
+          ✕
+        </button>
+      </div>
+      <!-- Imagen del Flyer -->
+      <div class="p-2 bg-black flex items-center justify-center overflow-auto flex-grow">
+        <img id="event-flyer-modal-image" src="" alt="Flyer del Evento" class="max-w-full max-h-[70vh] object-contain rounded-lg" />
+      </div>
+      <!-- Footer del Modal -->
+      <div class="p-3.5 bg-slate-950/90 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+        <span class="text-slate-400 font-light flex items-center gap-1.5">
+          <span>📅</span> Presentación oficial confirmada
+        </span>
+        <a id="event-flyer-modal-link" href="#" target="_blank" rel="noopener" class="text-[10px] text-gold-bruna font-bold uppercase tracking-wider hover:underline flex items-center gap-1">
+          Abrir en tamaño completo ↗
+        </a>
       </div>
     </div>
   </div>
