@@ -129,13 +129,21 @@ const { data: dbConfig } = await supabase
 
 const config = dbConfig || {};
 const stats = {
-  musiciansTrajectory: config.cant_trayectoria !== undefined && config.cant_trayectoria !== null ? config.cant_trayectoria : socialStats.musiciansTrajectory,
-  stageYears: config.cant_escenarios !== undefined && config.cant_escenarios !== null ? config.cant_escenarios : socialStats.stageYears,
-  instagramFollowers: Math.max(Number(config.cant_instagram) || 0, Number(socialStats.instagramFollowers) || 0, 3359),
-  facebookFriends: Math.max(Number(config.cant_facebook) || 0, Number(socialStats.facebookFriends) || 0, 5000),
-  youtubeSubscribers: Math.max(Number(config.cant_youtube) || 0, Number(socialStats.youtubeSubscribers) || 0, 911),
-  tiktokFollowers: Math.max(Number(config.cant_tiktok) || 0, Number(socialStats.tiktokFollowers) || 0, 1136),
-  regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : socialStats.regions
+  musiciansTrajectory: config.cant_trayectoria !== undefined && config.cant_trayectoria !== null ? config.cant_trayectoria : (socialStats.musiciansTrajectory || 15),
+  stageYears: config.cant_escenarios !== undefined && config.cant_escenarios !== null ? config.cant_escenarios : (socialStats.stageYears || 10),
+  instagramFollowers: config.cant_instagram !== undefined && config.cant_instagram !== null && Number(config.cant_instagram) > 0
+    ? Number(config.cant_instagram)
+    : (Number(socialStats.instagramFollowers) || 3364),
+  facebookFriends: config.cant_facebook !== undefined && config.cant_facebook !== null && Number(config.cant_facebook) > 0
+    ? Number(config.cant_facebook)
+    : (Number(socialStats.facebookFriends) || 4971),
+  youtubeSubscribers: config.cant_youtube !== undefined && config.cant_youtube !== null && Number(config.cant_youtube) > 0
+    ? Number(config.cant_youtube)
+    : (Number(socialStats.youtubeSubscribers) || 911),
+  tiktokFollowers: config.cant_tiktok !== undefined && config.cant_tiktok !== null && Number(config.cant_tiktok) > 0
+    ? Number(config.cant_tiktok)
+    : (Number(socialStats.tiktokFollowers) || 1095),
+  regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : (socialStats.regions || 5)
 };
 
 // Cargar testimonios aprobados

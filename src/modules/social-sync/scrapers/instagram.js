@@ -45,34 +45,85 @@ function unescapeHtml(text) {
  * Extrae seguidores de la cabecera/metadatos de Instagram.
  */
 export async function scrapeInstagramFollowers() {
+  // 1. Intento primario: Perfil oficial con cabecera estándar
   try {
     const res = await fetch(IG_PROFILE_URL, {
       headers: IG_HEADERS,
-      signal: AbortSignal.timeout(10000)
+      signal: AbortSignal.timeout(8000)
     });
 
-    if (!res.ok) {
-      console.warn(`[instagram-scraper] HTTP ${res.status} al consultar perfil.`);
-      return null;
-    }
+    if (res.ok) {
+      const html = await res.text();
 
-    const html = await res.text();
+      // Detección en meta description / og:description
+      const descMatch = html.match(/<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"/i);
+      if (descMatch) {
+        const content = unescapeHtml(descMatch[1]);
+        const fMatch = content.match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
+        if (fMatch) {
+          const parsed = parseCount(fMatch[1]);
+          if (parsed && parsed > 1000) return parsed;
+        }
+      }
 
-    const descMatch = html.match(/<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"/i);
-    if (descMatch) {
-      const content = unescapeHtml(descMatch[1]);
-      // Ej: "3,360 seguidores, 1,455 seguidos..." o "3,360 Followers, 150 Following..."
-      const fMatch = content.match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
-      if (fMatch) {
-        return parseCount(fMatch[1]);
+      // Detección en JSON embebido de la página
+      const jsonMatch = html.match(/"edge_followed_by":\{"count":(\d+)\}/) ||
+                        html.match(/"userInteractionCount":"(\d+)"/);
+      if (jsonMatch) {
+        const parsed = parseInt(jsonMatch[1], 10);
+        if (parsed && parsed > 1000) return parsed;
       }
     }
-
-    return null;
   } catch (err) {
-    console.warn(`[instagram-scraper] Error al obtener seguidores:`, err.message);
-    return null;
+    console.warn(`[instagram-scraper] Intento 1 falló:`, err.message);
   }
+
+  // 2. Intento secundario: Endpoint web_profile_info oficial de Instagram con App ID público
+  try {
+    const apiUrl = 'https://www.instagram.com/api/v1/users/web_profile_info/?username=banda_bruna';
+    const apiRes = await fetch(apiUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+        'x-ig-app-id': '936619743392459',
+        'Accept': '*/*',
+        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
+      },
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (apiRes.ok) {
+      const json = await apiRes.json();
+      const count = json?.data?.user?.edge_followed_by?.count;
+      if (count && count > 1000) {
+        return count;
+      }
+    }
+  } catch (err) {
+    console.warn(`[instagram-scraper] Intento 2 falló:`, err.message);
+  }
+
+  // 3. Intento terciario: Visor público Imginn
+  try {
+    const imginnRes = await fetch('https://imginn.com/banda_bruna/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (imginnRes.ok) {
+      const html = await imginnRes.text();
+      const match = html.match(/class="desc">[\s\S]*?<span>([0-9.,KkMm]+)<\/span>\s*followers/i) ||
+                    html.match(/([0-9.,KkMm]+)\s*followers/i);
+      if (match) {
+        const parsed = parseCount(match[1]);
+        if (parsed && parsed > 1000) return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn(`[instagram-scraper] Intento 3 falló:`, err.message);
+  }
+
+  return null;
 }
 
 /**

@@ -46,8 +46,14 @@ export async function scrapeYouTubeSubscribers() {
 
     const html = await res.text();
 
-    // 1. Intento con pageHeaderViewModel (formato moderno YouTube 2025/2026)
-    const headerMatch = html.match(/"contentMetadataViewModel":\{"metadataRows":\[[\s\S]+?\{"text":\{"content":"([^"]+suscriptor[^"]*)"/i);
+    // 0. Intento con Schema.org / InteractionCounter (formato de microdatos oficial)
+    const schemaMatch = html.match(/"@type":"InteractionCounter","interactionType":\{"@type":"FollowAction"\},"userInteractionCount":"(\d+)"/);
+    if (schemaMatch && parseInt(schemaMatch[1], 10) > 0) {
+      return parseInt(schemaMatch[1], 10);
+    }
+
+    // 1. Intento con pageHeaderViewModel (soporta español o inglés)
+    const headerMatch = html.match(/"contentMetadataViewModel":\{"metadataRows":\[[\s\S]+?\{"text":\{"content":"([^"]+(?:suscriptor|subscriber)[^"]*)"/i);
     if (headerMatch) {
       return parseCount(headerMatch[1]);
     }

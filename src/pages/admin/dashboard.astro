@@ -2175,19 +2175,60 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         }
       });
 
-      // Botones de simulación de sincronización de plataformas
+      // Sincronización real de plataformas de redes sociales y métricas
       document.getElementById('btn-sync-redes')?.addEventListener('click', async () => {
         const btn = document.getElementById('btn-sync-redes') as HTMLButtonElement;
-        const text = btn.textContent;
-        btn.textContent = '🔄 Sincronizando...';
+        const originalText = btn.textContent;
+        btn.textContent = '🔄 Sincronizando redes...';
         btn.disabled = true;
 
-        setTimeout(async () => {
-          btn.textContent = text;
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token || '';
+
+          const res = await fetch('/api/cron/sync-social', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          let data: any = {};
+          try {
+            data = await res.json();
+          } catch (parseErr) {
+            throw new Error(`Respuesta no válida del servidor (HTTP ${res.status})`);
+          }
+          if (res.ok && data.success) {
+            await loadConfig();
+            const m = data.metrics || {};
+            const ahogado = data.ahogado_stats || {};
+            const ahogadoMsg = ahogado.views
+              ? `${Number(ahogado.views).toLocaleString('es-CL')} reproducciones y ${Number(ahogado.likes || 0).toLocaleString('es-CL')} likes`
+              : 'Métricas preservadas';
+            const msg = `✅ Sincronización completada con éxito:
+
+• YouTube: ${m.youtube ? Number(m.youtube).toLocaleString('es-CL') : '—'} suscriptores
+• Instagram: ${m.instagram ? Number(m.instagram).toLocaleString('es-CL') : '—'} seguidores
+• TikTok: ${m.tiktok ? Number(m.tiktok).toLocaleString('es-CL') : '—'} seguidores
+• Facebook: ${m.facebook ? Number(m.facebook).toLocaleString('es-CL') : '—'} amigos/seguidores
+• "Ahogado en un Bar": ${ahogadoMsg}
+• Videos YouTube sincronizados: ${data.youtube_posts_synced || 0}
+• Contenidos de redes en VIDEOS: Actualizados en base de datos
+
+Las cifras se han actualizado en el formulario y en el sitio.`;
+            alert(msg);
+          } else {
+            throw new Error(data.error || 'Error al ejecutar sincronización');
+          }
+        } catch (err: any) {
+          console.error('Error sincronizando redes:', err);
+          alert('Error durante la sincronización: ' + (err.message || 'Error de conexión'));
+        } finally {
+          btn.textContent = originalText;
           btn.disabled = false;
-          await logAction('Ejecutó sincronización forzada de seguidores y posts de Redes Sociales');
-          alert('Sincronización de redes completada. Seguidores de Instagram, TikTok y Facebook actualizados.');
-        }, 1500);
+        }
       });
 
       document.getElementById('btn-sync-musica')?.addEventListener('click', async () => {

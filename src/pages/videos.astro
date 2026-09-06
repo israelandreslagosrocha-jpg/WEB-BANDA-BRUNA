@@ -1,8 +1,117 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getVideoPlaylists } from '../services/socialApi.js';
+import { supabase } from '../services/supabaseClient.js';
 
-const playlists = getVideoPlaylists();
+export const prerender = false;
+
+// 1. Catálogo base de alta disponibilidad (fallback)
+const staticPlaylists = getVideoPlaylists();
+
+// 2. Consulta de publicaciones dinámicas desde Supabase (últimos 5 de cada red)
+let playlists = {
+  youtube: [...staticPlaylists.youtube],
+  facebook: [...staticPlaylists.facebook],
+  instagram: [...staticPlaylists.instagram],
+  tiktok: [...staticPlaylists.tiktok]
+};
+
+try {
+  // Consultar en paralelo para máxima velocidad en SSR
+  const [ytRes, fbRes, igRes, ttRes] = await Promise.all([
+    supabase
+      .from('social_posts')
+      .select('*')
+      .eq('platform', 'youtube')
+      .eq('disponible', true)
+      .eq('show_on_web', true)
+      .order('published_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('social_posts')
+      .select('*')
+      .eq('platform', 'facebook')
+      .eq('disponible', true)
+      .eq('show_on_web', true)
+      .order('web_order', { ascending: true })
+      .limit(5),
+    supabase
+      .from('social_posts')
+      .select('*')
+      .eq('platform', 'instagram')
+      .eq('disponible', true)
+      .eq('show_on_web', true)
+      .order('web_order', { ascending: true })
+      .limit(5),
+    supabase
+      .from('social_posts')
+      .select('*')
+      .eq('platform', 'tiktok')
+      .eq('disponible', true)
+      .eq('show_on_web', true)
+      .order('web_order', { ascending: true })
+      .limit(5)
+  ]);
+
+  // Si hay videos de YouTube en Supabase, formateamos
+  if (ytRes.data && ytRes.data.length > 0) {
+    const formattedYt = ytRes.data.map((v: any, idx: number) => ({
+      id: v.external_id || `yt_${idx}`,
+      title: v.title || 'Banda Bruna - Video Oficial',
+      url: v.url || `https://www.youtube.com/watch?v=${v.external_id}`,
+      embedId: v.external_id,
+      thumbnail: v.thumbnail_url || `https://i.ytimg.com/vi/${v.external_id}/hqdefault.jpg`,
+      duration: v.post_type === 'short' ? 'Short' : 'Oficial',
+      category: v.post_type === 'short' ? 'YouTube Short' : 'YouTube Oficial'
+    }));
+    const remainingYt = staticPlaylists.youtube.filter((sv: any) => !formattedYt.some((fy: any) => fy.id === sv.id || fy.embedId === sv.embedId));
+    playlists.youtube = [...formattedYt, ...remainingYt].slice(0, 5);
+  }
+
+  // Si hay reels de Facebook en Supabase
+  if (fbRes.data && fbRes.data.length > 0) {
+    const formattedFb = fbRes.data.map((r: any, idx: number) => ({
+      id: r.external_id || `fb_${idx}`,
+      title: r.title || r.caption || 'Banda Bruna en vivo',
+      url: r.url,
+      thumbnail: r.thumbnail_url || '/assets/images/facebook/fb_fiestas_patrias.webp',
+      duration: '0:45',
+      category: 'Facebook Reel'
+    }));
+    const remainingFb = staticPlaylists.facebook.filter((sf: any) => !formattedFb.some((ff: any) => ff.id === sf.id || ff.url === sf.url));
+    playlists.facebook = [...formattedFb, ...remainingFb].slice(0, 5);
+  }
+
+  // Si hay reels de Instagram en Supabase
+  if (igRes.data && igRes.data.length > 0) {
+    const formattedIg = igRes.data.map((r: any, idx: number) => ({
+      id: r.external_id || `ig_${idx}`,
+      title: r.title || r.caption || 'Banda Bruna en Instagram',
+      url: r.url,
+      thumbnail: r.thumbnail_url || '/assets/images/instagram/ig_boca_de_lobos.webp',
+      duration: '0:45',
+      category: 'Instagram Reel'
+    }));
+    const remainingIg = staticPlaylists.instagram.filter((si: any) => !formattedIg.some((fi: any) => fi.id === si.id || fi.url === si.url));
+    playlists.instagram = [...formattedIg, ...remainingIg].slice(0, 5);
+  }
+
+  // Si hay videos de TikTok en Supabase
+  if (ttRes.data && ttRes.data.length > 0) {
+    const formattedTt = ttRes.data.map((t: any, idx: number) => ({
+      id: t.external_id || `tt_${idx}`,
+      title: t.title || t.caption || 'Banda Bruna en TikTok',
+      url: t.url,
+      thumbnail: t.thumbnail_url || '/assets/images/tiktok/tiktok_minero.webp',
+      duration: '0:45',
+      category: 'TikTok Oficial'
+    }));
+    const remainingTt = staticPlaylists.tiktok.filter((st: any) => !formattedTt.some((ft: any) => ft.id === st.id || ft.url === st.url));
+    playlists.tiktok = [...formattedTt, ...remainingTt].slice(0, 5);
+  }
+} catch (err) {
+  console.warn('Error al cargar playlists desde Supabase, usando catálogo local:', err);
+}
 ---
 
 <Layout title="Vídeos | Banda Bruna - Videoclips Oficiales y Presentaciones en Vivo" description="Disfruta de la videoteca de Banda Bruna: presentaciones destacadas, videoclips de YouTube y Reels oficiales de Facebook.">

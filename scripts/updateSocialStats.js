@@ -10,10 +10,10 @@ const statsFilePath = path.join(__dirname, '..', 'src', 'data', 'socialStats.jso
 let stats = {
   musiciansTrajectory: 15,
   stageYears: 10,
-  instagramFollowers: 3359,
-  facebookFriends: 5000,
+  instagramFollowers: 3364,
+  facebookFriends: 4971,
   youtubeSubscribers: 911,
-  tiktokFollowers: 1136,
+  tiktokFollowers: 1095,
   regions: 5,
   lastUpdated: new Date().toISOString()
 };
