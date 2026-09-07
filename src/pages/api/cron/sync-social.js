@@ -134,27 +134,44 @@ async function fetchYouTubeVideoStats(videoId = 'mZhYl60ENAs') {
 
 // 4.1 Scrape de seguidores de TikTok
 async function scrapeTikTokFollowers() {
-  try {
-    const res = await fetch('https://www.tiktok.com/@bandabrunaoficial', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (res.ok) {
-      const html = await res.text();
-      const match = html.match(/"followerCount":(\d+)/) ||
-                    html.match(/data-e2e="followers-count">([^<]+)<\/strong>/i) ||
-                    html.match(/"fans":(\d+)/);
-      if (match) {
-        const parsed = parseInt(match[1].replace(/[.,]/g, ''), 10);
-        if (parsed && parsed > 500) return parsed;
+  const candidateUserAgents = [
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+    'Twitterbot/1.0',
+    'WhatsApp/2.21.12.21 A',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+  ];
+
+  for (const ua of candidateUserAgents) {
+    try {
+      const res = await fetch('https://www.tiktok.com/@bandabrunaoficial', {
+        headers: {
+          'User-Agent': ua,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
+        },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (res.ok) {
+        const html = await res.text();
+        const descMatch = html.match(/<meta\s+(?:name|property)="(?:description|og:description)"\s+content="([^"]+)"/i);
+        if (descMatch) {
+          const m = descMatch[1].match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
+          if (m) {
+            const parsed = parseCount(m[1]);
+            if (parsed && parsed > 500) return parsed;
+          }
+        }
+        const match = html.match(/"followerCount":(\d+)/) ||
+                      html.match(/data-e2e="followers-count">([^<]+)<\/strong>/i) ||
+                      html.match(/"fans":(\d+)/);
+        if (match) {
+          const parsed = parseInt(match[1].replace(/[.,]/g, ''), 10);
+          if (parsed && parsed > 500) return parsed;
+        }
       }
+    } catch (err) {
+      // continuar con siguiente UA
     }
-  } catch (err) {
-    console.warn('[sync-social] TikTok directo no disponible:', err.message);
   }
 
   try {
@@ -230,7 +247,7 @@ async function executeSynchronization(userEmail, userToken) {
   const ttFollowersScraped = await scrapeTikTokFollowers();
   const fbFollowersScraped = await scrapeFacebookFollowers();
 
-  // Obtener valores actuales de configuracion para no decrementar números por fallas
+  // Obtener valores actuales de configuracion para no decrementar números por fallas ni pisar ajustes manuales
   const { data: currentConfig } = await sb
     .from('configuracion')
     .select('*')
@@ -238,12 +255,32 @@ async function executeSynchronization(userEmail, userToken) {
     .maybeSingle();
 
   const prevConfig = currentConfig || {};
+  const prevYoutube = Number(prevConfig.cant_youtube) || 0;
+  const prevInstagram = Number(prevConfig.cant_instagram) || 0;
+  const prevTiktok = Number(prevConfig.cant_tiktok) || 0;
+  const prevFacebook = Number(prevConfig.cant_facebook) || 0;
 
-  // Prioridad: 1. Scrape en vivo directo -> 2. Google Sheets -> 3. Valor guardado previo -> 4. Base garantizada
-  const finalYoutube = ytSubsScraped || sheetStats.youtube || Number(prevConfig.cant_youtube) || 911;
-  const finalInstagram = igFollowersScraped || sheetStats.instagram || Number(prevConfig.cant_instagram) || 3364;
-  const finalTiktok = ttFollowersScraped || sheetStats.tiktok || Number(prevConfig.cant_tiktok) || 1136;
-  const finalFacebook = fbFollowersScraped || sheetStats.facebook || Number(prevConfig.cant_facebook) || 5000;
+  // REGLA DE ORO DE PRIORIDAD:
+  // 1. Scrape en vivo directo (si extrae un número válido).
+  // 2. Valor previo en configuracion (prevConfig, el cual el usuario puede forzar o ajustar manualmente).
+  //    Si el scraping falla o retorna null, SE PRESERVA estrictamente el valor previo y no se decrementa.
+  // 3. Planilla de respaldo Google Sheets (solo si prevConfig no existe o es 0).
+  // 4. Base mínima garantizada.
+  const finalYoutube = ytSubsScraped
+    ? Math.max(ytSubsScraped, prevYoutube)
+    : (prevYoutube || sheetStats.youtube || 911);
+
+  const finalInstagram = igFollowersScraped
+    ? Math.max(igFollowersScraped, prevInstagram)
+    : (prevInstagram || sheetStats.instagram || 3366);
+
+  const finalTiktok = ttFollowersScraped
+    ? Math.max(ttFollowersScraped, prevTiktok)
+    : (prevTiktok || sheetStats.tiktok || 1139);
+
+  const finalFacebook = fbFollowersScraped
+    ? Math.max(fbFollowersScraped, prevFacebook)
+    : (prevFacebook || sheetStats.facebook || 4971);
 
   result.metrics = {
     youtube: finalYoutube,

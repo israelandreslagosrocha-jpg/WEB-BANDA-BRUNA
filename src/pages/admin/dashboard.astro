@@ -2117,10 +2117,10 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         (document.getElementById('conf-tiktok') as HTMLInputElement).value = data.tiktok || '';
 
         // Nuevos campos de estadísticas
-        (document.getElementById('conf-stats-instagram') as HTMLInputElement).value = data.cant_instagram !== undefined && data.cant_instagram !== null ? data.cant_instagram : 3157;
-        (document.getElementById('conf-stats-facebook') as HTMLInputElement).value = data.cant_facebook !== undefined && data.cant_facebook !== null ? data.cant_facebook : 4900;
-        (document.getElementById('conf-stats-youtube') as HTMLInputElement).value = data.cant_youtube !== undefined && data.cant_youtube !== null ? data.cant_youtube : 576;
-        (document.getElementById('conf-stats-tiktok') as HTMLInputElement).value = data.cant_tiktok !== undefined && data.cant_tiktok !== null ? data.cant_tiktok : 1092;
+        (document.getElementById('conf-stats-instagram') as HTMLInputElement).value = data.cant_instagram !== undefined && data.cant_instagram !== null ? data.cant_instagram : 3366;
+        (document.getElementById('conf-stats-facebook') as HTMLInputElement).value = data.cant_facebook !== undefined && data.cant_facebook !== null ? data.cant_facebook : 4971;
+        (document.getElementById('conf-stats-youtube') as HTMLInputElement).value = data.cant_youtube !== undefined && data.cant_youtube !== null ? data.cant_youtube : 911;
+        (document.getElementById('conf-stats-tiktok') as HTMLInputElement).value = data.cant_tiktok !== undefined && data.cant_tiktok !== null ? data.cant_tiktok : 1139;
         (document.getElementById('conf-stats-trayectoria') as HTMLInputElement).value = data.cant_trayectoria !== undefined && data.cant_trayectoria !== null ? data.cant_trayectoria : 15;
         (document.getElementById('conf-stats-escenarios') as HTMLInputElement).value = data.cant_escenarios !== undefined && data.cant_escenarios !== null ? data.cant_escenarios : 10;
         (document.getElementById('conf-stats-regiones') as HTMLInputElement).value = data.cant_regiones !== undefined && data.cant_regiones !== null ? data.cant_regiones : 5;
@@ -2156,10 +2156,10 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           youtube,
           tiktok,
           // Nuevos campos
-          cant_instagram: isNaN(cantInstagram) ? 3157 : cantInstagram,
-          cant_facebook: isNaN(cantFacebook) ? 4900 : cantFacebook,
-          cant_youtube: isNaN(cantYoutube) ? 576 : cantYoutube,
-          cant_tiktok: isNaN(cantTiktok) ? 1092 : cantTiktok,
+          cant_instagram: isNaN(cantInstagram) ? 3366 : cantInstagram,
+          cant_facebook: isNaN(cantFacebook) ? 4971 : cantFacebook,
+          cant_youtube: isNaN(cantYoutube) ? 911 : cantYoutube,
+          cant_tiktok: isNaN(cantTiktok) ? 1139 : cantTiktok,
           cant_trayectoria: isNaN(cantTrayectoria) ? 15 : cantTrayectoria,
           cant_escenarios: isNaN(cantEscenarios) ? 10 : cantEscenarios,
           cant_regiones: isNaN(cantRegiones) ? 5 : cantRegiones
@@ -2167,9 +2167,25 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
 
         const { error } = await supabase.from('configuracion').update(payload).eq('id', 1);
         if (!error) {
+          // Sincronizar también la tabla social_accounts para mantener consistencia en Curación Social y KPIs
+          try {
+            await Promise.allSettled([
+              supabase.from('social_accounts').update({ followers_count: payload.cant_instagram, updated_at: new Date().toISOString() }).eq('id', 'instagram'),
+              supabase.from('social_accounts').update({ followers_count: payload.cant_youtube, updated_at: new Date().toISOString() }).eq('id', 'youtube'),
+              supabase.from('social_accounts').update({ followers_count: payload.cant_tiktok, updated_at: new Date().toISOString() }).eq('id', 'tiktok'),
+              supabase.from('social_accounts').update({ followers_count: payload.cant_facebook, updated_at: new Date().toISOString() }).eq('id', 'facebook')
+            ]);
+          } catch (accErr) {
+            console.warn('Error al sincronizar social_accounts desde config-form:', accErr);
+          }
+
           await logAction('Actualizó los Ajustes de Configuración Global, Redes Sociales y Estadísticas');
           alert('Configuración guardada exitosamente.');
           loadConfig();
+
+          if (typeof (window as any).loadSocialFeedAdmin === 'function') {
+            (window as any).loadSocialFeedAdmin();
+          }
         } else {
           alert('Error al actualizar configuración.');
         }

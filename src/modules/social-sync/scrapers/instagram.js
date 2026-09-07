@@ -42,40 +42,57 @@ function unescapeHtml(text) {
 }
 
 /**
- * Extrae seguidores de la cabecera/metadatos de Instagram.
+ * Extrae seguidores de la cabecera/metadatos de Instagram con resiliencia multi-agente.
  */
 export async function scrapeInstagramFollowers() {
-  // 1. Intento primario: Perfil oficial con cabecera estándar
-  try {
-    const res = await fetch(IG_PROFILE_URL, {
-      headers: IG_HEADERS,
-      signal: AbortSignal.timeout(8000)
-    });
+  const candidateUserAgents = [
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+    'Twitterbot/1.0',
+    'WhatsApp/2.21.12.21 A',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+  ];
 
-    if (res.ok) {
-      const html = await res.text();
+  // 1. Intento por perfil oficial iterando User-Agents de previsualización (Meta permite rich cards sin login wall)
+  for (const ua of candidateUserAgents) {
+    try {
+      const res = await fetch(IG_PROFILE_URL, {
+        headers: {
+          'User-Agent': ua,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'es-CL,es;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate'
+        },
+        signal: AbortSignal.timeout(8000)
+      });
 
-      // Detección en meta description / og:description
-      const descMatch = html.match(/<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"/i);
-      if (descMatch) {
-        const content = unescapeHtml(descMatch[1]);
-        const fMatch = content.match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
-        if (fMatch) {
-          const parsed = parseCount(fMatch[1]);
+      if (res.ok) {
+        const html = await res.text();
+
+        // Detección en meta description / og:description
+        const descMatch = html.match(/<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"/i);
+        if (descMatch) {
+          const content = unescapeHtml(descMatch[1]);
+          // Soporta '3,365 seguidores', '3.365 seguidores', '3,4 mil seguidores', '3,365 followers'
+          const fMatch = content.match(/([0-9.,KkMm]+(?:\s*mil)?)\s*(?:seguidores|followers)/i);
+          if (fMatch) {
+            const parsed = parseCount(fMatch[1]);
+            if (parsed && parsed > 1000) return parsed;
+          }
+        }
+
+        // Detección en JSON embebido de la página
+        const jsonMatch = html.match(/"edge_followed_by":\{"count":(\d+)\}/) ||
+                          html.match(/"userInteractionCount":"(\d+)"/);
+        if (jsonMatch) {
+          const parsed = parseInt(jsonMatch[1], 10);
           if (parsed && parsed > 1000) return parsed;
         }
       }
-
-      // Detección en JSON embebido de la página
-      const jsonMatch = html.match(/"edge_followed_by":\{"count":(\d+)\}/) ||
-                        html.match(/"userInteractionCount":"(\d+)"/);
-      if (jsonMatch) {
-        const parsed = parseInt(jsonMatch[1], 10);
-        if (parsed && parsed > 1000) return parsed;
-      }
+    } catch (err) {
+      // Continuar con el siguiente User-Agent si hay fallo transitorio
     }
-  } catch (err) {
-    console.warn(`[instagram-scraper] Intento 1 falló:`, err.message);
   }
 
   // 2. Intento secundario: Endpoint web_profile_info oficial de Instagram con App ID público
@@ -85,6 +102,8 @@ export async function scrapeInstagramFollowers() {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
         'x-ig-app-id': '936619743392459',
+        'x-asbd-id': '129477',
+        'referer': 'https://www.instagram.com/banda_bruna/',
         'Accept': '*/*',
         'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
       },
@@ -99,7 +118,7 @@ export async function scrapeInstagramFollowers() {
       }
     }
   } catch (err) {
-    console.warn(`[instagram-scraper] Intento 2 falló:`, err.message);
+    console.warn(`[instagram-scraper] Intento web_profile_info falló:`, err.message);
   }
 
   // 3. Intento terciario: Visor público Imginn
@@ -120,7 +139,7 @@ export async function scrapeInstagramFollowers() {
       }
     }
   } catch (err) {
-    console.warn(`[instagram-scraper] Intento 3 falló:`, err.message);
+    console.warn(`[instagram-scraper] Intento Imginn falló:`, err.message);
   }
 
   return null;

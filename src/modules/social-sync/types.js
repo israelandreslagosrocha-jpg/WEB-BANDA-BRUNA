@@ -69,18 +69,28 @@ export function parseCount(str) {
   const cleanStr = String(str).trim();
   if (!cleanStr) return null;
 
-  // 1. Si tiene multiplicador K o M (ej: 1.2K, 3,5M)
-  const kmMatch = cleanStr.match(/([0-9]+(?:[.,][0-9]+)?)\s*([KkMm])/);
-  if (kmMatch) {
-    let num = parseFloat(kmMatch[1].replace(',', '.'));
-    const mult = kmMatch[2].toUpperCase();
-    if (mult === 'K') num *= 1000;
-    if (mult === 'M') num *= 1000000;
-    return Math.round(num);
+  // 1. Manejo explícito de palabras en español: "mil" (x1.000) vs "millón"/"millones"/"mill" (x1.000.000)
+  const milMatch = cleanStr.match(/([0-9]+(?:[.,][0-9]+)?)\s*mil\b/i);
+  if (milMatch) {
+    const num = parseFloat(milMatch[1].replace(',', '.'));
+    return Math.round(num * 1000);
   }
 
-  // 2. Si no tiene multiplicador, eliminar separadores de miles (puntos o comas)
-  // Ej: '3,360' -> '3360', '3.360' -> '3360', '10.500' -> '10500'
+  const millMatch = cleanStr.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:millones|millón|mill|m)\b/i);
+  if (millMatch) {
+    const num = parseFloat(millMatch[1].replace(',', '.'));
+    return Math.round(num * 1000000);
+  }
+
+  // 2. Multiplicadores estándar K (x1.000)
+  const kMatch = cleanStr.match(/([0-9]+(?:[.,][0-9]+)?)\s*k\b/i);
+  if (kMatch) {
+    const num = parseFloat(kMatch[1].replace(',', '.'));
+    return Math.round(num * 1000);
+  }
+
+  // 3. Si no tiene multiplicador, eliminar separadores de miles (puntos o comas)
+  // Ej: '3,365' -> 3365, '3.365' -> 3365, '10.500' -> 10500
   const digitsMatch = cleanStr.match(/([0-9]+(?:[.,][0-9]{3})*)/);
   if (digitsMatch) {
     const sanitized = digitsMatch[1].replace(/[.,]/g, '');

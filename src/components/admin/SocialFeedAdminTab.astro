@@ -182,15 +182,23 @@
     if (emptyEl) emptyEl.classList.add('hidden');
 
     try {
-      // 1. Cargar estadísticas de cuentas
-      const { data: accounts } = await supabase.from('social_accounts').select('*');
-      if (accounts) {
-        const yt = accounts.find((a: any) => a.id === 'youtube');
-        const ig = accounts.find((a: any) => a.id === 'instagram');
+      // 1. Cargar estadísticas de cuentas (priorizando configuracion activa)
+      const [{ data: accounts }, { data: config }] = await Promise.all([
+        supabase.from('social_accounts').select('*'),
+        supabase.from('configuracion').select('cant_youtube, cant_instagram').eq('id', 1).maybeSingle()
+      ]);
+
+      if (accounts || config) {
+        const yt = accounts?.find((a: any) => a.id === 'youtube');
+        const ig = accounts?.find((a: any) => a.id === 'instagram');
         const kpiYt = document.getElementById('kpi-yt-subs');
         const kpiIg = document.getElementById('kpi-ig-followers');
-        if (kpiYt && yt) kpiYt.textContent = yt.followers_count?.toLocaleString('es-CL') || '0';
-        if (kpiIg && ig) kpiIg.textContent = ig.followers_count?.toLocaleString('es-CL') || '0';
+
+        const ytCount = config?.cant_youtube || yt?.followers_count || 0;
+        const igCount = config?.cant_instagram || ig?.followers_count || 0;
+
+        if (kpiYt) kpiYt.textContent = ytCount ? ytCount.toLocaleString('es-CL') : '—';
+        if (kpiIg) kpiIg.textContent = igCount ? igCount.toLocaleString('es-CL') : '—';
       }
 
       // 2. Cargar publicaciones
