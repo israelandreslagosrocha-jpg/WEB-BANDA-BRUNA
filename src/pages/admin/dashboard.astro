@@ -39,6 +39,9 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         <button data-tab-target="eventos" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📅 Agenda & Shows
         </button>
+        <button data-tab-target="galeria" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          📸 Galería & Álbumes
+        </button>
         <button data-tab-target="equipo" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           👥 Integrantes & Staff
         </button>
@@ -96,6 +99,23 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           
           <div id="eventos-list" class="flex flex-col gap-4">
             <!-- Dynamic Eventos Rows -->
+          </div>
+        </section>
+ 
+        <!-- Tab: Galería & Álbumes -->
+        <section id="tab-galeria" class="tab-pane hidden">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+              <h2 class="font-title font-bold text-xl uppercase text-white">Galería de Álbumes Fotográficos</h2>
+              <p class="text-xs text-slate-400 mt-1">Crea y edita álbumes de presentaciones en vivo, agrega fotos desde tu dispositivo o enlaces directos.</p>
+            </div>
+            <button id="btn-new-album" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer flex items-center gap-2">
+              <span>+</span> Nuevo Álbum
+            </button>
+          </div>
+          
+          <div id="galeria-albums-list" class="flex flex-col gap-4">
+            <!-- Dynamic Albums Rows -->
           </div>
         </section>
 
@@ -202,29 +222,61 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
 
             <!-- DISEÑADOR DE STAGE PLOT -->
             <div class="bg-slate-950/40 border border-white/5 rounded-xl p-5 flex flex-col gap-4">
-              <div class="flex justify-between items-center">
-                <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Distribución del Escenario (Stage Plot)</h3>
-                <div class="flex gap-2">
-                  <select id="stage-element-type" class="bg-slate-950 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white outline-none cursor-pointer">
-                    <option value="bateria">🥁 Batería / Timbales</option>
-                    <option value="congas">🥁 Congas / Bongos</option>
-                    <option value="guiro">🪵 Güiro</option>
-                    <option value="teclado">🎹 Teclados</option>
-                    <option value="gtr">🎸 Guitarra</option>
-                    <option value="bajo">🎸 Bajo</option>
-                    <option value="vocal">🎤 Vocal / Micrófono</option>
-                    <option value="monitor">🔊 Monitor de Piso</option>
-                    <option value="power">⚡ Toma de Corriente</option>
-                  </select>
-                  <button type="button" id="btn-add-stage-element" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3.5 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer">
-                    + Añadir
-                  </button>
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <h3 class="font-title font-bold text-sm text-gold-bruna uppercase tracking-wider">Distribución del Escenario (Stage Plot)</h3>
+                  <p class="text-[10px] text-slate-400">Fichas oficiales ilustradas en 3D para escenario y montajes técnicos.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a 
+                    href="/assets/downloads/stageplot_banda_bruna.pdf" 
+                    target="_blank" 
+                    class="bg-slate-900 hover:bg-slate-850 text-gold-bruna border border-gold-bruna/30 hover:border-gold-bruna px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+                  >
+                    <span>📄</span>
+                    <span>Ver PDF Oficial</span>
+                  </a>
+                  <a 
+                    href="/produccion#sec-stageplot" 
+                    target="_blank" 
+                    class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+                  >
+                    <span>👁️</span>
+                    <span>Ver en la Web</span>
+                  </a>
                 </div>
               </div>
-              
-              <p class="text-[10px] text-slate-400">
-                Arrastra y coloca los elementos en la cuadrícula para definir su posición exacta en el escenario. Haz clic en un elemento para editar sus detalles (nombre, canal, retorno) o eliminarlo. Los cambios de posición se guardarán al guardar todo el Rider Técnico.
-              </p>
+
+              <!-- Tarjetas de Previsualización de las 2 Opciones Oficiales -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Opción 1 -->
+                <div class="bg-slate-900 border border-gold-bruna/30 rounded-xl p-3.5 flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold uppercase font-mono text-gold-bruna">★ Opción 1: Típica (Frontal)</span>
+                    <span class="text-[8px] bg-gold-bruna/10 text-gold-bruna px-2 py-0.5 rounded border border-gold-bruna/20 font-mono">Recomendada</span>
+                  </div>
+                  <div class="rounded-lg overflow-hidden bg-black/60 border border-white/5 aspect-[16/9] flex items-center justify-center">
+                    <img src="/assets/images/rider/stage_plot_1.webp" alt="Stage Plot Opción 1" class="w-full h-full object-contain hover:scale-105 transition-transform" />
+                  </div>
+                  <p class="text-[9.5px] text-slate-400 leading-relaxed font-mono">
+                    Distribución en dos líneas frontales. Congas, batería/timbales y teclados atrás; bajo, güiro, voz y guitarra al frente.
+                  </p>
+                </div>
+
+                <!-- Opción 2 -->
+                <div class="bg-slate-900 border border-white/10 rounded-xl p-3.5 flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold uppercase font-mono text-emerald-400">★ Opción 2: Teclados Lateral</span>
+                    <span class="text-[8px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">Alternativa</span>
+                  </div>
+                  <div class="rounded-lg overflow-hidden bg-black/60 border border-white/5 aspect-[16/9] flex items-center justify-center">
+                    <img src="/assets/images/rider/stage_plot_2.webp" alt="Stage Plot Opción 2" class="w-full h-full object-contain hover:scale-105 transition-transform" />
+                  </div>
+                  <p class="text-[9.5px] text-slate-400 leading-relaxed font-mono">
+                    Variante con teclados en ángulo lateral mirando al centro de la banda. Ideal para escenarios con mayor fondo o dinámicas específicas.
+                  </p>
+                </div>
+              </div>
 
               <!-- Escenario Interactivo -->
               <div id="stage-designer-canvas" class="w-full aspect-[16/10] bg-slate-950 border border-white/10 rounded-lg relative overflow-hidden select-none min-h-[300px] shadow-inner shadow-black">
@@ -650,6 +702,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           // Cargar datos según la pestaña activa
           if (target === 'noticias') loadNoticias();
           if (target === 'eventos') loadEventos();
+          if (target === 'galeria') loadGaleriaAlbums();
           if (target === 'equipo') loadEquipo();
           if (target === 'rider') loadRider();
           if (target === 'produccion-tecnica') {
@@ -960,7 +1013,17 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           return;
         }
 
-        listDiv.innerHTML = data.map(item => `
+        listDiv.innerHTML = data.map(item => {
+          let metaItem: any = {};
+          try {
+            if (item.descripcion && item.descripcion.trim().startsWith('{')) {
+              metaItem = JSON.parse(item.descripcion);
+            }
+          } catch(e) {}
+          const hasVideo = Boolean(metaItem.video_url);
+          const hasGallery = Boolean(metaItem.gallery_url || metaItem.album_url);
+
+          return `
           <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex justify-between items-center gap-4">
             <div class="flex items-center gap-3.5">
               ${item.imagen ? `
@@ -971,7 +1034,11 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
               <div>
                 <h4 class="font-title font-bold text-sm text-white uppercase">${item.nombre}</h4>
                 <p class="text-[10px] text-slate-500 mt-1">${new Date(item.fecha + 'T12:00:00').toLocaleDateString('es-CL')} — Lugar: ${item.lugar || 'Por Confirmar'}, ${item.ciudad}</p>
-                ${item.imagen ? `<span class="text-[9px] text-emerald-400 font-mono">✓ Flyer cargado</span>` : `<span class="text-[9px] text-slate-500 font-mono">Sin flyer adjunto</span>`}
+                <div class="flex items-center gap-2 mt-1">
+                  ${item.imagen ? `<span class="text-[9px] text-emerald-400 font-mono">✓ Flyer cargado</span>` : `<span class="text-[9px] text-slate-500 font-mono">Sin flyer</span>`}
+                  ${hasVideo ? `<span class="text-[9px] text-red-400 font-mono">✓ Video Resumen</span>` : ''}
+                  ${hasGallery ? `<span class="text-[9px] text-purple-400 font-mono">✓ Álbum Galería</span>` : ''}
+                </div>
               </div>
             </div>
             <div class="flex gap-2">
@@ -979,7 +1046,8 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
               <button data-delete-evento-id="${item.id}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Borrar</button>
             </div>
           </div>
-        `).join('');
+          `;
+        }).join('');
 
         // Bind events
         document.querySelectorAll('[data-edit-evento-id]').forEach(btn => {
@@ -1003,7 +1071,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           if (data) evento = data;
         }
 
-        let meta = { tiene_entradas: false, ticket_url: '' };
+        let meta = { tiene_entradas: false, ticket_url: '', video_url: '', gallery_url: '' };
         try {
           if (evento.descripcion && evento.descripcion.trim().startsWith('{')) {
             meta = JSON.parse(evento.descripcion);
@@ -1011,9 +1079,11 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         } catch (e) {}
         const hasTickets = meta.tiene_entradas || false;
         const ticketUrl = meta.ticket_url || '';
+        const videoUrl = meta.video_url || '';
+        const galleryUrl = meta.gallery_url || (meta as any).album_url || '';
 
         modal.innerHTML = `
-          <div class="bg-slate-900 border border-white/5 w-full max-w-md rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+          <div class="bg-slate-900 border border-white/5 w-full max-w-md rounded-2xl p-6 md:p-8 flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
             <h3 class="font-title font-bold text-lg uppercase text-white">${id ? 'Editar Presentación' : 'Crear Nuevo Show'}</h3>
             
             <form id="evento-form" class="flex flex-col gap-4">
@@ -1056,6 +1126,22 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
                 <input type="url" id="ev-flyer-url" value="${evento.imagen || ''}" placeholder="https://res.cloudinary.com/.../flyer.webp" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
               </div>
 
+              <!-- Opciones Post-Evento (Video Resumen y Galería) -->
+              <div class="border-t border-white/10 pt-4 flex flex-col gap-3">
+                <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>🎬</span> Material Post-Evento (Opcional)
+                </span>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Video Resumen (URL Cloudinary o MP4)</label>
+                  <input type="url" id="ev-video-url" value="${videoUrl}" placeholder="https://res.cloudinary.com/.../video.mp4" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Enlace al Álbum de Galería</label>
+                  <input type="text" id="ev-gallery-url" value="${galleryUrl}" placeholder="ej: /galeria#album-section-temuco-2026-show-en-vivo-olimpo-club" class="bg-slate-950 border border-white/5 rounded p-2.5 text-white text-xs outline-none" />
+                  <p class="text-[9px] text-slate-500">Puedes vincularlo a un álbum creado en la pestaña "Galería & Álbumes".</p>
+                </div>
+              </div>
+
               <div class="flex gap-3 mt-2 justify-end">
                 <button type="button" id="btn-modal-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
                 <button type="submit" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer">Guardar</button>
@@ -1091,6 +1177,8 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           const flyerUrlInput = document.getElementById('ev-flyer-url') as HTMLInputElement;
           const hasTicketsChecked = (document.getElementById('ev-has-tickets') as HTMLInputElement)?.checked || false;
           const finalTicketUrl = (document.getElementById('ev-ticket-url') as HTMLInputElement)?.value.trim() || '';
+          const finalVideoUrl = (document.getElementById('ev-video-url') as HTMLInputElement)?.value.trim() || '';
+          const finalGalleryUrl = (document.getElementById('ev-gallery-url') as HTMLInputElement)?.value.trim() || '';
 
           let imagen = flyerUrlInput.value.trim() || evento.imagen || null;
 
@@ -1103,7 +1191,9 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
 
           const metaPayload = {
             tiene_entradas: hasTicketsChecked,
-            ticket_url: hasTicketsChecked ? finalTicketUrl : ''
+            ticket_url: hasTicketsChecked ? finalTicketUrl : '',
+            video_url: finalVideoUrl,
+            gallery_url: finalGalleryUrl
           };
 
           const payload = {
@@ -1151,6 +1241,304 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           loadEventos();
         } else {
           alert('Error al borrar show.');
+        }
+      }
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: GALERÍA & ÁLBUMES
+      // ==========================================
+      let cachedAlbums: any[] = [];
+
+      async function loadGaleriaAlbums() {
+        const listDiv = document.getElementById('galeria-albums-list');
+        if (!listDiv) return;
+        listDiv.innerHTML = '<p class="text-xs text-slate-400 uppercase animate-pulse">Cargando álbumes de la galería...</p>';
+
+        try {
+          const res = await fetch('/api/galeria');
+          const json = await res.json();
+          cachedAlbums = json.albums || [];
+        } catch (e) {
+          console.error('Error al obtener álbumes:', e);
+          cachedAlbums = [];
+        }
+
+        if (cachedAlbums.length === 0) {
+          listDiv.innerHTML = `
+            <div class="text-center py-12 bg-slate-900/50 rounded-xl border border-white/5">
+              <p class="text-slate-400 text-xs mb-3">No hay álbumes creados aún.</p>
+              <button id="btn-empty-new-album" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer">
+                + Crear Primer Álbum
+              </button>
+            </div>
+          `;
+          document.getElementById('btn-empty-new-album')?.addEventListener('click', () => openAlbumModal());
+          return;
+        }
+
+        listDiv.innerHTML = cachedAlbums.map(album => {
+          const firstPhoto = (album.photos && album.photos.length > 0) ? album.photos[0] : null;
+          const photoCount = album.photos ? album.photos.length : 0;
+          return `
+            <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/10 transition-colors">
+              <div class="flex items-center gap-4 min-w-0">
+                ${firstPhoto ? `
+                  <img src="${firstPhoto}" alt="${album.title}" class="w-14 h-14 rounded-lg object-cover border border-white/10 flex-shrink-0 bg-black" />
+                ` : `
+                  <div class="w-14 h-14 rounded-lg bg-slate-950 border border-white/5 flex items-center justify-center text-purple-400 text-xl font-bold flex-shrink-0">📸</div>
+                `}
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[9px] bg-purple-950/80 text-purple-300 border border-purple-500/30 font-bold px-2 py-0.5 rounded uppercase tracking-wider">${album.year || 2026}</span>
+                    <span class="text-[10px] text-slate-400 font-mono">${photoCount} fotos</span>
+                  </div>
+                  <h4 class="font-title font-bold text-sm text-white uppercase truncate mt-1">${album.title}</h4>
+                  <p class="text-[9px] text-slate-500 font-mono truncate mt-0.5">ID / Ancla: <code class="text-slate-400">#album-section-${album.id}</code></p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-shrink-0 pt-2 sm:pt-0 border-t border-white/5 sm:border-0">
+                <a href="/galeria#album-section-${album.id}" target="_blank" class="text-[10px] border border-purple-500/30 text-purple-300 hover:bg-purple-950/50 font-bold py-1.5 px-3 rounded uppercase transition-colors flex items-center gap-1">
+                  <span>↗</span> Ver
+                </a>
+                <button data-edit-album-id="${album.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">
+                  Editar
+                </button>
+                <button data-delete-album-id="${album.id}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">
+                  Borrar
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Bind events
+        document.querySelectorAll('[data-edit-album-id]').forEach(btn => {
+          btn.addEventListener('click', () => openAlbumModal((btn as HTMLButtonElement).dataset.editAlbumId));
+        });
+        document.querySelectorAll('[data-delete-album-id]').forEach(btn => {
+          btn.addEventListener('click', () => deleteAlbum((btn as HTMLButtonElement).dataset.deleteAlbumId!));
+        });
+      }
+
+      document.getElementById('btn-new-album')?.addEventListener('click', () => openAlbumModal());
+
+      async function openAlbumModal(id?: string) {
+        const modal = document.getElementById('modal-container');
+        if (!modal) return;
+
+        let album = {
+          id: '',
+          title: '',
+          year: new Date().getFullYear(),
+          photos: [] as string[]
+        };
+
+        if (id) {
+          const found = cachedAlbums.find(a => a.id === id);
+          if (found) {
+            album = JSON.parse(JSON.stringify(found));
+          } else {
+            try {
+              const res = await fetch('/api/galeria');
+              const json = await res.json();
+              const a = (json.albums || []).find((x: any) => x.id === id);
+              if (a) album = JSON.parse(JSON.stringify(a));
+            } catch (e) {}
+          }
+        }
+
+        let currentPhotos = [...(album.photos || [])];
+
+        function renderPhotosPreview() {
+          const container = document.getElementById('alb-photos-list');
+          if (!container) return;
+          if (currentPhotos.length === 0) {
+            container.innerHTML = '<p class="text-[10px] text-slate-500 italic py-2">No hay fotos en este álbum todavía.</p>';
+            return;
+          }
+          container.innerHTML = `
+            <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-1 bg-slate-950 rounded-lg border border-white/5">
+              ${currentPhotos.map((url, idx) => `
+                <div class="relative group aspect-square rounded-md overflow-hidden bg-black border border-white/10">
+                  <img src="${url}" class="w-full h-full object-cover" />
+                  <button type="button" data-remove-photo-idx="${idx}" class="absolute top-1 right-1 bg-red-600/90 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">✕</button>
+                </div>
+              `).join('')}
+            </div>
+            <p class="text-[9px] text-slate-400 mt-1">${currentPhotos.length} fotos listas en este álbum.</p>
+          `;
+
+          container.querySelectorAll('[data-remove-photo-idx]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const idx = parseInt((btn as HTMLButtonElement).dataset.removePhotoIdx!, 10);
+              currentPhotos.splice(idx, 1);
+              renderPhotosPreview();
+            });
+          });
+        }
+
+        modal.innerHTML = `
+          <div class="bg-slate-900 border border-white/10 w-full max-w-xl rounded-2xl p-6 md:p-8 flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 class="font-title font-bold text-lg uppercase text-white flex items-center gap-2">
+                <span>📸</span> ${id ? 'Editar Álbum de Galería' : 'Crear Nuevo Álbum'}
+              </h3>
+              <button type="button" id="btn-album-close-x" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">✕</button>
+            </div>
+            
+            <form id="album-form" class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Título del Álbum</label>
+                <input type="text" id="alb-title" value="${album.title}" required placeholder="ej: TEMUCO 2026 - SHOW EN VIVO - OLIMPO CLUB" class="bg-slate-950 border border-white/10 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Año</label>
+                  <input type="number" id="alb-year" value="${album.year || 2026}" required class="bg-slate-950 border border-white/10 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna" />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Identificador / Slug (Opcional)</label>
+                  <input type="text" id="alb-slug" value="${album.id}" placeholder="ej: olimpo-club-2026" class="bg-slate-950 border border-white/10 rounded p-2.5 text-white text-xs outline-none focus:border-gold-bruna font-mono" />
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Fotos del Álbum Actuales</label>
+                <div id="alb-photos-list"></div>
+              </div>
+
+              <div class="border-t border-white/10 pt-3 flex flex-col gap-3">
+                <span class="text-[10px] font-bold text-gold-bruna uppercase tracking-wider flex items-center gap-1.5">
+                  <span>➕</span> Agregar Más Fotografías
+                </span>
+                
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Opción 1: Subir archivos desde tu dispositivo (WebP automático)</label>
+                  <input type="file" id="alb-files-input" multiple accept="image/*" class="bg-slate-950 border border-white/10 rounded p-2 text-white text-xs" />
+                  <p class="text-[8px] text-slate-500">Puedes seleccionar múltiples fotos a la vez.</p>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Opción 2: Pegar enlaces directos (Cloudinary u otros, un enlace por línea)</label>
+                  <textarea id="alb-urls-input" rows="3" placeholder="https://res.cloudinary.com/.../foto1.webp&#10;https://res.cloudinary.com/.../foto2.webp" class="bg-slate-950 border border-white/10 rounded p-2.5 text-white text-xs font-mono outline-none focus:border-gold-bruna resize-y"></textarea>
+                </div>
+              </div>
+
+              <div id="alb-status-msg" class="hidden text-xs py-2 px-3 rounded"></div>
+
+              <div class="flex gap-3 mt-2 justify-end">
+                <button type="button" id="btn-album-cancel" class="border border-white/10 hover:border-white/20 text-white font-bold py-2.5 px-4 rounded text-xs uppercase cursor-pointer">Cancelar</button>
+                <button type="submit" id="btn-album-save" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black font-bold py-2.5 px-6 rounded text-xs uppercase cursor-pointer flex items-center gap-2">
+                  <span>Guardar Álbum</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        modal.classList.remove('hidden');
+        renderPhotosPreview();
+
+        document.getElementById('btn-album-close-x')?.addEventListener('click', () => modal.classList.add('hidden'));
+        document.getElementById('btn-album-cancel')?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        document.getElementById('album-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const saveBtn = document.getElementById('btn-album-save') as HTMLButtonElement;
+          const statusEl = document.getElementById('alb-status-msg');
+
+          if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="animate-spin">⏳</span> Guardando...';
+          }
+
+          const title = (document.getElementById('alb-title') as HTMLInputElement).value.trim();
+          const year = parseInt((document.getElementById('alb-year') as HTMLInputElement).value.trim(), 10) || 2026;
+          let customId = (document.getElementById('alb-slug') as HTMLInputElement).value.trim();
+          if (!customId) {
+            customId = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s_]+/g, '-');
+          }
+
+          // Procesar fotos pegadas por URL
+          const urlsInput = (document.getElementById('alb-urls-input') as HTMLTextAreaElement).value;
+          if (urlsInput) {
+            const rawUrls = urlsInput.split('\n').map(u => u.trim()).filter(u => u.startsWith('http'));
+            currentPhotos.push(...rawUrls);
+          }
+
+          // Procesar archivos subidos
+          const filesInput = document.getElementById('alb-files-input') as HTMLInputElement;
+          if (filesInput.files && filesInput.files.length > 0) {
+            if (statusEl) {
+              statusEl.classList.remove('hidden', 'bg-red-950/60', 'text-red-400');
+              statusEl.classList.add('bg-blue-950/60', 'text-blue-400');
+              statusEl.textContent = `Subiendo y procesando ${filesInput.files.length} fotos...`;
+            }
+            for (let i = 0; i < filesInput.files.length; i++) {
+              const file = filesInput.files[i];
+              const uploaded = await uploadImageToStorage(file, 'noticias');
+              if (uploaded) {
+                currentPhotos.push(uploaded);
+              }
+            }
+          }
+
+          // Quitar duplicados
+          const finalPhotos = Array.from(new Set(currentPhotos));
+
+          try {
+            const res = await fetch('/api/galeria', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: id ? 'update' : 'create',
+                id: customId,
+                album: {
+                  id: customId,
+                  title: title,
+                  year: year,
+                  photos: finalPhotos
+                }
+              })
+            });
+
+            const resJson = await res.json();
+            if (resJson.success) {
+              await logAction(`${id ? 'Actualizó' : 'Creó'} álbum de galería: "${title}" (${finalPhotos.length} fotos)`);
+              modal.classList.add('hidden');
+              loadGaleriaAlbums();
+            } else {
+              alert('Error al guardar álbum: ' + (resJson.error || 'Desconocido'));
+            }
+          } catch (err: any) {
+            alert('Error de conexión al guardar álbum: ' + err.message);
+          } finally {
+            if (saveBtn) {
+              saveBtn.disabled = false;
+              saveBtn.innerHTML = 'Guardar Álbum';
+            }
+          }
+        });
+      }
+
+      async function deleteAlbum(id: string) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este álbum de la galería? Esta acción no se puede deshacer.')) return;
+        try {
+          const res = await fetch('/api/galeria', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', id })
+          });
+          const json = await res.json();
+          if (json.success) {
+            await logAction(`Eliminó álbum de galería ID: "${id}"`);
+            loadGaleriaAlbums();
+          } else {
+            alert('Error al eliminar álbum: ' + (json.error || 'Desconocido'));
+          }
+        } catch (e: any) {
+          alert('Error de conexión al eliminar álbum: ' + e.message);
         }
       }
 

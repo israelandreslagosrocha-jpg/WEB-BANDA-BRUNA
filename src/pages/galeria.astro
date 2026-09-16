@@ -1,172 +1,35 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import staticAlbums from '../data/albums.json';
+import { supabase } from '../services/supabaseClient.js';
+
+// Cargar álbumes activos desde Supabase con fallback a staticAlbums
+let albums = staticAlbums;
+try {
+  const { data: dbAlbums, error } = await supabase
+    .from('galeria_albumes')
+    .select('*')
+    .eq('activo', true)
+    .order('orden', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (!error && dbAlbums && dbAlbums.length > 0) {
+    albums = dbAlbums.map((a: any) => ({
+      id: a.id,
+      title: a.titulo,
+      year: a.ano,
+      photos: Array.isArray(a.fotos) ? a.fotos : (typeof a.fotos === 'string' ? JSON.parse(a.fotos) : [])
+    }));
+  }
+} catch (e) {
+  albums = staticAlbums;
+}
 
 // Excluimos la foto 7 del array de fotos locales [1, 2, 3, 4, 5, 6, 8, 9, 10]
 const generalPhotos = [1, 2, 3, 4, 5, 6, 8, 9, 10].map((num) => ({
   src: `/assets/images/gallery/gallery_${num}.webp`,
   alt: `Banda Bruna Presentación en Vivo ${num}`
 }));
-
-const albums = [
-  {
-    id: "freire-2026-dia-de-la-mujer",
-    title: "FREIRE 2026 - DÍA DE LA MUJER",
-    year: 2026,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860253/compressed_25-DSC02077_a1j4vg.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860251/compressed_2-DSC02011_wt9bhd.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860250/compressed_15-DSC02043_mykjys.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860252/compressed_7-DSC02026_y6eapw.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860252/compressed_14-DSC02040_dag6qf.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860252/compressed_8-DSC02028_ybn4io.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860251/compressed_5-DSC02020_ozd4tr.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860251/compressed_19-DSC02058_oufp5c.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860251/compressed_6-DSC02021_n84qmi.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860253/compressed_46-DSC02173_lv2ybj.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860253/compressed_44-DSC02168_v6qlpy.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860252/compressed_22-DSC02066_wrnql7.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860256/compressed_4-DSC02019_u6sx1t.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860254/compressed_18-DSC02057_mhl68n.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860253/compressed_26-DSC02085_vvj3o6.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784860254/compressed_30-DSC02107_k54gi1.webp"
-    ]
-  },
-  {
-    id: "pocoyan-2026",
-    title: "POCOYAN 2026",
-    year: 2026,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914210/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_14_bsxvrm.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914210/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_12_amhyoh.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914211/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_tcm7np.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914208/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_11_jivxbe.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914192/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_1_kkaw2s.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914192/compressed_WhatsApp_Image_2026-07-22_at_4.33.42_PM_wejfiw.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914191/compressed_WhatsApp_Image_2026-07-22_at_4.33.40_PM_2_rmjxl9.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914193/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_4_nc1jnk.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914192/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_2_uahhlo.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914191/compressed_WhatsApp_Image_2026-07-22_at_4.33.42_PM_1_dgvnod.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914191/compressed_WhatsApp_Image_2026-07-22_at_4.33.40_PM_3_oxgn2g.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784914193/compressed_WhatsApp_Image_2026-07-22_at_4.33.43_PM_5_o5d8ad.webp"
-    ]
-  },
-  {
-    id: "puerto-saavedra-2026",
-    title: "Puerto Saavedra 2026",
-    year: 2026,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414125/compressed_DSC01108_gh6sl8.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01050_r8fjdr.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC00953_zemfwn.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01039_k96lbp.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414122/compressed_DSC01037_drvqlo.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414122/compressed_DSC01030_yuidzw.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC01078_caezrq.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414121/compressed_DSC01017_nbg8tc.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414121/compressed_DSC00912_yegttw.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC01015_snc4y3.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00983_tcabl4.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00959_qbmc83.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414118/compressed_DSC00938_epjivn.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414118/compressed_DSC00924_qjmiv5.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414119/compressed_DSC00958_eysbdz.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414118/compressed_DSC00921_tgwxsj.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414117/compressed_DSC00914_loo0xh.webp"
-    ]
-  },
-  {
-    id: "queule-2025",
-    title: "QUEULE 2025",
-    year: 2025,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414193/compressed_20250322-_DSC8451_tfvkgj.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414183/compressed_20250322-_DSC7731_smf5lp.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414183/compressed_20250322-_DSC7739_tb9nj8.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414184/compressed_20250322-_DSC7733_n2jspy.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414185/compressed_20250322-_DSC7769_i9pnfx.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414185/compressed_20250322-_DSC7966_ghpzc1.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414186/compressed_20250322-_DSC8028_wiqaof.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414187/compressed_20250322-_DSC8119_nvwckz.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414187/compressed_20250322-_DSC8127_jnqybt.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414188/compressed_20250322-_DSC8213_xl4fbg.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8247_lb1txw.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8302_iiqi8k.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414190/compressed_20250322-_DSC8316_gw0iie.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8356_zoar8n.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8359_pl7ubh.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414192/compressed_20250322-_DSC8362_vb3okd.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414193/compressed_20250322-_DSC8372_g0wkcl.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414194/compressed_20250322-_DSC8379_vsqowt.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414194/compressed_20250322-_DSC8207_jzso2d.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414195/compressed_20250322-_DSC8054_ryv5zg.webp"
-    ]
-  },
-  {
-    id: "expo-gorbea-2025",
-    title: "Expo Gorbea 2025",
-    year: 2025,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414182/compressed_20250322-_DSC8018_bqynkm.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414173/compressed_DSC00670_duu8r5.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414170/compressed_20250201230328_DSC00046_pr6oiu.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414170/compressed_20250201225753_DSC00006_hpdyo2.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414171/compressed_20250201230649_DSC00072_kyujor.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201230759_DSC00081_1_jv8mqo.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201232706_DSC01024_1_ci04km.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414173/compressed_20250201233944_DSC00544_1_cimbba.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414174/compressed_DSC00936_dkot0h.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414174/compressed_DSC00980_rz46x7.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414175/compressed_DSC00999_1_kiadap.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414176/compressed_DSC01011_ovbmg4.webp"
-    ]
-  },
-  {
-    id: "feria-costumbrista-tolten-2025",
-    title: "Feria Costumbrista Toltén 2025",
-    year: 2025,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414150/compressed_DSC02307_ca2wcv.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414149/compressed_DSC02279_dxk9xl.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414149/compressed_DSC02239_scfany.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414150/compressed_DSC02287_pqb5lj.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414151/compressed_DSC02309_nj8muq.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02343_1_k3npmc.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02356_1_l5mqsc.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414153/compressed_DSC02483_1_wx22zr.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414169/compressed_20250201230030_DSC00027_xk8lqc.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1781892642/compressed_DSC02295-scaled_habavd.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1781892642/compressed_DSC01118-scaled_qdzzx0.webp"
-    ]
-  },
-  {
-    id: "expo-freire-2025",
-    title: "Expo Freire 2025",
-    year: 2025,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414136/compressed_DSC00739_ebt6ni.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414136/compressed_DSC00864_cfbibm.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414138/compressed_DSC00917_kdb5d6.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414137/compressed_DSC00928_wrv3pg.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414137/compressed_DSC00845_ximkxy.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414138/compressed_DSC00771_pcbg7z.webp"
-    ]
-  },
-  {
-    id: "lautaro-2024",
-    title: "Lautaro 2024",
-    year: 2024,
-    photos: [
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09068_slsmnu.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09105_ngy5pw.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09016_xwet1n.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414106/compressed_DSC09063_kj4tkq.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09146_g28o4o.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09116_arjwcx.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09153_uzblup.webp",
-      "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414107/compressed_DSC09167_ixrfvl.webp"
-    ]
-  }
-];
 ---
 
 <Layout title="Galería | Banda Bruna - Fotos de Conciertos y Escenarios" description="Explora la galería oficial de fotos de Banda Bruna: presentaciones en vivo, interacción con el público y escenarios en festivales de Chile.">

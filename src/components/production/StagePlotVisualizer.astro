@@ -1,199 +1,331 @@
 ---
-// Visor del Stage Plot (Distribución de Músicos y Monitores en el Escenario)
-import { supabase } from '../../services/supabaseClient.js';
+// Visor del Stage Plot Oficial (Distribución Ilustrada de Músicos y Monitores en el Escenario)
+interface Member {
+  name: string;
+  role: string;
+  aux: string;
+  type: 'iem' | 'wedge';
+  hasAC?: boolean;
+}
 
-// Cargar elementos del Stageplot desde Supabase
-const { data: dbStageData } = await supabase
-  .from('rider_stageplot')
-  .select('*');
-
-// Fallback estático si la base de datos está vacía o no conecta
-const fallbackElements = [
-  { id: '1', nombre: 'Batería & Timbales', tipo: 'bateria', pos_x: 25.00, pos_y: 70.00 },
-  { id: '2', nombre: 'Percusión', tipo: 'congas', pos_x: 75.00, pos_y: 70.00 },
-  { id: '3', nombre: 'Teclados', tipo: 'teclado', pos_x: 68.00, pos_y: 20.00 },
-  { id: '4', nombre: 'Bajo Eléctrico', tipo: 'bajo', pos_x: 85.00, pos_y: 20.00 },
-  { id: '5', nombre: 'Huiro / Güiro', tipo: 'guiro', pos_x: 15.00, pos_y: 20.00 },
-  { id: '6', nombre: 'Guitarra & Amp', tipo: 'gtr', pos_x: 32.00, pos_y: 20.00 },
-  { id: '7', nombre: 'Voz Principal', tipo: 'vocal', pos_x: 50.00, pos_y: 20.00 },
-  { id: '8', nombre: 'Monitores de Piso', tipo: 'monitor', pos_x: 36.80, pos_y: 89.27 }
+const stageMembers: Member[] = [
+  { name: 'César Bruna', role: 'Voz Principal', aux: 'Aux 6 Bodypack', type: 'iem' },
+  { name: 'Fabián Garrido', role: 'Güiro / Animación', aux: 'Aux 4 Bodypack', type: 'iem' },
+  { name: 'Vicente Núñez', role: 'Guitarra Eléctrica / Dirección', aux: 'Aux 4 Bodypack', type: 'iem', hasAC: true },
+  { name: 'Gerson Ulloa', role: 'Bajo Eléctrico', aux: 'Aux 5 Bodypack + Aux 8 Wedge', type: 'iem', hasAC: true },
+  { name: 'Israel Lagos Rocha', role: 'Pianos / Teclados', aux: 'Aux 1 XLR', type: 'iem', hasAC: true },
+  { name: 'Jaime Cárdenas Quilodrán', role: 'Batería / Timbales', aux: 'Aux 2 XLR + Aux 7 Wedge', type: 'wedge', hasAC: true },
+  { name: 'Jaime Cárdenas Sanhueza', role: 'Congas / Bongós', aux: 'Aux 3 XLR', type: 'iem', hasAC: true },
 ];
-
-const rawElements = dbStageData && dbStageData.length > 0 ? dbStageData : fallbackElements;
-
-// Mapear elementos del Stage Plot a los músicos/roles correspondientes
-const members = rawElements.map((el: any) => {
-  let initials = '';
-  let name = el.nombre;
-  let role = '';
-  let aux = el.retorno || '';
-  let borderGlow = 'border-gold-bruna/85 shadow-[0_0_8px_rgba(212,175,55,0.25)]';
-  let typeColor = 'text-gold-bruna';
-  let isWedge = false;
-  let hasAC = false;
-  let isMonitorOrPower = false;
-  let iconEmoji = '';
-
-  if (el.tipo === 'bateria') {
-    initials = 'JQ';
-    name = 'Jaime C. Quilodrán';
-    role = 'Percusión/Timbal/Voces';
-    aux = 'Aux 6 Wedge';
-    isWedge = true;
-    borderGlow = 'border-blue-500/80 shadow-[0_0_8px_rgba(59,130,246,0.25)]';
-    typeColor = 'text-blue-400';
-    hasAC = true;
-  } else if (el.tipo === 'congas') {
-    initials = 'JS';
-    name = 'Jaime C. Sanhueza';
-    role = 'Congas/Bongós/Coros';
-    aux = 'Aux 7 Wedge';
-    isWedge = true;
-    borderGlow = 'border-blue-500/80 shadow-[0_0_8px_rgba(59,130,246,0.25)]';
-    typeColor = 'text-blue-400';
-    hasAC = true;
-  } else if (el.tipo === 'teclado') {
-    initials = 'IL';
-    name = 'Israel Lagos Rocha';
-    role = 'Pianos/Teclados/Sintetizadores';
-    aux = 'Aux 5 IEM';
-    hasAC = true;
-  } else if (el.tipo === 'bajo') {
-    initials = 'GU';
-    name = 'Gerson Ulloa';
-    role = 'Bajos/Coros';
-    aux = 'Aux 4 IEM';
-    hasAC = true;
-  } else if (el.tipo === 'guiro') {
-    initials = 'FG';
-    name = 'Fabian Garrido';
-    role = 'Guiro/Animación';
-    aux = 'Aux 2 IEM';
-  } else if (el.tipo === 'gtr') {
-    initials = 'VN';
-    name = 'Vicente Nuñez';
-    role = 'Guitarra Electrica/Dir/Coros';
-    aux = 'Aux 3 IEM';
-    hasAC = true;
-  } else if (el.tipo === 'vocal') {
-    initials = 'CB';
-    name = 'Cesar Bruna';
-    role = 'Voz principal';
-    aux = 'Aux 1 IEM';
-  } else if (el.tipo === 'monitor') {
-    initials = 'MON';
-    name = el.nombre || 'Monitor de Piso';
-    role = 'Retorno Escenario';
-    aux = el.retorno || 'Wedge';
-    isWedge = true;
-    borderGlow = 'border-blue-500/50 shadow-[0_0_6px_rgba(59,130,246,0.15)]';
-    typeColor = 'text-blue-400';
-    isMonitorOrPower = true;
-    iconEmoji = '🔊';
-  } else if (el.tipo === 'power') {
-    initials = '220V';
-    name = el.nombre || 'Toma de Corriente';
-    role = 'AC Power 220V';
-    aux = 'Alimentación';
-    borderGlow = 'border-emerald-500/50';
-    typeColor = 'text-emerald-400';
-    isMonitorOrPower = true;
-    iconEmoji = '⚡';
-    hasAC = true;
-  } else {
-    initials = el.nombre.substring(0, 2).toUpperCase();
-    name = el.nombre;
-    role = 'Elemento Stage';
-    aux = el.retorno || '';
-  }
-
-  return {
-    id: el.id,
-    name,
-    role,
-    initials,
-    aux,
-    borderGlow,
-    typeColor,
-    isWedge,
-    hasAC,
-    isMonitorOrPower,
-    iconEmoji,
-    x: el.pos_x !== null ? parseFloat(el.pos_x) : 50,
-    y: el.pos_y !== null ? parseFloat(el.pos_y) : 50
-  };
-});
 ---
-<div class="bg-slate-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden" id="stage-plot-root">
+
+<div class="bg-slate-900/40 border border-white/5 rounded-3xl p-6 md:p-8 relative overflow-hidden" id="stage-plot-root">
   <div class="absolute -top-40 -left-40 w-80 h-80 bg-gold-bruna/5 rounded-full blur-3xl pointer-events-none"></div>
 
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+  <!-- Encabezado y Selector de Opciones -->
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
     <div>
-      <h3 class="font-title font-bold text-lg uppercase text-white mb-1">Stage Plot Oficial (Distribución)</h3>
-      <p class="text-xs text-slate-400">Distribución física de los músicos en escenario, tarimas y asignación de monitores.</p>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-gold-bruna/10 text-gold-bruna border border-gold-bruna/20">
+          Oficial 2026 - 2027
+        </span>
+        <span class="text-[10px] text-slate-400 font-mono">2 Variantes de Montaje</span>
+      </div>
+      <h3 class="font-title font-bold text-xl uppercase text-white tracking-wide">Stage Plot (Orden en Escenario)</h3>
+      <p class="text-xs text-slate-400">Diagrama ilustrado con ubicación exacta de músicos, backline, sistemas de retorno y energía 220V.</p>
     </div>
-    <!-- Indicadores/Leyenda -->
-    <div class="flex flex-wrap gap-3 text-[10px] uppercase font-bold tracking-wider font-mono">
-      <div class="flex items-center gap-1.5 text-gold-bruna">
-        <span class="w-2.5 h-2.5 rounded-full bg-gold-bruna"></span>
-        IEM (In-Ear)
+
+    <!-- Controles: Selector de Opciones y Descarga -->
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Selector de Variante -->
+      <div class="inline-flex p-1 bg-slate-950/80 border border-white/10 rounded-xl" role="tablist">
+        <button 
+          id="btn-stage-opt-1" 
+          type="button" 
+          class="stage-opt-btn active px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer bg-gold-bruna text-black shadow-md shadow-gold-bruna/20"
+          data-target="plot-option-1"
+        >
+          Opción 1: Típica (Frontal)
+        </button>
+        <button 
+          id="btn-stage-opt-2" 
+          type="button" 
+          class="stage-opt-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white"
+          data-target="plot-option-2"
+        >
+          Opción 2: Teclados Lateral
+        </button>
       </div>
-      <div class="flex items-center gap-1.5 text-blue-400">
-        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-        Wedge (Piso)
+
+      <!-- Botón Descargar PDF -->
+      <a 
+        href="/assets/downloads/stageplot_banda_bruna.pdf" 
+        target="_blank" 
+        rel="noopener" 
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-white/10 transition-colors"
+        title="Descargar Ficha en PDF"
+      >
+        <span>📄</span>
+        <span>Descargar PDF</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal de Visualización -->
+  <div class="relative bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-2 sm:p-4">
+    
+    <!-- Barra superior interna con badges explicativos -->
+    <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-white/5 bg-slate-900/60 rounded-xl mb-3 text-[11px]">
+      <div id="plot-description-1" class="plot-desc text-slate-300 font-mono flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-gold-bruna animate-pulse"></span>
+        <span><strong>OPCIÓN 1:</strong> Distribución estándar en 2 líneas frontales. Ideal para la mayoría de escenarios y festivales.</span>
       </div>
-      <div class="flex items-center gap-1.5 text-emerald-400">
-        <span class="w-2.5 h-2.5 rounded bg-emerald-500"></span>
-        [AC] Corriente
+      <div id="plot-description-2" class="plot-desc hidden text-slate-300 font-mono flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span><strong>OPCIÓN 2:</strong> Teclados en ángulo lateral mirando al centro de la banda. Ideal para escenarios profundos.</span>
+      </div>
+
+      <button 
+        id="btn-open-stage-zoom" 
+        type="button" 
+        class="text-gold-bruna hover:text-white text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer transition-colors ml-auto"
+      >
+        <span>🔍</span>
+        <span>Pantalla Completa</span>
+      </button>
+    </div>
+
+    <!-- Panel Opción 1 -->
+    <div id="plot-option-1" class="stage-plot-panel block transition-opacity duration-300">
+      <div class="relative rounded-xl overflow-hidden bg-black/50 border border-white/5 flex items-center justify-center">
+        <picture>
+          <source srcset="/assets/images/rider/stage_plot_1.webp" type="image/webp" />
+          <img 
+            id="stage-img-1" 
+            src="/assets/images/rider/stage_plot_1.png" 
+            alt="Stage Plot Oficial Opción 1 - Banda Bruna" 
+            class="w-full h-auto max-h-[580px] object-contain cursor-zoom-in"
+            loading="lazy"
+          />
+        </picture>
+      </div>
+    </div>
+
+    <!-- Panel Opción 2 -->
+    <div id="plot-option-2" class="stage-plot-panel hidden transition-opacity duration-300">
+      <div class="relative rounded-xl overflow-hidden bg-black/50 border border-white/5 flex items-center justify-center">
+        <picture>
+          <source srcset="/assets/images/rider/stage_plot_2.webp" type="image/webp" />
+          <img 
+            id="stage-img-2" 
+            src="/assets/images/rider/stage_plot_2.png" 
+            alt="Stage Plot Oficial Opción 2 - Banda Bruna" 
+            class="w-full h-auto max-h-[580px] object-contain cursor-zoom-in"
+            loading="lazy"
+          />
+        </picture>
+      </div>
+    </div>
+
+    <!-- Pie del Visualizador con Leyenda -->
+    <div class="mt-3 pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 px-2 text-[10px] font-mono text-slate-400">
+      <div class="flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-gold-bruna"></span>
+          <span class="text-white font-bold">IEM Inalámbrico</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+          <span class="text-white font-bold">Monitor Wedge Piso</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded bg-emerald-500"></span>
+          <span class="text-white font-bold">220V Estabilizada</span>
+        </div>
+      </div>
+      <div class="text-slate-500 uppercase tracking-wider">
+        ▲ BOCA DE ESCENARIO (FRENTE AL PÚBLICO) ▲
       </div>
     </div>
   </div>
 
-  <!-- Lienzo del Escenario (Stage Plot) -->
-  <div class="w-full bg-slate-950 border border-white/10 rounded-2xl relative p-6 aspect-[16/9] md:aspect-[16/7.5] min-h-[320px] shadow-inner shadow-black overflow-hidden flex flex-col justify-between">
-    <!-- Grid decorativo -->
-    <div class="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
-    
-    <!-- LÍNEAS DE CONTORNO DE TARIMAS DE PERCUSIÓN COMO GUÍAS DE FONDO -->
-    <div class="absolute left-[12%] top-[15%] w-[180px] h-[100px] border border-dashed border-white/5 bg-slate-900/10 rounded-xl flex items-center justify-center text-[7.5px] text-slate-650 uppercase font-mono pointer-events-none">
-      Área Tarima Percusión
-    </div>
-    <div class="absolute right-[12%] top-[15%] w-[180px] h-[100px] border border-dashed border-white/5 bg-slate-900/10 rounded-xl flex items-center justify-center text-[7.5px] text-slate-650 uppercase font-mono pointer-events-none">
-      Área Tarima Congas
+  <!-- Especificaciones Técnicas y Tarjetas de Músicos -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <!-- Columna 1: Requerimientos Físicos del Escenario -->
+    <div class="bg-slate-950/70 border border-white/5 rounded-2xl p-5 flex flex-col justify-between">
+      <div>
+        <h4 class="text-xs font-title font-bold text-gold-bruna uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>📐</span> Requerimientos de Escenario
+        </h4>
+        <ul class="space-y-2.5 text-xs text-slate-300 font-mono">
+          <li class="flex items-start gap-2">
+            <span class="text-gold-bruna font-bold">•</span>
+            <span><strong>Dimensiones mínimas:</strong> 10m de boca x 8m de fondo x 1.2m de altura.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-gold-bruna font-bold">•</span>
+            <span><strong>Tarima Batería / Timbales:</strong> 2m x 2m, altura 40cm (con alfombra antideslizante).</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-gold-bruna font-bold">•</span>
+            <span><strong>Tarima Congas / Bongós:</strong> 2m x 2m, altura 40cm.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-gold-bruna font-bold">•</span>
+            <span><strong>Electricidad en Escenario:</strong> 4 puntos dobles 220V estabilizada (Batería, Teclados, Guitarra y Bajo).</span>
+          </li>
+        </ul>
+      </div>
+      <div class="mt-4 pt-3 border-t border-white/5 text-[10px] text-slate-400">
+        * Para escenarios de menores dimensiones, consultar con dirección técnica.
+      </div>
     </div>
 
-    <!-- Músicos Posicionados de Forma Dinámica -->
-    <div class="absolute inset-0 z-10">
-      {members.map(m => (
-        <div 
-          class="absolute flex flex-col items-center gap-1 text-center group transition-all duration-300"
-          style={`left: ${m.x}%; top: ${m.y}%; transform: translate(-50%, -50%); width: 120px;`}
-        >
-          <!-- Círculo del músico / elemento -->
-          <div class={`w-11 h-11 rounded-full bg-slate-900 border-2 ${m.borderGlow} flex items-center justify-center relative shadow-lg shadow-black text-white group-hover:scale-105 transition-transform font-bold font-mono text-xs`}>
-            {m.isMonitorOrPower ? m.iconEmoji : m.initials}
-            {!m.isMonitorOrPower && (
-              <div class="absolute -bottom-1 -right-1 bg-slate-950 border border-white/10 text-white text-[6.5px] font-mono px-1 rounded-full">
-                {m.aux.split(' ')[0]}
-              </div>
-            )}
-          </div>
-          <!-- Nombre y Rol -->
-          <div class="pointer-events-none select-none">
-            <h4 class="text-[9px] text-white font-bold uppercase font-mono tracking-tight leading-tight">{m.name}</h4>
-            <p class="text-[7.5px] text-slate-450 leading-none mt-0.5">{m.role.split('/')[0]}</p>
-            <div class="flex items-center justify-center gap-1 mt-0.5">
-              <span class={`text-[7px] font-mono font-bold ${m.typeColor}`}>{m.aux.split(' ')[1] || 'IEM'}</span>
-              {m.hasAC && <span class="text-[7px] text-emerald-400 font-mono font-bold">[AC]</span>}
+    <!-- Columna 2 y 3: Integrantes, Roles y Retornos -->
+    <div class="lg:col-span-2 bg-slate-950/70 border border-white/5 rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-xs font-title font-bold text-gold-bruna uppercase tracking-wider flex items-center gap-2">
+          <span>👥</span> Alineación de Músicos & Retornos
+        </h4>
+        <span class="text-[10px] text-slate-400 font-mono">7 Músicos en Escenario</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        {stageMembers.map(m => (
+          <div class="bg-slate-900/60 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-white uppercase leading-tight">{m.name}</p>
+              <p class="text-[10px] text-slate-400 leading-tight mt-0.5">{m.role}</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${
+                m.type === 'iem' 
+                  ? 'bg-gold-bruna/10 text-gold-bruna border-gold-bruna/30' 
+                  : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+              }`}>
+                {m.aux}
+              </span>
+              {m.hasAC && (
+                <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" title="Alimentación 220V">
+                  220V
+                </span>
+              )}
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Lightbox para Pantalla Completa -->
+  <div id="stage-zoom-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden opacity-0 transition-opacity duration-300 flex flex-col justify-between p-4 sm:p-6">
+    <div class="flex items-center justify-between text-white border-b border-white/10 pb-3">
+      <div>
+        <h3 id="stage-zoom-title" class="text-base font-title font-bold uppercase text-gold-bruna">Stage Plot Oficial - Vista Detallada</h3>
+        <p class="text-xs text-slate-400 font-mono">Ubicación física e instrumental a escala</p>
+      </div>
+      <button id="btn-close-stage-zoom" type="button" class="text-slate-400 hover:text-white text-2xl font-bold p-2 cursor-pointer transition-colors" title="Cerrar">
+        ✕
+      </button>
     </div>
 
-    <!-- Boca de escenario -->
-    <div class="absolute bottom-2 left-0 right-0 text-center border-t border-white/5 pt-2 text-[8px] text-slate-500 font-mono uppercase tracking-widest bg-slate-950/80 z-20">
-      ▲ Boca de Escenario (Frente al público) ▲
+    <div class="flex-grow flex items-center justify-center p-2 overflow-auto">
+      <img id="stage-zoom-img" src="/assets/images/rider/stage_plot_1.png" alt="Stage Plot Grande" class="max-w-full max-h-[82vh] object-contain rounded-lg shadow-2xl" />
+    </div>
+
+    <div class="border-t border-white/10 pt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 font-mono">
+      <span>Banda Bruna • Rider Técnico Oficial</span>
+      <span class="text-gold-bruna font-bold">contacto@bandabruna.cl</span>
     </div>
   </div>
 </div>
+
+<script>
+  function initStagePlot() {
+    const btnOpt1 = document.getElementById('btn-stage-opt-1');
+    const btnOpt2 = document.getElementById('btn-stage-opt-2');
+    const panel1 = document.getElementById('plot-option-1');
+    const panel2 = document.getElementById('plot-option-2');
+    const desc1 = document.getElementById('plot-description-1');
+    const desc2 = document.getElementById('plot-description-2');
+
+    const modal = document.getElementById('stage-zoom-modal');
+    const modalImg = document.getElementById('stage-zoom-img') as HTMLImageElement;
+    const modalTitle = document.getElementById('stage-zoom-title');
+    const btnOpenZoom = document.getElementById('btn-open-stage-zoom');
+    const btnCloseZoom = document.getElementById('btn-close-stage-zoom');
+    const img1 = document.getElementById('stage-img-1');
+    const img2 = document.getElementById('stage-img-2');
+
+    let activeOption = 1;
+
+    function selectOption(opt: number) {
+      activeOption = opt;
+      if (opt === 1) {
+        btnOpt1?.classList.add('bg-gold-bruna', 'text-black', 'shadow-md', 'shadow-gold-bruna/20');
+        btnOpt1?.classList.remove('text-slate-400');
+        btnOpt2?.classList.remove('bg-gold-bruna', 'text-black', 'shadow-md', 'shadow-gold-bruna/20');
+        btnOpt2?.classList.add('text-slate-400');
+
+        panel1?.classList.remove('hidden');
+        panel2?.classList.add('hidden');
+        desc1?.classList.remove('hidden');
+        desc2?.classList.add('hidden');
+      } else {
+        btnOpt2?.classList.add('bg-gold-bruna', 'text-black', 'shadow-md', 'shadow-gold-bruna/20');
+        btnOpt2?.classList.remove('text-slate-400');
+        btnOpt1?.classList.remove('bg-gold-bruna', 'text-black', 'shadow-md', 'shadow-gold-bruna/20');
+        btnOpt1?.classList.add('text-slate-400');
+
+        panel2?.classList.remove('hidden');
+        panel1?.classList.add('hidden');
+        desc2?.classList.remove('hidden');
+        desc1?.classList.add('hidden');
+      }
+    }
+
+    btnOpt1?.addEventListener('click', () => selectOption(1));
+    btnOpt2?.addEventListener('click', () => selectOption(2));
+
+    function openZoom() {
+      if (!modal || !modalImg) return;
+      if (activeOption === 1) {
+        modalImg.src = '/assets/images/rider/stage_plot_1.png';
+        if (modalTitle) modalTitle.textContent = 'Stage Plot Oficial - Opción 1: Distribución Estándar (Frontal)';
+      } else {
+        modalImg.src = '/assets/images/rider/stage_plot_2.png';
+        if (modalTitle) modalTitle.textContent = 'Stage Plot Oficial - Opción 2: Distribución Alternativa (Teclados Lateral)';
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function closeZoom() {
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    btnOpenZoom?.addEventListener('click', openZoom);
+    img1?.addEventListener('click', openZoom);
+    img2?.addEventListener('click', openZoom);
+    btnCloseZoom?.addEventListener('click', closeZoom);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeZoom();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        closeZoom();
+      }
+    });
+  }
+
+  // Ejecutar al cargar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStagePlot);
+  } else {
+    initStagePlot();
+  }
+</script>

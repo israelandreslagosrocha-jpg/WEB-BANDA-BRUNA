@@ -23,7 +23,6 @@ const events = (rawEvents || []).map((event: any) => {
 
   const eventDateMidnight = new Date(event.fecha + 'T00:00:00');
   const isPast = eventDateMidnight.getTime() < today.getTime() || event.fecha === '2026-08-08';
-  const videoUrl = event.video_url || (event.fecha === '2026-08-08' ? 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4' : 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4');
 
   // Metadatos parseados desde descripcion
   let meta: any = {};
@@ -33,7 +32,42 @@ const events = (rawEvents || []).map((event: any) => {
     }
   } catch (e) {}
 
-  const isBocaDeLobos = event.fecha === '2026-09-18';
+  let videoUrl = event.video_url || meta.video_url;
+  if (!videoUrl) {
+    if (event.fecha === '2026-08-08') {
+      videoUrl = 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4';
+    } else if (event.fecha === '2026-09-12' || (event.lugar && event.lugar.toLowerCase().includes('olimpo'))) {
+      videoUrl = 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1789429380/OLIMPO_REEL_SOCIAL2_4K_baja_dqki2z.mp4';
+    } else {
+      videoUrl = 'https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4';
+    }
+  }
+
+  let galleryUrl = meta.gallery_url || meta.album_url || null;
+  if (!galleryUrl) {
+    const venueLower = (event.lugar || '').toLowerCase();
+    const nameLower = (event.nombre || '').toLowerCase();
+    if (event.fecha === '2026-09-12' || venueLower.includes('olimpo') || nameLower.includes('olimpo')) {
+      galleryUrl = '/galeria#album-section-temuco-2026-show-en-vivo-olimpo-club';
+    } else if (venueLower.includes('saavedra') || nameLower.includes('saavedra')) {
+      galleryUrl = '/galeria#album-section-puerto-saavedra-2026';
+    } else if (venueLower.includes('pocoyan') || nameLower.includes('pocoyan')) {
+      galleryUrl = '/galeria#album-section-pocoyan-2026';
+    } else if (venueLower.includes('queule') || nameLower.includes('queule')) {
+      galleryUrl = '/galeria#album-section-queule-2025';
+    } else if (venueLower.includes('toltén') || venueLower.includes('tolten') || nameLower.includes('toltén') || nameLower.includes('tolten')) {
+      galleryUrl = '/galeria#album-section-tolten-2025';
+    } else if (venueLower.includes('gorbea') || nameLower.includes('gorbea')) {
+      galleryUrl = '/galeria#album-section-expo-gorbea-2025';
+    } else if (venueLower.includes('lautaro') || nameLower.includes('lautaro')) {
+      galleryUrl = '/galeria#album-section-lautaro-2025';
+    }
+  }
+
+  const isBocaDeLobos = event.fecha === '2026-09-18' && (
+    (event.lugar && event.lugar.toLowerCase().includes('boca')) ||
+    (event.nombre && event.nombre.toLowerCase().includes('boca'))
+  );
 
   const tieneEntradas = meta.tiene_entradas !== undefined 
     ? Boolean(meta.tiene_entradas) 
@@ -89,6 +123,7 @@ const events = (rawEvents || []).map((event: any) => {
     fullDate: fullDateStr,
     isPast,
     videoUrl,
+    galleryUrl,
     imagen: imagenFlyer,
     tieneEntradas,
     ticketUrl
@@ -134,7 +169,8 @@ const getGoogleCalendarUrl = (event: any) => {
               }`}
               {...(event.isPast ? {
                 'data-open-event-video': event.videoUrl || '',
-                'data-event-title': `${event.title} — ${event.location || event.venue}`
+                'data-event-title': `${event.title} — ${event.location || event.venue}`,
+                'data-event-gallery': event.galleryUrl || '/galeria'
               } : (event.imagen ? {
                 'data-open-event-flyer': event.imagen,
                 'data-event-title': `${event.title} — ${event.location || event.venue}`
@@ -165,11 +201,41 @@ const getGoogleCalendarUrl = (event: any) => {
               <div class="flex flex-wrap items-center gap-4 border-t md:border-t-0 pt-4 md:pt-0 justify-between md:justify-end">
                 
                 {event.isPast ? (
-                  <div class="flex items-center gap-3">
-                    <span class="bg-slate-800/90 border border-slate-700 text-slate-300 group-hover/pastevent:text-gold-bruna group-hover/pastevent:border-gold-bruna/50 text-[10px] font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-2 transition-colors shadow">
-                      <span>🎬 SHOW REALIZADO</span>
-                      <span class="text-[9px] bg-gold-bruna/20 text-gold-bruna px-2 py-0.5 rounded font-mono border border-gold-bruna/30">VER VIDEOS ▶</span>
-                    </span>
+                  <div class="flex flex-wrap items-center gap-2.5">
+                    {event.videoUrl && (
+                      <button 
+                        type="button"
+                        data-open-event-video={event.videoUrl}
+                        data-event-title={`${event.title} — ${event.location || event.venue}`}
+                        data-event-gallery={event.galleryUrl || '/galeria'}
+                        class="text-xs bg-slate-800/90 border border-slate-700 hover:border-gold-bruna/50 text-slate-200 hover:text-gold-bruna font-bold px-3.5 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow uppercase tracking-wider cursor-pointer"
+                        title="Ver video resumen del evento"
+                      >
+                        <span>🎬</span> Ver Resumen
+                      </button>
+                    )}
+                    {event.galleryUrl && (
+                      <a 
+                        href={event.galleryUrl}
+                        onclick="event.stopPropagation();"
+                        class="text-xs bg-gold-bruna/10 border border-gold-bruna/30 hover:bg-gold-bruna hover:text-black text-gold-bruna font-bold px-3.5 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow uppercase tracking-wider cursor-pointer"
+                        title="Ver fotos del evento en Galería"
+                      >
+                        <span>📸</span> Ver Fotos del Evento
+                      </a>
+                    )}
+                    {event.imagen && (
+                      <button 
+                        type="button" 
+                        data-open-event-flyer={event.imagen} 
+                        data-event-title={`${event.title} — ${event.location || event.venue}`}
+                        data-event-gallery={event.galleryUrl || ''}
+                        class="text-xs bg-white/5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white font-bold px-3.5 py-2 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 uppercase tracking-wider"
+                        title="Ver flyer del show"
+                      >
+                        <span>🖼️</span> Ver Flyer
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -202,10 +268,20 @@ const getGoogleCalendarUrl = (event: any) => {
                             type="button" 
                             data-open-event-flyer={event.imagen} 
                             data-event-title={`${event.title} — ${event.location || event.venue}`}
+                            data-event-gallery={event.galleryUrl || ''}
                             class="text-xs bg-gold-bruna/10 border border-gold-bruna/30 hover:bg-gold-bruna/20 text-gold-bruna px-3.5 py-2 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 font-bold uppercase tracking-wider"
                           >
                             <span>🖼️</span> Ver Flyer
                           </button>
+                        )}
+                        {event.galleryUrl && (
+                          <a 
+                            href={event.galleryUrl}
+                            class="text-xs bg-white/5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 font-bold uppercase tracking-wider"
+                            title="Ver fotos en Galería"
+                          >
+                            <span>📸</span> Ver Álbum
+                          </a>
                         )}
                         <a href={getGoogleCalendarUrl(event)} target="_blank" rel="noopener" class="text-xs bg-slate-950 border border-white/10 hover:border-gold-bruna text-slate-300 px-3.5 py-2 rounded-lg transition-colors cursor-pointer">
                           Añadir a Google Calendar
@@ -284,6 +360,7 @@ const getGoogleCalendarUrl = (event: any) => {
           <span id="event-video-caption" class="font-medium text-white truncate max-w-xs">Cobertura oficial del concierto en vivo</span>
         </div>
         <a 
+          id="event-video-gallery-btn"
           href="/galeria" 
           class="inline-flex items-center gap-2 bg-gradient-to-r from-gold-bruna to-gold-bruna-hover hover:brightness-110 text-black font-extrabold text-xs px-5 py-2.5 rounded-lg transition-all shadow-md uppercase tracking-wider font-title"
         >
@@ -301,6 +378,7 @@ const getGoogleCalendarUrl = (event: any) => {
       const titleEl = document.getElementById('event-video-modal-title');
       const captionEl = document.getElementById('event-video-caption');
       const counterEl = document.getElementById('event-video-counter');
+      const galleryBtn = document.getElementById('event-video-gallery-btn') as HTMLAnchorElement;
       const closeBtn = document.getElementById('close-event-video-modal');
       const prevBtn = document.getElementById('prev-event-video');
       const nextBtn = document.getElementById('next-event-video');
@@ -309,16 +387,24 @@ const getGoogleCalendarUrl = (event: any) => {
 
       const pastVideos = [
         {
-          title: "Show en Puerto Saavedra",
-          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4"
+          title: "Show en Vivo - Olimpo Club Temuco",
+          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1789429380/OLIMPO_REEL_SOCIAL2_4K_baja_dqki2z.mp4",
+          galleryUrl: "/galeria#album-section-temuco-2026-show-en-vivo-olimpo-club"
         },
         {
           title: "Presentación en Vivo Expo Familia Temuco",
-          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4"
+          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1786559998/expo_familia_cfjxai.mp4",
+          galleryUrl: "/galeria"
+        },
+        {
+          title: "Show en Puerto Saavedra",
+          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4",
+          galleryUrl: "/galeria#album-section-puerto-saavedra-2026"
         },
         {
           title: "Gira Regional y Backstage",
-          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4"
+          url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4",
+          galleryUrl: "/galeria"
         }
       ];
 
@@ -331,16 +417,19 @@ const getGoogleCalendarUrl = (event: any) => {
         player.src = v.url;
         if (counterEl) counterEl.textContent = `Video ${currentVideoIdx + 1} de ${pastVideos.length}`;
         if (captionEl) captionEl.textContent = v.title;
+        if (galleryBtn && (v as any).galleryUrl) {
+          galleryBtn.href = (v as any).galleryUrl;
+        }
         player.play().catch(() => {});
       }
 
-      function openModal(videoUrl: string, title: string) {
+      function openModal(videoUrl: string, title: string, galleryUrl?: string) {
         // Si el video solicitado está en la lista o es nuevo, posicionar el índice
         const foundIdx = pastVideos.findIndex(v => v.url === videoUrl);
         if (foundIdx >= 0) {
           currentVideoIdx = foundIdx;
         } else if (videoUrl) {
-          pastVideos.unshift({ title: title || 'Registro en Vivo', url: videoUrl });
+          pastVideos.unshift({ title: title || 'Registro en Vivo', url: videoUrl, galleryUrl: galleryUrl || '/galeria' });
           currentVideoIdx = 0;
         }
 
@@ -349,6 +438,9 @@ const getGoogleCalendarUrl = (event: any) => {
         if (titleEl) titleEl.textContent = title || 'Resumen de Show';
         if (captionEl) captionEl.textContent = v.title;
         if (counterEl) counterEl.textContent = `Video ${currentVideoIdx + 1} de ${pastVideos.length}`;
+        if (galleryBtn) {
+          galleryBtn.href = galleryUrl || (v as any).galleryUrl || '/galeria';
+        }
 
         modal.classList.remove('hidden');
         setTimeout(() => {
@@ -383,7 +475,8 @@ const getGoogleCalendarUrl = (event: any) => {
           e.stopPropagation();
           const videoUrl = el.getAttribute('data-open-event-video');
           const title = el.getAttribute('data-event-title');
-          if (videoUrl) openModal(videoUrl, title || '');
+          const galleryUrl = el.getAttribute('data-event-gallery');
+          if (videoUrl) openModal(videoUrl, title || '', galleryUrl || '');
         });
       });
 
@@ -412,14 +505,23 @@ const getGoogleCalendarUrl = (event: any) => {
       const imgEl = document.getElementById('event-flyer-modal-image') as HTMLImageElement;
       const titleEl = document.getElementById('event-flyer-modal-title');
       const linkEl = document.getElementById('event-flyer-modal-link') as HTMLAnchorElement;
+      const galleryBtn = document.getElementById('event-flyer-modal-gallery-btn') as HTMLAnchorElement;
       const closeBtn = document.getElementById('close-event-flyer-modal');
 
       if (!modal || !imgEl) return;
 
-      function openModal(url: string, title: string) {
+      function openModal(url: string, title: string, galleryUrl?: string) {
         imgEl.src = url;
         if (titleEl) titleEl.textContent = title || 'Afiche Oficial';
         if (linkEl) linkEl.href = url;
+        if (galleryBtn) {
+          if (galleryUrl) {
+            galleryBtn.href = galleryUrl;
+            galleryBtn.classList.remove('hidden');
+          } else {
+            galleryBtn.classList.add('hidden');
+          }
+        }
         modal.classList.remove('hidden');
         setTimeout(() => {
           modal.classList.remove('opacity-0');
@@ -441,7 +543,8 @@ const getGoogleCalendarUrl = (event: any) => {
           e.stopPropagation();
           const url = el.getAttribute('data-open-event-flyer');
           const title = el.getAttribute('data-event-title');
-          if (url) openModal(url, title || '');
+          const galleryUrl = el.getAttribute('data-event-gallery');
+          if (url) openModal(url, title || '', galleryUrl || '');
         });
       });
 
@@ -478,13 +581,18 @@ const getGoogleCalendarUrl = (event: any) => {
         <img id="event-flyer-modal-image" src="" alt="Flyer del Evento" class="max-w-full max-h-[70vh] object-contain rounded-lg" />
       </div>
       <!-- Footer del Modal -->
-      <div class="p-3.5 bg-slate-950/90 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+      <div class="p-3.5 bg-slate-950/90 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2.5 text-[11px] text-slate-400">
         <span class="text-slate-400 font-light flex items-center gap-1.5">
           <span>📅</span> Presentación oficial confirmada
         </span>
-        <a id="event-flyer-modal-link" href="#" target="_blank" rel="noopener" class="text-[10px] text-gold-bruna font-bold uppercase tracking-wider hover:underline flex items-center gap-1">
-          Abrir en tamaño completo ↗
-        </a>
+        <div class="flex items-center gap-3">
+          <a id="event-flyer-modal-gallery-btn" href="/galeria" class="hidden text-[10px] bg-gold-bruna/20 border border-gold-bruna/40 text-gold-bruna hover:bg-gold-bruna hover:text-black px-3 py-1 rounded font-bold uppercase tracking-wider transition-all flex items-center gap-1">
+            <span>📸</span> VER ÁLBUM EN GALERÍA →
+          </a>
+          <a id="event-flyer-modal-link" href="#" target="_blank" rel="noopener" class="text-[10px] text-slate-400 hover:text-white uppercase tracking-wider flex items-center gap-1">
+            Abrir original ↗
+          </a>
+        </div>
       </div>
     </div>
   </div>

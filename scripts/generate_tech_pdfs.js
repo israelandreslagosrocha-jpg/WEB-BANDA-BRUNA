@@ -102,50 +102,53 @@ function drawHeader(doc, title, subtitle, logoPath) {
 }
 
 // Función para dibujar el pie de página
-function drawFooter(doc, pageNum) {
-  doc.rect(40, 790, 515, 1).fill(COLOR_BORDER);
-  doc.fillColor(COLOR_MUTED).fontSize(7).font('Helvetica').text('Portal de Producción Técnica v2.0 - Banda Bruna • contacto@bandabruna.cl • Temuco, Chile', 40, 798, { width: 400 });
-  doc.text(`Página ${pageNum}`, 440, 798, { width: 115, align: 'right' });
+function drawFooter(doc, pageNum, totalPages = 1) {
+  doc.rect(40, 765, 515, 1).fill(COLOR_BORDER);
+  doc.fillColor(COLOR_MUTED).fontSize(7).font('Helvetica').text('Portal de Producción Técnica v2.0 - Banda Bruna • contacto@bandabruna.cl • Temuco, Chile', 40, 772, { width: 400 });
+  doc.text(totalPages > 1 ? `Página ${pageNum} de ${totalPages}` : `Página ${pageNum}`, 440, 772, { width: 115, align: 'right' });
 }
 
 // =====================================================================
-// 1. GENERAR: INPUT LIST PDF
+// 1. GENERAR: INPUT LIST PDF (SOUNDCRAFT Ui24R & 8 AUXILIARES)
 // =====================================================================
 function generateInputListPDF(canales, layoutName, logoPath) {
   const pdfPath = path.join(downloadsDir, 'input_list_banda_bruna.pdf');
   const doc = new PDFDocument({ size: 'A4', margin: 40 });
   doc.pipe(fs.createWriteStream(pdfPath));
 
-  drawHeader(doc, 'Input List & Audio Patch', `Ficha Oficial: ${layoutName}`, logoPath);
+  // ----------------------------------------------------
+  // PÁGINA 1: PATCH DE CANALES AUDIO (FOH / SALA)
+  // ----------------------------------------------------
+  drawHeader(doc, 'Input List & Patch de Canales', 'Soundcraft Ui24R • Ficha Oficial', logoPath);
 
-  // 1. Contacto ante dudas técnicas (Subcabecera limpia)
-  const contactY = 116;
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('CONTACTO ANTE DUDAS TÉCNICAS:', 40, contactY);
-  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(8).text(
-    'Dirección Técnica: contacto@bandabruna.cl  •  Teléfonos: +56 9 9002 1689 / +56 9 7614 9408  •  Temuco, Chile', 
-    40, contactY + 12
+  // 1. Aviso de Consola Propia y Flexibilidad
+  const noticeY = 114;
+  doc.rect(40, noticeY, 515, 30).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.5).text('CONSOLA DIGITAL PROPIA EN GIRA: SOUNDCRAFT Ui24R', 48, noticeY + 5);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8).text(
+    'Banda Bruna viaja con su propia consola Soundcraft Ui24R (escenas y monitores preconfigurados para Line Check ágil de 10-15 min).\nSe solicita contar con la microfonía indicada o modelos de características similares o superior, según disponibilidad de la producción.',
+    48, noticeY + 15, { lineGap: 1.5 }
   );
 
-  // 2. Tabla Canales (Comienza a Y fijo = 145)
-  let currentY = 145;
-  const colWidths = [32, 138, 230, 115];
-  const colTitles = ['Ch', 'Instrumento / Fuente', 'Micrófono / Conexión sugerida', 'Categoría'];
+  // 2. Tabla Canales (Patch 1-26)
+  let currentY = 148;
+  const colWidths = [28, 145, 232, 110];
+  const colTitles = ['N°', 'Instrumento / Fuente', 'Micrófono / Conexión sugerida', 'Categoría'];
 
   // Cabecera de la Tabla
-  doc.rect(40, currentY, 515, 18).fill(COLOR_PRIMARY);
+  doc.rect(40, currentY, 515, 16).fill(COLOR_PRIMARY);
   let currentX = 40;
-  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(8);
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7.5);
   for (let i = 0; i < colTitles.length; i++) {
-    doc.text(colTitles[i], currentX + 6, currentY + 5, { width: colWidths[i] - 12 });
+    doc.text(colTitles[i], currentX + 6, currentY + 4, { width: colWidths[i] - 12 });
     currentX += colWidths[i];
   }
 
-  currentY += 18;
-  doc.font('Helvetica').fontSize(7.5);
+  currentY += 16;
+  doc.font('Helvetica').fontSize(7.2);
 
   canales.forEach((c, idx) => {
-    const rowHeight = 17;
-    // Zebra striping
+    const rowHeight = 15.2;
     if (idx % 2 === 1) {
       doc.rect(40, currentY, 515, rowHeight).fill(COLOR_LIGHT_BG);
     }
@@ -155,43 +158,138 @@ function generateInputListPDF(canales, layoutName, logoPath) {
     
     // Canal
     doc.font('Helvetica-Bold');
-    doc.text(c.canal.toString(), drawX + 6, currentY + 4, { width: colWidths[0] - 12, align: 'center' });
+    doc.text(c.canal.toString(), drawX + 6, currentY + 3.5, { width: colWidths[0] - 12, align: 'center' });
     drawX += colWidths[0];
     
     // Instrumento
     doc.font('Helvetica-Bold');
-    doc.text(c.instrumento, drawX + 6, currentY + 4, { width: colWidths[1] - 12 });
+    doc.text(c.instrumento, drawX + 6, currentY + 3.5, { width: colWidths[1] - 12 });
     drawX += colWidths[1];
     
     // Conexión
     doc.font('Helvetica');
-    doc.text(c.conexion, drawX + 6, currentY + 4, { width: colWidths[2] - 12 });
+    doc.text(c.conexion, drawX + 6, currentY + 3.5, { width: colWidths[2] - 12 });
     drawX += colWidths[2];
     
     // Categoría
     doc.fillColor(COLOR_MUTED);
-    doc.text(c.categoria, drawX + 6, currentY + 4, { width: colWidths[3] - 12 });
+    doc.text(c.categoria, drawX + 6, currentY + 3.5, { width: colWidths[3] - 12 });
     
     doc.rect(40, currentY + rowHeight, 515, 0.5).fill(COLOR_BORDER);
     currentY += rowHeight;
   });
 
-  // 3. Pie de página: Web Oficial y Redes Sociales
-  const footerCardY = currentY + 14;
-  doc.rect(40, footerCardY, 515, 36).fill(COLOR_LIGHT_BG);
-  doc.rect(40, footerCardY, 515, 36).stroke(COLOR_BORDER);
+  // 3. Notas técnicas de microfonía y corriente
+  const notesY = currentY + 7;
+  doc.rect(40, notesY, 515, 38).fill(COLOR_GOLD_LIGHT).stroke(COLOR_GOLD);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.2).text('NOTAS TÉCNICAS PARA FOH & PATCHERA:', 48, notesY + 5);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8);
+  doc.text('• Clamps LP: Canales 3, 4, 5, 11 y 12 utilizan montajes Clamp Claw LP (ahorra atriles en tarimas).', 48, notesY + 15);
+  doc.text('• Líneas RCA & Phantom: Ch 21/22 corresponden a entradas RCA físicas. Phantom (+48V) requerido en Ch 5, 6, 14 y 19.', 48, notesY + 25);
 
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8)
-     .text('PÁGINA WEB OFICIAL:', 52, footerCardY + 8);
-  doc.fillColor(COLOR_GOLD).font('Helvetica-Bold').fontSize(8)
-     .text('www.bandabruna.cl', 160, footerCardY + 8);
+  // 4. Pie de página web & redes
+  const footerCardY = notesY + 44;
+  doc.rect(40, footerCardY, 515, 24).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.2).text('BANDA BRUNA:', 48, footerCardY + 5);
+  doc.fillColor(COLOR_GOLD).font('Helvetica-Bold').fontSize(7.2).text('www.bandabruna.cl', 110, footerCardY + 5);
+  doc.fillColor(COLOR_MUTED).font('Helvetica').fontSize(6.8).text('contacto@bandabruna.cl  •  +56 9 9002 1689 / +56 9 7614 9408  •  Temuco, Chile', 48, footerCardY + 14);
 
-  doc.fillColor(COLOR_MUTED).font('Helvetica-Bold').fontSize(7)
-     .text('REDES SOCIALES OFICIALES:', 52, footerCardY + 22);
-  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(7)
-     .text('Instagram: @banda_bruna  •  YouTube: @bandabrunaoficial  •  Facebook: Banda Bruna  •  TikTok: @bandabrunaoficial', 170, footerCardY + 22);
+  drawFooter(doc, 1, 2);
 
-  drawFooter(doc, 1);
+  // ----------------------------------------------------
+  // PÁGINA 2: LISTA DE MONITORES (8 ENVIOS AUXILIARES)
+  // ----------------------------------------------------
+  doc.addPage({ size: 'A4', margin: 40 });
+
+  drawHeader(doc, 'Lista de Monitores & Retornos', '8 Salidas Auxiliares Soundcraft Ui24R', logoPath);
+
+  // Subcabecera
+  const subY = 114;
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('SISTEMA DE MONITOREO OFICIAL (8 MEZCLAS INDEPENDIENTES):', 40, subY);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(7.5).text(
+    'Configuración exacta de las 8 salidas auxiliares físicas de la consola Soundcraft Ui24R de Banda Bruna.', 
+    40, subY + 11
+  );
+
+  // Resumen de Infraestructura
+  const infraY = 138;
+  doc.rect(40, infraY, 515, 32).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.8).text('RESUMEN DE SALIDAS DE MONITOREO:', 48, infraY + 5);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(7).text(
+    '• 3x Envíos In-Ear Cableados (XLR macho en escenario para Piano, Batería y Congas).\n• 3x Envíos In-Ear Inalámbricos UHF (Bodypacks para Vocal, Bajo y Guitarra/Güira) provistos por Banda Bruna.\n• 2x Monitores Wedge Activos de Piso (12" o 15") provistos por la productora (Piso Batería y Piso Bajo).',
+    48, infraY + 15, { lineGap: 1.5 }
+  );
+
+  // Tabla Monitoreo (8 Auxiliares Exactos)
+  let currentYM = 176;
+  const colWidthsMix = [45, 110, 80, 110, 170];
+  const colTitlesMix = ['Aux #', 'Destino / Músico', 'Tipo Salida', 'Sistema Retorno', 'Detalle de Mezcla'];
+
+  doc.rect(40, currentYM, 515, 16).fill(COLOR_PRIMARY);
+  let currentXM = 40;
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7.5);
+  for (let i = 0; i < colTitlesMix.length; i++) {
+    doc.text(colTitlesMix[i], currentXM + 6, currentYM + 4, { width: colWidthsMix[i] - 12 });
+    currentXM += colWidthsMix[i];
+  }
+
+  currentYM += 16;
+  doc.font('Helvetica').fontSize(7.2);
+
+  const monitorMixes = [
+    { mix: 'Aux 1', member: 'PIANO (Israel Lagos)', out: 'XLR', type: 'In-Ear Cableado (XLR)', spec: 'Pianos, teclados L/R, secuencias estéreo, click y referencia.' },
+    { mix: 'Aux 2', member: 'BATERIA (Jaime C. Q.)', out: 'XLR', type: 'In-Ear Cableado (XLR)', spec: 'Batería, click, guía, bajo y retorno de voces.' },
+    { mix: 'Aux 3', member: 'CONGA (Jaime C. S.)', out: 'XLR', type: 'In-Ear Cableado (XLR)', spec: 'Percusión latina, timbal, base rítmica y coros.' },
+    { mix: 'Aux 4', member: 'GUITAR - GÜIRA', out: 'BODYPACK', type: 'In-Ear Inalámbrico UHF', spec: 'Vicente N. & Fabián G.: Balance guitarra, animación, coros y secuencias.' },
+    { mix: 'Aux 5', member: 'BASS (Gerson Ulloa)', out: 'BODYPACK', type: 'In-Ear Inalámbrico UHF', spec: 'Bajo al frente, bombo, timbales, armonía y click.' },
+    { mix: 'Aux 6', member: 'VOCAL (César Bruna)', out: 'BODYPACK', type: 'In-Ear Inalámbrico UHF', spec: 'Voz principal al frente, reverb, teclados y secuencias.' },
+    { mix: 'Aux 7', member: 'PISO BATERIA', out: 'XLR', type: 'Monitor Wedge (Piso)', spec: '1 Monitor Activo 12" o 15" para presión acústica y rítmica en tarima.' },
+    { mix: 'Aux 8', member: 'PISO BASS', out: 'XLR', type: 'Monitor Wedge (Piso)', spec: '1 Monitor Activo 12" o 15" para referencia frontal de graves y armonía.' }
+  ];
+
+  monitorMixes.forEach((m, idx) => {
+    const rowH = 19;
+    if (idx % 2 === 1) {
+      doc.rect(40, currentYM, 515, rowH).fill(COLOR_LIGHT_BG);
+    }
+    doc.fillColor(COLOR_TEXT);
+
+    let drawX = 40;
+    doc.font('Helvetica-Bold').text(m.mix, drawX + 6, currentYM + 5, { width: colWidthsMix[0] - 12, align: 'center' });
+    drawX += colWidthsMix[0];
+
+    doc.font('Helvetica-Bold').text(m.member, drawX + 6, currentYM + 5, { width: colWidthsMix[1] - 12 });
+    drawX += colWidthsMix[1];
+
+    doc.font('Helvetica-Bold').fillColor(m.out === 'BODYPACK' ? '#7e22ce' : '#0369a1').text(m.out, drawX + 6, currentYM + 5, { width: colWidthsMix[2] - 12 });
+    drawX += colWidthsMix[2];
+
+    doc.font('Helvetica').fillColor(COLOR_TEXT).text(m.type, drawX + 6, currentYM + 5, { width: colWidthsMix[3] - 12 });
+    drawX += colWidthsMix[3];
+
+    doc.fillColor(COLOR_MUTED).font('Helvetica').fontSize(6.8).text(m.spec, drawX + 6, currentYM + 3.5, { width: colWidthsMix[4] - 12, lineGap: 1.2 });
+
+    doc.rect(40, currentYM + rowH, 515, 0.5).fill(COLOR_BORDER);
+    currentYM += rowH;
+  });
+
+  // Requerimientos técnicos para sonidista de monitores
+  const monReqY = currentYM + 10;
+  doc.rect(40, monReqY, 515, 68).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.5).text('DIRECTRICES DE CONEXIÓN EN ESCENARIO:', 48, monReqY + 6);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8);
+  doc.text('1. Envíos Cableados (Aux 1, 2, 3, 7, 8): Requieren líneas balanceadas XLR macho rotuladas en escenario.', 48, monReqY + 18);
+  doc.text('2. Talkback (Canal 20): Asignado para intercomunicación interna entre músicos y el equipo técnico.', 48, monReqY + 28);
+  doc.text('3. Monitores Wedge (Aux 7 y 8): Deben ser activos de 12" o 15", verificados en fase y ecualizados para evitar acoples.', 48, monReqY + 38);
+  doc.text('4. Transmisores Bodypack (Aux 4, 5, 6): Operan en banda UHF; se solicita coordinar frecuencias libres con producción.', 48, monReqY + 48);
+
+  // Tarjeta de contacto
+  const contactCardY = monReqY + 76;
+  doc.rect(40, contactCardY, 515, 24).fill(COLOR_GOLD_LIGHT).stroke(COLOR_GOLD);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.2).text('DIRECCIÓN TÉCNICA OFICIAL:', 48, contactCardY + 5);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8).text('contacto@bandabruna.cl  •  +56 9 9002 1689 / +56 9 7614 9408  •  www.bandabruna.cl', 48, contactCardY + 13);
+
+  drawFooter(doc, 2, 2);
   doc.end();
 }
 
@@ -403,157 +501,201 @@ function generateLightingPDF(stageObjects, dbEffects, layoutName, logoPath) {
 }
 
 // =====================================================================
-// 3. GENERAR: STAGE PLOT PDF
+// 3. GENERAR: STAGE PLOT PDF (OPCIÓN 1 & OPCIÓN 2 ILUSTRADAS)
 // =====================================================================
 function generateStagePlotPDF(stageObjects, members, layoutName, logoPath) {
   const pdfPath = path.join(downloadsDir, 'stageplot_banda_bruna.pdf');
+  const pdfPathUnderscore = path.join(downloadsDir, 'stage_plot_banda_bruna.pdf');
+  const stagePlot1Path = path.join(projectRoot, 'public', 'assets', 'images', 'rider', 'stage_plot_1.png');
+  const stagePlot2Path = path.join(projectRoot, 'public', 'assets', 'images', 'rider', 'stage_plot_2.png');
+
   const doc = new PDFDocument({ size: 'A4', margin: 40 });
-  doc.pipe(fs.createWriteStream(pdfPath));
+  const stream = fs.createWriteStream(pdfPath);
+  doc.pipe(stream);
 
-  drawHeader(doc, 'Plano de Distribución de Escenario (Stage Plot)', `Ficha Oficial: ${layoutName}`, logoPath);
+  // ----------------------------------------------------
+  // PÁGINA 1: OPCIÓN 1 - DISTRIBUCIÓN ESTÁNDAR (FRONTAL)
+  // ----------------------------------------------------
+  drawHeader(doc, 'Plano de Escenario (Stage Plot)', 'Opción 1: Distribución Estándar (Frontal)', logoPath);
 
-  // Metadatos de la ficha (Dos columnas estables, Y fijo = 125)
-  const colY = 125;
-  doc.fillColor(COLOR_TEXT).fontSize(10).font('Helvetica-Bold').text('Detalles del Escenario:', 40, colY);
-  doc.font('Helvetica').fontSize(8.5).text(`Dimensión mínima: 10m Ancho x 8m Fondo\nTarimas: Batería y Percusión (2x2m, H: 40cm)\n[AC] Alimentación eléctrica 220V disponible`, 40, colY + 14, { lineGap: 2 });
+  // Metadatos y requerimientos físicos
+  const colY = 114;
+  doc.rect(40, colY, 515, 38).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).fontSize(8).font('Helvetica-Bold').text('ESPECIFICACIONES DE ESCENARIO:', 50, colY + 6);
+  doc.font('Helvetica').fontSize(7).fillColor(COLOR_TEXT)
+     .text('• Dimensión mínima: 10m Boca x 8m Fondo x 1.2m Altura\n• Tarimas: Batería 2x2m (H: 40cm) y Congas 2x2m (H: 40cm)', 50, colY + 17, { lineGap: 1.5 });
 
-  doc.font('Helvetica-Bold').text('Distribución IEMs / Retornos:', 300, colY);
-  doc.font('Helvetica').fontSize(8)
-       .text('• Aux 1: César Bruna (IEM Voz) • Aux 2: Fabián G. (IEM Gtr)\n• Aux 3: Vicente N. (IEM Bajo) • Aux 4: Gerson U. (IEM Teclado)\n• Aux 5: Baterista (IEM) • Aux 6: Percusión (1 Wedge de piso)', 300, colY + 14, { width: 250, lineGap: 2 });
+  doc.fillColor(COLOR_PRIMARY).fontSize(8).font('Helvetica-Bold').text('ENERGÍA & MONITOREO:', 305, colY + 6);
+  doc.font('Helvetica').fontSize(7).fillColor(COLOR_TEXT)
+     .text('• Corriente: 4 Puntos 220V estabilizada (Tarimas y Frontal)\n• Monitoreo: 5 IEMs Inalámbricos UHF + 2 Wedges de Piso Activos', 305, colY + 17, { lineGap: 1.5 });
 
-  // Diagrama del Escenario (Comienza en Y fijo = 190)
-  const stageY = 205;
-  const stageX = 60;
-  const stageW = 475;
-  const stageH = 220;
+  // Título de la Ilustración
+  const imgY = 158;
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('DIAGRAMA ILUSTRADO - OPCIÓN 1 (DISTRIBUCIÓN FRONTAL TÍPICA):', 40, imgY);
 
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(9.5).text('DIAGRAMA DE DISTRIBUCIÓN EN ESCENARIO:', 40, 190);
-
-  // Escenario base
-  doc.rect(stageX, stageY, stageW, stageH).fill(COLOR_PRIMARY);
-
-  // Grid suave de fondo
-  doc.strokeColor('rgba(255,255,255,0.05)').lineWidth(0.5);
-  for (let x = stageX + 40; x < stageX + stageW; x += 40) {
-    doc.moveTo(x, stageY).lineTo(x, stageY + stageH).stroke();
-  }
-  for (let y = stageY + 40; y < stageY + stageH; y += 40) {
-    doc.moveTo(stageX, y).lineTo(stageX + stageW, y).stroke();
+  // Ilustración 3D Opción 1
+  if (fs.existsSync(stagePlot1Path)) {
+    doc.image(stagePlot1Path, 40, imgY + 11, { width: 515, height: 289 });
+    doc.rect(40, imgY + 11, 515, 289).stroke(COLOR_BORDER);
   }
 
-  // Tarimas de Referencia en el escenario (Fondo)
-  doc.rect(stageX + 50, stageY + 110, 110, 80).fill('#111827').strokeColor('rgba(212,175,55,0.25)').lineWidth(1).stroke();
-  doc.fillColor('rgba(255,255,255,0.15)').fontSize(7).font('Helvetica-Bold').text('TARIMA TIMBAL', stageX + 55, stageY + 115, { width: 100, align: 'center' });
-  
-  doc.rect(stageX + stageW - 160, stageY + 110, 110, 80).fill('#111827').strokeColor('rgba(212,175,55,0.25)').lineWidth(1).stroke();
-  doc.fillColor('rgba(255,255,255,0.15)').fontSize(7).font('Helvetica-Bold').text('TARIMA CONGAS', stageX + stageW - 155, stageY + 115, { width: 100, align: 'center' });
+  // Tabla Resumen de Músicos en Escenario
+  let currentY1 = imgY + 306;
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8).text('ALINEACIÓN DE MÚSICOS & ASIGNACIÓN TÉCNICA (OPCIÓN 1):', 40, currentY1);
+  currentY1 += 11;
 
-  // Integrantes dinámicos dibujados en base a sus coordenadas X e Y (0-100)
-  members.forEach(m => {
-    const px = stageX + (m.x / 100) * stageW;
-    const py = stageY + (m.y / 100) * stageH;
+  const colWidthsPlot1 = [65, 110, 110, 95, 135];
+  const colTitlesPlot1 = ['Ubicación', 'Músico', 'Instrumento / Rol', 'Monitoreo', 'Conexión / Energía'];
 
-    const borderColor = m.isWedge ? '#3b82f6' : m.role.includes('AC Power') ? '#10b981' : COLOR_GOLD;
-    const circleColor = '#1e293b';
-
-    // Dibujar círculo
-    doc.circle(px, py, 16).fill(circleColor).strokeColor(borderColor).lineWidth(1.5).stroke();
-    
-    if (m.isMonitorOrPower) {
-      doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold').text(m.iconEmoji, px - 15, py - 4, { width: 30, align: 'center' });
-    } else {
-      doc.fillColor('#ffffff').fontSize(7.5).font('Helvetica-Bold').text(m.initials, px - 15, py - 3, { width: 30, align: 'center' });
-    }
-
-    // Etiqueta de nombre y rol (colocada debajo o arriba dependiendo del borde)
-    let labelY = py + 18;
-    if (m.y > 85) {
-      labelY = py - 32;
-    }
-
-    doc.fillColor('#ffffff').fontSize(6.5).font('Helvetica-Bold').text(m.name.split(' ')[0] + ' ' + (m.name.split(' ')[1] || ''), px - 35, labelY, { width: 70, align: 'center' });
-    doc.fillColor(m.isWedge ? '#60a5fa' : COLOR_GOLD).fontSize(6).font('Helvetica').text(m.role.split('/')[0], px - 35, labelY + 7, { width: 70, align: 'center' });
-    if (!m.isMonitorOrPower) {
-      doc.fillColor('#94a3b8').fontSize(5.5).text(m.aux, px - 35, labelY + 13, { width: 70, align: 'center' });
-    }
-  });
-
-  // Graficar focos DMX dinámicamente
-  if (stageObjects.length > 0) {
-    stageObjects.forEach(obj => {
-      const px = stageX + (obj.posicion_x / 100) * stageW;
-      const py = stageY + (1 - obj.posicion_y / 100) * stageH;
-      
-      let color = '#ef4444'; // Beam = rojo
-      if (obj.fixture?.tipo === 'Wash') color = '#3b82f6';
-      else if (obj.fixture?.tipo === 'Led Bar') color = '#10b981';
-      else if (obj.fixture?.tipo === 'Cob') color = '#eab308';
-      else if (obj.fixture?.tipo === 'Blinder') color = '#f97316';
-
-      doc.circle(px, py, 3.5).fill(color);
-    });
-
-    // Leyenda de mini-plot
-    doc.rect(stageX + 5, stageY + 5, 110, 22).fill('rgba(15,23,42,0.85)');
-    doc.fontSize(5.5).font('Helvetica-Bold').fillColor('#ffffff');
-    doc.text('Focos: •Beam •Wash •Led •COB •Blinder', stageX + 10, stageY + 9);
+  doc.rect(40, currentY1, 515, 15).fill(COLOR_PRIMARY);
+  let currentXP1 = 40;
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7.5);
+  for (let i = 0; i < colTitlesPlot1.length; i++) {
+    doc.text(colTitlesPlot1[i], currentXP1 + 5, currentY1 + 4, { width: colWidthsPlot1[i] - 10 });
+    currentXP1 += colWidthsPlot1[i];
   }
 
-  doc.rect(stageX, stageY + stageH - 12, stageW, 12).fill('#0f172a');
-  doc.fillColor('#94a3b8').fontSize(6.5).font('Helvetica-Bold').text('BOCA DE ESCENARIO (PÚBLICO)', stageX, stageY + stageH - 9, { width: stageW, align: 'center' });
+  currentY1 += 15;
+  doc.font('Helvetica').fontSize(6.8);
 
-  // Tabla Retornos (Comienza a Y fijo = 445, con anchos de columna optimizados contra encimamientos)
-  let currentYS = 460;
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(9.5).text('DISTRIBUCIÓN DE MONITORES DE RETORNO:', 40, 445);
-
-  const colWidthsMix = [50, 110, 150, 205];
-  const colTitlesMix = ['Mezcla', 'Integrante', 'Tipo de Monitoreo', 'Especificación del Equipo'];
-
-  doc.rect(40, currentYS, 515, 18).fill(COLOR_PRIMARY);
-  let currentXS = 40;
-  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(8);
-  for (let i = 0; i < colTitlesMix.length; i++) {
-    doc.text(colTitlesMix[i], currentXS + 6, currentYS + 5, { width: colWidthsMix[i] - 12 });
-    currentXS += colWidthsMix[i];
-  }
-
-  const mixes = [
-    { mix: 'Aux 1', member: 'Cesar Bruna', type: 'IEM Inalámbrico (Mono/Estéreo)', spec: 'Transmisor UHF / Shure PSM300' },
-    { mix: 'Aux 2', member: 'Fabian Garrido', type: 'IEM Inalámbrico (Mono)', spec: 'Transmisor UHF / Shure PSM300' },
-    { mix: 'Aux 3', member: 'Vicente Nuñez', type: 'IEM Inalámbrico (Mono)', spec: 'Transmisor UHF / Shure PSM300' },
-    { mix: 'Aux 4', member: 'Gerson Ulloa', type: 'IEM Inalámbrico (Mono)', spec: 'Transmisor UHF / Shure PSM300' },
-    { mix: 'Aux 5', member: 'Israel Lagos Rocha', type: 'IEM Inalámbrico (Mono)', spec: 'Transmisor UHF / Shure PSM300' },
-    { mix: 'Aux 6', member: 'Jaime Cardenas Quilodrán', type: 'Monitor de Piso Wedge', spec: '1 Monitor Activo de 12" o 15"' },
-    { mix: 'Aux 7', member: 'Jaime Cardenas Sanhueza', type: 'Monitor de Piso Wedge', spec: '1 Monitor Activo de 12" o 15"' }
+  const stageList = [
+    { pos: 'Atrás Izq.', name: 'Jaime C. Sanhueza', inst: 'Congas & Bongós', aux: 'Aux 3 XLR', req: 'Tarima 2x2m c/alfombra' },
+    { pos: 'Atrás Centro', name: 'Jaime C. Quilodrán', inst: 'Batería, Timbal & Octapad', aux: 'Aux 2 XLR + Aux 7 Wedge', req: 'Tarima 2x2m + 220V + Mixer' },
+    { pos: 'Atrás Der.', name: 'Israel Lagos Rocha', inst: 'Pianos & Teclados', aux: 'Aux 1 XLR', req: '220V + 2 Cajas Directas (D.I.)' },
+    { pos: 'Frente Izq.', name: 'Gerson Ulloa', inst: 'Bajo Eléctrico', aux: 'Aux 5 Bodypack + Aux 8 Wedge', req: '220V + Amplificador' },
+    { pos: 'Frente C-Izq.', name: 'Fabián Garrido', inst: 'Güiro & Animación', aux: 'Aux 4 Bodypack', req: 'Inalámbrico (Mic & In-Ear)' },
+    { pos: 'Frente Centro', name: 'César Bruna', inst: 'Voz Principal', aux: 'Aux 6 Bodypack', req: 'Inalámbrico (Beta 87A)' },
+    { pos: 'Frente Der.', name: 'Vicente Núñez', inst: 'Guitarra Eléctrica & Dir.', aux: 'Aux 4 Bodypack', req: '220V + Amplificador + Pedales' }
   ];
 
-  currentYS += 18;
-  doc.font('Helvetica').fontSize(7.5);
-
-  mixes.forEach((m, idx) => {
+  stageList.forEach((s, idx) => {
+    const rh = 13.5;
     if (idx % 2 === 1) {
-      doc.rect(40, currentYS, 515, 18).fill(COLOR_LIGHT_BG);
+      doc.rect(40, currentY1, 515, rh).fill(COLOR_LIGHT_BG);
     }
     doc.fillColor(COLOR_TEXT);
 
     let drawX = 40;
-    doc.font('Helvetica-Bold').text(m.mix, drawX + 6, currentYS + 5, { width: colWidthsMix[0] - 12, align: 'center' });
-    drawX += colWidthsMix[0];
+    doc.font('Helvetica-Bold').text(s.pos, drawX + 5, currentY1 + 3, { width: colWidthsPlot1[0] - 10 });
+    drawX += colWidthsPlot1[0];
 
-    doc.font('Helvetica-Bold').text(m.member, drawX + 6, currentYS + 5, { width: colWidthsMix[1] - 12 });
-    drawX += colWidthsMix[1];
+    doc.font('Helvetica-Bold').text(s.name, drawX + 5, currentY1 + 3, { width: colWidthsPlot1[1] - 10 });
+    drawX += colWidthsPlot1[1];
 
-    doc.font('Helvetica').text(m.type, drawX + 6, currentYS + 5, { width: colWidthsMix[2] - 12 });
-    drawX += colWidthsMix[2];
+    doc.font('Helvetica').text(s.inst, drawX + 5, currentY1 + 3, { width: colWidthsPlot1[2] - 10 });
+    drawX += colWidthsPlot1[2];
 
-    doc.text(m.spec, drawX + 6, currentYS + 5, { width: colWidthsMix[3] - 12 });
+    doc.font('Helvetica-Bold').fillColor(s.aux.includes('Bodypack') ? '#7e22ce' : s.aux.includes('Wedge') ? '#1d4ed8' : '#b45309').text(s.aux, drawX + 5, currentY1 + 3, { width: colWidthsPlot1[3] - 10 });
+    drawX += colWidthsPlot1[3];
 
-    doc.rect(40, currentYS + 18, 515, 0.5).fill(COLOR_BORDER);
-    currentYS += 18;
+    doc.fillColor(COLOR_MUTED).font('Helvetica').text(s.req, drawX + 5, currentY1 + 3, { width: colWidthsPlot1[4] - 10 });
+
+    doc.rect(40, currentY1 + rh, 515, 0.5).fill(COLOR_BORDER);
+    currentY1 += rh;
   });
 
-  drawFooter(doc, 1);
+  // Nota de aplicación al pie
+  const noteBoxY = currentY1 + 7;
+  doc.rect(40, noteBoxY, 515, 24).fill(COLOR_GOLD_LIGHT).stroke(COLOR_GOLD);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7).text('APLICACIÓN DE LA OPCIÓN 1:', 48, noteBoxY + 5);
+  doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8).text('Configuración recomendada para la gran mayoría de festivales, teatros y eventos masivos al aire libre.', 48, noteBoxY + 13);
+
+  drawFooter(doc, 1, 2);
+
+  // ----------------------------------------------------
+  // PÁGINA 2: OPCIÓN 2 - DISTRIBUCIÓN ALTERNATIVA
+  // ----------------------------------------------------
+  doc.addPage({ size: 'A4', margin: 40 });
+
+  drawHeader(doc, 'Plano de Escenario (Stage Plot)', 'Opción 2: Distribución Alternativa (Teclados Lateral)', logoPath);
+
+  // Explicación de la Opción 2
+  const colY2 = 114;
+  doc.rect(40, colY2, 515, 38).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).fontSize(8).font('Helvetica-Bold').text('CRITERIO DE MONTAJE OPCIÓN 2 (TECLADOS LATERAL):', 50, colY2 + 6);
+  doc.font('Helvetica').fontSize(7).fillColor(COLOR_TEXT)
+     .text('• Esta variante sitúa los teclados en ángulo lateral derecho mirando hacia el centro de la banda.\n• Especialmente indicada para escenarios con mayor fondo, festivales multi-banda o tarimas con acceso lateral.', 50, colY2 + 17, { lineGap: 1.5 });
+
+  // Título de la Ilustración
+  const imgY2 = 158;
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('DIAGRAMA ILUSTRADO - OPCIÓN 2 (DISTRIBUCIÓN TECLADOS LATERAL):', 40, imgY2);
+
+  // Ilustración 3D Opción 2
+  if (fs.existsSync(stagePlot2Path)) {
+    doc.image(stagePlot2Path, 40, imgY2 + 11, { width: 515, height: 289 });
+    doc.rect(40, imgY2 + 11, 515, 289).stroke(COLOR_BORDER);
+  }
+
+  // Tabla Completa de Monitores de Retorno (8 Auxiliares)
+  let currentY2 = imgY2 + 306;
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8).text('DISTRIBUCIÓN OFICIAL DE RETORNOS DE MONITOREO (8 AUXILIARES):', 40, currentY2);
+  currentY2 += 11;
+
+  const colWidthsMix2 = [50, 120, 140, 205];
+  const colTitlesMix2 = ['Mezcla', 'Destino / Integrante', 'Tipo de Salida / Sistema', 'Especificación del Equipo'];
+
+  doc.rect(40, currentY2, 515, 15).fill(COLOR_PRIMARY);
+  let currentXS2 = 40;
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(7.5);
+  for (let i = 0; i < colTitlesMix2.length; i++) {
+    doc.text(colTitlesMix2[i], currentXS2 + 6, currentY2 + 4, { width: colWidthsMix2[i] - 12 });
+    currentXS2 += colWidthsMix2[i];
+  }
+
+  currentY2 += 15;
+  doc.font('Helvetica').fontSize(7);
+
+  const mixes2 = [
+    { mix: 'Aux 1', member: 'PIANO (Israel Lagos)', type: 'XLR (In-Ear Cableado)', spec: 'Retorno estéreo teclado, secuencias y click' },
+    { mix: 'Aux 2', member: 'BATERIA (Jaime C. Q.)', type: 'XLR (In-Ear Cableado)', spec: 'Retorno batería, bajo, click y voces' },
+    { mix: 'Aux 3', member: 'CONGA (Jaime C. S.)', type: 'XLR (In-Ear Cableado)', spec: 'Percusión latina, timbal, base y voces' },
+    { mix: 'Aux 4', member: 'GUITAR - GÜIRA', type: 'BODYPACK (In-Ear UHF)', spec: 'Vicente N. & Fabián G.: guitarra y animación' },
+    { mix: 'Aux 5', member: 'BASS (Gerson Ulloa)', type: 'BODYPACK (In-Ear UHF)', spec: 'Bajo al frente, bombo y armonía' },
+    { mix: 'Aux 6', member: 'VOCAL (César Bruna)', type: 'BODYPACK (In-Ear UHF)', spec: 'Voz principal al frente y reverb' },
+    { mix: 'Aux 7', member: 'PISO BATERIA', type: 'XLR (Monitor Wedge)', spec: '1 Monitor Activo 12" o 15" en tarima' },
+    { mix: 'Aux 8', member: 'PISO BASS', type: 'XLR (Monitor Wedge)', spec: '1 Monitor Activo 12" o 15" en boca de escenario' }
+  ];
+
+  mixes2.forEach((m, idx) => {
+    const rh = 13.5;
+    if (idx % 2 === 1) {
+      doc.rect(40, currentY2, 515, rh).fill(COLOR_LIGHT_BG);
+    }
+    doc.fillColor(COLOR_TEXT);
+
+    let drawX = 40;
+    doc.font('Helvetica-Bold').text(m.mix, drawX + 6, currentY2 + 3.5, { width: colWidthsMix2[0] - 12, align: 'center' });
+    drawX += colWidthsMix2[0];
+
+    doc.font('Helvetica-Bold').text(m.member, drawX + 6, currentY2 + 3.5, { width: colWidthsMix2[1] - 12 });
+    drawX += colWidthsMix2[1];
+
+    doc.font('Helvetica-Bold').fillColor(m.type.includes('BODYPACK') ? '#7e22ce' : m.type.includes('Wedge') ? '#1d4ed8' : '#b45309').text(m.type, drawX + 6, currentY2 + 3.5, { width: colWidthsMix2[2] - 12 });
+    drawX += colWidthsMix2[2];
+
+    doc.fillColor(COLOR_TEXT).font('Helvetica').text(m.spec, drawX + 6, currentY2 + 3.5, { width: colWidthsMix2[3] - 12 });
+
+    doc.rect(40, currentY2 + rh, 515, 0.5).fill(COLOR_BORDER);
+    currentY2 += rh;
+  });
+
+  // Tarjeta de contacto al pie
+  const contactBoxY2 = currentY2 + 7;
+  doc.rect(40, contactBoxY2, 515, 24).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7).text('DIRECCIÓN TÉCNICA OFICIAL:', 48, contactBoxY2 + 5);
+  doc.fillColor(COLOR_MUTED).font('Helvetica').fontSize(6.8).text('contacto@bandabruna.cl  •  +56 9 9002 1689 / +56 9 7614 9408  •  Temuco, Chile', 48, contactBoxY2 + 13);
+
+  drawFooter(doc, 2, 2);
   doc.end();
+
+  stream.on('finish', () => {
+    try {
+      fs.copyFileSync(pdfPath, pdfPathUnderscore);
+      console.log('stageplot_banda_bruna.pdf y stage_plot_banda_bruna.pdf sincronizados.');
+    } catch (err) {
+      console.error('Error al sincronizar stage_plot_banda_bruna.pdf:', err.message);
+    }
+  });
 }
 
 // =====================================================================
@@ -591,26 +733,26 @@ async function main() {
   const defaultCanales = [
     { canal: 1, instrumento: 'KICK', conexion: 'SHURE BETA 91', categoria: 'Batería' },
     { canal: 2, instrumento: 'SNARE', conexion: 'SENNHEISER E609', categoria: 'Batería' },
-    { canal: 3, instrumento: 'TIMBAL HI', conexion: 'SHURE SM57', categoria: 'Batería' },
-    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE SM57', categoria: 'Batería' },
-    { canal: 5, instrumento: 'OH ACCESORIOS', conexion: 'SM 81', categoria: 'Batería' },
-    { canal: 6, instrumento: 'OH HI HAT', conexion: 'SM 81', categoria: 'Batería' },
-    { canal: 7, instrumento: 'BASS', conexion: 'XLR', categoria: 'Cuerdas / Armonía' },
-    { canal: 8, instrumento: 'GUITAR', conexion: 'SENNHEISER E906', categoria: 'Cuerdas / Armonía' },
-    { canal: 9, instrumento: 'TECLADO L', conexion: 'D.I.', categoria: 'Cuerdas / Armonía' },
-    { canal: 10, instrumento: 'TECLADO R', conexion: 'D.I.', categoria: 'Cuerdas / Armonía' },
-    { canal: 11, instrumento: 'CONGA HI', conexion: 'BETA 56A', categoria: 'Percusión' },
-    { canal: 12, instrumento: 'CONGA LOW', conexion: 'BETA 56A', categoria: 'Percusión' },
-    { canal: 13, instrumento: 'BONGO', conexion: 'BETA 57A', categoria: 'Percusión' },
-    { canal: 14, instrumento: 'CHIMES', conexion: 'SM 81', categoria: 'Percusión' },
-    { canal: 15, instrumento: 'VOZ BAJO', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 16, instrumento: 'VOZ GUITARRA', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 17, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 18, instrumento: 'VOZ BATERIA', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 19, instrumento: 'VOCAL', conexion: 'G4/BETA 58 INAL.', categoria: 'Voces' },
-    { canal: 20, instrumento: 'TALKBACK', conexion: 'SHURE SM 58', categoria: 'Voces' },
-    { canal: 21, instrumento: 'OCTAPAD', conexion: 'DIRECT LINE L', categoria: 'Batería' },
-    { canal: 22, instrumento: 'GUIRO', conexion: 'DIRECT LINE R (BETA 98H/C)', categoria: 'Percusión' },
+    { canal: 3, instrumento: 'TIMBAL HI', conexion: 'SHURE SM57 - CLAMP CLAW LP', categoria: 'Batería' },
+    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE SM57 - CLAMP CLAW LP', categoria: 'Batería' },
+    { canal: 5, instrumento: 'OH ACCESORIOS', conexion: 'AKG C1000S - CLAMP CLAW LP', categoria: 'Batería' },
+    { canal: 6, instrumento: 'OH HI-HAT', conexion: 'AKG C1000S', categoria: 'Batería' },
+    { canal: 7, instrumento: 'BASS', conexion: 'XLR DIRECTO', categoria: 'Cuerdas / Armonía' },
+    { canal: 8, instrumento: 'GUITAR', conexion: 'SHURE SM57', categoria: 'Cuerdas / Armonía' },
+    { canal: 9, instrumento: 'TECLADO L', conexion: 'CAJA DIRECTA', categoria: 'Cuerdas / Armonía' },
+    { canal: 10, instrumento: 'TECLADO R', conexion: 'CAJA DIRECTA', categoria: 'Cuerdas / Armonía' },
+    { canal: 11, instrumento: 'CONGA HI', conexion: 'SENNHEISER E604 - CLAMP CLAW LP', categoria: 'Percusión' },
+    { canal: 12, instrumento: 'CONGA LOW', conexion: 'SENNHEISER E604 - CLAMP CLAW LP', categoria: 'Percusión' },
+    { canal: 13, instrumento: 'BONGO', conexion: 'SHURE SM57', categoria: 'Percusión' },
+    { canal: 14, instrumento: 'CHIMES', conexion: 'AKG C1000S', categoria: 'Percusión' },
+    { canal: 15, instrumento: 'VOZ DRUM', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 16, instrumento: 'VOZ GUITAR', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 17, instrumento: 'VOZ BASS', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 18, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 19, instrumento: 'VOZ PRINCIPAL', conexion: 'SHURE BETA 87A', categoria: 'Voces' },
+    { canal: 20, instrumento: 'TALKBACK BATERIA - GUITAR', conexion: 'SHURE SM58', categoria: 'Voces' },
+    { canal: 21, instrumento: 'OCTAPAD', conexion: 'DIRECT LINE RCA L', categoria: 'Batería' },
+    { canal: 22, instrumento: 'GÜIRA', conexion: 'DIRECT LINE RCA R / SHURE BETA 98H/C', categoria: 'Percusión' },
     { canal: 23, instrumento: 'CLICK', conexion: 'USB', categoria: 'Secuencia / Otros' },
     { canal: 24, instrumento: 'GUIA', conexion: 'USB', categoria: 'Secuencia / Otros' },
     { canal: 25, instrumento: 'SECUENCIA L', conexion: 'USB', categoria: 'Secuencia / Otros' },

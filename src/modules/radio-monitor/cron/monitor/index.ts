@@ -49,6 +49,7 @@ interface NowPlayingResult {
   artist: string;
   title: string;
   artwork?: string;
+  history?: Array<{ title: string; artist: string }>;
   online: boolean;
   raw?: any;
 }
@@ -242,6 +243,42 @@ async function getStreamTheWorldMetadata(streamUrl: string, metadataUrl?: string
   }
 }
 
+async function getEmisoraClMetadata(url: string): Promise<NowPlayingResult> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
+      },
+      signal: AbortSignal.timeout(7000)
+    });
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const html = await response.text();
+
+    // 1. Canción actual en vivo
+    const currentMatch = html.match(/<div data-playlist-current-song[\s\S]*?<span class="playlist__song-name">([^<]+)<\/span>[\s\S]*?<span class="playlist__artist-name">([^<]+)<\/span>/i);
+    const currentSong = currentMatch ? cleanMetadataText(currentMatch[1]) : '';
+    const currentArtist = currentMatch ? cleanMetadataText(currentMatch[2]) : '';
+
+    // 2. Historial de temas recientes
+    const prevMatches = [...html.matchAll(/<li class="playlist__item"[\s\S]*?<span class="playlist__song-name">([^<]+)<\/span>[\s\S]*?<span class="playlist__artist-name">([^<]+)<\/span>/gi)];
+    const history = prevMatches.map(m => ({
+      title: cleanMetadataText(m[1]),
+      artist: cleanMetadataText(m[2])
+    }));
+
+    return {
+      artist: currentArtist,
+      title: currentSong,
+      history,
+      online: !!(currentSong || history.length > 0),
+      raw: { current: { artist: currentArtist, title: currentSong }, history }
+    };
+  } catch (error: any) {
+    return { artist: '', title: '', history: [], online: false, raw: { error: error.message } };
+  }
+}
+
 // ==========================================
 // 3. HANDLER PRINCIPAL DE LA EDGE FUNCTION
 // ==========================================
@@ -307,7 +344,9 @@ Deno.serve(async (req) => {
       let nowPlaying: NowPlayingResult = { artist: '', title: '', online: false };
 
       try {
-        if (provider === 'Icecast') {
+        if (radio.metadata_url && radio.metadata_url.includes('emisora.cl')) {
+          nowPlaying = await getEmisoraClMetadata(radio.metadata_url);
+        } else if (provider === 'Icecast') {
           nowPlaying = await getIcecastMetadata(radio.stream_url, radio.metadata_url);
         } else if (provider === 'Shoutcast') {
           nowPlaying = await getShoutcastMetadata(radio.stream_url, radio.metadata_url);
@@ -352,9 +391,7 @@ Deno.serve(async (req) => {
       }
 
       if (isMatch) {
-        // Encontramos una coincidencia. Registramos la detección.
-        
-        // Buscamos el nombre correcto del artista y canción
+        // Encontramos una coincidencia en vivo. Registramos la detección.
         const matchedArtist = (artists || []).find(a => matchesAlias(nowPlaying.artist, a.aliases))?.nombre || nowPlaying.artist || 'Banda Bruna';
         const matchedTrack = (tracks || []).find(t => matchesAlias(nowPlaying.title, t.aliases))?.titulo || nowPlaying.title;
 
@@ -398,8 +435,48 @@ Deno.serve(async (req) => {
 
         results.push({ radio: radio.nombre, status: 'DETECTION', artist: matchedArtist, track: matchedTrack });
       } else {
-        // No está sonando nada monitoreado o la radio está caída.
-        // Si antes estaba registrado que sonaba Banda Bruna en esta radio, limpiamos su now_playing
+        // Si no está sonando en este segundo exacto, verificar si sonó hace poco en el historial reciente (ej. Emisora.cl)
+        let historyDetected = false;
+        if (nowPlaying.history && nowPlaying.history.length > 0) {
+          for (const prevItem of nowPlaying.history) {
+            const hArtistMatch = matchesAlias(prevItem.artist, artistAliases);
+            const hSongMatch = matchesAlias(prevItem.title, trackAliases);
+            const hMentionsArtist = matchesAlias(prevItem.title, artistAliases);
+
+            if ((hArtistMatch && hSongMatch) || (hSongMatch && hMentionsArtist)) {
+              const matchedArtist = (artists || []).find(a => matchesAlias(prevItem.artist, a.aliases))?.nombre || prevItem.artist || 'Banda Bruna';
+              const matchedTrack = (tracks || []).find(t => matchesAlias(prevItem.title, t.aliases))?.titulo || prevItem.title;
+
+              // Ventana de 30 minutos para no duplicar detecciones recientes
+              const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+              const { data: recentPlays } = await supabase
+                .from('radio_tracks')
+                .select('id')
+                .eq('radio_id', radio.id)
+                .eq('title', matchedTrack)
+                .gte('detected_at', thirtyMinsAgo)
+                .limit(1);
+
+              if (!recentPlays || recentPlays.length === 0) {
+                await supabase
+                  .from('radio_tracks')
+                  .insert({
+                    radio_id: radio.id,
+                    artist: matchedArtist,
+                    title: matchedTrack,
+                    metadata_raw: { source: 'emisora.cl_history', ...prevItem },
+                    stream_url: radio.stream_url
+                  });
+
+                results.push({ radio: radio.nombre, status: 'HISTORY_DETECTION', artist: matchedArtist, track: matchedTrack });
+                historyDetected = true;
+              }
+              break;
+            }
+          }
+        }
+
+        // Limpiar now_playing si no está sonando en vivo actualmente
         const { data: currentNp } = await supabase
           .from('now_playing')
           .select('*')
@@ -418,7 +495,9 @@ Deno.serve(async (req) => {
             .eq('radio_id', radio.id);
         }
 
-        results.push({ radio: radio.nombre, status: nowPlaying.online ? 'NO_MATCH' : 'OFFLINE' });
+        if (!historyDetected) {
+          results.push({ radio: radio.nombre, status: nowPlaying.online ? 'NO_MATCH' : 'OFFLINE' });
+        }
       }
     });
 
