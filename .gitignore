@@ -32,3 +32,5 @@ pnpm-debug.log*
 
 # Scratch / Local test artifacts
 scratch/
+.vercel
+.env*
