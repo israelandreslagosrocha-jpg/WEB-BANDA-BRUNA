@@ -330,33 +330,64 @@ async function executeSynchronization(userEmail, userToken) {
     // Si la tabla no está creada, no bloquea el proceso
   }
 
-  // --- PASO 2: ESTADÍSTICAS DEL VIDEOCLIP "AHOGADO EN UN BAR" ---
-  const ahogadoStats = await fetchYouTubeVideoStats('mZhYl60ENAs');
-  result.ahogado_stats = ahogadoStats;
-
+  // --- PASO 2: ESTADÍSTICAS EN VIVO DE TODOS LOS LANZAMIENTOS ---
+  result.lanzamientos_updated = [];
   try {
-    // Actualizar en tabla lanzamientos
-    const { data: lanzamiento } = await sb
+    const { data: allLanzamientos } = await sb
       .from('lanzamientos')
-      .select('id, plataformas_links')
-      .eq('slug', 'ahogado-en-un-bar')
-      .maybeSingle();
+      .select('*');
 
-    if (lanzamiento) {
-      const currentLinks = lanzamiento.plataformas_links || {};
-      const updatedLinks = {
-        ...currentLinks,
-        youtube_views: Math.max(ahogadoStats.views || 0, Number(currentLinks.youtube_views) || 0, 26249),
-        youtube_likes: Math.max(ahogadoStats.likes || 0, Number(currentLinks.youtube_likes) || 0, 239)
-      };
+    if (allLanzamientos && allLanzamientos.length > 0) {
+      for (const lan of allLanzamientos) {
+        let ytId = null;
+        if (lan.slug === 'ahogado-en-un-bar') {
+          ytId = 'mZhYl60ENAs';
+        } else if (lan.slug === 'sesion-fiestas-patrias') {
+          ytId = 'yXvWp-3sNuM';
+        } else {
+          const rawUrl = lan.video_url || (lan.plataformas_links && lan.plataformas_links.youtube) || '';
+          const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+          ytId = match ? match[1] : null;
+        }
 
-      await sb
-        .from('lanzamientos')
-        .update({
-          plataformas_links: updatedLinks,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', lanzamiento.id);
+        if (ytId) {
+          const stats = await fetchYouTubeVideoStats(ytId);
+          if (lan.slug === 'ahogado-en-un-bar') {
+            result.ahogado_stats = stats;
+          }
+
+          if (stats.views !== null || stats.likes !== null) {
+            const currentLinks = lan.plataformas_links || {};
+            const isAhogado = lan.slug === 'ahogado-en-un-bar';
+            const minViews = isAhogado ? 26249 : 0;
+            const minLikes = isAhogado ? 239 : 0;
+            const newViews = Math.max(stats.views || 0, Number(currentLinks.youtube_views) || 0, minViews);
+            const newLikes = Math.max(stats.likes || 0, Number(currentLinks.youtube_likes) || 0, minLikes);
+
+            const updatedLinks = {
+              ...currentLinks,
+              youtube_views: newViews,
+              youtube_likes: newLikes
+            };
+
+            await sb
+              .from('lanzamientos')
+              .update({
+                plataformas_links: updatedLinks,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', lan.id);
+
+            result.lanzamientos_updated.push({
+              slug: lan.slug,
+              nombre: lan.nombre,
+              videoId: ytId,
+              views: newViews,
+              likes: newLikes
+            });
+          }
+        }
+      }
     }
   } catch (err) {
     result.warnings.push(`Error al actualizar lanzamientos: ${err.message}`);
@@ -395,9 +426,9 @@ async function executeSynchronization(userEmail, userToken) {
           };
 
           // Si es el video de ahogado en un bar, agregar métricas
-          if (p.external_id === 'mZhYl60ENAs' && ahogadoStats.views) {
-            postPayload.views = ahogadoStats.views;
-            postPayload.likes = ahogadoStats.likes;
+          if (p.external_id === 'mZhYl60ENAs' && result.ahogado_stats?.views) {
+            postPayload.views = result.ahogado_stats.views;
+            postPayload.likes = result.ahogado_stats.likes;
           }
 
           const { error: upsertErr } = await sb
@@ -454,7 +485,7 @@ async function executeSynchronization(userEmail, userToken) {
 
   // --- PASO 5: REGISTRO EN BITÁCORA DE AUDITORÍA ---
   try {
-    const logActionText = `Sincronización completa de redes (YT: ${finalYoutube}, IG: ${finalInstagram}, TT: ${finalTiktok}, FB: ${finalFacebook}). Ahogado en un Bar vistas: ${ahogadoStats.views || 'mantenidas'}`;
+    const logActionText = `Sincronización completa de redes (YT: ${finalYoutube}, IG: ${finalInstagram}, TT: ${finalTiktok}, FB: ${finalFacebook}). Ahogado en un Bar vistas: ${result.ahogado_stats?.views || 'mantenidas'}`;
     await sb
       .from('logs_actividad')
       .insert([{

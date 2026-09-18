@@ -2607,21 +2607,27 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           if (res.ok && data.success) {
             await loadConfig();
             const m = data.metrics || {};
-            const ahogado = data.ahogado_stats || {};
-            const ahogadoMsg = ahogado.views
-              ? `${Number(ahogado.views).toLocaleString('es-CL')} reproducciones y ${Number(ahogado.likes || 0).toLocaleString('es-CL')} likes`
-              : 'Métricas preservadas';
+            const lanzamientosList = data.lanzamientos_updated || [];
+            let lanMsg = '';
+            if (lanzamientosList.length > 0) {
+              lanMsg = lanzamientosList.map((l: any) => `• "${l.nombre || l.slug}": ${Number(l.views).toLocaleString('es-CL')} views y ${Number(l.likes).toLocaleString('es-CL')} likes`).join('\n');
+            } else if (data.ahogado_stats?.views) {
+              lanMsg = `• "Ahogado en un Bar": ${Number(data.ahogado_stats.views).toLocaleString('es-CL')} reproducciones y ${Number(data.ahogado_stats.likes || 0).toLocaleString('es-CL')} likes`;
+            } else {
+              lanMsg = '• Métricas de lanzamientos preservadas';
+            }
+
             const msg = `✅ Sincronización completada con éxito:
 
 • YouTube: ${m.youtube ? Number(m.youtube).toLocaleString('es-CL') : '—'} suscriptores
 • Instagram: ${m.instagram ? Number(m.instagram).toLocaleString('es-CL') : '—'} seguidores
 • TikTok: ${m.tiktok ? Number(m.tiktok).toLocaleString('es-CL') : '—'} seguidores
 • Facebook: ${m.facebook ? Number(m.facebook).toLocaleString('es-CL') : '—'} amigos/seguidores
-• "Ahogado en un Bar": ${ahogadoMsg}
-• Videos YouTube sincronizados: ${data.youtube_posts_synced || 0}
-• Contenidos de redes en VIDEOS: Actualizados en base de datos
 
-Las cifras se han actualizado en el formulario y en el sitio.`;
+Lanzamientos Musicales Actualizados:
+${lanMsg}
+
+Las cifras se han sincronizado en tiempo real en la base de datos y en todo el sitio web.`;
             alert(msg);
           } else {
             throw new Error(data.error || 'Error al ejecutar sincronización');

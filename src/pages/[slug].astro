@@ -80,9 +80,12 @@ const youtubeId = getYouTubeId(lanzamiento.plataformas_links?.youtube || '');
 const hasYoutube = !!youtubeId;
 const dbViews = Number(lanzamiento.plataformas_links?.youtube_views) || 0;
 const dbLikes = Number(lanzamiento.plataformas_links?.youtube_likes) || 0;
-const currentLaunchStats = (launchStats && launchStats.slug === lanzamiento.slug) ? launchStats : { youtube_views: 26249, youtube_likes: 239 };
-const youtubeViews = Math.max(dbViews, Number(currentLaunchStats.youtube_views) || 0, 26249);
-const youtubeLikes = Math.max(dbLikes, Number(currentLaunchStats.youtube_likes) || 0, 239);
+const isAhogado = lanzamiento.slug === 'ahogado-en-un-bar';
+const launchStatsForThisSlug = (launchStats && launchStats.slug === lanzamiento.slug) ? launchStats : null;
+const defaultViewsFloor = isAhogado ? 26249 : 0;
+const defaultLikesFloor = isAhogado ? 239 : 0;
+const youtubeViews = Math.max(dbViews, Number(launchStatsForThisSlug?.youtube_views) || 0, defaultViewsFloor);
+const youtubeLikes = Math.max(dbLikes, Number(launchStatsForThisSlug?.youtube_likes) || 0, defaultLikesFloor);
 
 // Extraer ID de Instagram
 function getInstagramId(url: string) {
@@ -849,8 +852,11 @@ const allDetrasCamaras = [
             
             // 2. Actualizar estadísticas de YouTube
             if (item.plataformas_links) {
-              const views = Math.max(Number(item.plataformas_links.youtube_views) || 0, 26249);
-              const likes = Math.max(Number(item.plataformas_links.youtube_likes) || 0, 239);
+              const isCurrentAhogado = slug === 'ahogado-en-un-bar';
+              const minViews = isCurrentAhogado ? 26249 : 0;
+              const minLikes = isCurrentAhogado ? 239 : 0;
+              const views = Math.max(Number(item.plataformas_links.youtube_views) || 0, minViews);
+              const likes = Math.max(Number(item.plataformas_links.youtube_likes) || 0, minLikes);
               
               let updated = false;
               const viewsEl = document.getElementById('yt-views-counter');
@@ -874,29 +880,35 @@ const allDetrasCamaras = [
         .catch(err => console.error("Error al obtener datos en tiempo real de Supabase:", err));
 
         // 3. Sincronización en vivo automática de visualizaciones y likes vía API
-        fetch('/api/update-youtube-stats?id=' + (youtubeId || 'mZhYl60ENAs'))
-          .then(res => res.json())
-          .then(liveData => {
-            if (liveData && liveData.success) {
-              const liveViews = Math.max(Number(liveData.views) || 0, 26249);
-              const liveLikes = Math.max(Number(liveData.likes) || 0, 239);
-              const viewsEl = document.getElementById('yt-views-counter');
-              const likesEl = document.getElementById('yt-likes-counter');
-              let changed = false;
-              if (viewsEl && viewsEl.getAttribute('data-count-target') !== liveViews.toString()) {
-                viewsEl.setAttribute('data-count-target', liveViews.toString());
-                changed = true;
+        const videoIdForStats = youtubeId || (slug === 'ahogado-en-un-bar' ? 'mZhYl60ENAs' : '');
+        if (videoIdForStats) {
+          fetch(`/api/update-youtube-stats?id=${encodeURIComponent(videoIdForStats)}&slug=${encodeURIComponent(slug)}`)
+            .then(res => res.json())
+            .then(liveData => {
+              if (liveData && liveData.success) {
+                const isCurrentAhogado = slug === 'ahogado-en-un-bar';
+                const minViews = isCurrentAhogado ? 26249 : 0;
+                const minLikes = isCurrentAhogado ? 239 : 0;
+                const liveViews = Math.max(Number(liveData.views) || 0, minViews);
+                const liveLikes = Math.max(Number(liveData.likes) || 0, minLikes);
+                const viewsEl = document.getElementById('yt-views-counter');
+                const likesEl = document.getElementById('yt-likes-counter');
+                let changed = false;
+                if (viewsEl && viewsEl.getAttribute('data-count-target') !== liveViews.toString()) {
+                  viewsEl.setAttribute('data-count-target', liveViews.toString());
+                  changed = true;
+                }
+                if (likesEl && likesEl.getAttribute('data-count-target') !== liveLikes.toString()) {
+                  likesEl.setAttribute('data-count-target', liveLikes.toString());
+                  changed = true;
+                }
+                if (changed && typeof window.setupCountUp === 'function') {
+                  window.setupCountUp();
+                }
               }
-              if (likesEl && likesEl.getAttribute('data-count-target') !== liveLikes.toString()) {
-                likesEl.setAttribute('data-count-target', liveLikes.toString());
-                changed = true;
-              }
-              if (changed && typeof window.setupCountUp === 'function') {
-                window.setupCountUp();
-              }
-            }
-          })
-          .catch(() => {});
+            })
+            .catch(() => {});
+        }
       }
       const badgeEstado = document.getElementById('badge-estado-lanzamiento');
       const countdownSection = document.getElementById('countdown-landing');

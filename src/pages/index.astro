@@ -260,13 +260,23 @@ try {
     <!-- Contenido Central del Hero: Impacto, Título y 2 CTAs -->
     <div class="relative max-w-[1400px] mx-auto w-full lg:h-full z-20 flex flex-col justify-center py-12 lg:py-24 gap-6 text-center lg:text-left">
       
-      <!-- Badge superior sutil (Próximo show inminente o Tag de Identidad) -->
-      <div>
+      <!-- Badges superiores (Próximo show + Estreno Patrio) -->
+      <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 mb-2">
+        <a 
+          href="/sesion-fiestas-patrias" 
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#030d2a] via-[#10204d] to-[#4c0b0b] border border-red-500/60 hover:border-gold-bruna text-white text-xs font-bold tracking-wider uppercase shadow-[0_0_20px_rgba(220,38,38,0.35)] transition-all hover:scale-105 active:scale-95 group backdrop-blur-md"
+        >
+          <span class="text-sm">🇨🇱</span>
+          <span class="bg-red-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono shadow-sm">ESTRENO</span>
+          <span class="text-slate-100 group-hover:text-gold-bruna transition-colors font-title">Sesión Fiestas Patrias</span>
+          <span class="text-gold-bruna group-hover:translate-x-0.5 transition-transform font-bold">➔</span>
+        </a>
+
         {imminentEvent ? (
           <div 
             id="imminent-event-badge"
             data-event-date={imminentEvent.fecha}
-            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-gold-bruna/70 text-gold-bruna text-xs font-bold tracking-wider uppercase mb-2 shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse"
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-gold-bruna/70 text-gold-bruna text-xs font-bold tracking-wider uppercase shadow-[0_0_20px_rgba(214,175,55,0.3)] animate-pulse"
           >
             <span>✨</span>
             <span>PRÓXIMO SHOW: {imminentEvent.nombre} ({imminentEvent.day} {imminentEvent.monthName} · {imminentEvent.lugar || imminentEvent.ciudad})</span>
@@ -275,11 +285,12 @@ try {
             </span>
           </div>
         ) : (
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-gold-bruna/40 text-gold-bruna text-xs tracking-[0.25em] font-extrabold uppercase mb-2 backdrop-blur-sm">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/60 border border-gold-bruna/40 text-gold-bruna text-xs tracking-[0.25em] font-extrabold uppercase backdrop-blur-sm">
             <span class="w-2 h-2 rounded-full bg-gold-bruna animate-ping"></span>
             ORQUESTA EN VIVO · CUMBIA SUREÑA PROFESIONAL
           </span>
         )}
+      </div>
 
         <script is:inline>
           (function() {
