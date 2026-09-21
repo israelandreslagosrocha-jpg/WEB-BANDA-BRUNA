@@ -1,0 +1,419 @@
+---
+export interface CalendarEvent {
+  fecha: string; // YYYY-MM-DD
+  title: string;
+  venue?: string;
+  location?: string;
+  statusType: 'confirmed' | 'pending';
+  isPast?: boolean;
+}
+
+interface Props {
+  events: CalendarEvent[];
+  id?: string;
+  initialMonth?: number; // 0-11
+  initialYear?: number;
+}
+
+const {
+  events = [],
+  id = "tour-availability-calendar",
+  initialMonth,
+  initialYear
+} = Astro.props;
+
+// Serializamos solo datos públicos y sanitizados para el script del cliente
+const serializedEvents = JSON.stringify(
+  events.map(e => ({
+    fecha: e.fecha,
+    title: e.title,
+    venue: e.venue || '',
+    location: e.location || '',
+    statusType: e.statusType || 'confirmed',
+    isPast: Boolean(e.isPast)
+  }))
+);
+---
+
+<div id={id} class="tour-calendar-widget bg-slate-900/90 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md" data-events={serializedEvents}>
+  
+  <!-- Encabezado del Calendario y Controles de Mes -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="text-gold-bruna text-lg">🗓️</span>
+        <span class="text-xs font-bold tracking-[0.2em] text-gold-bruna uppercase">DISPONIBILIDAD DE GIRA</span>
+      </div>
+      <h3 class="font-title font-extrabold text-xl sm:text-2xl text-white uppercase mt-1">
+        CALENDARIO DE CONCIERTOS Y RESERVAS
+      </h3>
+      <p class="text-xs text-slate-400 font-light mt-1">
+        Verifica nuestras fechas ocupadas y selecciona días disponibles para cotizar tu evento en vivo.
+      </p>
+    </div>
+
+    <!-- Navegación de Mes -->
+    <div class="flex items-center gap-3 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 shadow-inner">
+      <button 
+        type="button" 
+        data-cal-prev 
+        aria-label="Mes anterior"
+        class="w-8 h-8 rounded-lg bg-slate-900 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-slate-300 flex items-center justify-center transition-colors text-xs font-bold cursor-pointer"
+      >
+        ❮
+      </button>
+      <span data-cal-month-label class="font-title font-extrabold text-sm text-white uppercase tracking-wider min-w-[140px] text-center">
+        <!-- Rellenado por JS -->
+      </span>
+      <button 
+        type="button" 
+        data-cal-next 
+        aria-label="Mes siguiente"
+        class="w-8 h-8 rounded-lg bg-slate-900 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-slate-300 flex items-center justify-center transition-colors text-xs font-bold cursor-pointer"
+      >
+        ❯
+      </button>
+    </div>
+  </div>
+
+  <!-- Resumen Comercial del Mes -->
+  <div class="flex flex-wrap items-center justify-between gap-3 py-4 text-xs">
+    <div class="flex items-center gap-4 flex-wrap">
+      <div class="flex items-center gap-1.5 text-slate-300">
+        <span class="text-base leading-none">⭐</span>
+        <span class="font-medium"><strong data-cal-count-confirmed class="text-gold-bruna">0</strong> Shows Confirmados</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-slate-300">
+        <span class="text-base leading-none">✨</span>
+        <span class="font-medium"><strong data-cal-count-pending class="text-amber-400">0</strong> En Negociación</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-slate-300">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+        <span class="font-medium text-emerald-400">Fechas Disponibles para Contratación</span>
+      </div>
+    </div>
+
+    <div class="text-[11px] text-slate-400 font-mono">
+      Zona Horaria: <strong class="text-slate-200">Chile (CLT)</strong>
+    </div>
+  </div>
+
+  <!-- Grilla del Calendario -->
+  <div class="mt-2 overflow-hidden rounded-xl border border-white/10 bg-slate-950/60 shadow-inner">
+    <!-- Días de la semana -->
+    <div class="grid grid-cols-7 border-b border-white/10 bg-slate-950 text-center text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider py-2.5">
+      <div>LUN</div>
+      <div>MAR</div>
+      <div>MIÉ</div>
+      <div>JUE</div>
+      <div>VIE</div>
+      <div class="text-gold-bruna/80">SÁB</div>
+      <div class="text-gold-bruna/80">DOM</div>
+    </div>
+
+    <!-- Celdas de días (Generadas dinámicamente) -->
+    <div data-cal-days-grid class="grid grid-cols-7 gap-px bg-white/5">
+      <!-- Inyectado por JS -->
+    </div>
+  </div>
+
+  <!-- Popover / Tooltip flotante informativo para Shows -->
+  <div 
+    data-cal-popover 
+    class="hidden absolute z-30 bg-slate-900 border border-gold-bruna/40 rounded-xl p-3.5 shadow-2xl max-w-xs text-left pointer-events-none transition-opacity duration-200"
+  >
+    <div class="flex items-center gap-2 mb-1">
+      <span data-cal-popover-icon class="text-base">⭐</span>
+      <span data-cal-popover-badge class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-gold-bruna text-black">
+        SHOW CONFIRMADO
+      </span>
+    </div>
+    <h5 data-cal-popover-title class="font-title font-bold text-xs text-white uppercase tracking-wide">
+      Nombre del Evento
+    </h5>
+    <p data-cal-popover-place class="text-[11px] text-slate-300 font-light mt-0.5">
+      📍 Recinto, Comuna
+    </p>
+    <div class="mt-2 pt-2 border-t border-white/10 text-[10px] text-gold-bruna font-medium">
+      Fecha ocupada en gira oficial
+    </div>
+  </div>
+
+  <!-- Barra Comercial Inferior: Leyenda + Call To Action -->
+  <div class="mt-6 pt-5 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+    <!-- Leyenda simplificada -->
+    <div class="flex flex-wrap items-center gap-3 text-slate-400 text-[11px]">
+      <span class="flex items-center gap-1">
+        <span>⭐</span> <strong>Show Confirmado</strong> (No disponible)
+      </span>
+      <span class="flex items-center gap-1">
+        <span>✨</span> <strong>En Negociación</strong> (Consulta cupo)
+      </span>
+      <span class="flex items-center gap-1">
+        <span class="text-emerald-400 font-bold">🟢</span> <strong>Fecha Libre</strong> (Haz clic para cotizar)
+      </span>
+    </div>
+
+    <!-- CTA Comercial Directo -->
+    <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+      <a 
+        href="/contrataciones" 
+        data-cal-direct-cta
+        class="w-full md:w-auto bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold px-6 py-3 rounded-lg text-xs uppercase tracking-wider hover:brightness-110 hover:scale-102 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span>📅</span>
+        <span>Cotizar Fecha Disponible</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function setupTourCalendar() {
+    const widgets = document.querySelectorAll('.tour-calendar-widget');
+
+    widgets.forEach((widget) => {
+      const eventsDataRaw = widget.getAttribute('data-events') || '[]';
+      let events: Array<{ fecha: string; title: string; venue: string; location: string; statusType: string; isPast: boolean }> = [];
+      try {
+        events = JSON.parse(eventsDataRaw);
+      } catch (e) {
+        console.error("Error parsing calendar events", e);
+      }
+
+      const grid = widget.querySelector('[data-cal-days-grid]') as HTMLElement | null;
+      const monthLabel = widget.querySelector('[data-cal-month-label]') as HTMLElement | null;
+      const prevBtn = widget.querySelector('[data-cal-prev]') as HTMLButtonElement | null;
+      const nextBtn = widget.querySelector('[data-cal-next]') as HTMLButtonElement | null;
+      const countConfirmed = widget.querySelector('[data-cal-count-confirmed]');
+      const countPending = widget.querySelector('[data-cal-count-pending]');
+      const popover = widget.querySelector('[data-cal-popover]') as HTMLElement | null;
+      const popoverTitle = widget.querySelector('[data-cal-popover-title]');
+      const popoverPlace = widget.querySelector('[data-cal-popover-place]');
+      const popoverIcon = widget.querySelector('[data-cal-popover-icon]');
+      const popoverBadge = widget.querySelector('[data-cal-popover-badge]');
+
+      if (!grid || !monthLabel) return;
+
+      const monthNames = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+
+      // Determinar mes inicial según los eventos o la fecha de hoy
+      const today = new Date();
+      let currentYear = today.getFullYear();
+      let currentMonth = today.getMonth();
+
+      // Si hay eventos futuros, posicionar preferentemente en el mes más relevante
+      const futureEvents = events.filter(e => {
+        const d = new Date(e.fecha + 'T00:00:00');
+        return d.getTime() >= today.getTime();
+      });
+      if (futureEvents.length > 0) {
+        const firstFuture = new Date(futureEvents[0].fecha + 'T00:00:00');
+        currentYear = firstFuture.getFullYear();
+        currentMonth = firstFuture.getMonth();
+      }
+
+      function renderCalendar() {
+        monthLabel!.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+        // Obtener primer día y total de días
+        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+        const totalDays = lastDayOfMonth.getDate();
+
+        // 0=Domingo, 1=Lunes, ..., 6=Sábado -> Ajustar a Lunes=0, ..., Domingo=6
+        let startingDayIndex = firstDayOfMonth.getDay() - 1;
+        if (startingDayIndex === -1) startingDayIndex = 6;
+
+        grid!.innerHTML = '';
+
+        let monthConfirmedCount = 0;
+        let monthPendingCount = 0;
+
+        // Celdas vacías antes del primer día
+        for (let i = 0; i < startingDayIndex; i++) {
+          const emptyCell = document.createElement('div');
+          emptyCell.className = 'bg-slate-950/40 p-2 sm:p-3 min-h-[60px] sm:min-h-[85px] border-b border-white/5 opacity-20';
+          grid!.appendChild(emptyCell);
+        }
+
+        // Celdas para cada día del mes
+        for (let day = 1; day <= totalDays; day++) {
+          const dayDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const dayDate = new Date(currentYear, currentMonth, day);
+          dayDate.setHours(0,0,0,0);
+          const isToday = dayDate.getTime() === today.getTime();
+          const isPastDate = dayDate.getTime() < today.getTime();
+
+          // Buscar eventos en este día
+          const dayEvents = events.filter(e => e.fecha === dayDateStr);
+          const hasEvent = dayEvents.length > 0;
+          const eventItem = hasEvent ? dayEvents[0] : null;
+
+          const isPending = eventItem && (eventItem.statusType === 'pending' || eventItem.title.toLowerCase().includes('negociaci'));
+          const isConfirmed = eventItem && !isPending;
+
+          if (isConfirmed) monthConfirmedCount++;
+          if (isPending) monthPendingCount++;
+
+          const cell = document.createElement('div');
+          cell.className = `relative p-1.5 sm:p-2.5 min-h-[60px] sm:min-h-[85px] border-b border-white/5 flex flex-col justify-between transition-all duration-200 group ${
+            isConfirmed 
+              ? 'bg-amber-950/20 hover:bg-amber-950/40 border-gold-bruna/30 cursor-pointer' 
+              : isPending
+              ? 'bg-yellow-950/20 hover:bg-yellow-950/40 border-amber-500/30 cursor-pointer'
+              : isPastDate
+              ? 'bg-slate-950/60 opacity-60'
+              : 'bg-slate-950 hover:bg-slate-900/90 hover:border-emerald-500/40 cursor-pointer'
+          }`;
+
+          // Número de día
+          const dayNumber = document.createElement('span');
+          dayNumber.className = `text-[11px] sm:text-xs font-bold leading-none ${
+            isToday 
+              ? 'w-5 h-5 rounded-full bg-gold-bruna text-black flex items-center justify-center font-extrabold' 
+              : isConfirmed
+              ? 'text-gold-bruna'
+              : isPending
+              ? 'text-amber-400'
+              : isPastDate
+              ? 'text-slate-500'
+              : 'text-slate-300 group-hover:text-emerald-400'
+          }`;
+          dayNumber.textContent = String(day);
+
+          const topRow = document.createElement('div');
+          topRow.className = 'flex items-center justify-between';
+          topRow.appendChild(dayNumber);
+
+          // Indicador de disponibilidad o show
+          if (isConfirmed) {
+            const star = document.createElement('span');
+            star.className = 'text-xs sm:text-sm animate-pulse filter drop-shadow-[0_0_8px_rgba(214,175,55,0.8)]';
+            star.textContent = '⭐';
+            star.title = `${eventItem?.title} (${eventItem?.venue || eventItem?.location || ''})`;
+            topRow.appendChild(star);
+          } else if (isPending) {
+            const star = document.createElement('span');
+            star.className = 'text-xs sm:text-sm filter drop-shadow-[0_0_6px_rgba(245,158,11,0.6)]';
+            star.textContent = '✨';
+            star.title = `Pre-reserva: ${eventItem?.title}`;
+            topRow.appendChild(star);
+          } else if (!isPastDate) {
+            const dot = document.createElement('span');
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500/40 group-hover:bg-emerald-400 transition-colors';
+            topRow.appendChild(dot);
+          }
+
+          cell.appendChild(topRow);
+
+          // Etiqueta del evento en la celda
+          if (eventItem) {
+            const eventSnippet = document.createElement('div');
+            eventSnippet.className = `mt-1 text-[9px] sm:text-[10px] font-bold truncate rounded px-1 py-0.5 ${
+              isConfirmed 
+                ? 'bg-gold-bruna/20 text-gold-bruna border border-gold-bruna/30' 
+                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+            }`;
+            eventSnippet.textContent = eventItem.title;
+            cell.appendChild(eventSnippet);
+
+            // Eventos hover para el popover informativo
+            cell.addEventListener('mouseenter', (ev) => {
+              if (!popover) return;
+              popoverTitle!.textContent = eventItem.title;
+              popoverPlace!.textContent = `📍 ${eventItem.venue || ''} ${eventItem.location ? `· ${eventItem.location}` : ''}`.trim();
+              if (isConfirmed) {
+                popoverIcon!.textContent = '⭐';
+                popoverBadge!.textContent = 'SHOW CONFIRMADO';
+                popoverBadge!.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-gold-bruna text-black';
+              } else {
+                popoverIcon!.textContent = '✨';
+                popoverBadge!.textContent = 'EN NEGOCIACIÓN';
+                popoverBadge!.className = 'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500 text-black';
+              }
+
+              const rect = cell.getBoundingClientRect();
+              popover.style.left = `${rect.left + window.scrollX}px`;
+              popover.style.top = `${rect.top + window.scrollY - 100}px`;
+              popover.classList.remove('hidden');
+            });
+
+            cell.addEventListener('mouseleave', () => {
+              popover?.classList.add('hidden');
+            });
+
+          } else if (!isPastDate) {
+            // Día libre para cotizar
+            const freeSnippet = document.createElement('div');
+            freeSnippet.className = 'mt-auto text-[8px] sm:text-[9px] font-semibold text-emerald-400/80 group-hover:text-emerald-300 opacity-0 group-hover:opacity-100 transition-opacity truncate';
+            freeSnippet.textContent = '🟢 Cotizar';
+            cell.appendChild(freeSnippet);
+
+            // Al hacer clic en un día libre: Embudo comercial directo
+            cell.addEventListener('click', () => {
+              handleDateSelection(dayDateStr);
+            });
+          }
+
+          grid!.appendChild(cell);
+        }
+
+        // Actualizar contadores
+        if (countConfirmed) countConfirmed.textContent = String(monthConfirmedCount);
+        if (countPending) countPending.textContent = String(monthPendingCount);
+      }
+
+      // Lógica al seleccionar un día libre: rellenar formulario o redirigir a /contrataciones
+      function handleDateSelection(selectedDate: string) {
+        const formDateInput = document.getElementById('ext-date') as HTMLInputElement | null;
+        const formContainer = document.getElementById('contacto') || document.getElementById('booking-form-container');
+
+        if (formDateInput && formContainer) {
+          formDateInput.value = selectedDate;
+          formContainer.scrollIntoView({ behavior: 'smooth' });
+          formDateInput.focus();
+          formDateInput.classList.add('border-gold-bruna', 'ring-4', 'ring-gold-bruna/40', 'bg-gold-bruna/10');
+          setTimeout(() => {
+            formDateInput.classList.remove('ring-4', 'ring-gold-bruna/40', 'bg-gold-bruna/10');
+          }, 3000);
+        } else {
+          // Redirección a la página de contrataciones con fecha precargada
+          window.location.href = `/contrataciones?fecha=${selectedDate}#booking-form-container`;
+        }
+      }
+
+      // Botones mes anterior / siguiente
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          currentMonth--;
+          if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+          }
+          renderCalendar();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          currentMonth++;
+          if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+          }
+          renderCalendar();
+        });
+      }
+
+      renderCalendar();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupTourCalendar);
+  document.addEventListener('astro:page-load', setupTourCalendar);
+</script>

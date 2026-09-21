@@ -9,6 +9,8 @@ import socialStats from '../data/socialStats.json';
 import { supabase } from '../services/supabaseClient.js';
 import NowPlayingWidget from '../modules/radio-monitor/components/NowPlayingWidget.astro';
 import QuoteForm from '../components/forms/QuoteForm.astro';
+import EventSlider from '../components/events/EventSlider.astro';
+import TourCalendar from '../components/events/TourCalendar.astro';
 
 // Fetch mock social data at build time
 const latestVideo = getLatestVideo();
@@ -29,7 +31,7 @@ today.setHours(0, 0, 0, 0);
 
 let imminentEvent = null;
 
-const upcomingEvents = (rawEvents || []).map((event: any) => {
+const allTourEvents = (rawEvents || []).map((event: any) => {
   const d = new Date(event.fecha + 'T12:00:00'); // Evitar descalces de zona horaria
   const day = d.getDate();
   const monthName = months[d.getMonth()];
@@ -138,6 +140,7 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
     mapUrl: '#',
     statusType: isNegociacion ? 'pending' : 'confirmed',
     fullDate: fullDateStr,
+    rawFecha: event.fecha,
     isWithinOneWeek,
     diffDays,
     isPast,
@@ -147,7 +150,19 @@ const upcomingEvents = (rawEvents || []).map((event: any) => {
     tieneEntradas,
     ticketUrl
   };
-}).slice(0, 5);
+});
+
+const upcomingEvents = allTourEvents.filter(e => !e.isPast);
+const pastEvents = allTourEvents.filter(e => e.isPast);
+
+const calendarEvents = allTourEvents.map(e => ({
+  fecha: e.rawFecha,
+  title: e.title,
+  venue: e.venue,
+  location: e.location,
+  statusType: e.statusType,
+  isPast: e.isPast
+}));
 
 const heroImages = [
   "/assets/images/hero/hero_1.webp",
@@ -467,123 +482,24 @@ try {
   <section id="estado-actual" class="max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 py-16 scroll-reveal" aria-label="Estado Actual de la Banda">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
       
-      <!-- Columna 1: Próximos Eventos (Agenda en Vivo) -->
+      <!-- Columna 1: Agenda y Barra Deslizante de Eventos -->
       <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-left">
-        <div>
-          <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="text-gold-bruna text-base">📅</span>
-              <h2 class="font-title font-extrabold text-base sm:text-lg text-white uppercase tracking-wider">
-                PRÓXIMOS EVENTOS
-              </h2>
-            </div>
-            <a href="/agenda" class="text-gold-bruna text-[10px] font-bold hover:underline tracking-wider uppercase flex items-center gap-1">
-              Ver Agenda →
-            </a>
-          </div>
+        <EventSlider events={allTourEvents} compact={true} title="PRÓXIMOS EVENTOS" />
 
-          {upcomingEvents.length > 0 ? (
-            <ul class="flex flex-col gap-3.5 list-none p-0 m-0">
-              {upcomingEvents.map((event: any) => (
-                <li 
-                  class={`flex items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
-                    event.isPast 
-                      ? 'bg-black/40 border-white/5 opacity-80 hover:opacity-100 hover:border-gold-bruna/40 cursor-pointer group/pastevent' 
-                      : event.isWithinOneWeek 
-                      ? 'bg-amber-950/30 border-gold-bruna/70 shadow-[0_0_15px_rgba(214,175,55,0.2)]' 
-                      : 'bg-black/20 border-white/5 hover:border-white/20'
-                  }`}
-                  {...(event.isPast && event.videoUrl ? {
-                    'data-open-event-video': event.videoUrl,
-                    'data-event-title': `${event.title} — ${event.location || event.venue}`,
-                    'data-event-gallery': event.galleryUrl || ''
-                  } : {})}
-                >
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div class="flex flex-col text-center min-w-[38px] bg-slate-950/90 py-1.5 px-2 rounded-lg border border-white/10 flex-shrink-0">
-                      <span class={`text-lg font-extrabold font-title leading-none ${event.isPast ? 'text-slate-400 group-hover/pastevent:text-gold-bruna' : 'text-gold-bruna'}`}>{event.date}</span>
-                      <span class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">{event.month}</span>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <h3 class="font-title font-bold text-xs text-white uppercase truncate">{event.title}</h3>
-                      <p class="text-[10px] text-slate-400 truncate mt-0.5">
-                        {event.venue && event.venue !== 'PRONTO' && event.venue !== 'Por confirmar' ? (
-                          <><strong class="text-slate-300 font-medium">{event.venue}</strong>{event.location ? ` · ${event.location}` : ''}</>
-                        ) : (
-                          event.location || event.venue
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div class="flex flex-col items-end gap-1 flex-shrink-0 ml-2">
-                    {event.isPast ? (
-                      <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                        <span class="bg-slate-800 text-slate-300 group-hover/pastevent:text-gold-bruna text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
-                          <span>🎬 SHOW REALIZADO</span>
-                        </span>
-                        {event.galleryUrl && (
-                          <a 
-                            href={event.galleryUrl}
-                            class="bg-purple-950/60 border border-purple-500/40 hover:bg-purple-900 text-purple-300 text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1 transition-colors"
-                            onclick="event.stopPropagation();"
-                          >
-                            <span>📸</span> ÁLBUM
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        {event.isWithinOneWeek && (
-                          <span class="bg-gold-bruna text-black text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-                            {event.diffDays === 0 ? '¡HOY!' : event.diffDays === 1 ? '¡MAÑANA!' : `¡EN ${event.diffDays} DÍAS!`}
-                          </span>
-                        )}
-                        <span class="bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                          CONFIRMADO
-                        </span>
-                      </>
-                    )}
-                    {event.imagen && (
-                      <button 
-                        type="button" 
-                        data-open-event-flyer={event.imagen} 
-                        data-event-title={`${event.title} — ${event.location || event.venue}`}
-                        data-event-gallery={event.galleryUrl || ''}
-                        class="text-[8px] text-gold-bruna hover:underline font-bold flex items-center gap-1 cursor-pointer"
-                        onclick="event.stopPropagation();"
-                      >
-                        <span>🖼️</span> VER FLYER
-                      </button>
-                    )}
-                    {event.tieneEntradas && event.ticketUrl && (
-                      <a 
-                        href={event.ticketUrl} 
-                        target="_blank" 
-                        rel="noopener"
-                        class="text-[8px] text-amber-400 hover:text-amber-300 hover:underline font-extrabold flex items-center gap-1 cursor-pointer mt-0.5 tracking-wider uppercase"
-                      >
-                        <span>🎟️</span> Comprar Entradas
-                      </a>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div class="py-8 text-center text-slate-400">
-              <p class="text-xs">Próximas fechas en confirmación.</p>
-            </div>
-          )}
-        </div>
-
-        <div class="pt-5 mt-4 border-t border-white/5">
+        <div class="pt-4 mt-3 border-t border-white/5 flex items-center justify-between gap-2.5">
           <a 
             href="/agenda" 
-            class="w-full min-h-[42px] bg-slate-950 hover:bg-slate-900 border border-white/10 hover:border-gold-bruna text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all"
+            class="flex-1 min-h-[42px] bg-slate-950 hover:bg-slate-900 border border-white/10 hover:border-gold-bruna text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-all"
           >
             <span>📅</span>
             <span>Ver Agenda Completa</span>
+          </a>
+          <a 
+            href="#disponibilidad" 
+            class="min-h-[42px] bg-gold-bruna/10 border border-gold-bruna/30 hover:bg-gold-bruna hover:text-black text-gold-bruna font-bold text-xs uppercase tracking-wider rounded-lg px-3.5 flex items-center justify-center gap-1.5 transition-all"
+          >
+            <span>🗓️</span>
+            <span>Disponibilidad</span>
           </a>
         </div>
       </div>
@@ -1357,6 +1273,26 @@ try {
       </div>
 
     </div>
+  </section>
+
+  <!-- ====================================================================== -->
+  <!-- BLOQUE: CALENDARIO DE DISPONIBILIDAD PARA CONTRATACIONES               -->
+  <!-- ====================================================================== -->
+  <section id="disponibilidad" class="max-w-[1400px] mx-auto px-5 sm:px-8 md:px-12 py-16 scroll-reveal" aria-label="Disponibilidad y Calendario de Gira">
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <span class="text-xs font-extrabold tracking-[0.25em] text-gold-bruna uppercase block mb-2">
+        PLANIFICA TU FECHA
+      </span>
+      <h2 class="font-title font-extrabold text-2xl sm:text-3xl md:text-4xl text-white uppercase">
+        DISPONIBILIDAD DE AGENDA & GIRA EN VIVO
+      </h2>
+      <div class="w-12 h-1 bg-gold-bruna mx-auto mt-3 mb-4"></div>
+      <p class="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+        Revisa las fechas confirmadas con estrella dorada ⭐ y haz clic en cualquier día libre 🟢 para cotizar o agendar la presentación de Banda Bruna en tu festival, matrimonio o fiesta costumbrista.
+      </p>
+    </div>
+
+    <TourCalendar events={calendarEvents} id="home-tour-calendar" />
   </section>
 
   <!-- ================================================================= -->

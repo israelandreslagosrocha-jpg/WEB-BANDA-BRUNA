@@ -1,0 +1,361 @@
+---
+export interface EventItem {
+  id: string | number;
+  date: string | number;
+  month: string;
+  year: number;
+  time?: string;
+  title: string;
+  venue?: string;
+  location?: string;
+  mapUrl?: string | null;
+  statusType?: 'confirmed' | 'pending';
+  fullDate?: string;
+  rawFecha?: string;
+  isPast?: boolean;
+  isWithinOneWeek?: boolean;
+  diffDays?: number;
+  videoUrl?: string | null;
+  galleryUrl?: string | null;
+  imagen?: string | null;
+  tieneEntradas?: boolean;
+  ticketUrl?: string | null;
+}
+
+interface Props {
+  events: EventItem[];
+  id?: string;
+  title?: string;
+  compact?: boolean;
+}
+
+const {
+  events = [],
+  id = "tour-event-slider",
+  title = "EVENTOS & GIRA",
+  compact = false
+} = Astro.props;
+
+const upcomingEvents = events.filter(e => !e.isPast);
+const pastEvents = events.filter(e => e.isPast);
+---
+
+<div id={id} class="event-slider-component flex flex-col w-full">
+  
+  <!-- Header de Controles y Filtros -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+    <div class="flex items-center gap-2">
+      <span class="text-gold-bruna text-base">📅</span>
+      <h3 class="font-title font-extrabold text-sm sm:text-base text-white uppercase tracking-wider">
+        {title}
+      </h3>
+    </div>
+
+    <!-- Filtros de Pestañas Rápidas -->
+    <div class="flex items-center gap-1 bg-slate-950/80 p-1 rounded-lg border border-white/10 text-[10px] font-bold">
+      <button 
+        type="button" 
+        data-slider-filter="upcoming" 
+        class="slider-filter-btn active px-2.5 py-1 rounded bg-gold-bruna text-black transition-all cursor-pointer uppercase tracking-wider"
+      >
+        Próximos ({upcomingEvents.length})
+      </button>
+      <button 
+        type="button" 
+        data-slider-filter="past" 
+        class="slider-filter-btn px-2.5 py-1 rounded text-slate-400 hover:text-white transition-all cursor-pointer uppercase tracking-wider"
+      >
+        Realizados ({pastEvents.length})
+      </button>
+      <button 
+        type="button" 
+        data-slider-filter="all" 
+        class="slider-filter-btn px-2.5 py-1 rounded text-slate-400 hover:text-white transition-all cursor-pointer uppercase tracking-wider"
+      >
+        Todos ({events.length})
+      </button>
+    </div>
+
+    <!-- Flechas de Navegación del Carrusel -->
+    <div class="flex items-center gap-1.5 ml-auto sm:ml-0">
+      <button 
+        type="button" 
+        data-slider-prev 
+        aria-label="Evento anterior" 
+        class="w-7 h-7 rounded-lg bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-slate-300 flex items-center justify-center transition-colors text-xs font-bold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        ❮
+      </button>
+      <button 
+        type="button" 
+        data-slider-next 
+        aria-label="Siguiente evento" 
+        class="w-7 h-7 rounded-lg bg-slate-950 border border-white/10 hover:border-gold-bruna hover:text-gold-bruna text-slate-300 flex items-center justify-center transition-colors text-xs font-bold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        ❯
+      </button>
+    </div>
+  </div>
+
+  <!-- Pista de Desplazamiento Horizontal (Scroll-Snap Track) -->
+  <div class="relative w-full">
+    <div 
+      data-slider-track 
+      class="flex gap-3.5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 pt-1 px-1 scrollbar-none focus:outline-none"
+      tabindex="0"
+      style="scrollbar-width: none; -ms-overflow-style: none;"
+    >
+      {events.length > 0 ? (
+        events.map((event) => {
+          const filterType = event.isPast ? 'past' : 'upcoming';
+          return (
+            <article 
+              data-filter-type={filterType}
+              class={`event-slider-card snap-start flex-shrink-0 ${compact ? 'w-[260px] sm:w-[290px]' : 'w-[280px] sm:w-[330px]'} bg-slate-950/90 border rounded-xl p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-xl ${
+                event.isPast 
+                  ? 'border-white/5 opacity-85 hover:opacity-100 hover:border-gold-bruna/40' 
+                  : event.isWithinOneWeek 
+                  ? 'border-gold-bruna/60 bg-gradient-to-b from-amber-950/20 to-slate-950 shadow-[0_0_15px_rgba(214,175,55,0.15)]' 
+                  : 'border-white/10 hover:border-gold-bruna/50'
+              }`}
+            >
+              <div>
+                <!-- Top Row: Date Badge & Status Badge -->
+                <div class="flex items-start justify-between gap-3 mb-3">
+                  <div class="flex flex-col text-center min-w-[42px] bg-slate-900/90 py-1.5 px-2.5 rounded-lg border border-white/10 flex-shrink-0">
+                    <span class={`text-xl font-extrabold font-title leading-none ${event.isPast ? 'text-slate-400' : 'text-gold-bruna'}`}>
+                      {event.date}
+                    </span>
+                    <span class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider">
+                      {event.month}
+                    </span>
+                  </div>
+
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                    {event.isPast ? (
+                      <span class="bg-slate-800 border border-slate-700 text-slate-300 text-[8px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                        <span>🎬 REALIZADO</span>
+                      </span>
+                    ) : (
+                      <>
+                        {event.isWithinOneWeek && (
+                          <span class="bg-gold-bruna text-black text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                            {event.diffDays === 0 ? '¡HOY!' : event.diffDays === 1 ? '¡MAÑANA!' : `¡EN ${event.diffDays} DÍAS!`}
+                          </span>
+                        )}
+                        <span class={`text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                          event.statusType === 'pending'
+                            ? 'bg-amber-950/50 border border-amber-500/40 text-amber-400'
+                            : 'bg-emerald-950/50 border border-emerald-500/30 text-emerald-400'
+                        }`}>
+                          {event.statusType === 'pending' ? 'EN NEGOCIACIÓN' : 'CONFIRMADO'}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <!-- Title and Location -->
+                <h4 class="font-title font-bold text-sm text-white uppercase tracking-wide line-clamp-2 min-h-[2.5rem]" title={event.title}>
+                  {event.title}
+                </h4>
+                
+                <p class="text-[11px] text-slate-400 font-light mt-1 flex items-center gap-1 truncate">
+                  <span>📍</span>
+                  <span class="truncate">
+                    {event.venue && event.venue !== 'PRONTO' && event.venue !== 'Por confirmar' ? (
+                      <strong class="text-slate-300 font-medium">{event.venue}</strong>
+                    ) : null}
+                    {event.location ? ` · ${event.location}` : ''}
+                  </span>
+                </p>
+                {event.time && (
+                  <p class="text-[10px] text-slate-500 font-mono mt-0.5">
+                    ⏰ {event.time}
+                  </p>
+                )}
+              </div>
+
+              <!-- Bottom Actions Bar -->
+              <div class="pt-3.5 mt-3 border-t border-white/5 flex items-center justify-between gap-2 flex-wrap">
+                {event.isPast ? (
+                  <div class="flex items-center gap-1.5 w-full justify-between">
+                    {event.videoUrl ? (
+                      <button 
+                        type="button"
+                        data-open-event-video={event.videoUrl}
+                        data-event-title={`${event.title} — ${event.location || event.venue || ''}`}
+                        data-event-gallery={event.galleryUrl || '/galeria'}
+                        class="text-[9px] bg-slate-800 hover:bg-slate-700 text-gold-bruna font-bold px-2.5 py-1.5 rounded transition-all flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+                      >
+                        <span>🎬</span> Ver Resumen
+                      </button>
+                    ) : <span class="text-[9px] text-slate-500 font-medium">Show registrado</span>}
+
+                    {event.galleryUrl && (
+                      <a 
+                        href={event.galleryUrl}
+                        class="text-[9px] bg-purple-950/60 border border-purple-500/30 hover:bg-purple-900 text-purple-300 font-bold px-2 py-1.5 rounded transition-all flex items-center gap-1 uppercase tracking-wider"
+                        onclick="event.stopPropagation();"
+                      >
+                        <span>📸</span> Fotos
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <div class="flex items-center gap-2 w-full justify-between">
+                    {event.imagen ? (
+                      <button 
+                        type="button" 
+                        data-open-event-flyer={event.imagen} 
+                        data-event-title={`${event.title} — ${event.location || event.venue || ''}`}
+                        data-event-gallery={event.galleryUrl || ''}
+                        class="text-[9px] text-gold-bruna hover:underline font-bold flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+                        onclick="event.stopPropagation();"
+                      >
+                        <span>🖼️</span> Flyer
+                      </button>
+                    ) : (
+                      <span class="text-[9px] text-slate-500">Gira Oficial</span>
+                    )}
+
+                    {event.tieneEntradas && event.ticketUrl ? (
+                      <a 
+                        href={event.ticketUrl} 
+                        target="_blank" 
+                        rel="noopener"
+                        class="text-[9px] bg-gradient-to-r from-gold-bruna to-gold-bruna-hover hover:brightness-110 text-black font-extrabold px-3 py-1.5 rounded uppercase tracking-wider transition-transform hover:scale-102 flex items-center gap-1 shadow"
+                      >
+                        <span>🎟️</span> Entradas
+                      </a>
+                    ) : (
+                      <a 
+                        href={`/contrataciones?fecha=${event.rawFecha || ''}`}
+                        class="text-[9px] bg-slate-900 hover:bg-slate-800 border border-white/10 hover:border-gold-bruna text-slate-300 hover:text-gold-bruna font-bold px-2.5 py-1.5 rounded uppercase tracking-wider transition-colors flex items-center gap-1"
+                      >
+                        <span>✨</span> Consultar
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </article>
+          );
+        })
+      ) : (
+        <div class="w-full py-8 text-center text-slate-400">
+          <p class="text-xs">No hay eventos en este momento.</p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Indicador de Deslizamiento Inferior -->
+  <div class="flex items-center justify-between text-[10px] text-slate-500 mt-2 px-1">
+    <span class="flex items-center gap-1">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-gold-bruna animate-pulse"></span>
+      <span data-slider-status>Desliza para ver más fechas</span>
+    </span>
+    <span data-slider-counter class="font-mono text-slate-400"></span>
+  </div>
+</div>
+
+<script>
+  function setupEventSliders() {
+    const containers = document.querySelectorAll('.event-slider-component');
+    
+    containers.forEach((container) => {
+      const track = container.querySelector('[data-slider-track]') as HTMLElement | null;
+      const prevBtn = container.querySelector('[data-slider-prev]') as HTMLButtonElement | null;
+      const nextBtn = container.querySelector('[data-slider-next]') as HTMLButtonElement | null;
+      const filterBtns = container.querySelectorAll('.slider-filter-btn');
+      const counterSpan = container.querySelector('[data-slider-counter]');
+      const statusSpan = container.querySelector('[data-slider-status]');
+      
+      if (!track) return;
+
+      const getVisibleCards = () => {
+        return Array.from(track.querySelectorAll<HTMLElement>('.event-slider-card')).filter(
+          c => c.style.display !== 'none'
+        );
+      };
+
+      const updateCounter = () => {
+        const visible = getVisibleCards();
+        if (visible.length === 0) {
+          if (counterSpan) counterSpan.textContent = "0 fechas";
+          if (prevBtn) prevBtn.disabled = true;
+          if (nextBtn) nextBtn.disabled = true;
+          return;
+        }
+
+        const scrollLeft = track.scrollLeft;
+        const cardWidth = visible[0].offsetWidth + 14; // card width + gap
+        const currentIndex = Math.min(Math.round(scrollLeft / cardWidth) + 1, visible.length);
+
+        if (counterSpan) {
+          counterSpan.textContent = `${currentIndex} / ${visible.length}`;
+        }
+
+        if (prevBtn) prevBtn.disabled = scrollLeft <= 10;
+        if (nextBtn) {
+          const maxScroll = track.scrollWidth - track.clientWidth;
+          nextBtn.disabled = scrollLeft >= maxScroll - 10;
+        }
+      };
+
+      track.addEventListener('scroll', updateCounter, { passive: true });
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          const visible = getVisibleCards();
+          const cardWidth = visible[0] ? visible[0].offsetWidth + 14 : 300;
+          track.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          const visible = getVisibleCards();
+          const cardWidth = visible[0] ? visible[0].offsetWidth + 14 : 300;
+          track.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        });
+      }
+
+      // Filter handling
+      filterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => {
+            b.classList.remove('active', 'bg-gold-bruna', 'text-black');
+            b.classList.add('text-slate-400');
+          });
+
+          btn.classList.add('active', 'bg-gold-bruna', 'text-black');
+          btn.classList.remove('text-slate-400');
+
+          const filter = btn.getAttribute('data-slider-filter');
+          const cards = track.querySelectorAll<HTMLElement>('.event-slider-card');
+
+          cards.forEach((card) => {
+            const cardFilter = card.getAttribute('data-filter-type');
+            if (filter === 'all' || cardFilter === filter) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+
+          track.scrollTo({ left: 0, behavior: 'smooth' });
+          setTimeout(updateCounter, 100);
+        });
+      });
+
+      // Initial state
+      updateCounter();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupEventSliders);
+  // Re-run on dynamic page transitions if any
+  document.addEventListener('astro:page-load', setupEventSliders);
+</script>

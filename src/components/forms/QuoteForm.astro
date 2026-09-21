@@ -263,7 +263,16 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
     if (urlParams.has('email') && emailInput) emailInput.value = decodeURIComponent(urlParams.get('email') || '');
     if (urlParams.has('phone') && phoneInput) phoneInput.value = decodeURIComponent(urlParams.get('phone') || '');
     if (urlParams.has('city') && cityInput) cityInput.value = decodeURIComponent(urlParams.get('city') || '');
-    if (urlParams.has('date') && dateInput) dateInput.value = decodeURIComponent(urlParams.get('date') || '');
+    
+    const prefillDate = urlParams.get('fecha') || urlParams.get('date');
+    if (prefillDate && dateInput) {
+      dateInput.value = decodeURIComponent(prefillDate);
+      dateInput.classList.add('border-gold-bruna', 'ring-2', 'ring-gold-bruna/30', 'bg-gold-bruna/5');
+      setTimeout(() => {
+        dateInput.classList.remove('ring-2', 'ring-gold-bruna/30', 'bg-gold-bruna/5');
+      }, 3500);
+    }
+
     if (urlParams.has('type') && typeSelect) {
       typeSelect.value = decodeURIComponent(urlParams.get('type') || '');
     }

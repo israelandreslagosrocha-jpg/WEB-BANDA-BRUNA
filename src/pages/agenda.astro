@@ -1,6 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../services/supabaseClient.js';
+import TourCalendar from '../components/events/TourCalendar.astro';
+import EventSlider from '../components/events/EventSlider.astro';
 
 // Cargar eventos activos desde Supabase ordenados por fecha ascendente
 const { data: rawEvents } = await supabase
@@ -121,6 +123,7 @@ const events = (rawEvents || []).map((event: any) => {
     mapUrl: finalMapUrl,
     statusType: isNegociacion ? 'pending' : 'confirmed',
     fullDate: fullDateStr,
+    rawFecha: event.fecha,
     isPast,
     videoUrl,
     galleryUrl,
@@ -129,6 +132,15 @@ const events = (rawEvents || []).map((event: any) => {
     ticketUrl
   };
 });
+
+const calendarEvents = events.map(e => ({
+  fecha: e.rawFecha,
+  title: e.title,
+  venue: e.venue,
+  location: e.location,
+  statusType: e.statusType,
+  isPast: e.isPast
+}));
 
 // Helper to generate Google Calendar links
 const getGoogleCalendarUrl = (event: any) => {
@@ -143,11 +155,43 @@ const getGoogleCalendarUrl = (event: any) => {
 <Layout title="Agenda de Conciertos | Banda Bruna - Fechas de Gira Oficial" description="Entérate de las próximas fechas de conciertos de Banda Bruna. Fiestas costumbristas, festivales y shows en vivo.">
   <section class="max-w-5xl mx-auto px-6 py-16 md:py-24">
     
-    <div class="text-center mb-16">
-      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">PROGRAMACIÓN</span>
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-title uppercase">FECHAS DE GIRA</h1>
+    <div class="text-center mb-12">
+      <span class="text-gold-bruna text-sm tracking-widest font-semibold uppercase block mb-1">PROGRAMACIÓN OFICIAL</span>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold font-title uppercase">FECHAS DE GIRA & DISPONIBILIDAD</h1>
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
+
+    <!-- Calendario Comercial de Disponibilidad (Mes a Mes) -->
+    <div class="mb-14">
+      <TourCalendar events={calendarEvents} id="agenda-tour-calendar" />
+    </div>
+
+    <!-- Barra Deslizante de Navegación de Gira -->
+    {events.length > 10 ? (
+      <div class="mb-12 bg-slate-900/90 border border-white/10 rounded-2xl p-6 shadow-2xl">
+        <EventSlider events={events} title="LÍNEA DE TIEMPO DESLIZABLE" />
+      </div>
+    ) : (
+      <div class="mb-8">
+        <div class="flex items-center justify-between gap-4 mb-3 px-1">
+          <div class="text-xs text-slate-400 font-light">
+            <span>Visualiza las presentaciones en formato timeline deslizable o listado completo:</span>
+          </div>
+          <button 
+            type="button" 
+            id="toggle-agenda-slider-btn"
+            class="text-xs bg-slate-900 border border-white/10 hover:border-gold-bruna text-gold-bruna font-bold px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer uppercase tracking-wider shadow"
+          >
+            <span>‹ ›</span>
+            <span id="toggle-agenda-slider-label">Ver Barra Deslizable</span>
+          </button>
+        </div>
+
+        <div id="agenda-optional-slider" class="hidden mb-10 bg-slate-900/90 border border-white/10 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+          <EventSlider events={events} title="LÍNEA DE TIEMPO & GIRA" />
+        </div>
+      </div>
+    )}
 
     <!-- Concert schedule detailed timeline list -->
     <div class="bg-slate-900 border border-white/5 rounded-xl overflow-hidden shadow-2xl">
@@ -557,9 +601,31 @@ const getGoogleCalendarUrl = (event: any) => {
       });
     }
 
+    function setupAgendaSliderToggle() {
+      const toggleBtn = document.getElementById('toggle-agenda-slider-btn');
+      const sliderContainer = document.getElementById('agenda-optional-slider');
+      const toggleLabel = document.getElementById('toggle-agenda-slider-label');
+      if (toggleBtn && sliderContainer && toggleLabel) {
+        toggleBtn.addEventListener('click', () => {
+          const isHidden = sliderContainer.classList.contains('hidden');
+          if (isHidden) {
+            sliderContainer.classList.remove('hidden');
+            toggleLabel.textContent = 'Ocultar Barra Deslizable';
+            sliderContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } else {
+            sliderContainer.classList.add('hidden');
+            toggleLabel.textContent = 'Ver Barra Deslizable';
+          }
+        });
+      }
+    }
+
+    setupAgendaSliderToggle();
+
     document.addEventListener('astro:after-swap', () => {
       setupEventVideoModal();
       setupEventFlyerModal();
+      setupAgendaSliderToggle();
     });
   </script>
 
