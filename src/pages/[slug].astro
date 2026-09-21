@@ -22,7 +22,8 @@ export async function getStaticPaths() {
   
   // Fallback para compilar sin errores en build
   return [
-    { params: { slug: 'ahogado-en-un-bar' } }
+    { params: { slug: 'ahogado-en-un-bar' } },
+    { params: { slug: 'sesion-fiestas-patrias' } }
   ];
 }
 
@@ -81,11 +82,23 @@ const hasYoutube = !!youtubeId;
 const dbViews = Number(lanzamiento.plataformas_links?.youtube_views) || 0;
 const dbLikes = Number(lanzamiento.plataformas_links?.youtube_likes) || 0;
 const isAhogado = lanzamiento.slug === 'ahogado-en-un-bar';
+const isPatrio = lanzamiento.slug === 'sesion-fiestas-patrias';
 const launchStatsForThisSlug = (launchStats && launchStats.slug === lanzamiento.slug) ? launchStats : null;
-const defaultViewsFloor = isAhogado ? 26249 : 0;
-const defaultLikesFloor = isAhogado ? 239 : 0;
+const defaultViewsFloor = isAhogado ? 26249 : (isPatrio ? 7199 : 0);
+const defaultLikesFloor = isAhogado ? 239 : (isPatrio ? 110 : 0);
 const youtubeViews = Math.max(dbViews, Number(launchStatsForThisSlug?.youtube_views) || 0, defaultViewsFloor);
 const youtubeLikes = Math.max(dbLikes, Number(launchStatsForThisSlug?.youtube_likes) || 0, defaultLikesFloor);
+
+// Determinar visibilidad de plataformas de streaming (solo si tiene enlaces reales y no es sesión en vivo / videoclip)
+const hasAudioPlatforms = !!(
+  lanzamiento.plataformas_links?.spotify || 
+  lanzamiento.plataformas_links?.apple_music || 
+  lanzamiento.plataformas_links?.deezer || 
+  lanzamiento.plataformas_links?.amazon_music || 
+  lanzamiento.plataformas_links?.youtube_music
+);
+const isLiveSessionOrVideo = lanzamiento.tipo === 'videoclip' || isPatrio;
+const shouldShowPlatforms = Boolean(lanzamiento.mostrar_plataformas && hasAudioPlatforms && !isLiveSessionOrVideo);
 
 // Extraer ID de Instagram
 function getInstagramId(url: string) {
@@ -396,7 +409,7 @@ const allDetrasCamaras = [
               <div class="w-8 h-8 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna mb-2 shadow-md">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
               </div>
-              <span id="yt-views-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeViews}>0</span>
+              <span id="yt-views-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeViews}>{youtubeViews > 0 ? youtubeViews.toLocaleString('es-CL') : '0'}</span>
               <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Visualizaciones YouTube</span>
             </div>
 
@@ -405,7 +418,7 @@ const allDetrasCamaras = [
               <div class="w-8 h-8 rounded-full bg-slate-950 border border-white/5 flex items-center justify-center text-gold-bruna mb-2 shadow-md">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>
               </div>
-              <span id="yt-likes-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeLikes}>0</span>
+              <span id="yt-likes-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeLikes}>{youtubeLikes > 0 ? youtubeLikes.toLocaleString('es-CL') : '0'}</span>
               <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Me Gusta YouTube</span>
             </div>
           </div>
@@ -490,7 +503,7 @@ const allDetrasCamaras = [
       </div>
     </section>
 
-    {lanzamiento.mostrar_plataformas && (
+    {shouldShowPlatforms && (
       <section class="relative z-10 px-6 max-w-4xl mx-auto py-16 text-center">
         <h2 class="font-title font-extrabold text-2xl uppercase tracking-widest mb-2">Escucha / Guarda en Plataformas</h2>
         <p class="text-xs text-slate-450 uppercase tracking-widest font-bold mb-8">Disponible en todos los servicios de streaming</p>
@@ -853,25 +866,31 @@ const allDetrasCamaras = [
             // 2. Actualizar estadísticas de YouTube
             if (item.plataformas_links) {
               const isCurrentAhogado = slug === 'ahogado-en-un-bar';
-              const minViews = isCurrentAhogado ? 26249 : 0;
-              const minLikes = isCurrentAhogado ? 239 : 0;
+              const isCurrentPatrio = slug === 'sesion-fiestas-patrias';
+              const minViews = isCurrentAhogado ? 26249 : (isCurrentPatrio ? 7199 : 0);
+              const minLikes = isCurrentAhogado ? 239 : (isCurrentPatrio ? 110 : 0);
               const views = Math.max(Number(item.plataformas_links.youtube_views) || 0, minViews);
               const likes = Math.max(Number(item.plataformas_links.youtube_likes) || 0, minLikes);
               
               let updated = false;
               const viewsEl = document.getElementById('yt-views-counter');
-              if (viewsEl) {
-                viewsEl.setAttribute('data-count-target', views.toString());
-                updated = true;
+              if (viewsEl && views > 0) {
+                const currTarget = Number(viewsEl.getAttribute('data-count-target')) || 0;
+                if (views > currTarget) {
+                  viewsEl.setAttribute('data-count-target', views.toString());
+                  updated = true;
+                }
               }
               const likesEl = document.getElementById('yt-likes-counter');
-              if (likesEl) {
-                likesEl.setAttribute('data-count-target', likes.toString());
-                updated = true;
+              if (likesEl && likes > 0) {
+                const currTarget = Number(likesEl.getAttribute('data-count-target')) || 0;
+                if (likes > currTarget) {
+                  likesEl.setAttribute('data-count-target', likes.toString());
+                  updated = true;
+                }
               }
               
-              // Si la fecha ya pasó y los contadores cambiaron, relanzar la animación
-              if (updated && (launchDate - new Date().getTime() <= 0) && typeof window.setupCountUp === 'function') {
+              if (updated && typeof window.setupCountUp === 'function') {
                 window.setupCountUp();
               }
             }
@@ -880,27 +899,34 @@ const allDetrasCamaras = [
         .catch(err => console.error("Error al obtener datos en tiempo real de Supabase:", err));
 
         // 3. Sincronización en vivo automática de visualizaciones y likes vía API
-        const videoIdForStats = youtubeId || (slug === 'ahogado-en-un-bar' ? 'mZhYl60ENAs' : '');
+        const videoIdForStats = youtubeId || (slug === 'ahogado-en-un-bar' ? 'mZhYl60ENAs' : (slug === 'sesion-fiestas-patrias' ? 'yXvWp-3sNuM' : ''));
         if (videoIdForStats) {
           fetch(`/api/update-youtube-stats?id=${encodeURIComponent(videoIdForStats)}&slug=${encodeURIComponent(slug)}`)
             .then(res => res.json())
             .then(liveData => {
               if (liveData && liveData.success) {
                 const isCurrentAhogado = slug === 'ahogado-en-un-bar';
-                const minViews = isCurrentAhogado ? 26249 : 0;
-                const minLikes = isCurrentAhogado ? 239 : 0;
+                const isCurrentPatrio = slug === 'sesion-fiestas-patrias';
+                const minViews = isCurrentAhogado ? 26249 : (isCurrentPatrio ? 7199 : 0);
+                const minLikes = isCurrentAhogado ? 239 : (isCurrentPatrio ? 110 : 0);
                 const liveViews = Math.max(Number(liveData.views) || 0, minViews);
                 const liveLikes = Math.max(Number(liveData.likes) || 0, minLikes);
                 const viewsEl = document.getElementById('yt-views-counter');
                 const likesEl = document.getElementById('yt-likes-counter');
                 let changed = false;
-                if (viewsEl && viewsEl.getAttribute('data-count-target') !== liveViews.toString()) {
-                  viewsEl.setAttribute('data-count-target', liveViews.toString());
-                  changed = true;
+                if (viewsEl && liveViews > 0) {
+                  const currTarget = Number(viewsEl.getAttribute('data-count-target')) || 0;
+                  if (liveViews > currTarget) {
+                    viewsEl.setAttribute('data-count-target', liveViews.toString());
+                    changed = true;
+                  }
                 }
-                if (likesEl && likesEl.getAttribute('data-count-target') !== liveLikes.toString()) {
-                  likesEl.setAttribute('data-count-target', liveLikes.toString());
-                  changed = true;
+                if (likesEl && liveLikes > 0) {
+                  const currTarget = Number(likesEl.getAttribute('data-count-target')) || 0;
+                  if (liveLikes > currTarget) {
+                    likesEl.setAttribute('data-count-target', liveLikes.toString());
+                    changed = true;
+                  }
                 }
                 if (changed && typeof window.setupCountUp === 'function') {
                   window.setupCountUp();
@@ -1405,6 +1431,7 @@ const allDetrasCamaras = [
             if (entry.isIntersecting) {
               const counter = entry.target;
               const target = parseFloat(counter.getAttribute('data-count-target'));
+              if (isNaN(target) || target <= 0) return;
               const duration = 2000; // 2 seconds animation
               const startTime = performance.now();
               const prefix = counter.getAttribute('data-count-prefix') || '';
