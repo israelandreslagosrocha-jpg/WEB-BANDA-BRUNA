@@ -10,10 +10,10 @@ const statsFilePath = path.join(__dirname, '..', 'src', 'data', 'socialStats.jso
 let stats = {
   musiciansTrajectory: 15,
   stageYears: 10,
-  instagramFollowers: 3364,
+  instagramFollowers: 3488,
   facebookFriends: 4971,
-  youtubeSubscribers: 911,
-  tiktokFollowers: 1095,
+  youtubeSubscribers: 948,
+  tiktokFollowers: 1146,
   regions: 5,
   lastUpdated: new Date().toISOString()
 };
@@ -66,16 +66,16 @@ async function fetchStatsFromGoogleSheets() {
         
         if (!isNaN(value) && value > 0) {
           if (platform === 'youtube') {
-            stats.youtubeSubscribers = Math.max(value, 911);
+            stats.youtubeSubscribers = Math.max(value, 948);
             updatedCount++;
           } else if (platform === 'instagram') {
-            stats.instagramFollowers = Math.max(value, 3359);
+            stats.instagramFollowers = Math.max(value, 3488);
             updatedCount++;
           } else if (platform === 'tiktok') {
-            stats.tiktokFollowers = Math.max(value, 1136);
+            stats.tiktokFollowers = Math.max(value, 1146);
             updatedCount++;
           } else if (platform === 'facebook') {
-            stats.facebookFriends = Math.max(value, 5000);
+            stats.facebookFriends = Math.max(value, 4971);
             updatedCount++;
           }
         }

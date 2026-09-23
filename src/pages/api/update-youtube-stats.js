@@ -9,8 +9,8 @@ export async function GET({ request }) {
   const isPatrio = slug === 'sesion-fiestas-patrias' || videoId === 'yXvWp-3sNuM';
   const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-  const defaultViewsFloor = isAhogado ? 26249 : (isPatrio ? 7199 : 0);
-  const defaultLikesFloor = isAhogado ? 239 : (isPatrio ? 110 : 0);
+  const defaultViewsFloor = isAhogado ? 26578 : (isPatrio ? 8598 : 0);
+  const defaultLikesFloor = isAhogado ? 243 : (isPatrio ? 122 : 0);
 
   let views = defaultViewsFloor;
   let likes = defaultLikesFloor;

@@ -84,8 +84,8 @@ const dbLikes = Number(lanzamiento.plataformas_links?.youtube_likes) || 0;
 const isAhogado = lanzamiento.slug === 'ahogado-en-un-bar';
 const isPatrio = lanzamiento.slug === 'sesion-fiestas-patrias';
 const launchStatsForThisSlug = (launchStats && launchStats.slug === lanzamiento.slug) ? launchStats : null;
-const defaultViewsFloor = isAhogado ? 26249 : (isPatrio ? 7199 : 0);
-const defaultLikesFloor = isAhogado ? 239 : (isPatrio ? 110 : 0);
+const defaultViewsFloor = isAhogado ? 26578 : (isPatrio ? 8598 : 0);
+const defaultLikesFloor = isAhogado ? 243 : (isPatrio ? 122 : 0);
 const youtubeViews = Math.max(dbViews, Number(launchStatsForThisSlug?.youtube_views) || 0, defaultViewsFloor);
 const youtubeLikes = Math.max(dbLikes, Number(launchStatsForThisSlug?.youtube_likes) || 0, defaultLikesFloor);
 
@@ -867,8 +867,8 @@ const allDetrasCamaras = [
             if (item.plataformas_links) {
               const isCurrentAhogado = slug === 'ahogado-en-un-bar';
               const isCurrentPatrio = slug === 'sesion-fiestas-patrias';
-              const minViews = isCurrentAhogado ? 26249 : (isCurrentPatrio ? 7199 : 0);
-              const minLikes = isCurrentAhogado ? 239 : (isCurrentPatrio ? 110 : 0);
+              const minViews = isCurrentAhogado ? 26578 : (isCurrentPatrio ? 8598 : 0);
+              const minLikes = isCurrentAhogado ? 243 : (isCurrentPatrio ? 122 : 0);
               const views = Math.max(Number(item.plataformas_links.youtube_views) || 0, minViews);
               const likes = Math.max(Number(item.plataformas_links.youtube_likes) || 0, minLikes);
               
@@ -907,8 +907,8 @@ const allDetrasCamaras = [
               if (liveData && liveData.success) {
                 const isCurrentAhogado = slug === 'ahogado-en-un-bar';
                 const isCurrentPatrio = slug === 'sesion-fiestas-patrias';
-                const minViews = isCurrentAhogado ? 26249 : (isCurrentPatrio ? 7199 : 0);
-                const minLikes = isCurrentAhogado ? 239 : (isCurrentPatrio ? 110 : 0);
+                const minViews = isCurrentAhogado ? 26578 : (isCurrentPatrio ? 8598 : 0);
+                const minLikes = isCurrentAhogado ? 243 : (isCurrentPatrio ? 122 : 0);
                 const liveViews = Math.max(Number(liveData.views) || 0, minViews);
                 const liveLikes = Math.max(Number(liveData.likes) || 0, minLikes);
                 const viewsEl = document.getElementById('yt-views-counter');

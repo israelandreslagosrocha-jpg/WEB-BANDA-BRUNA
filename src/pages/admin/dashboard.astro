@@ -54,6 +54,9 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         <button data-tab-target="config" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           ⚙️ Ajustes & Redes
         </button>
+        <button data-tab-target="videos-web" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
+          🎥 Videos de la Web
+        </button>
         <button data-tab-target="testimonios" class="tab-btn w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           ⭐ Testimonios / Reseñas
         </button>
@@ -417,6 +420,292 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           </form>
         </section>
 
+        <!-- Tab: Videos de la Web (Autoadministrable: YouTube, Facebook, Instagram, TikTok) -->
+        <section id="tab-videos-web" class="tab-pane hidden">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold-bruna/10 text-gold-bruna font-bold uppercase tracking-wider border border-gold-bruna/20">
+                  Autoadministrable
+                </span>
+                <h2 class="font-title font-bold text-xl uppercase text-white">Videos y Reels de la Web</h2>
+              </div>
+              <p class="text-xs text-slate-400">
+                Pega directamente los enlaces de los videos que deseas mostrar en la página <a href="/videos" target="_blank" class="text-gold-bruna underline">/videos</a>. 5 videos para cada plataforma.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button id="btn-reload-web-videos" type="button" class="bg-slate-950 border border-white/10 hover:border-white/30 text-white px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors">
+                🔄 Recargar
+              </button>
+              <a href="/videos" target="_blank" class="bg-slate-950 border border-white/10 hover:border-gold-bruna text-white px-3.5 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-1.5">
+                <span>🌐 Ver /videos</span>
+              </a>
+              <button id="btn-save-web-videos-top" type="button" class="bg-gold-bruna hover:bg-gold-bruna-hover text-black px-4 py-2 rounded text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors flex items-center gap-1.5 shadow-lg">
+                <span>💾</span>
+                <span>Guardar Videos</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="web-videos-status" class="mb-6 p-3 rounded-lg bg-slate-950 border border-white/10 text-xs font-bold text-center hidden"></div>
+
+          <form id="web-videos-form" class="flex flex-col gap-10">
+
+            <!-- 1. CANAL OFICIAL DE YOUTUBE -->
+            <div class="bg-slate-900/60 border border-red-500/20 rounded-2xl p-5 md:p-6 shadow-xl">
+              <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 font-bold text-sm">
+                    ▶
+                  </div>
+                  <div>
+                    <h3 class="font-title font-bold text-base uppercase text-white tracking-wide">
+                      1. Canal Oficial de YouTube
+                    </h3>
+                    <p class="text-[10px] text-slate-400">5 Videos · Se detecta la miniatura en HD automáticamente al pegar el enlace</p>
+                  </div>
+                </div>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-red-400 bg-red-950/60 px-2.5 py-1 rounded-full border border-red-500/20">
+                  5 Videos
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {[0, 1, 2, 3, 4].map(idx => (
+                  <div class="bg-slate-950/70 border border-white/5 rounded-xl p-3.5 flex flex-col justify-between gap-2.5 group hover:border-red-500/40 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-red-400 uppercase tracking-wider font-mono">Slot {idx + 1}</span>
+                      <span class="text-[9px] text-slate-500">{idx === 0 ? 'Principal' : `Posición ${idx + 1}`}</span>
+                    </div>
+
+                    <!-- Live Thumbnail Preview -->
+                    <div id={`yt-preview-${idx}`} class="aspect-video bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-white/10 text-center">
+                      <span class="text-[9px] text-slate-500 p-2">Pega el link para ver la portada</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`yt-url-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Enlace de YouTube *</label>
+                      <input 
+                        type="url" 
+                        id={`yt-url-${idx}`} 
+                        placeholder="https://www.youtube.com/watch?v=..." 
+                        class="yt-url-input bg-slate-900 border border-white/10 focus:border-red-500 rounded p-2 text-white text-xs outline-none transition-colors" 
+                        data-slot={idx}
+                      />
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`yt-title-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Título del Video</label>
+                      <input 
+                        type="text" 
+                        id={`yt-title-${idx}`} 
+                        placeholder="Ej: Banda Bruna - Mix Cumbias" 
+                        class="bg-slate-900 border border-white/10 focus:border-red-500 rounded p-2 text-white text-xs outline-none transition-colors" 
+                      />
+                    </div>
+                    <input type="hidden" id={`yt-thumb-${idx}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- 2. FACEBOOK REELS -->
+            <div class="bg-slate-900/60 border border-blue-500/20 rounded-2xl p-5 md:p-6 shadow-xl">
+              <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm">
+                    f
+                  </div>
+                  <div>
+                    <h3 class="font-title font-bold text-base uppercase text-white tracking-wide">
+                      2. Facebook Reels & Clips
+                    </h3>
+                    <p class="text-[10px] text-slate-400">5 Reels verticales · Portada y título detectados automáticamente al pegar el enlace</p>
+                  </div>
+                </div>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-blue-400 bg-blue-950/60 px-2.5 py-1 rounded-full border border-blue-500/20">
+                  5 Reels
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {[0, 1, 2, 3, 4].map(idx => (
+                  <div class="bg-slate-950/70 border border-white/5 rounded-xl p-3.5 flex flex-col justify-between gap-2.5 group hover:border-blue-500/40 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider font-mono">Reel {idx + 1}</span>
+                      <span class="text-[9px] text-slate-500">Facebook</span>
+                    </div>
+
+                    <!-- Live Thumbnail Preview -->
+                    <div id={`fb-preview-${idx}`} class="aspect-[9/13] bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-white/10 text-center">
+                      <span class="text-[9px] text-slate-500 p-2">Pega el link para ver la portada</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`fb-url-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Enlace del Reel *</label>
+                      <input 
+                        type="url" 
+                        id={`fb-url-${idx}`} 
+                        placeholder="https://www.facebook.com/reel/..." 
+                        class="fb-url-input bg-slate-900 border border-white/10 focus:border-blue-500 rounded p-2 text-white text-xs outline-none transition-colors" 
+                        data-slot={idx}
+                      />
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`fb-title-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Título / Pie de Foto</label>
+                      <input 
+                        type="text" 
+                        id={`fb-title-${idx}`} 
+                        placeholder="Ej: Banda Bruna en vivo..." 
+                        class="bg-slate-900 border border-white/10 focus:border-blue-500 rounded p-2 text-white text-xs outline-none transition-colors" 
+                      />
+                    </div>
+
+                    <input type="hidden" id={`fb-thumb-${idx}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- 3. INSTAGRAM REELS -->
+            <div class="bg-slate-900/60 border border-[#E1306C]/25 rounded-2xl p-5 md:p-6 shadow-xl">
+              <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-[#E1306C]/10 border border-[#E1306C]/30 flex items-center justify-center text-[#E1306C] font-bold text-sm">
+                    📸
+                  </div>
+                  <div>
+                    <h3 class="font-title font-bold text-base uppercase text-white tracking-wide">
+                      3. Instagram Reels & Clips
+                    </h3>
+                    <p class="text-[10px] text-slate-400">5 Reels verticales · Portada y título detectados automáticamente al pegar el enlace</p>
+                  </div>
+                </div>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-[#E1306C] bg-pink-950/60 px-2.5 py-1 rounded-full border border-[#E1306C]/20">
+                  5 Reels
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {[0, 1, 2, 3, 4].map(idx => (
+                  <div class="bg-slate-950/70 border border-white/5 rounded-xl p-3.5 flex flex-col justify-between gap-2.5 group hover:border-[#E1306C]/40 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-[#E1306C] uppercase tracking-wider font-mono">Reel {idx + 1}</span>
+                      <span class="text-[9px] text-slate-500">Instagram</span>
+                    </div>
+
+                    <!-- Live Thumbnail Preview -->
+                    <div id={`ig-preview-${idx}`} class="aspect-[9/13] bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-white/10 text-center">
+                      <span class="text-[9px] text-slate-500 p-2">Pega el link para ver la portada</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`ig-url-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Enlace del Reel *</label>
+                      <input 
+                        type="url" 
+                        id={`ig-url-${idx}`} 
+                        placeholder="https://www.instagram.com/reel/..." 
+                        class="ig-url-input bg-slate-900 border border-white/10 focus:border-[#E1306C] rounded p-2 text-white text-xs outline-none transition-colors" 
+                        data-slot={idx}
+                      />
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`ig-title-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Título / Pie de Foto</label>
+                      <input 
+                        type="text" 
+                        id={`ig-title-${idx}`} 
+                        placeholder="Ej: Banda Bruna en vivo..." 
+                        class="bg-slate-900 border border-white/10 focus:border-[#E1306C] rounded p-2 text-white text-xs outline-none transition-colors" 
+                      />
+                    </div>
+
+                    <input type="hidden" id={`ig-thumb-${idx}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- 4. TIKTOK OFICIAL -->
+            <div class="bg-slate-900/60 border border-[#FE2C55]/25 rounded-2xl p-5 md:p-6 shadow-xl">
+              <div class="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-[#FE2C55]/10 border border-[#FE2C55]/30 flex items-center justify-center text-[#FE2C55] font-bold text-sm">
+                    🎵
+                  </div>
+                  <div>
+                    <h3 class="font-title font-bold text-base uppercase text-white tracking-wide">
+                      4. TikTok Oficial & Clips
+                    </h3>
+                    <p class="text-[10px] text-slate-400">5 Videos de TikTok · Portada en alta definición y título detectados automáticamente</p>
+                  </div>
+                </div>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-[#FE2C55] bg-rose-950/60 px-2.5 py-1 rounded-full border border-[#FE2C55]/20">
+                  5 Videos
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {[0, 1, 2, 3, 4].map(idx => (
+                  <div class="bg-slate-950/70 border border-white/5 rounded-xl p-3.5 flex flex-col justify-between gap-2.5 group hover:border-[#FE2C55]/40 transition-colors">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-[#FE2C55] uppercase tracking-wider font-mono">TikTok {idx + 1}</span>
+                      <span class="text-[9px] text-slate-500">TikTok</span>
+                    </div>
+
+                    <!-- Live Thumbnail Preview -->
+                    <div id={`tt-preview-${idx}`} class="aspect-[9/13] bg-slate-900 rounded-lg overflow-hidden relative flex items-center justify-center border border-white/10 text-center">
+                      <span class="text-[9px] text-slate-500 p-2">Pega el link para ver la portada</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`tt-url-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Enlace de TikTok *</label>
+                      <input 
+                        type="url" 
+                        id={`tt-url-${idx}`} 
+                        placeholder="https://www.tiktok.com/@bandabrunaoficial/video/..." 
+                        class="tt-url-input bg-slate-900 border border-white/10 focus:border-[#FE2C55] rounded p-2 text-white text-xs outline-none transition-colors" 
+                        data-slot={idx}
+                      />
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                      <label for={`tt-title-${idx}`} class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Título / Pie de Foto</label>
+                      <input 
+                        type="text" 
+                        id={`tt-title-${idx}`} 
+                        placeholder="Ej: Día del Minero..." 
+                        class="bg-slate-900 border border-white/10 focus:border-[#FE2C55] rounded p-2 text-white text-xs outline-none transition-colors" 
+                      />
+                    </div>
+
+                    <input type="hidden" id={`tt-thumb-${idx}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- Botón Guardar Inferior -->
+            <div class="bg-slate-950/80 border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 backdrop-blur-md shadow-2xl">
+              <div>
+                <h4 class="font-title font-bold text-sm text-white uppercase tracking-wider">¿Listo para publicar los cambios?</h4>
+                <p class="text-[11px] text-slate-400">Los 20 enlaces se sincronizarán directamente en la base de datos de Supabase y aparecerán de inmediato en /videos.</p>
+              </div>
+              <button 
+                type="submit" 
+                id="btn-save-web-videos-bottom" 
+                class="w-full sm:w-auto bg-gold-bruna hover:bg-gold-bruna-hover text-black font-title font-extrabold px-8 py-3 rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-lg hover:scale-102 flex items-center justify-center gap-2"
+              >
+                <span>💾</span>
+                <span>GUARDAR TODOS LOS VIDEOS</span>
+              </button>
+            </div>
+
+          </form>
+        </section>
+
         <!-- Tab 6: Testimonios / Reseñas de Clientes -->
         <section id="tab-testimonios" class="tab-pane hidden">
           <div class="flex justify-between items-center mb-6">
@@ -711,6 +1000,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
             }
           }
           if (target === 'config') loadConfig();
+          if (target === 'videos-web') loadWebVideosAdmin();
           if (target === 'testimonios') loadTestimonios();
           if (target === 'lanzamientos') loadLanzamientos();
           if (target === 'logs') loadLogs();
@@ -2505,10 +2795,10 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         (document.getElementById('conf-tiktok') as HTMLInputElement).value = data.tiktok || '';
 
         // Nuevos campos de estadísticas
-        (document.getElementById('conf-stats-instagram') as HTMLInputElement).value = data.cant_instagram !== undefined && data.cant_instagram !== null ? data.cant_instagram : 3366;
-        (document.getElementById('conf-stats-facebook') as HTMLInputElement).value = data.cant_facebook !== undefined && data.cant_facebook !== null ? data.cant_facebook : 4971;
-        (document.getElementById('conf-stats-youtube') as HTMLInputElement).value = data.cant_youtube !== undefined && data.cant_youtube !== null ? data.cant_youtube : 911;
-        (document.getElementById('conf-stats-tiktok') as HTMLInputElement).value = data.cant_tiktok !== undefined && data.cant_tiktok !== null ? data.cant_tiktok : 1139;
+        (document.getElementById('conf-stats-instagram') as HTMLInputElement).value = Math.max(Number(data.cant_instagram) || 0, 3488).toString();
+        (document.getElementById('conf-stats-facebook') as HTMLInputElement).value = Math.max(Number(data.cant_facebook) || 0, 4971).toString();
+        (document.getElementById('conf-stats-youtube') as HTMLInputElement).value = Math.max(Number(data.cant_youtube) || 0, 948).toString();
+        (document.getElementById('conf-stats-tiktok') as HTMLInputElement).value = Math.max(Number(data.cant_tiktok) || 0, 1146).toString();
         (document.getElementById('conf-stats-trayectoria') as HTMLInputElement).value = data.cant_trayectoria !== undefined && data.cant_trayectoria !== null ? data.cant_trayectoria : 15;
         (document.getElementById('conf-stats-escenarios') as HTMLInputElement).value = data.cant_escenarios !== undefined && data.cant_escenarios !== null ? data.cant_escenarios : 10;
         (document.getElementById('conf-stats-regiones') as HTMLInputElement).value = data.cant_regiones !== undefined && data.cant_regiones !== null ? data.cant_regiones : 5;
@@ -2544,10 +2834,10 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           youtube,
           tiktok,
           // Nuevos campos
-          cant_instagram: isNaN(cantInstagram) ? 3366 : cantInstagram,
-          cant_facebook: isNaN(cantFacebook) ? 4971 : cantFacebook,
-          cant_youtube: isNaN(cantYoutube) ? 911 : cantYoutube,
-          cant_tiktok: isNaN(cantTiktok) ? 1139 : cantTiktok,
+          cant_instagram: isNaN(cantInstagram) ? 3488 : Math.max(cantInstagram, 3488),
+          cant_facebook: isNaN(cantFacebook) ? 4971 : Math.max(cantFacebook, 4971),
+          cant_youtube: isNaN(cantYoutube) ? 948 : Math.max(cantYoutube, 948),
+          cant_tiktok: isNaN(cantTiktok) ? 1146 : Math.max(cantTiktok, 1146),
           cant_trayectoria: isNaN(cantTrayectoria) ? 15 : cantTrayectoria,
           cant_escenarios: isNaN(cantEscenarios) ? 10 : cantEscenarios,
           cant_regiones: isNaN(cantRegiones) ? 5 : cantRegiones
@@ -2591,9 +2881,9 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           const token = session?.access_token || '';
 
           const res = await fetch('/api/cron/sync-social', {
-            method: 'POST',
+            method: 'GET',
             headers: {
-              'Content-Type': 'application/json',
+              'Accept': 'application/json',
               'Authorization': `Bearer ${token}`
             }
           });
@@ -2606,6 +2896,13 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           }
           if (res.ok && data.success) {
             await loadConfig();
+            if (typeof (window as any).loadSocialFeedAdmin === 'function') {
+              (window as any).loadSocialFeedAdmin();
+            }
+            if (typeof (window as any).loadLanzamientos === 'function') {
+              (window as any).loadLanzamientos();
+            }
+
             const m = data.metrics || {};
             const lanzamientosList = data.lanzamientos_updated || [];
             let lanMsg = '';
@@ -2653,6 +2950,276 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
           await logAction('Ejecutó sincronización forzada de lanzamientos y catálogo de audio en plataformas');
           alert('Sincronización de plataformas de streaming finalizada. Spotify y YouTube Music actualizados.');
         }, 1500);
+      });
+
+      // ==========================================
+      // LÓGICA DE PESTAÑA: VIDEOS DE LA WEB (AUTO-PORTADAS Y METADATOS)
+      // ==========================================
+      const platformBadges: Record<string, { color: string, label: string }> = {
+        yt: { color: 'bg-red-600', label: 'YouTube' },
+        fb: { color: 'bg-blue-600', label: 'Facebook Reel' },
+        ig: { color: 'bg-[#E1306C]', label: 'Instagram Reel' },
+        tt: { color: 'bg-[#FE2C55]', label: 'TikTok' }
+      };
+
+      function updateVideoPreview(prefix: string, index: number, thumbUrl?: string, title?: string) {
+        const previewDiv = document.getElementById(`${prefix}-preview-${index}`);
+        if (!previewDiv) return;
+
+        const badge = platformBadges[prefix] || { color: 'bg-gold-bruna text-black', label: 'Video' };
+
+        if (thumbUrl && thumbUrl.trim()) {
+          previewDiv.innerHTML = `
+            <img src="${thumbUrl}" alt="Preview" class="w-full h-full object-cover" referrerpolicy="no-referrer" />
+            <div class="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+              <span class="${badge.color} text-white text-[10px] font-bold px-2 py-0.5 rounded shadow flex items-center gap-1">
+                <span>▶</span> <span>${badge.label}</span>
+              </span>
+            </div>
+          `;
+        } else {
+          previewDiv.innerHTML = `
+            <div class="flex flex-col items-center justify-center text-slate-500 text-[9px] p-2 text-center">
+              <span class="text-base mb-1">🔗</span>
+              <span>Pega el link para ver la portada</span>
+            </div>
+          `;
+        }
+      }
+
+      const metaFetchDebounceTimers: Record<string, any> = {};
+
+      async function triggerMetaFetch(prefix: string, index: number, immediate = false) {
+        const urlEl = document.getElementById(`${prefix}-url-${index}`) as HTMLInputElement;
+        const titleEl = document.getElementById(`${prefix}-title-${index}`) as HTMLInputElement;
+        const thumbEl = document.getElementById(`${prefix}-thumb-${index}`) as HTMLInputElement;
+        const previewDiv = document.getElementById(`${prefix}-preview-${index}`);
+
+        if (!urlEl || !previewDiv) return;
+        const url = urlEl.value.trim();
+
+        const timerKey = `${prefix}-${index}`;
+        if (metaFetchDebounceTimers[timerKey]) {
+          clearTimeout(metaFetchDebounceTimers[timerKey]);
+        }
+
+        if (!url) {
+          if (thumbEl) thumbEl.value = '';
+          updateVideoPreview(prefix, index, '');
+          return;
+        }
+
+        const runFetch = async () => {
+          previewDiv.innerHTML = `
+            <div class="flex flex-col items-center justify-center text-gold-bruna text-[9px] p-2 text-center animate-pulse">
+              <span class="text-base mb-1">⏳</span>
+              <span>Detectando portada original...</span>
+            </div>
+          `;
+
+          try {
+            const res = await fetch(`/api/admin/fetch-video-meta?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+
+            if (data.success && data.thumbnail) {
+              if (thumbEl) thumbEl.value = data.thumbnail;
+              updateVideoPreview(prefix, index, data.thumbnail, data.title);
+              if (titleEl && !titleEl.value.trim() && data.title) {
+                titleEl.value = data.title;
+              }
+            } else {
+              previewDiv.innerHTML = `
+                <div class="flex flex-col items-center justify-center text-slate-400 text-[9px] p-2 text-center">
+                  <span class="text-base mb-1">⚠️</span>
+                  <span>Portada no detectada automáticamente</span>
+                </div>
+              `;
+            }
+          } catch (err: any) {
+            console.warn('[dashboard] Error al auto-detectar portada:', err);
+            previewDiv.innerHTML = `
+              <div class="flex flex-col items-center justify-center text-slate-400 text-[9px] p-2 text-center">
+                <span>⚠️ Error al leer enlace</span>
+              </div>
+            `;
+          }
+        };
+
+        if (immediate) {
+          runFetch();
+        } else {
+          metaFetchDebounceTimers[timerKey] = setTimeout(runFetch, 600);
+        }
+      }
+
+      async function loadWebVideosAdmin() {
+        const statusDiv = document.getElementById('web-videos-status');
+        if (statusDiv) {
+          statusDiv.classList.remove('hidden', 'text-green-400', 'text-red-400');
+          statusDiv.classList.add('text-gold-bruna');
+          statusDiv.textContent = 'Cargando videos actuales de la web...';
+        }
+
+        try {
+          const res = await fetch('/api/admin/save-web-videos');
+          const data = await res.json();
+          if (!data.success || !data.videos) {
+            throw new Error(data.error || 'Error al obtener videos');
+          }
+
+          const videos = data.videos;
+
+          const populatePlatform = (plat: string, prefix: string) => {
+            const list = videos[plat] || [];
+            for (let i = 0; i < 5; i++) {
+              const item = list[i] || {};
+              const urlEl = document.getElementById(`${prefix}-url-${i}`) as HTMLInputElement;
+              const titleEl = document.getElementById(`${prefix}-title-${i}`) as HTMLInputElement;
+              const thumbEl = document.getElementById(`${prefix}-thumb-${i}`) as HTMLInputElement;
+
+              if (urlEl) urlEl.value = item.url || '';
+              if (titleEl) titleEl.value = item.title || '';
+              if (thumbEl) thumbEl.value = item.thumbnail || '';
+
+              updateVideoPreview(prefix, i, item.thumbnail, item.title);
+            }
+          };
+
+          populatePlatform('youtube', 'yt');
+          populatePlatform('facebook', 'fb');
+          populatePlatform('instagram', 'ig');
+          populatePlatform('tiktok', 'tt');
+
+          if (statusDiv) {
+            statusDiv.classList.add('hidden');
+          }
+        } catch (err: any) {
+          console.error('Error al cargar videos de la web:', err);
+          if (statusDiv) {
+            statusDiv.classList.remove('text-gold-bruna');
+            statusDiv.classList.add('text-red-400');
+            statusDiv.textContent = 'Error al cargar los videos desde la base de datos.';
+          }
+        }
+      }
+
+      async function saveWebVideosAdmin() {
+        const statusDiv = document.getElementById('web-videos-status');
+        const saveBtns = [
+          document.getElementById('btn-save-web-videos-top') as HTMLButtonElement,
+          document.getElementById('btn-save-web-videos-bottom') as HTMLButtonElement
+        ];
+
+        saveBtns.forEach(b => {
+          if (b) {
+            b.disabled = true;
+            b.classList.add('opacity-50');
+          }
+        });
+
+        if (statusDiv) {
+          statusDiv.classList.remove('hidden', 'text-green-400', 'text-red-400');
+          statusDiv.classList.add('text-gold-bruna');
+          statusDiv.textContent = 'Guardando cambios en Supabase...';
+        }
+
+        try {
+          const collectPlatform = (prefix: string) => {
+            const items = [];
+            for (let i = 0; i < 5; i++) {
+              const urlEl = document.getElementById(`${prefix}-url-${i}`) as HTMLInputElement;
+              const titleEl = document.getElementById(`${prefix}-title-${i}`) as HTMLInputElement;
+              const thumbEl = document.getElementById(`${prefix}-thumb-${i}`) as HTMLInputElement;
+
+              items.push({
+                url: urlEl ? urlEl.value.trim() : '',
+                title: titleEl ? titleEl.value.trim() : '',
+                thumbnail: thumbEl ? thumbEl.value.trim() : ''
+              });
+            }
+            return items;
+          };
+
+          const payload = {
+            youtube: collectPlatform('yt'),
+            facebook: collectPlatform('fb'),
+            instagram: collectPlatform('ig'),
+            tiktok: collectPlatform('tt')
+          };
+
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token || '';
+
+          const res = await fetch('/api/admin/save-web-videos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await res.json();
+          if (!result.success) {
+            throw new Error(result.error || 'Error al guardar');
+          }
+
+          if (statusDiv) {
+            statusDiv.classList.remove('text-gold-bruna', 'text-red-400');
+            statusDiv.classList.add('text-green-400');
+            statusDiv.textContent = '✓ ' + (result.message || 'Videos guardados exitosamente.');
+          }
+
+          await logAction('Actualizó los 20 videos de la web (YouTube, Facebook, Instagram, TikTok)');
+          alert('¡Videos actualizados correctamente! Los cambios ya están activos en /videos.');
+          loadWebVideosAdmin();
+        } catch (err: any) {
+          console.error('Error al guardar videos:', err);
+          if (statusDiv) {
+            statusDiv.classList.remove('text-gold-bruna');
+            statusDiv.classList.add('text-red-400');
+            statusDiv.textContent = 'Error: ' + err.message;
+          }
+          alert('Error al guardar: ' + err.message);
+        } finally {
+          saveBtns.forEach(b => {
+            if (b) {
+              b.disabled = false;
+              b.classList.remove('opacity-50');
+            }
+          });
+        }
+      }
+
+      // Escuchar cambios en los inputs de todas las plataformas (YouTube, Facebook, Instagram, TikTok)
+      ['yt', 'fb', 'ig', 'tt'].forEach(prefix => {
+        document.querySelectorAll(`.${prefix}-url-input`).forEach(input => {
+          const slot = parseInt(input.getAttribute('data-slot') || '0', 10);
+          input.addEventListener('input', () => {
+            triggerMetaFetch(prefix, slot, false);
+          });
+          input.addEventListener('paste', () => {
+            setTimeout(() => triggerMetaFetch(prefix, slot, true), 50);
+          });
+          input.addEventListener('change', () => {
+            triggerMetaFetch(prefix, slot, true);
+          });
+        });
+      });
+
+      // Listeners de guardado y recarga
+      document.getElementById('web-videos-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveWebVideosAdmin();
+      });
+
+      document.getElementById('btn-save-web-videos-top')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        saveWebVideosAdmin();
+      });
+
+      document.getElementById('btn-reload-web-videos')?.addEventListener('click', () => {
+        loadWebVideosAdmin();
       });
 
       // ==========================================

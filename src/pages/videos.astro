@@ -2,13 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 import { getVideoPlaylists } from '../services/socialApi.js';
 import { supabase } from '../services/supabaseClient.js';
+import curatedFallback from '../data/curatedVideos.json';
 
 export const prerender = false;
 
 // 1. Catálogo base de alta disponibilidad (fallback)
 const staticPlaylists = getVideoPlaylists();
 
-// 2. Consulta de publicaciones dinámicas desde Supabase (últimos 5 de cada red)
+// 2. Consulta de publicaciones dinámicas desde Supabase (los 5 videos autoadministrados de cada red)
 let playlists = {
   youtube: [...staticPlaylists.youtube],
   facebook: [...staticPlaylists.facebook],
@@ -17,7 +18,7 @@ let playlists = {
 };
 
 try {
-  // Consultar en paralelo para máxima velocidad en SSR
+  // Consultar en paralelo para máxima velocidad en SSR respetando web_order (1 al 5)
   const [ytRes, fbRes, igRes, ttRes] = await Promise.all([
     supabase
       .from('social_posts')
@@ -25,87 +26,131 @@ try {
       .eq('platform', 'youtube')
       .eq('disponible', true)
       .eq('show_on_web', true)
-      .order('published_at', { ascending: false })
-      .limit(5),
+      .not('web_order', 'is', null)
+      .order('web_order', { ascending: true })
+      .limit(10),
     supabase
       .from('social_posts')
       .select('*')
       .eq('platform', 'facebook')
       .eq('disponible', true)
       .eq('show_on_web', true)
+      .not('web_order', 'is', null)
       .order('web_order', { ascending: true })
-      .limit(5),
+      .limit(10),
     supabase
       .from('social_posts')
       .select('*')
       .eq('platform', 'instagram')
       .eq('disponible', true)
       .eq('show_on_web', true)
+      .not('web_order', 'is', null)
       .order('web_order', { ascending: true })
-      .limit(5),
+      .limit(10),
     supabase
       .from('social_posts')
       .select('*')
       .eq('platform', 'tiktok')
       .eq('disponible', true)
       .eq('show_on_web', true)
+      .not('web_order', 'is', null)
       .order('web_order', { ascending: true })
-      .limit(5)
+      .limit(10)
   ]);
 
   // Si hay videos de YouTube en Supabase, formateamos
   if (ytRes.data && ytRes.data.length > 0) {
-    const formattedYt = ytRes.data.map((v: any, idx: number) => ({
-      id: v.external_id || `yt_${idx}`,
-      title: v.title || 'Banda Bruna - Video Oficial',
-      url: v.url || `https://www.youtube.com/watch?v=${v.external_id}`,
-      embedId: v.external_id,
-      thumbnail: v.thumbnail_url || `https://i.ytimg.com/vi/${v.external_id}/hqdefault.jpg`,
-      duration: v.post_type === 'short' ? 'Short' : 'Oficial',
-      category: v.post_type === 'short' ? 'YouTube Short' : 'YouTube Oficial'
-    }));
-    const remainingYt = staticPlaylists.youtube.filter((sv: any) => !formattedYt.some((fy: any) => fy.id === sv.id || fy.embedId === sv.embedId));
-    playlists.youtube = [...formattedYt, ...remainingYt].slice(0, 5);
+    const seenYtOrders = new Set();
+    const dedupedYt = ytRes.data.filter((v: any) => {
+      if (seenYtOrders.has(v.web_order)) return false;
+      seenYtOrders.add(v.web_order);
+      return true;
+    });
+
+    const formattedYt = dedupedYt.map((v: any, idx: number) => {
+      const orderIdx = (v.web_order || idx + 1) - 1;
+      const fallbackItem = (curatedFallback as any)?.youtube?.[orderIdx];
+      let thumb = v.thumbnail_url;
+      if (!thumb || thumb.startsWith('/assets/images/') || (v.external_id && !thumb.includes(v.external_id))) {
+        thumb = fallbackItem?.thumbnail || (v.external_id ? `https://i.ytimg.com/vi/${v.external_id}/hqdefault.jpg` : '');
+      }
+      return {
+        id: v.external_id || `yt_${idx}`,
+        title: v.title || fallbackItem?.title || 'Banda Bruna - Video Oficial',
+        url: v.url || `https://www.youtube.com/watch?v=${v.external_id}`,
+        embedId: v.external_id,
+        thumbnail: thumb || `https://i.ytimg.com/vi/${v.external_id}/hqdefault.jpg`,
+        duration: v.post_type === 'short' ? 'Short' : 'Oficial',
+        category: v.post_type === 'short' ? 'YouTube Short' : 'YouTube Oficial'
+      };
+    });
+    const uniqueYt = formattedYt.filter((v: any, i: number, arr: any[]) => arr.findIndex((x: any) => x.embedId === v.embedId) === i);
+    const remainingYt = staticPlaylists.youtube.filter((sv: any) => !uniqueYt.some((fy: any) => fy.id === sv.id || fy.embedId === sv.embedId));
+    playlists.youtube = [...uniqueYt, ...remainingYt].slice(0, 5);
   }
 
   // Si hay reels de Facebook en Supabase
   if (fbRes.data && fbRes.data.length > 0) {
-    const formattedFb = fbRes.data.map((r: any, idx: number) => ({
-      id: r.external_id || `fb_${idx}`,
-      title: r.title || r.caption || 'Banda Bruna en vivo',
-      url: r.url,
-      thumbnail: r.thumbnail_url || '/assets/images/facebook/fb_fiestas_patrias.webp',
-      duration: '0:45',
-      category: 'Facebook Reel'
-    }));
+    const formattedFb = fbRes.data.map((r: any, idx: number) => {
+      const orderIdx = (r.web_order || idx + 1) - 1;
+      const fallbackItem = (curatedFallback as any)?.facebook?.[orderIdx];
+      let thumb = r.thumbnail_url;
+      if ((!thumb || thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail) {
+        thumb = fallbackItem.thumbnail;
+      }
+      return {
+        id: r.external_id || `fb_${idx}`,
+        title: r.title || r.caption || fallbackItem?.title || 'Banda Bruna en vivo',
+        url: r.url,
+        thumbnail: thumb || '/assets/images/facebook/fb_fiestas_patrias.webp',
+        duration: '0:45',
+        category: 'Facebook Reel'
+      };
+    });
     const remainingFb = staticPlaylists.facebook.filter((sf: any) => !formattedFb.some((ff: any) => ff.id === sf.id || ff.url === sf.url));
     playlists.facebook = [...formattedFb, ...remainingFb].slice(0, 5);
   }
 
   // Si hay reels de Instagram en Supabase
   if (igRes.data && igRes.data.length > 0) {
-    const formattedIg = igRes.data.map((r: any, idx: number) => ({
-      id: r.external_id || `ig_${idx}`,
-      title: r.title || r.caption || 'Banda Bruna en Instagram',
-      url: r.url,
-      thumbnail: r.thumbnail_url || '/assets/images/instagram/ig_boca_de_lobos.webp',
-      duration: '0:45',
-      category: 'Instagram Reel'
-    }));
+    const formattedIg = igRes.data.map((r: any, idx: number) => {
+      const orderIdx = (r.web_order || idx + 1) - 1;
+      const fallbackItem = (curatedFallback as any)?.instagram?.[orderIdx];
+      let thumb = r.thumbnail_url;
+      if ((!thumb || thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail) {
+        thumb = fallbackItem.thumbnail;
+      }
+      return {
+        id: r.external_id || `ig_${idx}`,
+        title: r.title || r.caption || fallbackItem?.title || 'Banda Bruna en Instagram',
+        url: r.url,
+        thumbnail: thumb || '/assets/images/instagram/ig_boca_de_lobos.webp',
+        duration: '0:45',
+        category: 'Instagram Reel'
+      };
+    });
     const remainingIg = staticPlaylists.instagram.filter((si: any) => !formattedIg.some((fi: any) => fi.id === si.id || fi.url === si.url));
     playlists.instagram = [...formattedIg, ...remainingIg].slice(0, 5);
   }
 
   // Si hay videos de TikTok en Supabase
   if (ttRes.data && ttRes.data.length > 0) {
-    const formattedTt = ttRes.data.map((t: any, idx: number) => ({
-      id: t.external_id || `tt_${idx}`,
-      title: t.title || t.caption || 'Banda Bruna en TikTok',
-      url: t.url,
-      thumbnail: t.thumbnail_url || '/assets/images/tiktok/tiktok_minero.webp',
-      duration: '0:45',
-      category: 'TikTok Oficial'
-    }));
+    const formattedTt = ttRes.data.map((t: any, idx: number) => {
+      const orderIdx = (t.web_order || idx + 1) - 1;
+      const fallbackItem = (curatedFallback as any)?.tiktok?.[orderIdx];
+      let thumb = t.thumbnail_url;
+      if ((!thumb || thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail) {
+        thumb = fallbackItem.thumbnail;
+      }
+      return {
+        id: t.external_id || `tt_${idx}`,
+        title: t.title || t.caption || fallbackItem?.title || 'Banda Bruna en TikTok',
+        url: t.url,
+        thumbnail: thumb || '/assets/images/tiktok/tiktok_minero.webp',
+        duration: '0:45',
+        category: 'TikTok Oficial'
+      };
+    });
     const remainingTt = staticPlaylists.tiktok.filter((st: any) => !formattedTt.some((ft: any) => ft.id === st.id || ft.url === st.url));
     playlists.tiktok = [...formattedTt, ...remainingTt].slice(0, 5);
   }
@@ -148,11 +193,40 @@ try {
             <div class="w-full h-full shrink-0 relative flex items-center justify-center">
               <video 
                 src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4" 
+                poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.jpg"
                 class="w-full h-full object-cover bg-slate-950" 
                 controls 
                 preload="metadata"
                 playsinline
                 aria-label="Presentación en vivo de Banda Bruna - Show en Vivo 2"
+              >
+                <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+              </video>
+            </div>
+            <!-- Slide 3 -->
+            <div class="w-full h-full shrink-0 relative flex items-center justify-center">
+              <video 
+                src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1790112786/20260919_200010_axde4z.mp4" 
+                poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1790112786/20260919_200010_axde4z.jpg"
+                class="w-full h-full object-cover bg-slate-950" 
+                controls 
+                preload="metadata"
+                playsinline
+                aria-label="Presentación en vivo de Banda Bruna - Fiestas Patrias Registro 1"
+              >
+                <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+              </video>
+            </div>
+            <!-- Slide 4 -->
+            <div class="w-full h-full shrink-0 relative flex items-center justify-center">
+              <video 
+                src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1790112832/20260919_202255_jlxc0o.mp4" 
+                poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1790112832/20260919_202255_jlxc0o.jpg"
+                class="w-full h-full object-cover bg-slate-950" 
+                controls 
+                preload="metadata"
+                playsinline
+                aria-label="Presentación en vivo de Banda Bruna - Fiestas Patrias Registro 2"
               >
                 <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
               </video>
@@ -164,20 +238,22 @@ try {
           <button id="next-video" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/10 select-none" aria-label="Siguiente video">❯</button>
           
           <!-- Slide indicators (dots) -->
-          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="0" aria-label="Video 1"></button>
-            <button class="w-2 h-2 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="1" aria-label="Video 2"></button>
+          <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/50 px-2.5 py-1 rounded-full backdrop-blur-sm">
+            <button class="w-2.5 h-2.5 rounded-full bg-white transition-all cursor-pointer" data-slide="0" aria-label="Video 1: Puerto Saavedra"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="1" aria-label="Video 2: Show en Vivo"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="2" aria-label="Video 3: Fiestas Patrias I"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-slide="3" aria-label="Video 4: Fiestas Patrias II"></button>
           </div>
         </div>
 
         <!-- Description Box -->
         <div class="w-full lg:w-2/5 flex flex-col justify-center text-left">
-          <span class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1.5 font-title">PRESENTACIÓN DESTACADA</span>
+          <span id="featured-video-badge" class="text-[10px] tracking-widest font-bold text-gold-bruna uppercase block mb-1.5 font-title">PRESENTACIÓN DESTACADA</span>
           <h2 id="featured-video-title" class="font-title font-bold text-2xl text-white uppercase leading-snug mb-3">
-            La Energía del Show en Vivo
+            Puerto Saavedra · Explanada Costera
           </h2>
-          <p class="text-xs text-slate-300 font-light leading-relaxed mb-6">
-            Una muestra auténtica de Banda Bruna sobre el escenario. Experimenta la potencia del sonido en vivo, la alegría contagiosa y la respuesta vibrante del público sureño que define cada una de nuestras fechas.
+          <p id="featured-video-desc" class="text-xs text-slate-300 font-light leading-relaxed mb-6">
+            Más de 5.000 personas en vivo. Audio directo de consola sin pistas pregrabadas.
           </p>
           <div class="flex flex-wrap gap-4">
             <a 
@@ -224,7 +300,7 @@ try {
           </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 sm:gap-6">
           {playlists.youtube.map(video => (
             <a 
               href={video.url} 
@@ -237,6 +313,8 @@ try {
                   src={video.thumbnail} 
                   alt={video.title} 
                   class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" 
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
                 />
                 <!-- Play button overlay -->
                 <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/30 transition-colors">
@@ -286,6 +364,7 @@ try {
                 src={reel.thumbnail} 
                 alt={reel.title} 
                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                referrerpolicy="no-referrer"
                 loading="lazy"
               />
               
@@ -356,6 +435,7 @@ try {
                 src={reel.thumbnail} 
                 alt={reel.title} 
                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                referrerpolicy="no-referrer"
                 loading="lazy"
               />
               
@@ -426,6 +506,7 @@ try {
                 src={video.thumbnail} 
                 alt={video.title} 
                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                referrerpolicy="no-referrer"
                 loading="lazy"
               />
               
@@ -468,29 +549,49 @@ try {
   </section>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function setupVideoCarousel() {
       const carousel = document.getElementById('video-carousel');
+      if (!carousel) return;
+
       const prevBtn = document.getElementById('prev-video');
       const nextBtn = document.getElementById('next-video');
       const dots = document.querySelectorAll('[data-slide]');
       const videos = document.querySelectorAll('#video-carousel video') as NodeListOf<HTMLVideoElement>;
+      const videoBadge = document.getElementById('featured-video-badge');
       const videoTitle = document.getElementById('featured-video-title');
+      const videoDesc = document.getElementById('featured-video-desc');
       const fbBtn = document.getElementById('fb-video-link') as HTMLAnchorElement;
 
       let currentSlide = 0;
 
-      const titles = [
-        "La Energía del Show en Vivo",
-        "Show Masivo en el Escenario"
-      ];
-      
-      const fbLinks = [
-        "https://www.facebook.com/reel/918184277458701",
-        "https://www.facebook.com/bandabruna"
+      const slidesData = [
+        {
+          badge: "PRESENTACIÓN DESTACADA",
+          title: "Puerto Saavedra · Explanada Costera",
+          desc: "Más de 5.000 personas en vivo. Audio directo de consola sin pistas pregrabadas.",
+          fbLink: "https://www.facebook.com/reel/918184277458701"
+        },
+        {
+          badge: "EN VIVO · BANDA BRUNA",
+          title: "La Energía del Show en Vivo",
+          desc: "Una muestra auténtica de Banda Bruna sobre el escenario. Experimenta la potencia del sonido en vivo.",
+          fbLink: "https://www.facebook.com/bandabruna"
+        },
+        {
+          badge: "FIESTAS PATRIAS 2026 · EN VIVO",
+          title: "Show en Vivo · Fiestas Patrias",
+          desc: "Registro en directo de la presentación estelar de Fiestas Patrias con todo el ritmo y animación tropical.",
+          fbLink: "https://www.facebook.com/bandabruna"
+        },
+        {
+          badge: "CONVOCATORIA Y FIESTA · EN VIVO",
+          title: "Fiesta y Convocatoria · Escenario Central",
+          desc: "Gran marco de público y euforia bailable viviendo la auténtica cumbia y música tropical chilena en directo.",
+          fbLink: "https://www.facebook.com/bandabruna"
+        }
       ];
 
       function updateCarousel(index: number) {
-        // Pausar todos los videos
         videos.forEach(vid => vid.pause());
 
         currentSlide = index;
@@ -509,25 +610,25 @@ try {
           }
         });
 
-        // Actualizar título y link de FB
-        if (videoTitle) {
-          videoTitle.textContent = titles[currentSlide];
-        }
-        if (fbBtn) {
-          fbBtn.href = fbLinks[currentSlide];
+        // Actualizar textos y link
+        if (slidesData[currentSlide]) {
+          if (videoBadge) videoBadge.textContent = slidesData[currentSlide].badge;
+          if (videoTitle) videoTitle.textContent = slidesData[currentSlide].title;
+          if (videoDesc) videoDesc.textContent = slidesData[currentSlide].desc;
+          if (fbBtn) fbBtn.href = slidesData[currentSlide].fbLink;
         }
       }
 
       if (prevBtn && nextBtn) {
         prevBtn.addEventListener('click', () => {
           let index = currentSlide - 1;
-          if (index < 0) index = videos.length - 1;
+          if (index < 0) index = slidesData.length - 1;
           updateCarousel(index);
         });
 
         nextBtn.addEventListener('click', () => {
           let index = currentSlide + 1;
-          if (index >= videos.length) index = 0;
+          if (index >= slidesData.length) index = 0;
           updateCarousel(index);
         });
       }
@@ -540,6 +641,9 @@ try {
 
       // Inicializar primer estado
       updateCarousel(0);
-    });
+    }
+
+    setupVideoCarousel();
+    document.addEventListener('astro:after-swap', setupVideoCarousel);
   </script>
 </Layout>

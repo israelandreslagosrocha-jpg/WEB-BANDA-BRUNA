@@ -196,18 +196,26 @@ const config = dbConfig || {};
 const stats = {
   musiciansTrajectory: config.cant_trayectoria !== undefined && config.cant_trayectoria !== null ? config.cant_trayectoria : (socialStats.musiciansTrajectory || 15),
   stageYears: config.cant_escenarios !== undefined && config.cant_escenarios !== null ? config.cant_escenarios : (socialStats.stageYears || 10),
-  instagramFollowers: config.cant_instagram !== undefined && config.cant_instagram !== null && Number(config.cant_instagram) > 0
-    ? Number(config.cant_instagram)
-    : (Number(socialStats.instagramFollowers) || 3364),
-  facebookFriends: config.cant_facebook !== undefined && config.cant_facebook !== null && Number(config.cant_facebook) > 0
-    ? Number(config.cant_facebook)
-    : (Number(socialStats.facebookFriends) || 4971),
-  youtubeSubscribers: config.cant_youtube !== undefined && config.cant_youtube !== null && Number(config.cant_youtube) > 0
-    ? Number(config.cant_youtube)
-    : (Number(socialStats.youtubeSubscribers) || 911),
-  tiktokFollowers: config.cant_tiktok !== undefined && config.cant_tiktok !== null && Number(config.cant_tiktok) > 0
-    ? Number(config.cant_tiktok)
-    : (Number(socialStats.tiktokFollowers) || 1095),
+  instagramFollowers: Math.max(
+    Number(config.cant_instagram) || 0,
+    Number(socialStats.instagramFollowers) || 0,
+    3488
+  ),
+  facebookFriends: Math.max(
+    Number(config.cant_facebook) || 0,
+    Number(socialStats.facebookFriends) || 0,
+    4971
+  ),
+  youtubeSubscribers: Math.max(
+    Number(config.cant_youtube) || 0,
+    Number(socialStats.youtubeSubscribers) || 0,
+    948
+  ),
+  tiktokFollowers: Math.max(
+    Number(config.cant_tiktok) || 0,
+    Number(socialStats.tiktokFollowers) || 0,
+    1146
+  ),
   regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : (socialStats.regions || 5)
 };
 
@@ -877,34 +885,118 @@ try {
         <!-- Lado A (7 cols): Showcase de Video Masivo en Explanada -->
         <div class="lg:col-span-7 flex flex-col justify-between gap-6">
           <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl group">
-            <video 
-              src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
-              poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.jpg"
-              class="w-full h-full object-cover bg-black" 
-              controls 
-              preload="none"
-              playsinline
-              aria-label="Presentación en vivo de Banda Bruna ante más de 5.000 personas en Puerto Saavedra"
-            >
-              <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
-            </video>
+            <!-- Carousel Slides Wrapper -->
+            <div id="home-live-carousel" class="flex w-full h-full transition-transform duration-500 ease-in-out" style="transform: translateX(0%);">
+              <!-- Slide 1: Puerto Saavedra -->
+              <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-black">
+                <video 
+                  src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.mp4" 
+                  poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1781905596/2.9K_views_119_reactions_Algo_de_lo_que_fue_Puerto_Saavedra_este_fin_de_semana_Gracias_a_todo_ese_lindo_Pu%CC%81blico_Este_sa%CC%81b_b0gyk9.jpg"
+                  class="w-full h-full object-cover bg-black" 
+                  controls 
+                  preload="none"
+                  playsinline
+                  aria-label="Presentación en vivo de Banda Bruna ante más de 5.000 personas en Puerto Saavedra"
+                >
+                  <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+                </video>
+              </div>
+
+              <!-- Slide 2: La Energía del Show en Vivo -->
+              <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-black">
+                <video 
+                  src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.mp4" 
+                  poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1782411607/WhatsApp_Video_2026-06-24_at_12.56.26_PM_oqdkzs.jpg"
+                  class="w-full h-full object-cover bg-black" 
+                  controls 
+                  preload="none"
+                  playsinline
+                  aria-label="Presentación en vivo de Banda Bruna - La Energía del Show en Vivo"
+                >
+                  <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+                </video>
+              </div>
+
+              <!-- Slide 3: Fiestas Patrias en vivo - Registro 1 -->
+              <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-black">
+                <video 
+                  src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1790112786/20260919_200010_axde4z.mp4" 
+                  poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1790112786/20260919_200010_axde4z.jpg"
+                  class="w-full h-full object-cover bg-black" 
+                  controls 
+                  preload="none"
+                  playsinline
+                  aria-label="Presentación en vivo de Banda Bruna en Fiestas Patrias - Registro 1"
+                >
+                  <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+                </video>
+              </div>
+
+              <!-- Slide 4: Fiestas Patrias en vivo - Registro 2 -->
+              <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-black">
+                <video 
+                  src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1790112832/20260919_202255_jlxc0o.mp4" 
+                  poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1790112832/20260919_202255_jlxc0o.jpg"
+                  class="w-full h-full object-cover bg-black" 
+                  controls 
+                  preload="none"
+                  playsinline
+                  aria-label="Presentación en vivo de Banda Bruna en Fiestas Patrias - Registro 2"
+                >
+                  <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+                </video>
+              </div>
+            </div>
             
-            <div class="absolute top-3 left-3 pointer-events-none">
+            <!-- Badge Superior -->
+            <div class="absolute top-3 left-3 pointer-events-none z-10">
               <span class="bg-red-600/90 text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow flex items-center gap-1.5 backdrop-blur-sm">
                 <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                <span>CONCIERTO EN VIVO</span>
+                <span id="home-live-badge">CONCIERTO EN VIVO</span>
               </span>
             </div>
+
+            <!-- Controles Flechas Carousel -->
+            <button id="home-live-prev" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/20 select-none shadow-lg" aria-label="Video anterior">❮</button>
+            <button id="home-live-next" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer border border-white/20 select-none shadow-lg" aria-label="Siguiente video">❯</button>
+
+            <!-- Dots -->
+            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2 bg-black/60 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              <button type="button" class="w-2.5 h-2.5 rounded-full bg-white transition-all cursor-pointer" data-home-slide="0" aria-label="Video 1: Puerto Saavedra"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="1" aria-label="Video 2: Show en Vivo"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="2" aria-label="Video 3: Fiestas Patrias 1"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="3" aria-label="Video 4: Fiestas Patrias 2"></button>
+            </div>
+          </div>
+
+          <!-- Selector de Videos / Mini Tabs -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <button type="button" data-home-tab="0" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-gold-bruna/60 bg-gold-bruna/10 text-left transition-all cursor-pointer flex flex-col gap-0.5">
+              <span class="text-[9px] font-bold text-gold-bruna uppercase tracking-wider block">Video 1</span>
+              <span class="text-xs font-bold text-white line-clamp-1">Puerto Saavedra</span>
+            </button>
+            <button type="button" data-home-tab="1" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 2</span>
+              <span class="text-xs font-bold text-white line-clamp-1">Show en Vivo</span>
+            </button>
+            <button type="button" data-home-tab="2" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 3</span>
+              <span class="text-xs font-bold text-white line-clamp-1">Fiestas Patrias I</span>
+            </button>
+            <button type="button" data-home-tab="3" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 4</span>
+              <span class="text-xs font-bold text-white line-clamp-1">Fiestas Patrias II</span>
+            </button>
           </div>
 
           <!-- Ficha descriptiva del concierto -->
           <div class="bg-[#0b132b]/80 border border-white/10 rounded-xl p-5 text-left flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <span class="text-[10px] text-gold-bruna uppercase font-bold tracking-widest block mb-1">REGISTRO OFICIAL EN ESCENARIO</span>
-              <h3 class="text-base font-bold font-title text-white uppercase tracking-wide">
+              <span id="home-live-tag" class="text-[10px] text-gold-bruna uppercase font-bold tracking-widest block mb-1">REGISTRO OFICIAL EN ESCENARIO</span>
+              <h3 id="home-live-title" class="text-base font-bold font-title text-white uppercase tracking-wide">
                 Puerto Saavedra · Explanada Costera
               </h3>
-              <p class="text-xs text-slate-300 font-light mt-1">
+              <p id="home-live-desc" class="text-xs text-slate-300 font-light mt-1">
                 Más de 5.000 personas en vivo. Audio directo de consola sin pistas pregrabadas.
               </p>
             </div>
@@ -1665,11 +1757,111 @@ try {
       });
     }
 
+    // Carrusel de videos en vivo en Home (Sección El Show en Directo)
+    function setupHomeLiveVideoCarousel() {
+      const homeCarousel = document.getElementById('home-live-carousel');
+      if (!homeCarousel) return;
+
+      const homePrev = document.getElementById('home-live-prev');
+      const homeNext = document.getElementById('home-live-next');
+      const homeDots = document.querySelectorAll('[data-home-slide]');
+      const homeTabs = document.querySelectorAll('[data-home-tab]');
+      const homeVideos = document.querySelectorAll('#home-live-carousel video');
+      const homeTag = document.getElementById('home-live-tag');
+      const homeTitle = document.getElementById('home-live-title');
+      const homeDesc = document.getElementById('home-live-desc');
+
+      const homeSlidesData = [
+        {
+          tag: "REGISTRO OFICIAL EN ESCENARIO",
+          title: "Puerto Saavedra · Explanada Costera",
+          desc: "Más de 5.000 personas en vivo. Audio directo de consola sin pistas pregrabadas."
+        },
+        {
+          tag: "EN VIVO · BANDA BRUNA",
+          title: "La Energía del Show en Vivo",
+          desc: "Una muestra auténtica de Banda Bruna sobre el escenario. Experimenta la potencia del sonido en vivo."
+        },
+        {
+          tag: "FIESTAS PATRIAS 2026 · EN VIVO",
+          title: "Show en Vivo · Escenario Principal",
+          desc: "Toda la energía, ritmo y potencia bailable de Banda Bruna ante una multitud festiva."
+        },
+        {
+          tag: "CONVOCATORIA Y FIESTA · EN VIVO",
+          title: "Fiesta y Convocatoria · Escenario Central",
+          desc: "El público disfrutando y coreando el repertorio tropical en una noche inolvidable."
+        }
+      ];
+
+      let homeSlideIndex = 0;
+
+      function updateHomeCarousel(index) {
+        homeVideos.forEach((v) => {
+          if (v instanceof HTMLVideoElement) v.pause();
+        });
+
+        homeSlideIndex = index;
+        if (homeCarousel) {
+          homeCarousel.style.transform = `translateX(-${homeSlideIndex * 100}%)`;
+        }
+
+        homeDots.forEach((d, i) => {
+          if (i === homeSlideIndex) {
+            d.classList.add('bg-white');
+            d.classList.remove('bg-white/40');
+          } else {
+            d.classList.remove('bg-white');
+            d.classList.add('bg-white/40');
+          }
+        });
+
+        homeTabs.forEach((tab, i) => {
+          if (i === homeSlideIndex) {
+            tab.classList.add('border-gold-bruna/60', 'bg-gold-bruna/10');
+            tab.classList.remove('border-white/10', 'bg-slate-900/60');
+          } else {
+            tab.classList.remove('border-gold-bruna/60', 'bg-gold-bruna/10');
+            tab.classList.add('border-white/10', 'bg-slate-900/60');
+          }
+        });
+
+        if (homeSlidesData[homeSlideIndex]) {
+          if (homeTag) homeTag.textContent = homeSlidesData[homeSlideIndex].tag;
+          if (homeTitle) homeTitle.textContent = homeSlidesData[homeSlideIndex].title;
+          if (homeDesc) homeDesc.textContent = homeSlidesData[homeSlideIndex].desc;
+        }
+      }
+
+      homePrev?.addEventListener('click', () => {
+        let nextIdx = homeSlideIndex - 1;
+        if (nextIdx < 0) nextIdx = homeSlidesData.length - 1;
+        updateHomeCarousel(nextIdx);
+      });
+
+      homeNext?.addEventListener('click', () => {
+        let nextIdx = homeSlideIndex + 1;
+        if (nextIdx >= homeSlidesData.length) nextIdx = 0;
+        updateHomeCarousel(nextIdx);
+      });
+
+      homeDots.forEach((dot, idx) => {
+        dot.addEventListener('click', () => updateHomeCarousel(idx));
+      });
+
+      homeTabs.forEach((tab, idx) => {
+        tab.addEventListener('click', () => updateHomeCarousel(idx));
+      });
+    }
+
+    setupHomeLiveVideoCarousel();
+
     document.addEventListener('astro:after-swap', () => {
       setupCountUp();
       loadDynamicTestimonios();
       setupEventVideoModal();
       setupEventFlyerModal();
+      setupHomeLiveVideoCarousel();
     });
   </script>
 

@@ -33,21 +33,30 @@ function getSupabaseClient(authToken = null) {
   return createClient(url, key, options);
 }
 
-// 2. Validación de autorización (Vercel Cron O Usuario Administrador de Supabase)
+// 2. Validación de autorización (Vercel Cron O Usuario Administrador de Supabase O GitHub Actions)
 async function authenticateRequest(request) {
   const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
   const authHeader = request.headers.get('authorization') || request.headers.get('Authorization') || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 
-  // Caso A: Cron Secret de Vercel
+  // Caso A: Cron Secret de Vercel o GitHub Actions
   if (cronSecret && token === cronSecret) {
     return { authorized: true, userEmail: 'cron@bandabruna.cl', isCron: true, token: null };
   }
 
+  // Caso A2: Query param secret (?secret=...)
+  try {
+    const urlObj = new URL(request.url);
+    const querySecret = urlObj.searchParams.get('secret');
+    if (cronSecret && querySecret === cronSecret) {
+      return { authorized: true, userEmail: 'cron@bandabruna.cl (param)', isCron: true, token: null };
+    }
+  } catch {}
+
   // Caso B: Token JWT de Supabase desde el Dashboard de Admin
   if (token) {
     try {
-      const sb = getSupabaseClient();
+      const sb = getSupabaseClient(token);
       const { data: { user }, error } = await sb.auth.getUser(token);
       if (!error && user && (user.email === 'contacto@bandabruna.cl' || user.role === 'authenticated')) {
         return { authorized: true, userEmail: user.email, isCron: false, token };
@@ -359,8 +368,9 @@ async function executeSynchronization(userEmail, userToken) {
           if (stats.views !== null || stats.likes !== null) {
             const currentLinks = lan.plataformas_links || {};
             const isAhogado = lan.slug === 'ahogado-en-un-bar';
-            const minViews = isAhogado ? 26249 : 0;
-            const minLikes = isAhogado ? 239 : 0;
+            const isPatrio = lan.slug === 'sesion-fiestas-patrias';
+            const minViews = isAhogado ? 26249 : (isPatrio ? 7199 : 0);
+            const minLikes = isAhogado ? 239 : (isPatrio ? 110 : 0);
             const newViews = Math.max(stats.views || 0, Number(currentLinks.youtube_views) || 0, minViews);
             const newLikes = Math.max(stats.likes || 0, Number(currentLinks.youtube_likes) || 0, minLikes);
 
@@ -370,7 +380,7 @@ async function executeSynchronization(userEmail, userToken) {
               youtube_likes: newLikes
             };
 
-            await sb
+            const { error: lanErr } = await sb
               .from('lanzamientos')
               .update({
                 plataformas_links: updatedLinks,
@@ -378,13 +388,17 @@ async function executeSynchronization(userEmail, userToken) {
               })
               .eq('id', lan.id);
 
-            result.lanzamientos_updated.push({
-              slug: lan.slug,
-              nombre: lan.nombre,
-              videoId: ytId,
-              views: newViews,
-              likes: newLikes
-            });
+            if (lanErr) {
+              result.warnings.push(`Error al actualizar lanzamiento ${lan.slug}: ${lanErr.message}`);
+            } else {
+              result.lanzamientos_updated.push({
+                slug: lan.slug,
+                nombre: lan.nombre,
+                videoId: ytId,
+                views: newViews,
+                likes: newLikes
+              });
+            }
           }
         }
       }
@@ -437,6 +451,8 @@ async function executeSynchronization(userEmail, userToken) {
 
           if (!upsertErr) {
             result.youtube_posts_synced++;
+          } else {
+            result.warnings.push(`Error al guardar video YouTube (${p.external_id}): ${upsertErr.message}`);
           }
         }
       }
@@ -445,13 +461,26 @@ async function executeSynchronization(userEmail, userToken) {
     result.warnings.push(`Error al sincronizar feed RSS de YouTube: ${err.message}`);
   }
 
-  // --- PASO 4: CATÁLOGO DE VIDEOS Y REELS (FACEBOOK, INSTAGRAM, TIKTOK) ---
-  // Asegura que en social_posts existan los 5 reels y videos de cada red para la sección VIDEOS
+  // --- PASO 4: CATÁLOGO DE VIDEOS Y REELS (FALLBACK PARA SECCIÓN VIDEOS) ---
+  // Solo se siembran si la base de datos no tiene videos activos con web_order configurados
   try {
-    const playlists = getVideoPlaylists();
     const platformsToSync = ['facebook', 'instagram', 'tiktok'];
 
     for (const plat of platformsToSync) {
+      // Verificar si ya existen publicaciones con web_order en esta plataforma
+      const { count } = await sb
+        .from('social_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('platform', plat)
+        .eq('show_on_web', true)
+        .not('web_order', 'is', null);
+
+      // Si el administrador ya configuró videos con web_order, respetamos su selección
+      if (count && count > 0) {
+        continue;
+      }
+
+      const playlists = getVideoPlaylists();
       const items = playlists[plat] || [];
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -476,6 +505,8 @@ async function executeSynchronization(userEmail, userToken) {
 
         if (!pErr) {
           result.social_posts_ensured++;
+        } else {
+          result.warnings.push(`Error al guardar post de ${plat} (${item.id}): ${pErr.message}`);
         }
       }
     }
@@ -501,20 +532,34 @@ async function executeSynchronization(userEmail, userToken) {
   return result;
 }
 
-// 6. Handlers GET y POST
+const CORS_HEADERS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+};
+
+// 6. Handlers OPTIONS, GET y POST
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: CORS_HEADERS
+  });
+}
+
 export async function GET({ request }) {
   const auth = await authenticateRequest(request);
   if (!auth.authorized) {
     return new Response(JSON.stringify({ success: false, error: 'No autorizado' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: CORS_HEADERS
     });
   }
 
   const result = await executeSynchronization(auth.userEmail, auth.token);
   return new Response(JSON.stringify(result), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
+    headers: CORS_HEADERS
   });
 }
 
@@ -523,13 +568,13 @@ export async function POST({ request }) {
   if (!auth.authorized) {
     return new Response(JSON.stringify({ success: false, error: 'No autorizado' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' }
+      headers: CORS_HEADERS
     });
   }
 
   const result = await executeSynchronization(auth.userEmail, auth.token);
   return new Response(JSON.stringify(result), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
+    headers: CORS_HEADERS
   });
 }
