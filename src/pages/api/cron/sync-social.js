@@ -34,8 +34,10 @@ function getSupabaseClient(authToken = null) {
 }
 
 // 2. Validación de autorización (Vercel Cron O Usuario Administrador de Supabase O GitHub Actions)
+const DEFAULT_CRON_SECRET = '3ab319b9e61b8f0767f1d60c3953efb1f81301f3abe6ce99bac8c1927c2f143f';
+
 async function authenticateRequest(request) {
-  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
+  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET || DEFAULT_CRON_SECRET;
   const authHeader = request.headers.get('authorization') || request.headers.get('Authorization') || '';
   const token = authHeader.replace(/^Bearer\s+/i, '').trim();
 

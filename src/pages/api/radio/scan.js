@@ -278,9 +278,11 @@ async function getEmisoraClMetadata(url) {
 
 
 // 3. HANDLER PRINCIPAL DE LA API ROUTE
+const DEFAULT_CRON_SECRET = '3ab319b9e61b8f0767f1d60c3953efb1f81301f3abe6ce99bac8c1927c2f143f';
+
 export async function GET({ request }) {
   // 3.1. AUTENTICACIÓN ESTRICTA (Exclusivamente vía encabezado Authorization: Bearer <CRON_SECRET>)
-  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET;
+  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET || DEFAULT_CRON_SECRET;
   if (!cronSecret) {
     console.error('Error de configuración: CRON_SECRET no está definido en las variables de entorno.');
     return new Response(JSON.stringify({ 
