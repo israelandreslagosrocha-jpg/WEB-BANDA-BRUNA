@@ -279,15 +279,15 @@ async function executeSynchronization(userEmail, userToken) {
   // 4. Base mínima garantizada.
   const finalYoutube = ytSubsScraped
     ? Math.max(ytSubsScraped, prevYoutube)
-    : (prevYoutube || sheetStats.youtube || 911);
+    : (prevYoutube || sheetStats.youtube || 952);
 
   const finalInstagram = igFollowersScraped
     ? Math.max(igFollowersScraped, prevInstagram)
-    : (prevInstagram || sheetStats.instagram || 3366);
+    : (prevInstagram || sheetStats.instagram || 3489);
 
   const finalTiktok = ttFollowersScraped
     ? Math.max(ttFollowersScraped, prevTiktok)
-    : (prevTiktok || sheetStats.tiktok || 1139);
+    : (prevTiktok || sheetStats.tiktok || 1147);
 
   const finalFacebook = fbFollowersScraped
     ? Math.max(fbFollowersScraped, prevFacebook)
@@ -371,8 +371,8 @@ async function executeSynchronization(userEmail, userToken) {
             const currentLinks = lan.plataformas_links || {};
             const isAhogado = lan.slug === 'ahogado-en-un-bar';
             const isPatrio = lan.slug === 'sesion-fiestas-patrias';
-            const minViews = isAhogado ? 26249 : (isPatrio ? 7199 : 0);
-            const minLikes = isAhogado ? 239 : (isPatrio ? 110 : 0);
+            const minViews = isAhogado ? 26611 : (isPatrio ? 9870 : 0);
+            const minLikes = isAhogado ? 244 : (isPatrio ? 132 : 0);
             const newViews = Math.max(stats.views || 0, Number(currentLinks.youtube_views) || 0, minViews);
             const newLikes = Math.max(stats.likes || 0, Number(currentLinks.youtube_likes) || 0, minLikes);
 

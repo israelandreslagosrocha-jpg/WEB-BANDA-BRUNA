@@ -16,65 +16,149 @@ function getYouTubeId(url: string) {
   return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
 }
 
-// Videos provistos por el usuario para la sección de Fiestas Patrias (Enriquecidos con categorías para neuromarketing)
+// Extraer poster de Cloudinary en el segundo 2
+function getPosterUrl(url: string) {
+  if (url && url.includes('res.cloudinary.com') && url.includes('/video/upload/')) {
+    return url.replace('/video/upload/', '/video/upload/so_2/').replace(/\.mp4$/i, '.jpg');
+  }
+  return undefined;
+}
+
+// Videos para la sección de Fiestas Patrias (Fondas SOFO 2026 y Temporada 2025)
 const videos = [
+  // --- FONDAS SOFO 2026 (NUEVOS REGISTROS OFICIALES) ---
   {
-    url: "https://www.youtube.com/watch?v=F0KAzR9ChU8",
-    title: "Show Cumbia Patriótica",
-    category: "🇨🇱 18 SEPTIEMBRE",
-    tagline: "El ritmo y fiesta de Banda Bruna en vivo",
-    aspect: "vertical"
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224175/solo_final_vicente_-_sofo_ko6myj.mp4",
+    title: "Solo Final Vicente · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Solo de guitarra y ovación en vivo",
+    year: "2026"
   },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224198/que_te_come_el_tiburon_t7b5rb.mp4",
+    title: "Que Te Come el Tiburón",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Coreografía masiva y fiesta tropical",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224214/que_me_voy_-_sofo_qvzgyt.mp4",
+    title: "Que Me Voy · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Euforia dieciochera y cumbia con la multitud",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224244/por_que_no_contestas_-_sofo_rca0at.mp4",
+    title: "¿Por Qué No Contestas? · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Miles cantando a todo pulmón en el parque SOFO",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224251/pastorcita_-_sofo_ayyt5k.mp4",
+    title: "Pastorcita · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "El clásico sureño en el escenario principal",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224268/para_que_llorar_-_sofo_kz0jdv.mp4",
+    title: "Para Qué Llorar · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Conexión y alegría pura en la fonda oficial",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224286/mujeres_y_cerveza_-_sofo_dhkt9d.mp4",
+    title: "Mujeres y Cerveza · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Todo el parque bailando a máxima energía",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224363/black_magic_woman_vicente_-_sofo_is3u5h.mp4",
+    title: "Black Magic Woman (Solo Vicente)",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Guitarra eléctrica encendiendo la noche en SOFO",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224371/black_magic_woman_-_tus_besos_son_-_sofo_yqdzv0.mp4",
+    title: "Black Magic Woman / Tus Besos Son",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Fusión latina y cumbia en directo",
+    year: "2026"
+  },
+  {
+    url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1790224375/baila_con_banda_bruna_-_sofo_p4pcvy.mp4",
+    title: "Baila con Banda Bruna · SOFO",
+    category: "🇨🇱 SOFO 2026",
+    tagline: "Animación, baile y fiesta interactiva",
+    year: "2026"
+  },
+
+  // --- TEMPORADA FONDAS 2025 ---
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1785284262/1000129055_p1sqh8.mp4",
     title: "Celebración Dieciochera",
-    category: "🎉 FONDA EN VIVO",
+    category: "🎉 FONDA 2025",
     tagline: "Público vibrando con la cumbia sureña",
-    aspect: "vertical"
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243531/WhatsApp_Video_2026-06-23_at_3.35.18_PM_zpdgvh.mp4",
     title: "La Energía del Escenario",
-    category: "⚡ EN VIVO",
-    tagline: "Show completo frente al público"
+    category: "⚡ FONDA 2025",
+    tagline: "Show completo frente al público",
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243531/WhatsApp_Video_2026-06-23_at_3.35.19_PM_cfne1x.mp4",
     title: "Cumbia y Ritmo Sureño",
-    category: "🎉 FIESTA",
-    tagline: "La respuesta de la gente en vivo"
+    category: "🎉 FONDA 2025",
+    tagline: "La respuesta de la gente en vivo",
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782243535/WhatsApp_Video_2026-06-23_at_3.35.21_PM_rzlepr.mp4",
     title: "Fonda Oficial Llena",
-    category: "🏛 MUNICIPAL",
-    tagline: "Miles cantando al unísono"
+    category: "🏛 FONDA 2025",
+    tagline: "Miles cantando al unísono",
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782245398/WhatsApp_Video_2026-06-23_at_3.37.24_PM_stp90u.mp4",
     title: "Show de Fiestas Patrias",
-    category: "🇨🇱 18 SEPTIEMBRE",
-    tagline: "El clásico de Fiestas Patrias"
+    category: "🇨🇱 FONDA 2025",
+    tagline: "El clásico de Fiestas Patrias",
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782245399/WhatsApp_Video_2026-06-23_at_3.42.16_PM_1_lndidf.mp4",
     title: "Banda Bruna en Acción",
-    category: "🎬 ESCENARIO",
-    tagline: "Nuestros integrantes en el escenario"
+    category: "🎬 FONDA 2025",
+    tagline: "Nuestros integrantes en el escenario",
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782245403/WhatsApp_Video_2026-06-23_at_3.42.16_PM_yp01qd.mp4",
     title: "Público Encendido",
-    category: "🔥 CONEXIÓN",
-    tagline: "El cariño de la gente del sur"
+    category: "🔥 FONDA 2025",
+    tagline: "El cariño de la gente del sur",
+    year: "2025"
   },
   {
     url: "https://res.cloudinary.com/dhgifjpkh/video/upload/v1782245421/WhatsApp_Video_2026-06-23_at_3.41.40_PM_oh7a6f.mp4",
     title: "La Potencia del Show",
-    category: "✨ EXPERIENCIA",
-    tagline: "Sonido en vivo e iluminación premium"
+    category: "✨ FONDA 2025",
+    tagline: "Sonido en vivo e iluminación premium",
+    year: "2025"
   }
 ];
+
+const videos2026Count = videos.filter(v => v.year === '2026').length;
+const videos2025Count = videos.filter(v => v.year === '2025').length;
 
 const galleryImages = [
   "/assets/images/hero/hero_2.webp",
@@ -263,13 +347,38 @@ const faqs = [
 
   <!-- Live Videos Section -->
   <section id="videos-section" class="py-20 px-6 max-w-[1400px] mx-auto overflow-hidden">
-    <div class="text-center mb-12 scroll-reveal">
+    <div class="text-center mb-8 scroll-reveal">
       <span class="text-gold-bruna text-xs tracking-[0.2em] font-bold uppercase block mb-1">REGISTROS 9:16</span>
       <h2 class="text-3xl md:text-4xl font-extrabold font-title uppercase text-white font-title">Show en Vivo Orgánico</h2>
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
       <p class="text-xs md:text-sm text-slate-400 font-light max-w-lg mx-auto mt-3">
         Explora nuestros registros verticales tomados directamente en el escenario. Sin filtros, pura energía real.
       </p>
+    </div>
+
+    <!-- Filtros de Videos (Todos / Fondas SOFO 2026 / Temporada 2025) -->
+    <div class="flex items-center justify-center gap-2 sm:gap-3 mb-10 flex-wrap">
+      <button 
+        type="button" 
+        data-video-filter="all" 
+        class="video-filter-pill px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all bg-gold-bruna text-black shadow-lg shadow-gold-bruna/20 cursor-pointer"
+      >
+        Todos ({videos.length})
+      </button>
+      <button 
+        type="button" 
+        data-video-filter="2026" 
+        class="video-filter-pill px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all bg-slate-900/80 border border-white/10 hover:border-gold-bruna text-slate-300 hover:text-white cursor-pointer"
+      >
+        🇨🇱 Fondas SOFO 2026 ({videos2026Count})
+      </button>
+      <button 
+        type="button" 
+        data-video-filter="2025" 
+        class="video-filter-pill px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all bg-slate-900/80 border border-white/10 hover:border-gold-bruna text-slate-300 hover:text-white cursor-pointer"
+      >
+        Fondas 2025 ({videos2025Count})
+      </button>
     </div>
 
     <!-- Video Track Container -->
@@ -284,6 +393,7 @@ const faqs = [
           const ytId = getYouTubeId(vid.url);
           const isYt = !!ytId;
           const previewImg = isYt ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+          const posterUrl = getPosterUrl(vid.url);
 
           return (
             <div 
@@ -291,6 +401,7 @@ const faqs = [
               data-video-url={vid.url}
               data-video-title={vid.title}
               data-video-aspect={vid.aspect || 'vertical'}
+              data-video-year={vid.year || '2026'}
             >
               <!-- Background video preview -->
               <div class="absolute inset-0 z-0 bg-slate-950 flex items-center justify-center">
@@ -304,11 +415,12 @@ const faqs = [
                 ) : (
                   <video 
                     src={vid.url} 
+                    poster={posterUrl}
                     class="w-full h-full object-cover opacity-60 group-hover/card:opacity-85 transition-opacity" 
                     muted 
                     loop 
                     playsinline 
-                    preload="metadata"
+                    preload="none"
                   />
                 )}
               </div>
@@ -531,7 +643,7 @@ const faqs = [
 </Layout>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  function setupFiestasPatriasVideos() {
     // ==========================================
     // INTERACTIVIDAD DE VIDEOS VERTICALES 9:16
     // ==========================================
@@ -541,30 +653,68 @@ const faqs = [
 
     if (track && prevBtn && nextBtn) {
       prevBtn.addEventListener('click', () => {
-        track.scrollBy({ left: -300, behavior: 'smooth' });
+        track.scrollBy({ left: -320, behavior: 'smooth' });
       });
       nextBtn.addEventListener('click', () => {
-        track.scrollBy({ left: 300, behavior: 'smooth' });
+        track.scrollBy({ left: 320, behavior: 'smooth' });
       });
     }
 
-    // Lightbox modal logic with navigation & history integration
+    // ==========================================
+    // FILTROS POR TEMPORADA (Todos / 2026 / 2025)
+    // ==========================================
+    const filterPills = document.querySelectorAll('[data-video-filter]');
+    const allCards = document.querySelectorAll('.vertical-video-card');
+
+    filterPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const filter = pill.getAttribute('data-video-filter');
+
+        // Actualizar apariencia de las píldoras de filtro
+        filterPills.forEach((p) => {
+          if (p === pill) {
+            p.classList.add('bg-gold-bruna', 'text-black', 'shadow-lg', 'shadow-gold-bruna/20');
+            p.classList.remove('bg-slate-900/80', 'border', 'border-white/10', 'text-slate-300');
+          } else {
+            p.classList.remove('bg-gold-bruna', 'text-black', 'shadow-lg', 'shadow-gold-bruna/20');
+            p.classList.add('bg-slate-900/80', 'border', 'border-white/10', 'text-slate-300');
+          }
+        });
+
+        // Filtrar tarjetas
+        allCards.forEach((card) => {
+          const year = card.getAttribute('data-video-year');
+          if (filter === 'all' || year === filter) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+
+        // Rebobinar el scroll del carrusel al inicio suavemente
+        if (track) {
+          track.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // ==========================================
+    // LIGHTBOX MODAL CON NAVEGACIÓN DINÁMICA
+    // ==========================================
     const lightbox = document.getElementById('video-lightbox');
     const lightboxVid = document.getElementById('lightbox-video') as HTMLVideoElement | null;
     const lightboxIframeContainer = document.getElementById('lightbox-iframe-container');
     const mediaContainer = document.getElementById('lightbox-media-container');
     const lightboxTitle = document.getElementById('lightbox-video-title');
     const closeBtn = document.getElementById('close-lightbox');
-    const videoCards = document.querySelectorAll('.vertical-video-card');
     const prevBtnLightbox = document.getElementById('lightbox-prev');
     const nextBtnLightbox = document.getElementById('lightbox-next');
 
-    // Mapear los videos disponibles
-    const videosList = Array.from(videoCards).map(card => ({
-      url: card.getAttribute('data-video-url'),
-      title: card.getAttribute('data-video-title')
-    }));
-    let currentIndex = 0;
+    let currentVisibleIndex = 0;
+
+    function getVisibleCards(): HTMLElement[] {
+      return Array.from(document.querySelectorAll<HTMLElement>('.vertical-video-card:not(.hidden)'));
+    }
 
     // Extraer ID de YouTube en el cliente
     function getYouTubeIdClient(url: string) {
@@ -580,17 +730,21 @@ const faqs = [
       return (match && match[2].length === 12) ? match[2].substring(0, 11) : (match && match[2].length === 11) ? match[2] : '';
     }
 
-    function openVideo(index, pushToHistory = true) {
-      if (index < 0) index = videosList.length - 1;
-      if (index >= videosList.length) index = 0;
-      currentIndex = index;
+    function openVideo(index: number, pushToHistory = true) {
+      const visible = getVisibleCards();
+      if (visible.length === 0) return;
 
-      const videoData = videosList[currentIndex];
-      const card = videoCards[currentIndex];
-      const aspect = card ? card.getAttribute('data-video-aspect') || 'vertical' : 'vertical';
+      if (index < 0) index = visible.length - 1;
+      if (index >= visible.length) index = 0;
+      currentVisibleIndex = index;
 
-      if (lightbox && videoData && videoData.url) {
-        if (lightboxTitle) lightboxTitle.textContent = videoData.title || '';
+      const card = visible[currentVisibleIndex];
+      const videoUrl = card.getAttribute('data-video-url');
+      const videoTitle = card.getAttribute('data-video-title') || '';
+      const aspect = card.getAttribute('data-video-aspect') || 'vertical';
+
+      if (lightbox && videoUrl) {
+        if (lightboxTitle) lightboxTitle.textContent = videoTitle;
         
         // Ajustar el aspecto del Lightbox (horizontal 16:9 o vertical 9:16)
         if (mediaContainer) {
@@ -601,10 +755,10 @@ const faqs = [
           }
         }
 
-        const ytId = getYouTubeIdClient(videoData.url);
+        const ytId = getYouTubeIdClient(videoUrl);
 
         if (ytId) {
-          // Si es YouTube, inyectar iframe y pausar/ocultar el reproductor nativo
+          // Si es YouTube, inyectar iframe y pausar reproductor nativo
           if (lightboxVid) {
             lightboxVid.pause();
             lightboxVid.src = '';
@@ -614,7 +768,7 @@ const faqs = [
             lightboxIframeContainer.innerHTML = `
               <iframe 
                 src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" 
-                title="${videoData.title}" 
+                title="${videoTitle}" 
                 frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowfullscreen 
@@ -624,13 +778,13 @@ const faqs = [
             lightboxIframeContainer.classList.remove('hidden');
           }
         } else {
-          // Si es un MP4 tradicional, limpiar iframe y usar reproductor nativo
+          // Si es MP4, limpiar iframe y usar reproductor nativo
           if (lightboxIframeContainer) {
             lightboxIframeContainer.innerHTML = '';
             lightboxIframeContainer.classList.add('hidden');
           }
           if (lightboxVid) {
-            lightboxVid.src = videoData.url;
+            lightboxVid.src = videoUrl;
             lightboxVid.classList.remove('hidden');
             lightboxVid.play().catch(() => {});
           }
@@ -638,7 +792,7 @@ const faqs = [
 
         if (lightbox.classList.contains('hidden')) {
           lightbox.classList.remove('hidden');
-          document.body.style.overflow = 'hidden'; // Evitar scroll de fondo
+          document.body.style.overflow = 'hidden';
           
           if (pushToHistory) {
             history.pushState({ lightboxOpen: true }, '');
@@ -658,18 +812,21 @@ const faqs = [
           lightboxIframeContainer.classList.add('hidden');
         }
         lightbox.classList.add('hidden');
-        document.body.style.overflow = ''; // Restaurar scroll
+        document.body.style.overflow = '';
         
-        // Si el cierre fue manual (X o clic fuera) y hay un estado en el historial, sacarlo
         if (shouldPopHistory && history.state && history.state.lightboxOpen) {
           history.back();
         }
       }
     }
 
-    videoCards.forEach((card, idx) => {
+    allCards.forEach((card) => {
       card.addEventListener('click', () => {
-        openVideo(idx, true);
+        const visible = getVisibleCards();
+        const idx = visible.indexOf(card as HTMLElement);
+        if (idx !== -1) {
+          openVideo(idx, true);
+        }
       });
     });
 
@@ -687,22 +844,24 @@ const faqs = [
     if (prevBtnLightbox) {
       prevBtnLightbox.addEventListener('click', (e) => {
         e.stopPropagation();
-        openVideo(currentIndex - 1, false);
+        openVideo(currentVisibleIndex - 1, false);
       });
     }
     if (nextBtnLightbox) {
       nextBtnLightbox.addEventListener('click', (e) => {
         e.stopPropagation();
-        openVideo(currentIndex + 1, false);
+        openVideo(currentVisibleIndex + 1, false);
       });
     }
 
-    // Escuchar el botón atrás del navegador/dispositivo móvil
+    // Botón atrás del navegador / móvil
     window.addEventListener('popstate', () => {
       if (lightbox && !lightbox.classList.contains('hidden')) {
-        // El usuario presionó atrás en el dispositivo: cerramos el reproductor sin salir de la página
         closeLightbox(false);
       }
     });
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupFiestasPatriasVideos);
+  document.addEventListener('astro:after-swap', setupFiestasPatriasVideos);
 </script>

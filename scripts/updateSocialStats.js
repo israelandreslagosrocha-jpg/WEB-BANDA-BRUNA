@@ -10,10 +10,10 @@ const statsFilePath = path.join(__dirname, '..', 'src', 'data', 'socialStats.jso
 let stats = {
   musiciansTrajectory: 15,
   stageYears: 10,
-  instagramFollowers: 3488,
+  instagramFollowers: 3489,
   facebookFriends: 4971,
-  youtubeSubscribers: 948,
-  tiktokFollowers: 1146,
+  youtubeSubscribers: 952,
+  tiktokFollowers: 1147,
   regions: 5,
   lastUpdated: new Date().toISOString()
 };
@@ -66,13 +66,13 @@ async function fetchStatsFromGoogleSheets() {
         
         if (!isNaN(value) && value > 0) {
           if (platform === 'youtube') {
-            stats.youtubeSubscribers = Math.max(value, 948);
+            stats.youtubeSubscribers = Math.max(value, 952);
             updatedCount++;
           } else if (platform === 'instagram') {
-            stats.instagramFollowers = Math.max(value, 3488);
+            stats.instagramFollowers = Math.max(value, 3489);
             updatedCount++;
           } else if (platform === 'tiktok') {
-            stats.tiktokFollowers = Math.max(value, 1146);
+            stats.tiktokFollowers = Math.max(value, 1147);
             updatedCount++;
           } else if (platform === 'facebook') {
             stats.facebookFriends = Math.max(value, 4971);
@@ -94,8 +94,8 @@ async function fetchYouTubeVideoStats() {
   let currentLaunchStats = {
     slug: 'ahogado-en-un-bar',
     youtube_id: 'mZhYl60ENAs',
-    youtube_views: 26249,
-    youtube_likes: 239,
+    youtube_views: 26611,
+    youtube_likes: 244,
     lastUpdated: new Date().toISOString()
   };
 

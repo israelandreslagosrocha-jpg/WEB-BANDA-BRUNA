@@ -946,6 +946,21 @@ try {
                   <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
                 </video>
               </div>
+
+              <!-- Slide 5: Vagabundo en vivo - Victoria -->
+              <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-black">
+                <video 
+                  src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1790223286/vagabundo_-_victoria_k2yaaf.mp4" 
+                  poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1790223286/vagabundo_-_victoria_k2yaaf.jpg"
+                  class="w-full h-full object-cover bg-black" 
+                  controls 
+                  preload="none"
+                  playsinline
+                  aria-label="Presentación en vivo de Banda Bruna - Vagabundo en Victoria"
+                >
+                  <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
+                </video>
+              </div>
             </div>
             
             <!-- Badge Superior -->
@@ -966,11 +981,12 @@ try {
               <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="1" aria-label="Video 2: Show en Vivo"></button>
               <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="2" aria-label="Video 3: Fiestas Patrias 1"></button>
               <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="3" aria-label="Video 4: Fiestas Patrias 2"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="4" aria-label="Video 5: Vagabundo en Victoria"></button>
             </div>
           </div>
 
           <!-- Selector de Videos / Mini Tabs -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
             <button type="button" data-home-tab="0" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-gold-bruna/60 bg-gold-bruna/10 text-left transition-all cursor-pointer flex flex-col gap-0.5">
               <span class="text-[9px] font-bold text-gold-bruna uppercase tracking-wider block">Video 1</span>
               <span class="text-xs font-bold text-white line-clamp-1">Puerto Saavedra</span>
@@ -986,6 +1002,10 @@ try {
             <button type="button" data-home-tab="3" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 4</span>
               <span class="text-xs font-bold text-white line-clamp-1">Fiestas Patrias II</span>
+            </button>
+            <button type="button" data-home-tab="4" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 5</span>
+              <span class="text-xs font-bold text-white line-clamp-1">Vagabundo (Victoria)</span>
             </button>
           </div>
 
@@ -1791,6 +1811,11 @@ try {
           tag: "CONVOCATORIA Y FIESTA · EN VIVO",
           title: "Fiesta y Convocatoria · Escenario Central",
           desc: "El público disfrutando y coreando el repertorio tropical en una noche inolvidable."
+        },
+        {
+          tag: "EN VIVO · VICTORIA",
+          title: "Vagabundo · En Vivo desde Victoria",
+          desc: "Toda la potencia, ritmo y convocatoria de Banda Bruna haciendo bailar al público de Victoria con el clásico \"Vagabundo\"."
         }
       ];
 
