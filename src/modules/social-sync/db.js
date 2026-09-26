@@ -126,7 +126,10 @@ export async function updateSocialAccount(client, platform, { followers_count, s
 
   if (error) {
     console.warn(`[social-sync] Error actualizando social_accounts para ${platform}:`, error.message);
+    return false;
   }
+
+  return true;
 }
 
 /**
@@ -162,5 +165,8 @@ export async function logScrapeRun(client, {
 
   if (error) {
     console.warn(`[social-sync] Error insertando log en social_scrape_logs:`, error.message);
+    return false;
   }
+
+  return true;
 }

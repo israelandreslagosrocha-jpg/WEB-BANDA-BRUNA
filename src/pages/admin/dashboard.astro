@@ -2926,17 +2926,32 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
               lanMsg = '• Métricas de lanzamientos preservadas';
             }
 
-            const msg = `✅ Sincronización completada con éxito:
+            const platformStates = Object.entries(data.platforms || {}).map(([platform, state]: [string, any]) => {
+              const label = platform.charAt(0).toUpperCase() + platform.slice(1);
+              return state.status === 'ok'
+                ? `• ${label}: actualizado desde su página pública`
+                : `• ${label}: se conserva la cifra anterior (${state.error || 'consulta no disponible'})`;
+            });
+            const warnings = Array.isArray(data.warnings) && data.warnings.length > 0
+              ? `\n\nAlertas registradas:\n${data.warnings.map((warning: string) => `• ${warning}`).join('\n')}`
+              : '';
+            const title = data.partial
+              ? '⚠️ Sincronización terminada con alertas:'
+              : '✅ Sincronización completada:';
+
+            const msg = `${title}
 
 • YouTube: ${m.youtube ? Number(m.youtube).toLocaleString('es-CL') : '—'} suscriptores
 • Instagram: ${m.instagram ? Number(m.instagram).toLocaleString('es-CL') : '—'} seguidores
 • TikTok: ${m.tiktok ? Number(m.tiktok).toLocaleString('es-CL') : '—'} seguidores
 • Facebook: ${m.facebook ? Number(m.facebook).toLocaleString('es-CL') : '—'} amigos/seguidores
 
+Estado de las fuentes:
+${platformStates.length > 0 ? platformStates.join('\n') : '• Sin estado disponible'}
+
 Lanzamientos Musicales Actualizados:
 ${lanMsg}
-
-Las cifras se han sincronizado en tiempo real en la base de datos y en todo el sitio web.`;
+${warnings}`;
             alert(msg);
           } else {
             throw new Error(data.error || 'Error al ejecutar sincronización');

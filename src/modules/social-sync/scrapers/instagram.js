@@ -42,104 +42,37 @@ function unescapeHtml(text) {
 }
 
 /**
- * Extrae seguidores de la cabecera/metadatos de Instagram con resiliencia multi-agente.
+ * Extrae seguidores del perfil público con una única petición diaria.
+ * No rota user agents, no usa cookies y no deriva datos a visores de terceros.
  */
 export async function scrapeInstagramFollowers() {
-  const candidateUserAgents = [
-    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-    'Twitterbot/1.0',
-    'WhatsApp/2.21.12.21 A',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-  ];
+  try {
+    const res = await fetch(IG_PROFILE_URL, {
+      headers: IG_HEADERS,
+      signal: AbortSignal.timeout(8000)
+    });
 
-  // 1. Intento por perfil oficial iterando User-Agents de previsualización (Meta permite rich cards sin login wall)
-  for (const ua of candidateUserAgents) {
-    try {
-      const res = await fetch(IG_PROFILE_URL, {
-        headers: {
-          'User-Agent': ua,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-          'Accept-Language': 'es-CL,es;q=0.9,en-US;q=0.8,en;q=0.7',
-          'Sec-Fetch-Dest': 'document',
-          'Sec-Fetch-Mode': 'navigate'
-        },
-        signal: AbortSignal.timeout(8000)
-      });
-
-      if (res.ok) {
-        const html = await res.text();
-
-        // Detección en meta description / og:description
-        const descMatch = html.match(/<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"/i);
-        if (descMatch) {
-          const content = unescapeHtml(descMatch[1]);
-          // Soporta '3,365 seguidores', '3.365 seguidores', '3,4 mil seguidores', '3,365 followers'
-          const fMatch = content.match(/([0-9.,KkMm]+(?:\s*mil)?)\s*(?:seguidores|followers)/i);
-          if (fMatch) {
-            const parsed = parseCount(fMatch[1]);
-            if (parsed && parsed > 1000) return parsed;
-          }
-        }
-
-        // Detección en JSON embebido de la página
-        const jsonMatch = html.match(/"edge_followed_by":\{"count":(\d+)\}/) ||
-                          html.match(/"userInteractionCount":"(\d+)"/);
-        if (jsonMatch) {
-          const parsed = parseInt(jsonMatch[1], 10);
+    if (res.ok) {
+      const html = await res.text();
+      const descMatch = html.match(/<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"/i);
+      if (descMatch) {
+        const content = unescapeHtml(descMatch[1]);
+        const followersMatch = content.match(/([0-9.,KkMm]+(?:\s*mil)?)\s*(?:seguidores|followers)/i);
+        if (followersMatch) {
+          const parsed = parseCount(followersMatch[1]);
           if (parsed && parsed > 1000) return parsed;
         }
       }
-    } catch (err) {
-      // Continuar con el siguiente User-Agent si hay fallo transitorio
-    }
-  }
 
-  // 2. Intento secundario: Endpoint web_profile_info oficial de Instagram con App ID público
-  try {
-    const apiUrl = 'https://www.instagram.com/api/v1/users/web_profile_info/?username=banda_bruna';
-    const apiRes = await fetch(apiUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'x-ig-app-id': '936619743392459',
-        'x-asbd-id': '129477',
-        'referer': 'https://www.instagram.com/banda_bruna/',
-        'Accept': '*/*',
-        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-
-    if (apiRes.ok) {
-      const json = await apiRes.json();
-      const count = json?.data?.user?.edge_followed_by?.count;
-      if (count && count > 1000) {
-        return count;
-      }
-    }
-  } catch (err) {
-    console.warn(`[instagram-scraper] Intento web_profile_info falló:`, err.message);
-  }
-
-  // 3. Intento terciario: Visor público Imginn
-  try {
-    const imginnRes = await fetch('https://imginn.com/banda_bruna/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (imginnRes.ok) {
-      const html = await imginnRes.text();
-      const match = html.match(/class="desc">[\s\S]*?<span>([0-9.,KkMm]+)<\/span>\s*followers/i) ||
-                    html.match(/([0-9.,KkMm]+)\s*followers/i);
-      if (match) {
-        const parsed = parseCount(match[1]);
+      const jsonMatch = html.match(/"edge_followed_by":\{"count":(\d+)\}/) ||
+                        html.match(/"userInteractionCount":"(\d+)"/);
+      if (jsonMatch) {
+        const parsed = parseInt(jsonMatch[1], 10);
         if (parsed && parsed > 1000) return parsed;
       }
     }
   } catch (err) {
-    console.warn(`[instagram-scraper] Intento Imginn falló:`, err.message);
+    console.warn(`[instagram-scraper] Perfil público no disponible:`, err.message);
   }
 
   return null;

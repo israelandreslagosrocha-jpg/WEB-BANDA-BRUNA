@@ -907,43 +907,6 @@ const allDetrasCamaras = [
         })
         .catch(err => console.error("Error al obtener datos en tiempo real de Supabase:", err));
 
-        // 3. Sincronización en vivo automática de visualizaciones y likes vía API
-        const videoIdForStats = youtubeId || (slug === 'ahogado-en-un-bar' ? 'mZhYl60ENAs' : (slug === 'sesion-fiestas-patrias' ? 'yXvWp-3sNuM' : ''));
-        if (videoIdForStats) {
-          fetch(`/api/update-youtube-stats?id=${encodeURIComponent(videoIdForStats)}&slug=${encodeURIComponent(slug)}`)
-            .then(res => res.json())
-            .then(liveData => {
-              if (liveData && liveData.success) {
-                const isCurrentAhogado = slug === 'ahogado-en-un-bar';
-                const isCurrentPatrio = slug === 'sesion-fiestas-patrias';
-                const minViews = isCurrentAhogado ? 26611 : (isCurrentPatrio ? 9870 : 0);
-                const minLikes = isCurrentAhogado ? 244 : (isCurrentPatrio ? 132 : 0);
-                const liveViews = Math.max(Number(liveData.views) || 0, minViews);
-                const liveLikes = Math.max(Number(liveData.likes) || 0, minLikes);
-                const viewsEl = document.getElementById('yt-views-counter');
-                const likesEl = document.getElementById('yt-likes-counter');
-                let changed = false;
-                if (viewsEl && liveViews > 0) {
-                  const currTarget = Number(viewsEl.getAttribute('data-count-target')) || 0;
-                  if (liveViews > currTarget) {
-                    viewsEl.setAttribute('data-count-target', liveViews.toString());
-                    changed = true;
-                  }
-                }
-                if (likesEl && liveLikes > 0) {
-                  const currTarget = Number(likesEl.getAttribute('data-count-target')) || 0;
-                  if (liveLikes > currTarget) {
-                    likesEl.setAttribute('data-count-target', liveLikes.toString());
-                    changed = true;
-                  }
-                }
-                if (changed && typeof window.setupCountUp === 'function') {
-                  window.setupCountUp();
-                }
-              }
-            })
-            .catch(() => {});
-        }
       }
       const badgeEstado = document.getElementById('badge-estado-lanzamiento');
       const countdownSection = document.getElementById('countdown-landing');

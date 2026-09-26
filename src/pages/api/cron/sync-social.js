@@ -2,6 +2,7 @@ import { parseYouTubeRssFeed, scrapeYouTubeSubscribers } from '../../../modules/
 import { scrapeInstagramFollowers } from '../../../modules/social-sync/scrapers/instagram.js';
 import { getVideoPlaylists } from '../../../services/socialApi.js';
 import { parseCount } from '../../../modules/social-sync/types.js';
+import { logScrapeRun, updateSocialAccount } from '../../../modules/social-sync/db.js';
 import {
   authenticateAdminRequest,
   createServiceSupabaseClient,
@@ -10,6 +11,7 @@ import {
 } from '../../../services/serverAuth.js';
 
 export const prerender = false;
+export const maxDuration = 60;
 
 // 2. Validación de autorización (Vercel Cron O Usuario Administrador de Supabase O GitHub Actions)
 async function authenticateRequest(request) {
@@ -21,39 +23,7 @@ async function authenticateRequest(request) {
   return { ...admin, isCron: false };
 }
 
-// 3. Consulta de métricas desde Google Sheets (respaldo consolidado)
-async function fetchGoogleSheetsStats() {
-  const sheetId = '1im9i2l0LuXuUdIGFpQq3u7Gxw5Rh_nnPDC0uB7x8QdY';
-  const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-
-  try {
-    const res = await fetch(gvizUrl, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-    if (!match) throw new Error('Formato no reconocido');
-
-    const json = JSON.parse(match[1]);
-    const rows = json.table?.rows || [];
-
-    const stats = {};
-    rows.forEach(row => {
-      if (row.c && row.c[0] && row.c[1]) {
-        const platform = String(row.c[0].v).toLowerCase().trim();
-        const value = parseInt(row.c[1].v, 10);
-        if (!isNaN(value) && value > 0) {
-          stats[platform] = value;
-        }
-      }
-    });
-    return stats;
-  } catch (err) {
-    console.warn('[sync-social] No se pudo consultar Google Sheets:', err.message);
-    return {};
-  }
-}
-
-// 4. Scrape en vivo de YouTube para "Ahogado en un Bar"
+// 3. Scrape en vivo de YouTube para "Ahogado en un Bar"
 async function fetchYouTubeVideoStats(videoId = 'mZhYl60ENAs') {
   const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
   let views = null;
@@ -87,72 +57,44 @@ async function fetchYouTubeVideoStats(videoId = 'mZhYl60ENAs') {
   return { views, likes };
 }
 
-// 4.1 Scrape de seguidores de TikTok
+// 3.1 Scrape de seguidores de TikTok. Una sola consulta diaria: no usamos cookies,
+// sesiones ni servicios de terceros para evitar depender de credenciales expuestas.
 async function scrapeTikTokFollowers() {
-  const candidateUserAgents = [
-    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-    'Twitterbot/1.0',
-    'WhatsApp/2.21.12.21 A',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
-  ];
-
-  for (const ua of candidateUserAgents) {
-    try {
-      const res = await fetch('https://www.tiktok.com/@bandabrunaoficial', {
-        headers: {
-          'User-Agent': ua,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
-        },
-        signal: AbortSignal.timeout(8000)
-      });
-      if (res.ok) {
-        const html = await res.text();
-        const descMatch = html.match(/<meta\s+(?:name|property)="(?:description|og:description)"\s+content="([^"]+)"/i);
-        if (descMatch) {
-          const m = descMatch[1].match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
-          if (m) {
-            const parsed = parseCount(m[1]);
-            if (parsed && parsed > 500) return parsed;
-          }
-        }
-        const match = html.match(/"followerCount":(\d+)/) ||
-                      html.match(/data-e2e="followers-count">([^<]+)<\/strong>/i) ||
-                      html.match(/"fans":(\d+)/);
-        if (match) {
-          const parsed = parseInt(match[1].replace(/[.,]/g, ''), 10);
-          if (parsed && parsed > 500) return parsed;
-        }
-      }
-    } catch (err) {
-      // continuar con siguiente UA
-    }
-  }
-
   try {
-    const ubRes = await fetch('https://urlebird.com/user/bandabrunaoficial/', {
+    const res = await fetch('https://www.tiktok.com/@bandabrunaoficial', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
       },
       signal: AbortSignal.timeout(8000)
     });
-    if (ubRes.ok) {
-      const html = await ubRes.text();
-      const match = html.match(/class="info-user"[\s\S]*?<strong>([0-9.,KkMm]+)<\/strong>\s*followers/i) ||
-                    html.match(/([0-9.,KkMm]+)\s*followers/i);
+    if (res.ok) {
+      const html = await res.text();
+      const descMatch = html.match(/<meta\s+(?:name|property)="(?:description|og:description)"\s+content="([^"]+)"/i);
+      if (descMatch) {
+        const descriptionCount = descMatch[1].match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
+        if (descriptionCount) {
+          const parsed = parseCount(descriptionCount[1]);
+          if (parsed && parsed > 500) return parsed;
+        }
+      }
+      const match = html.match(/"followerCount":(\d+)/) ||
+                    html.match(/data-e2e="followers-count">([^<]+)<\/strong>/i) ||
+                    html.match(/"fans":(\d+)/);
       if (match) {
-        const parsed = parseCount(match[1]);
+        const parsed = parseInt(match[1].replace(/[.,]/g, ''), 10);
         if (parsed && parsed > 500) return parsed;
       }
     }
   } catch (err) {
-    console.warn('[sync-social] Urlebird para TikTok no disponible:', err.message);
+    console.warn('[sync-social] TikTok no disponible:', err.message);
   }
 
   return null;
 }
 
-// 4.2 Scrape de seguidores de Facebook
+// 3.2 Scrape de seguidores de Facebook
 async function scrapeFacebookFollowers() {
   try {
     const res = await fetch('https://www.facebook.com/bandabruna', {
@@ -179,6 +121,49 @@ async function scrapeFacebookFollowers() {
   return null;
 }
 
+function buildFollowerResult({ platform, scraped, previous, minimum }) {
+  const hasLiveValue = Number.isFinite(scraped) && scraped > 0;
+  const preservedValue = previous || minimum;
+  const value = hasLiveValue ? Math.max(scraped, previous) : preservedValue;
+
+  return {
+    platform,
+    value,
+    status: hasLiveValue ? 'ok' : 'error',
+    source: hasLiveValue ? 'public_page' : 'preserved',
+    error: hasLiveValue
+      ? null
+      : 'No se pudo extraer la cifra pública; se conserva el último valor verificado.'
+  };
+}
+
+async function persistFollowerResult(client, startedAt, followerResult) {
+  const wasSuccessful = followerResult.status === 'ok';
+
+  const accountUpdated = await updateSocialAccount(client, followerResult.platform, {
+    followers_count: wasSuccessful ? followerResult.value : null,
+    status: followerResult.status,
+    error_message: followerResult.error
+  });
+  if (!accountUpdated) {
+    throw new Error(`No se pudo guardar el estado de ${followerResult.platform}.`);
+  }
+
+  const runLogged = await logScrapeRun(client, {
+    run_type: 'followers',
+    platform: followerResult.platform,
+    started_at: startedAt,
+    status: wasSuccessful ? 'success' : 'failed',
+    items_detected: wasSuccessful ? 1 : 0,
+    items_updated: wasSuccessful ? 1 : 0,
+    error_type: wasSuccessful ? 'none' : 'network_error',
+    error_details: followerResult.error
+  });
+  if (!runLogged) {
+    throw new Error(`No se pudo registrar la auditoría de ${followerResult.platform}.`);
+  }
+}
+
 // 5. Orquestador central de Sincronización
 async function executeSynchronization(userEmail) {
   const startedAt = new Date();
@@ -195,12 +180,15 @@ async function executeSynchronization(userEmail) {
     warnings: []
   };
 
-  // --- PASO 1: SUSCRIPTORES Y SEGUIDORES (YouTube, Instagram, TikTok, Facebook) ---
-  const sheetStats = await fetchGoogleSheetsStats();
-  const ytSubsScraped = await scrapeYouTubeSubscribers();
-  const igFollowersScraped = await scrapeInstagramFollowers();
-  const ttFollowersScraped = await scrapeTikTokFollowers();
-  const fbFollowersScraped = await scrapeFacebookFollowers();
+  // --- PASO 1: SUSCRIPTORES Y SEGUIDORES (una consulta pública por plataforma) ---
+  // Las consultas independientes van en paralelo para mantener bajo el tiempo total del cron.
+  const followersStartedAt = new Date();
+  const [ytSubsScraped, igFollowersScraped, ttFollowersScraped, fbFollowersScraped] = await Promise.all([
+    scrapeYouTubeSubscribers(),
+    scrapeInstagramFollowers(),
+    scrapeTikTokFollowers(),
+    scrapeFacebookFollowers()
+  ]);
 
   // Obtener valores actuales de configuracion para no decrementar números por fallas ni pisar ajustes manuales
   const { data: currentConfig } = await sb
@@ -215,27 +203,20 @@ async function executeSynchronization(userEmail) {
   const prevTiktok = Number(prevConfig.cant_tiktok) || 0;
   const prevFacebook = Number(prevConfig.cant_facebook) || 0;
 
-  // REGLA DE ORO DE PRIORIDAD:
-  // 1. Scrape en vivo directo (si extrae un número válido).
-  // 2. Valor previo en configuracion (prevConfig, el cual el usuario puede forzar o ajustar manualmente).
-  //    Si el scraping falla o retorna null, SE PRESERVA estrictamente el valor previo y no se decrementa.
-  // 3. Planilla de respaldo Google Sheets (solo si prevConfig no existe o es 0).
-  // 4. Base mínima garantizada.
-  const finalYoutube = ytSubsScraped
-    ? Math.max(ytSubsScraped, prevYoutube)
-    : (prevYoutube || sheetStats.youtube || 952);
+  // Si una consulta falla no se inventa un éxito: se conserva el último valor,
+  // se marca la cuenta con error y se deja evidencia en social_scrape_logs.
+  const followerResults = [
+    buildFollowerResult({ platform: 'youtube', scraped: ytSubsScraped, previous: prevYoutube, minimum: 952 }),
+    buildFollowerResult({ platform: 'instagram', scraped: igFollowersScraped, previous: prevInstagram, minimum: 3489 }),
+    buildFollowerResult({ platform: 'tiktok', scraped: ttFollowersScraped, previous: prevTiktok, minimum: 1147 }),
+    buildFollowerResult({ platform: 'facebook', scraped: fbFollowersScraped, previous: prevFacebook, minimum: 4971 })
+  ];
 
-  const finalInstagram = igFollowersScraped
-    ? Math.max(igFollowersScraped, prevInstagram)
-    : (prevInstagram || sheetStats.instagram || 3489);
-
-  const finalTiktok = ttFollowersScraped
-    ? Math.max(ttFollowersScraped, prevTiktok)
-    : (prevTiktok || sheetStats.tiktok || 1147);
-
-  const finalFacebook = fbFollowersScraped
-    ? Math.max(fbFollowersScraped, prevFacebook)
-    : (prevFacebook || sheetStats.facebook || 4971);
+  const followerResultByPlatform = Object.fromEntries(followerResults.map(item => [item.platform, item]));
+  const finalYoutube = followerResultByPlatform.youtube.value;
+  const finalInstagram = followerResultByPlatform.instagram.value;
+  const finalTiktok = followerResultByPlatform.tiktok.value;
+  const finalFacebook = followerResultByPlatform.facebook.value;
 
   result.metrics = {
     youtube: finalYoutube,
@@ -243,6 +224,15 @@ async function executeSynchronization(userEmail) {
     tiktok: finalTiktok,
     facebook: finalFacebook
   };
+  result.platforms = Object.fromEntries(followerResults.map(item => [item.platform, {
+    status: item.status,
+    source: item.source,
+    error: item.error
+  }]));
+  result.partial = followerResults.some(item => item.status !== 'ok');
+  for (const item of followerResults.filter(item => item.error)) {
+    result.warnings.push(`${item.platform}: ${item.error}`);
+  }
 
   // Actualizar tabla configuracion
   const configUpdatePayload = {
@@ -261,32 +251,18 @@ async function executeSynchronization(userEmail) {
     result.warnings.push(`Error al actualizar configuracion: ${confErr.message}`);
   }
 
-  // Actualizar tabla social_accounts si existe
+  // Actualizar estado verificable y bitácora por plataforma.
   try {
-    const accounts = [
-      { id: 'youtube', followers_count: finalYoutube },
-      { id: 'instagram', followers_count: finalInstagram },
-      { id: 'tiktok', followers_count: finalTiktok },
-      { id: 'facebook', followers_count: finalFacebook }
-    ];
-
-    for (const acc of accounts) {
-      await sb
-        .from('social_accounts')
-        .update({
-          followers_count: acc.followers_count,
-          last_scraped_at: new Date().toISOString(),
-          last_status: 'ok',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', acc.id);
-    }
+    await Promise.all(followerResults.map(item => persistFollowerResult(sb, followersStartedAt, item)));
   } catch (err) {
-    // Si la tabla no está creada, no bloquea el proceso
+    result.warnings.push(`No se pudo registrar la auditoría de redes: ${err.message}`);
   }
 
   // --- PASO 2: ESTADÍSTICAS EN VIVO DE TODOS LOS LANZAMIENTOS ---
   result.lanzamientos_updated = [];
+  const launchMetricsStartedAt = new Date();
+  let launchMetricsAttempted = 0;
+  let launchMetricsFailed = 0;
   try {
     const { data: allLanzamientos } = await sb
       .from('lanzamientos')
@@ -306,6 +282,7 @@ async function executeSynchronization(userEmail) {
         }
 
         if (ytId) {
+          launchMetricsAttempted++;
           const stats = await fetchYouTubeVideoStats(ytId);
           if (lan.slug === 'ahogado-en-un-bar') {
             result.ahogado_stats = stats;
@@ -335,6 +312,7 @@ async function executeSynchronization(userEmail) {
               .eq('id', lan.id);
 
             if (lanErr) {
+              launchMetricsFailed++;
               result.warnings.push(`Error al actualizar lanzamiento ${lan.slug}: ${lanErr.message}`);
             } else {
               result.lanzamientos_updated.push({
@@ -345,12 +323,46 @@ async function executeSynchronization(userEmail) {
                 likes: newLikes
               });
             }
+          } else {
+            launchMetricsFailed++;
+            result.warnings.push(`YouTube: no se pudieron actualizar las métricas de ${lan.slug}; se conservan las cifras diarias anteriores.`);
           }
         }
       }
     }
   } catch (err) {
+    launchMetricsFailed++;
     result.warnings.push(`Error al actualizar lanzamientos: ${err.message}`);
+  }
+
+  if (launchMetricsAttempted > 0) {
+    const metricsStatus = launchMetricsFailed > 0 ? 'warning' : 'success';
+    result.launch_metrics = {
+      status: metricsStatus,
+      attempted: launchMetricsAttempted,
+      updated: result.lanzamientos_updated.length,
+      failed: launchMetricsFailed
+    };
+
+    try {
+      const metricsLogged = await logScrapeRun(sb, {
+        run_type: 'metrics_refresh',
+        platform: 'youtube',
+        started_at: launchMetricsStartedAt,
+        status: metricsStatus,
+        items_detected: launchMetricsAttempted,
+        items_updated: result.lanzamientos_updated.length,
+        error_type: launchMetricsFailed > 0 ? 'network_error' : 'none',
+        error_details: launchMetricsFailed > 0
+          ? 'Una o más métricas de lanzamientos no pudieron extraerse; se conservaron los valores previos.'
+          : null
+      });
+      if (!metricsLogged) {
+        throw new Error('No se pudo guardar el registro de YouTube.');
+      }
+    } catch (err) {
+      result.warnings.push(`No se pudo registrar la auditoría de métricas: ${err.message}`);
+    }
   }
 
   // --- PASO 3: ÚLTIMOS VIDEOS DE YOUTUBE VÍA RSS ---
@@ -380,8 +392,8 @@ async function executeSynchronization(userEmail) {
             thumbnail_url: p.thumbnail_url,
             published_at: p.published_at,
             disponible: true,
-            show_on_web: true,
-            web_order: i < 5 ? i + 1 : null,
+            // Omitimos show_on_web y web_order: la tabla los deja ocultos al crear
+            // y el upsert conserva la decisión editorial en publicaciones existentes.
             last_scraped_at: new Date().toISOString()
           };
 
