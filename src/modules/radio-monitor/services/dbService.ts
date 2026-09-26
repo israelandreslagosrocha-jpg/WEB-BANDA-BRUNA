@@ -1,6 +1,9 @@
 import { supabase } from '../../../services/supabaseClient.js';
 import type { Radio, RadioTrack, NowPlaying, MonitoredArtist, MonitoredTrack, StatsOverview, SystemHealth } from '../types';
 
+// Una canción sin verificación reciente no puede presentarse como reproducción en vivo.
+const LIVE_DETECTION_MAX_AGE_MS = 5 * 60 * 1000;
+
 export class DbService {
   /**
    * Obtiene la lista de radios registradas.
@@ -52,9 +55,11 @@ export class DbService {
    * Obtiene las canciones que están sonando actualmente en vivo (Now Playing).
    */
   async getNowPlaying(): Promise<NowPlaying[]> {
+    const verifiedAfter = new Date(Date.now() - LIVE_DETECTION_MAX_AGE_MS).toISOString();
     const { data, error } = await supabase
       .from('now_playing')
-      .select('*, radios(nombre, logo_url, stream_url)');
+      .select('*, radios(nombre, logo_url, stream_url)')
+      .gte('updated_at', verifiedAfter);
 
     if (error) throw error;
 

@@ -55,6 +55,14 @@
 
   const widget = document.getElementById('radio-monitor-widget');
   const contentContainer = document.getElementById('widget-content');
+  const LIVE_DETECTION_MAX_AGE_MS = 5 * 60 * 1000;
+
+  function isFreshLiveDetection(updatedAt?: string): boolean {
+    const timestamp = Date.parse(updatedAt || '');
+    return Number.isFinite(timestamp)
+      && timestamp <= Date.now()
+      && Date.now() - timestamp <= LIVE_DETECTION_MAX_AGE_MS;
+  }
 
   // Formateador de fecha/hora estilo dd-mm-yyyy hh:mm a. m./p. m.
   function formatDate(dateString: string): string {
@@ -122,7 +130,9 @@
         fetch('/api/radio/history?limit=25').then(r => r.ok ? r.json() : { history: [] }).catch(() => ({ history: [] }))
       ]);
 
-      const liveDetections: NowPlayingInfo[] = resNow.nowPlaying || [];
+      // Defensa adicional en cliente: un registro vencido solo puede aparecer en el historial.
+      const liveDetections: NowPlayingInfo[] = (resNow.nowPlaying || [])
+        .filter(isFreshLiveDetection);
       const historyList: RadioTrackHistory[] = resHistory.history || [];
 
       let html = '';

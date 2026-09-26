@@ -4,6 +4,17 @@ import { cacheService } from '../../../modules/radio-monitor/services/cacheServi
 
 export const prerender = false; // Forza a ejecutar dinámicamente del lado del servidor (SSR)
 
+// Debe coincidir con la regla del servicio para no mostrar una detección vencida
+// si una fuente de datos devuelve registros antiguos.
+const LIVE_DETECTION_MAX_AGE_MS = 5 * 60 * 1000;
+
+function isFreshLiveDetection(updatedAt?: string) {
+  const timestamp = Date.parse(updatedAt || '');
+  return Number.isFinite(timestamp)
+    && timestamp <= Date.now()
+    && Date.now() - timestamp <= LIVE_DETECTION_MAX_AGE_MS;
+}
+
 export const GET: APIRoute = async () => {
   const cacheKey = 'radio_now_playing';
   const cachedData = cacheService.get(cacheKey);
@@ -21,7 +32,9 @@ export const GET: APIRoute = async () => {
   try {
     const nowPlayingList = await dbService.getNowPlaying();
     // Filtramos las radios que actualmente tengan una canción registrada de Banda Bruna
-    const activeDetections = nowPlayingList.filter(np => np.artist && np.title);
+    const activeDetections = nowPlayingList.filter(np =>
+      np.artist && np.title && isFreshLiveDetection(np.updated_at)
+    );
 
     const responseData = {
       success: true,
