@@ -44,13 +44,26 @@ export function cleanMetaTitle(rawTitle, platform) {
   return clean;
 }
 
+function isHost(hostname, domain) {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
 export function detectPlatform(url) {
   if (!url) return null;
-  const str = url.toLowerCase();
-  if (str.includes('youtube.com') || str.includes('youtu.be')) return 'youtube';
-  if (str.includes('facebook.com') || str.includes('fb.watch')) return 'facebook';
-  if (str.includes('instagram.com')) return 'instagram';
-  if (str.includes('tiktok.com')) return 'tiktok';
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') return null;
+
+    const hostname = parsed.hostname.toLowerCase();
+    if (isHost(hostname, 'youtube.com') || hostname === 'youtu.be') return 'youtube';
+    if (isHost(hostname, 'facebook.com') || hostname === 'fb.watch') return 'facebook';
+    if (isHost(hostname, 'instagram.com')) return 'instagram';
+    if (isHost(hostname, 'tiktok.com')) return 'tiktok';
+  } catch {
+    return null;
+  }
+
   return null;
 }
 
@@ -111,7 +124,7 @@ export async function fetchVideoMetadata(url) {
     if (ytId) {
       try {
         const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(trimmedUrl)}&format=json`;
-        const res = await fetch(oembedUrl, { signal: timeoutSignal });
+        const res = await fetch(oembedUrl, { signal: timeoutSignal, redirect: 'error' });
         if (res.ok) {
           const data = await res.json();
           if (data.title) title = cleanMetaTitle(data.title, 'youtube');
@@ -139,7 +152,7 @@ export async function fetchVideoMetadata(url) {
 
     try {
       const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(trimmedUrl)}`;
-      const res = await fetch(oembedUrl, { signal: timeoutSignal });
+      const res = await fetch(oembedUrl, { signal: timeoutSignal, redirect: 'error' });
       if (res.ok) {
         const data = await res.json();
         if (data.thumbnail_url) {
@@ -177,6 +190,7 @@ export async function fetchVideoMetadata(url) {
     try {
       const res = await fetch(trimmedUrl, {
         signal: timeoutSignal,
+        redirect: 'error',
         headers: {
           'User-Agent': 'facebookexternalhit/1.1; (+http://www.facebook.com/externalhit_uatext.php)',
           'Accept': 'text/html,application/xhtml+xml',
@@ -224,6 +238,7 @@ export async function fetchVideoMetadata(url) {
     try {
       const res = await fetch(trimmedUrl, {
         signal: timeoutSignal,
+        redirect: 'error',
         headers: {
           'User-Agent': 'facebookexternalhit/1.1; (+http://www.facebook.com/externalhit_uatext.php)',
           'Accept': 'text/html,application/xhtml+xml',

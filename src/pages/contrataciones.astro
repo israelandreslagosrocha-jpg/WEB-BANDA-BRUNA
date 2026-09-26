@@ -91,6 +91,7 @@ const testimonios = dbTestimonios || [];
   <script>
     import { supabase } from '../services/supabaseClient.js';
     import { sendEmail } from '../services/emailService.js';
+    import { escapeHtml, safeRating } from '../utils/escapeHtml.js';
 
     async function loadDynamicTestimonios() {
       const section = document.getElementById('testimonios-section');
@@ -111,20 +112,20 @@ const testimonios = dbTestimonios || [];
 
         section.classList.remove('hidden');
         grid.innerHTML = dbTestimonios.slice(0, 4).map((item: any) => {
-          const rating = item.calificacion || 5;
+          const rating = safeRating(item.calificacion);
           const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-          const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).join(' — ');
+          const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).map(escapeHtml).join(' — ');
           return `
             <blockquote class="bg-slate-900 border border-white/5 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/20 transition-all duration-300 shadow-xl">
               <div>
                 <span class="text-gold-bruna text-4xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
                 <div class="flex gap-0.5 text-gold-bruna text-[10px] mb-3 pl-2">${stars}</div>
                 <p class="text-xs text-slate-350 italic font-light relative z-10 pl-2 leading-relaxed mb-4">
-                  "${item.contenido}"
+                  "${escapeHtml(item.contenido)}"
                 </p>
               </div>
               <cite class="block pl-2 not-italic border-t border-white/5 pt-3">
-                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${item.nombre_cliente}</strong>
+                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${escapeHtml(item.nombre_cliente)}</strong>
                 ${sub ? `<span class="text-[9px] text-slate-500 uppercase tracking-wide block mt-0.5">${sub}</span>` : ''}
               </cite>
             </blockquote>

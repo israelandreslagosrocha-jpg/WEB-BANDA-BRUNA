@@ -424,6 +424,7 @@ const allDetrasCamaras = [
           </div>
         )}
       </div>
+      </div>
     </section>
 
     <!-- 1.5 SECCIÓN DE OPINIONES (CARRUSEL Y FORMULARIO COMPACTO) -->
@@ -832,6 +833,14 @@ const allDetrasCamaras = [
     document.addEventListener('DOMContentLoaded', () => {
       const root = document.getElementById('lanzamiento-root');
       if (!root) return;
+
+      const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+      const safeRating = (value) => {
+        const rating = Number.parseInt(value, 10);
+        return Number.isInteger(rating) ? Math.min(5, Math.max(1, rating)) : 5;
+      };
 
       const launchDateStr = root.getAttribute('data-launch-date');
       const youtubeId = root.getAttribute('data-youtube-id');
@@ -1293,19 +1302,20 @@ const allDetrasCamaras = [
             return;
           }
           muroGrid.innerHTML = data.map(com => {
-            const estrellas = '★'.repeat(com.calificacion) + '☆'.repeat(5 - com.calificacion);
+            const calificacion = safeRating(com.calificacion);
+            const estrellas = '★'.repeat(calificacion) + '☆'.repeat(5 - calificacion);
             const fecha = new Date(com.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
             return `
               <div class="carousel-item">
                 <div class="bg-slate-900/60 border border-white/5 rounded-xl p-4 flex flex-col text-left gap-2 backdrop-blur-sm relative hover:border-gold-bruna/20 transition-all duration-300 h-full min-h-[110px]">
                   <div class="flex justify-between items-start">
                     <div class="min-w-0 flex-grow">
-                      <h4 class="font-bold text-[11px] text-white uppercase tracking-wider truncate">${com.nombre}</h4>
-                      ${com.ciudad ? `<span class="text-[8px] text-slate-500 font-bold uppercase truncate block mt-0.5">${com.ciudad}</span>` : ''}
+                      <h4 class="font-bold text-[11px] text-white uppercase tracking-wider truncate">${escapeHtml(com.nombre)}</h4>
+                      ${com.ciudad ? `<span class="text-[8px] text-slate-500 font-bold uppercase truncate block mt-0.5">${escapeHtml(com.ciudad)}</span>` : ''}
                     </div>
                     <div class="text-gold-bruna text-[9px] tracking-wide font-mono shrink-0 pl-2">${estrellas}</div>
                   </div>
-                  <p class="text-[11px] text-slate-300 leading-snug font-light line-clamp-3">${com.comentario}</p>
+                  <p class="text-[11px] text-slate-300 leading-snug font-light line-clamp-3">${escapeHtml(com.comentario)}</p>
                   <span class="text-[7px] text-slate-600 uppercase font-mono mt-auto pt-1">${fecha}</span>
                 </div>
               </div>

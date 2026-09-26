@@ -1,80 +1,24 @@
-import { createClient } from '@supabase/supabase-js';
 import { parseYouTubeRssFeed, scrapeYouTubeSubscribers } from '../../../modules/social-sync/scrapers/youtube.js';
 import { scrapeInstagramFollowers } from '../../../modules/social-sync/scrapers/instagram.js';
 import { getVideoPlaylists } from '../../../services/socialApi.js';
 import { parseCount } from '../../../modules/social-sync/types.js';
+import {
+  authenticateAdminRequest,
+  createServiceSupabaseClient,
+  isValidCronRequest,
+  jsonResponse
+} from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
-// 1. Obtener cliente de Supabase server-side seguro
-function getSupabaseClient(authToken = null) {
-  const url = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error('Variables de entorno de Supabase faltantes.');
-  }
-
-  const options = {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false
-    }
-  };
-
-  if (authToken && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    options.global = {
-      headers: {
-        Authorization: `Bearer ${authToken}`
-      }
-    };
-  }
-
-  return createClient(url, key, options);
-}
-
 // 2. Validación de autorización (Vercel Cron O Usuario Administrador de Supabase O GitHub Actions)
-const DEFAULT_CRON_SECRET = '3ab319b9e61b8f0767f1d60c3953efb1f81301f3abe6ce99bac8c1927c2f143f';
-
 async function authenticateRequest(request) {
-  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET || DEFAULT_CRON_SECRET;
-  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization') || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-
-  // Caso A: Cron Secret de Vercel o GitHub Actions
-  if (cronSecret && token === cronSecret) {
-    return { authorized: true, userEmail: 'cron@bandabruna.cl', isCron: true, token: null };
+  if (isValidCronRequest(request)) {
+    return { authorized: true, userEmail: 'cron@bandabruna.cl', isCron: true };
   }
 
-  // Caso A2: Query param secret (?secret=...)
-  try {
-    const urlObj = new URL(request.url);
-    const querySecret = urlObj.searchParams.get('secret');
-    if (cronSecret && querySecret === cronSecret) {
-      return { authorized: true, userEmail: 'cron@bandabruna.cl (param)', isCron: true, token: null };
-    }
-  } catch {}
-
-  // Caso B: Token JWT de Supabase desde el Dashboard de Admin
-  if (token) {
-    try {
-      const sb = getSupabaseClient(token);
-      const { data: { user }, error } = await sb.auth.getUser(token);
-      if (!error && user && (user.email === 'contacto@bandabruna.cl' || user.role === 'authenticated')) {
-        return { authorized: true, userEmail: user.email, isCron: false, token };
-      }
-    } catch (err) {
-      console.warn('[sync-social] Error al validar JWT de usuario:', err.message);
-    }
-  }
-
-  // Caso C: En desarrollo local (localhost) permitimos ejecución si no hay secreto o viene bypass
-  const host = request.headers.get('host') || '';
-  if (host.includes('localhost') || host.includes('127.0.0.1')) {
-    return { authorized: true, userEmail: 'contacto@bandabruna.cl (local)', isCron: false, token: token || null };
-  }
-
-  return { authorized: false, userEmail: null, isCron: false, token: null };
+  const admin = await authenticateAdminRequest(request);
+  return { ...admin, isCron: false };
 }
 
 // 3. Consulta de métricas desde Google Sheets (respaldo consolidado)
@@ -236,9 +180,9 @@ async function scrapeFacebookFollowers() {
 }
 
 // 5. Orquestador central de Sincronización
-async function executeSynchronization(userEmail, userToken) {
+async function executeSynchronization(userEmail) {
   const startedAt = new Date();
-  const sb = getSupabaseClient(userToken);
+  const sb = createServiceSupabaseClient();
   const result = {
     success: true,
     started_at: startedAt.toISOString(),
@@ -534,49 +478,22 @@ async function executeSynchronization(userEmail, userToken) {
   return result;
 }
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-};
-
-// 6. Handlers OPTIONS, GET y POST
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: CORS_HEADERS
-  });
-}
-
 export async function GET({ request }) {
   const auth = await authenticateRequest(request);
   if (!auth.authorized) {
-    return new Response(JSON.stringify({ success: false, error: 'No autorizado' }), {
-      status: 401,
-      headers: CORS_HEADERS
-    });
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
   }
 
-  const result = await executeSynchronization(auth.userEmail, auth.token);
-  return new Response(JSON.stringify(result), {
-    status: 200,
-    headers: CORS_HEADERS
-  });
+  const result = await executeSynchronization(auth.userEmail);
+  return jsonResponse(result);
 }
 
 export async function POST({ request }) {
   const auth = await authenticateRequest(request);
   if (!auth.authorized) {
-    return new Response(JSON.stringify({ success: false, error: 'No autorizado' }), {
-      status: 401,
-      headers: CORS_HEADERS
-    });
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
   }
 
-  const result = await executeSynchronization(auth.userEmail, auth.token);
-  return new Response(JSON.stringify(result), {
-    status: 200,
-    headers: CORS_HEADERS
-  });
+  const result = await executeSynchronization(auth.userEmail);
+  return jsonResponse(result);
 }

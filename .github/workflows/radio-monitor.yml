@@ -1,0 +1,44 @@
+name: Monitor radial
+
+on:
+  schedule:
+    # Cada 30 minutos, evitando el minuto 00 donde GitHub suele tener mayor carga.
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+# El workflow solo invoca la API; no necesita acceso al repositorio ni permisos de GitHub.
+permissions: {}
+
+# Evita que dos ejecuciones programadas se solapen si una demora más de lo previsto.
+concurrency:
+  group: radio-monitor
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: Consultar radios
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Invocar el escaneo protegido
+        env:
+          RADIO_SCAN_URL: ${{ vars.RADIO_SCAN_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$RADIO_SCAN_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "Faltan RADIO_SCAN_URL o CRON_SECRET en la configuración de Actions." >&2
+            exit 1
+          fi
+
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --connect-timeout 10 \
+            --max-time 90 \
+            --retry 2 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${RADIO_SCAN_URL%/}/api/radio/scan"

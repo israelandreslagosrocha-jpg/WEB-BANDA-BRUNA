@@ -2,13 +2,13 @@ import { createClient } from '@supabase/supabase-js';
 
 /**
  * Obtiene o crea un cliente Supabase adecuado para operaciones server-side.
- * Prioriza SUPABASE_SERVICE_ROLE_KEY. Permite inyección de cliente para tests.
+ * Exige una clave secreta de Supabase. Permite inyección de cliente para tests.
  */
 export function getServiceClient(injectedClient = null) {
   if (injectedClient) return injectedClient;
 
-  const url = process.env.PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !key) {
     throw new Error('Faltan credenciales de Supabase (PUBLIC_SUPABASE_URL y/o SUPABASE_SERVICE_ROLE_KEY).');

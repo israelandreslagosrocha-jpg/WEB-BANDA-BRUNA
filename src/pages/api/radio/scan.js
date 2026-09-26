@@ -1,4 +1,9 @@
-import { supabase } from '../../../services/supabaseClient.js';
+import {
+  authenticateAdminRequest,
+  createServiceSupabaseClient,
+  isValidCronRequest,
+  jsonResponse
+} from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
@@ -277,35 +282,18 @@ async function getEmisoraClMetadata(url) {
 }
 
 
-// 3. HANDLER PRINCIPAL DE LA API ROUTE
-const DEFAULT_CRON_SECRET = '3ab319b9e61b8f0767f1d60c3953efb1f81301f3abe6ce99bac8c1927c2f143f';
-
 export async function GET({ request }) {
-  // 3.1. AUTENTICACIÓN ESTRICTA (Exclusivamente vía encabezado Authorization: Bearer <CRON_SECRET>)
-  const cronSecret = process.env.CRON_SECRET || import.meta.env.CRON_SECRET || DEFAULT_CRON_SECRET;
-  if (!cronSecret) {
-    console.error('Error de configuración: CRON_SECRET no está definido en las variables de entorno.');
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: 'Servicio no configurado' 
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
-  if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: 'No autorizado' 
-    }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  // Permite el cron de Vercel o una sesión autenticada del administrador para el disparo manual.
+  const isCron = isValidCronRequest(request);
+  const admin = isCron ? { authorized: false } : await authenticateAdminRequest(request);
+  if (!isCron && !admin.authorized) {
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
   }
 
   try {
+    // Este endpoint actualiza varias tablas protegidas por RLS; nunca debe usar la clave pública.
+    const supabase = createServiceSupabaseClient();
+
     // 3.2. CONTROL PERSISTENTE DE CONCURRENCIA (Ventana mínima de 60 segundos entre escaneos)
     const COOLDOWN_SECONDS = 60;
     const { data: latestRadio } = await supabase

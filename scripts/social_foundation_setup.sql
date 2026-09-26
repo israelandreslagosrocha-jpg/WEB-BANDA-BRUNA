@@ -226,8 +226,8 @@ ALTER TABLE public.social_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.social_scrape_logs ENABLE ROW LEVEL SECURITY;
 
 -- 8.1 Políticas social_accounts
+-- La lectura pública se expone sólo mediante social_accounts_public (vista con columnas mínimas).
 DROP POLICY IF EXISTS "social_accounts_read_public" ON public.social_accounts;
-CREATE POLICY "social_accounts_read_public" ON public.social_accounts FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "social_accounts_admin_full" ON public.social_accounts;
 CREATE POLICY "social_accounts_admin_full" ON public.social_accounts FOR ALL USING (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl');

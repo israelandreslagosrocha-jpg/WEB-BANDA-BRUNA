@@ -240,12 +240,42 @@ try {
     .order('web_order', { ascending: true })
     .limit(6);
 
-  if (!postsErr && dbPosts && dbPosts.length > 0) {
+if (!postsErr && dbPosts && dbPosts.length > 0) {
     editorialSocialPosts = dbPosts;
   }
 } catch (err) {
   console.error("Error al cargar publicaciones sociales aprobadas:", err);
 }
+
+const fallbackEditorialPosts = [
+  {
+    platform: 'youtube',
+    url: latestVideo.youtubeUrl,
+    thumbnail_url: latestVideo.thumbnail,
+    title: latestVideo.title,
+    caption: 'Videoclip oficial disponible en nuestro canal de YouTube.',
+    published_at: null,
+    web_order: 1
+  },
+  {
+    platform: 'instagram',
+    url: instagramFeed[0]?.link || 'https://www.instagram.com/banda_bruna/',
+    thumbnail_url: instagramFeed[0]?.imageUrl,
+    title: 'Fiestas Patrias en Vivo — Temuco',
+    caption: instagramFeed[0]?.caption || 'Contenido oficial de Banda Bruna en Instagram.',
+    published_at: null,
+    web_order: 2
+  },
+  {
+    platform: 'facebook',
+    url: facebookFeed[0]?.link || 'https://www.facebook.com/bandabruna',
+    thumbnail_url: facebookFeed[0]?.imageUrl,
+    title: 'Gira y Celebraciones Masivas',
+    caption: facebookFeed[0]?.caption || 'Contenido oficial de Banda Bruna en Facebook.',
+    published_at: null,
+    web_order: 3
+  }
+];
 ---
 
 <Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
@@ -341,8 +371,6 @@ try {
             }
           })();
         </script>
-      </div>
-
       <!-- Titular Display en Cabinet Grotesk -->
       <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-white uppercase font-title max-w-4xl drop-shadow-md">
         MÚSICA EN VIVO PARA <span class="text-gold-bruna">FESTIVALES, MUNICIPALIDADES</span> Y GRANDES CELEBRACIONES
@@ -1211,8 +1239,7 @@ try {
 
         <!-- Renderizado de Publicaciones Editoriales (Supabase P1/P2 o Fallback Verificado) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {editorialSocialPosts.length > 0 ? (
-            editorialSocialPosts.map((post: any) => (
+          {(editorialSocialPosts.length > 0 ? editorialSocialPosts : fallbackEditorialPosts).map((post: any) => (
               <a 
                 href={post.post_url || post.url || '#'} 
                 target="_blank" 
@@ -1258,107 +1285,7 @@ try {
                   <span class="text-gold-bruna font-bold group-hover:underline">Abrir →</span>
                 </div>
               </a>
-            ))
-          ) : (
-            <!-- Fallback Editorial Ordenado con Canales Oficiales Verificados -->
-            <>
-              <!-- Card 1: YouTube Oficial -->
-              <a 
-                href={latestVideo.youtubeUrl} 
-                target="_blank" 
-                rel="noopener" 
-                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
-              >
-                <div>
-                  <div class="flex items-center justify-between mb-3">
-                    <span class="bg-red-600/20 border border-red-500/30 text-red-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                      YOUTUBE OFICIAL
-                    </span>
-                    <span class="text-[9px] text-slate-500 font-mono">CANAL OFICIAL</span>
-                  </div>
-                  <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
-                    <img src={latestVideo.thumbnail} alt={latestVideo.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <span class="text-white text-base">▶</span>
-                    </div>
-                  </div>
-                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
-                    {latestVideo.title}
-                  </h3>
-                  <p class="text-[11px] text-slate-300 font-light line-clamp-2">
-                    Videoclip oficial disponible en nuestro canal de YouTube.
-                  </p>
-                </div>
-                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
-                  <span>{latestVideo.publishedAt}</span>
-                  <span class="text-gold-bruna font-bold group-hover:underline">Reproducir →</span>
-                </div>
-              </a>
-
-              <!-- Card 2: Instagram Reel Verificado -->
-              <a 
-                href={instagramFeed[0].link} 
-                target="_blank" 
-                rel="noopener" 
-                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
-              >
-                <div>
-                  <div class="flex items-center justify-between mb-3">
-                    <span class="bg-pink-600/20 border border-pink-500/30 text-pink-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                      INSTAGRAM OFICIAL
-                    </span>
-                    <span class="text-[9px] text-slate-500 font-mono">@banda_bruna</span>
-                  </div>
-                  <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
-                    <img src={instagramFeed[0].imageUrl} alt="Instagram Oficial Banda Bruna" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <span class="text-white text-base">📸</span>
-                    </div>
-                  </div>
-                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
-                    Fiestas Patrias en Vivo — Temuco
-                  </h3>
-                  <p class="text-[11px] text-slate-300 font-light line-clamp-2">
-                    {instagramFeed[0].caption}
-                  </p>
-                </div>
-                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
-                  <span>{instagramFeed[0].timeAgo}</span>
-                  <span class="text-gold-bruna font-bold group-hover:underline">Ver Publicación →</span>
-                </div>
-              </a>
-
-              <!-- Card 3: Facebook Post Verificado -->
-              <a 
-                href={facebookFeed[0].link} 
-                target="_blank" 
-                rel="noopener" 
-                class="bg-[#0b132b]/80 border border-white/10 hover:border-gold-bruna rounded-2xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 group text-left shadow-lg"
-              >
-                <div>
-                  <div class="flex items-center justify-between mb-3">
-                    <span class="bg-blue-600/20 border border-blue-500/30 text-blue-400 text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                      FACEBOOK OFICIAL
-                    </span>
-                    <span class="text-[9px] text-slate-500 font-mono">Banda Bruna</span>
-                  </div>
-                  <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
-                    <img src={facebookFeed[0].imageUrl} alt="Facebook Post" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                  </div>
-                  <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-1 group-hover:text-gold-bruna transition-colors">
-                    Gira y Celebraciones Masivas
-                  </h3>
-                  <p class="text-[11px] text-slate-300 font-light line-clamp-2">
-                    {facebookFeed[0].caption}
-                  </p>
-                </div>
-                <div class="flex items-center justify-between border-t border-white/5 pt-3 mt-4 text-[10px] text-slate-400">
-                  <span>{facebookFeed[0].timeAgo}</span>
-                  <span class="text-gold-bruna font-bold group-hover:underline">Ver Post →</span>
-                </div>
-              </a>
-            </>
-          )}
+          ))}
         </div>
 
         <!-- Franja de Enlaces Directos a Redes Oficiales -->
@@ -1503,6 +1430,8 @@ try {
 
   <!-- Interactive Scripts (Sliders, Counters, Video Player Modals) -->
   <script>
+    import { escapeHtml, safeRating } from '../utils/escapeHtml.js';
+
     // HERO BACKGROUND SLIDER LOGIC
     const slides = document.querySelectorAll('.hero-slide');
     const prevBtn = document.getElementById('hero-prev');
@@ -1632,20 +1561,20 @@ try {
 
         section.classList.remove('hidden');
         grid.innerHTML = dbTestimonios.map((item: any) => {
-          const rating = item.calificacion || 5;
+          const rating = safeRating(item.calificacion);
           const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-          const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).join(' — ');
+          const sub = [item.cargo_cliente, item.organizacion_cliente].filter(Boolean).map(escapeHtml).join(' — ');
           return `
             <blockquote class="bg-[#0b132b]/80 border border-white/10 p-6 rounded-2xl text-left relative flex flex-col justify-between group hover:border-gold-bruna/30 transition-all duration-300 shadow-xl">
               <div>
                 <span class="text-gold-bruna text-5xl font-serif absolute top-4 left-4 opacity-10 leading-none select-none pointer-events-none">“</span>
                 <div class="flex gap-1 text-gold-bruna text-xs mb-3.5 pl-3">${stars}</div>
                 <p class="text-xs text-slate-300 italic font-light relative z-10 pl-3 leading-relaxed mb-6">
-                  "${item.contenido}"
+                  "${escapeHtml(item.contenido)}"
                 </p>
               </div>
               <cite class="block pl-3 not-italic border-t border-white/5 pt-4">
-                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${item.nombre_cliente}</strong>
+                <strong class="text-white text-xs font-bold font-title uppercase block tracking-wider group-hover:text-gold-bruna transition-colors">${escapeHtml(item.nombre_cliente)}</strong>
                 ${sub ? `<span class="text-[11px] text-slate-400 uppercase tracking-wide block mt-1 leading-tight">${sub}</span>` : ''}
               </cite>
             </blockquote>

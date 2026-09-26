@@ -28,6 +28,8 @@
 </div>
 
 <script>
+  import { escapeHtml, safeWebUrl } from '../../../utils/escapeHtml.js';
+
   interface NowPlayingInfo {
     radio_id: string;
     artist: string;
@@ -99,7 +101,7 @@
   const DEFAULT_TRACK_COVER = 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1783052331/compressed_BANDA_BRUNA_-_AHOGADO_EN_UN_BAR_mgwlvi.webp';
 
   function getTrackCover(title?: string, artwork?: string): string {
-    if (artwork) return artwork;
+    if (artwork) return safeWebUrl(artwork, DEFAULT_TRACK_COVER);
     if (!title) return DEFAULT_TRACK_COVER;
     const cleanTitle = title.toLowerCase().trim();
     for (const key in trackCovers) {
@@ -151,24 +153,24 @@
 
             <div class="flex items-center gap-3.5">
               <img 
-                src="${trackCover}" 
-                alt="${current.title}" 
+                src="${escapeHtml(trackCover)}"
+                alt="${escapeHtml(current.title)}"
                 class="w-14 h-14 rounded-lg object-cover border border-white/10 bg-slate-900 flex-shrink-0 shadow-lg"
                 onerror="this.src='${DEFAULT_TRACK_COVER}'"
               />
               <div class="flex-1 min-w-0">
                 <span class="text-[9px] bg-white/10 border border-white/10 text-slate-300 font-bold px-2 py-0.5 rounded uppercase tracking-wider inline-block mb-1">
-                  📻 ${current.radio_name || 'Radio Online'}
+                  📻 ${escapeHtml(current.radio_name || 'Radio Online')}
                 </span>
-                <h4 class="text-sm font-extrabold text-white truncate font-title leading-tight">${current.title}</h4>
-                <p class="text-xs text-gold-bruna font-medium truncate mt-0.5">${current.artist || 'Banda Bruna'}</p>
+                <h4 class="text-sm font-extrabold text-white truncate font-title leading-tight">${escapeHtml(current.title)}</h4>
+                <p class="text-xs text-gold-bruna font-medium truncate mt-0.5">${escapeHtml(current.artist || 'Banda Bruna')}</p>
               </div>
             </div>
 
             ${current.stream_url ? `
               <div class="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between">
                 <a 
-                  href="${current.stream_url}" 
+                  href="${escapeHtml(safeWebUrl(current.stream_url))}"
                   target="_blank" 
                   class="bg-gold-bruna hover:bg-gold-bruna/90 text-slate-950 font-bold py-1.5 px-4 rounded-md text-[11px] tracking-wider uppercase flex items-center gap-1.5 transition-all shadow-md shadow-gold-bruna/10"
                 >
@@ -205,17 +207,17 @@
                 <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-gold-bruna/30 transition-all duration-300 group/item">
                   <div class="flex items-center gap-3 min-w-0 flex-1">
                     <img 
-                      src="${coverUrl}" 
-                      alt="${item.title}" 
+                      src="${escapeHtml(coverUrl)}"
+                      alt="${escapeHtml(item.title)}"
                       class="w-10 h-10 rounded-lg object-cover border border-white/10 bg-slate-950 flex-shrink-0 shadow"
                       onerror="this.src='${DEFAULT_TRACK_COVER}'"
                     />
                     <div class="min-w-0 flex-1">
                       <p class="text-xs font-extrabold text-white font-title truncate group-hover/item:text-gold-bruna transition-colors">
-                        ${item.title}
+                        ${escapeHtml(item.title)}
                       </p>
                       <p class="text-[11px] font-semibold text-slate-400 truncate flex items-center gap-1">
-                        <span>📻</span> ${item.radio_name || 'Radio Online'}
+                        <span>📻</span> ${escapeHtml(item.radio_name || 'Radio Online')}
                       </p>
                     </div>
                   </div>

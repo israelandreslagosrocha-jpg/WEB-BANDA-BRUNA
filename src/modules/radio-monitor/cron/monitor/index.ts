@@ -283,30 +283,40 @@ async function getEmisoraClMetadata(url: string): Promise<NowPlayingResult> {
 // 3. HANDLER PRINCIPAL DE LA EDGE FUNCTION
 // ==========================================
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+const jsonHeaders = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store',
 };
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight request
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+  // Esta función privilegiada solo admite el disparo manual de un administrador autenticado.
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Método no permitido' }), {
+      status: 405,
+      headers: { ...jsonHeaders, 'Allow': 'POST' }
+    });
   }
 
-  // Solo permitir peticiones POST o GET para disparar el cron
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''; // Usamos service role para bypass RLS y escribir auditorías
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
   
   if (!supabaseUrl || !supabaseKey) {
     return new Response(JSON.stringify({ error: 'Faltan variables de entorno de Supabase' }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: jsonHeaders
     });
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+  if (userError || user?.email?.toLowerCase() !== 'contacto@bandabruna.cl') {
+    return new Response(JSON.stringify({ error: 'No autorizado' }), {
+      status: 401,
+      headers: jsonHeaders
+    });
+  }
 
   try {
     // 1. Obtener radios activas
@@ -505,12 +515,13 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true, processed: radios?.length || 0, results }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: jsonHeaders
     });
   } catch (error: any) {
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    console.error('[radio-monitor] Error al ejecutar cron:', error);
+    return new Response(JSON.stringify({ success: false, error: 'Error interno al ejecutar el escaneo' }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: jsonHeaders
     });
   }
 });

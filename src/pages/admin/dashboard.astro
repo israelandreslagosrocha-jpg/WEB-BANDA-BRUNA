@@ -929,6 +929,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
 
   <script>
     import { supabase } from '../../services/supabaseClient.js';
+    import { escapeHtml, safeRating } from '../../utils/escapeHtml.js';
 
     let loggedInUserEmail = '';
     let stageElements = [] as any[];
@@ -1106,6 +1107,17 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         } catch(e) {
           console.error(e);
         }
+      }
+
+      async function adminRequestHeaders() {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) throw new Error('La sesión de administrador expiró. Vuelve a iniciar sesión.');
+
+        return {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        };
       }
 
       // ==========================================
@@ -1780,7 +1792,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
           try {
             const res = await fetch('/api/galeria', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: await adminRequestHeaders(),
               body: JSON.stringify({
                 action: id ? 'update' : 'create',
                 id: customId,
@@ -1817,7 +1829,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
         try {
           const res = await fetch('/api/galeria', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await adminRequestHeaders(),
             body: JSON.stringify({ action: 'delete', id })
           });
           const json = await res.json();
@@ -3018,7 +3030,12 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
           `;
 
           try {
-            const res = await fetch(`/api/admin/fetch-video-meta?url=${encodeURIComponent(url)}`);
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            if (!token) throw new Error('La sesión de administrador expiró.');
+            const res = await fetch(`/api/admin/fetch-video-meta?url=${encodeURIComponent(url)}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
 
             if (data.success && data.thumbnail) {
@@ -3297,20 +3314,20 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
             <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1.5">
-                  <span class="text-xs font-bold text-white font-title uppercase">${item.nombre_cliente}</span>
+                  <span class="text-xs font-bold text-white font-title uppercase">${escapeHtml(item.nombre_cliente)}</span>
                   ${item.cargo_cliente || item.organizacion_cliente ? `
                     <span class="text-[9px] text-slate-500 uppercase">
-                      — ${item.cargo_cliente || ''} ${item.cargo_cliente && item.organizacion_cliente ? 'en' : ''} ${item.organizacion_cliente || ''}
+                      — ${escapeHtml(item.cargo_cliente || '')} ${item.cargo_cliente && item.organizacion_cliente ? 'en' : ''} ${escapeHtml(item.organizacion_cliente || '')}
                     </span>
                   ` : ''}
-                  <span class="text-gold-bruna text-[10px] font-bold ml-2">${'★'.repeat(item.calificacion)}${'☆'.repeat(5 - item.calificacion)}</span>
+                  <span class="text-gold-bruna text-[10px] font-bold ml-2">${'★'.repeat(safeRating(item.calificacion))}${'☆'.repeat(5 - safeRating(item.calificacion))}</span>
                 </div>
-                <p class="text-xs text-slate-300 italic font-light">"${item.contenido}"</p>
+                <p class="text-xs text-slate-300 italic font-light">"${escapeHtml(item.contenido)}"</p>
                 <p class="text-[8px] text-slate-600 font-mono mt-1.5">${new Date(item.created_at).toLocaleDateString('es-CL')} ${new Date(item.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
               <div class="flex gap-2 w-full md:w-auto justify-end">
                 <button data-approve-testimonio-id="${item.id}" class="text-[10px] bg-green-950/20 border border-green-500/20 hover:border-green-500 hover:text-green-450 text-green-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Aprobar</button>
-                <button data-delete-testimonio-id="${item.id}" data-testimonio-name="${item.nombre_cliente}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Eliminar</button>
+                <button data-delete-testimonio-id="${escapeHtml(item.id)}" data-testimonio-name="${escapeHtml(item.nombre_cliente)}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Eliminar</button>
               </div>
             </div>
           `).join('');
@@ -3323,20 +3340,20 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
             <div class="bg-slate-900 border border-white/5 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1.5">
-                  <span class="text-xs font-bold text-white font-title uppercase">${item.nombre_cliente}</span>
+                  <span class="text-xs font-bold text-white font-title uppercase">${escapeHtml(item.nombre_cliente)}</span>
                   ${item.cargo_cliente || item.organizacion_cliente ? `
                     <span class="text-[9px] text-slate-500 uppercase">
-                      — ${item.cargo_cliente || ''} ${item.cargo_cliente && item.organizacion_cliente ? 'en' : ''} ${item.organizacion_cliente || ''}
+                      — ${escapeHtml(item.cargo_cliente || '')} ${item.cargo_cliente && item.organizacion_cliente ? 'en' : ''} ${escapeHtml(item.organizacion_cliente || '')}
                     </span>
                   ` : ''}
-                  <span class="text-gold-bruna text-[10px] font-bold ml-2">${'★'.repeat(item.calificacion)}${'☆'.repeat(5 - item.calificacion)}</span>
+                  <span class="text-gold-bruna text-[10px] font-bold ml-2">${'★'.repeat(safeRating(item.calificacion))}${'☆'.repeat(5 - safeRating(item.calificacion))}</span>
                 </div>
-                <p class="text-xs text-slate-300 italic font-light">"${item.contenido}"</p>
+                <p class="text-xs text-slate-300 italic font-light">"${escapeHtml(item.contenido)}"</p>
                 <p class="text-[8px] text-slate-600 font-mono mt-1.5">${new Date(item.created_at).toLocaleDateString('es-CL')} ${new Date(item.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
               <div class="flex gap-2 w-full md:w-auto justify-end">
                 <button data-unapprove-testimonio-id="${item.id}" class="text-[10px] border border-white/10 hover:border-gold-bruna hover:text-gold-bruna font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Desaprobar</button>
-                <button data-delete-testimonio-id="${item.id}" data-testimonio-name="${item.nombre_cliente}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Eliminar</button>
+                <button data-delete-testimonio-id="${escapeHtml(item.id)}" data-testimonio-name="${escapeHtml(item.nombre_cliente)}" class="text-[10px] border border-red-500/20 hover:border-red-500 hover:text-red-400 font-bold py-1.5 px-3 rounded uppercase transition-colors cursor-pointer">Eliminar</button>
               </div>
             </div>
           `).join('');
@@ -3985,17 +4002,18 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
             pendientesList.innerHTML = '<p class="text-[10px] text-slate-550 uppercase py-4">No hay comentarios pendientes</p>';
           } else {
             pendientesList.innerHTML = pendientes.map((c: any) => {
-              const stars = '★'.repeat(c.calificacion) + '☆'.repeat(5 - c.calificacion);
+              const rating = safeRating(c.calificacion);
+              const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
               return `
                 <div class="bg-slate-950 border border-white/5 p-4 rounded-xl flex flex-col gap-2 relative">
                   <div class="flex justify-between items-start">
                     <div>
-                      <h5 class="font-bold text-xs text-white uppercase">${c.nombre}</h5>
-                      ${c.ciudad ? `<span class="text-[8px] text-slate-500 uppercase font-bold">${c.ciudad}</span>` : ''}
+                      <h5 class="font-bold text-xs text-white uppercase">${escapeHtml(c.nombre)}</h5>
+                      ${c.ciudad ? `<span class="text-[8px] text-slate-500 uppercase font-bold">${escapeHtml(c.ciudad)}</span>` : ''}
                     </div>
                     <span class="text-gold-bruna text-[10px] font-mono">${stars}</span>
                   </div>
-                  <p class="text-xs text-slate-350 leading-tight font-light">${c.comentario}</p>
+                  <p class="text-xs text-slate-350 leading-tight font-light">${escapeHtml(c.comentario)}</p>
                   <div class="flex gap-2 justify-end mt-2 pt-2 border-t border-white/5">
                     <button data-mod-approve-id="${c.id}" class="text-[9px] bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 hover:text-green-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Aprobar</button>
                     <button data-mod-reject-id="${c.id}" class="text-[9px] bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:text-red-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Eliminar</button>
@@ -4039,17 +4057,18 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
             aprobadosList.innerHTML = '<p class="text-[10px] text-slate-550 uppercase py-4">No hay comentarios publicados</p>';
           } else {
             aprobadosList.innerHTML = aprobados.map((c: any) => {
-              const stars = '★'.repeat(c.calificacion) + '☆'.repeat(5 - c.calificacion);
+              const rating = safeRating(c.calificacion);
+              const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
               return `
                 <div class="bg-slate-950/60 border border-white/5 p-4 rounded-xl flex flex-col gap-2 relative">
                   <div class="flex justify-between items-start">
                     <div>
-                      <h5 class="font-bold text-xs text-white uppercase">${c.nombre}</h5>
-                      ${c.ciudad ? `<span class="text-[8px] text-slate-550 uppercase font-bold">${c.ciudad}</span>` : ''}
+                      <h5 class="font-bold text-xs text-white uppercase">${escapeHtml(c.nombre)}</h5>
+                      ${c.ciudad ? `<span class="text-[8px] text-slate-550 uppercase font-bold">${escapeHtml(c.ciudad)}</span>` : ''}
                     </div>
                     <span class="text-gold-bruna text-[10px] font-mono">${stars}</span>
                   </div>
-                  <p class="text-xs text-slate-350 leading-tight font-light">${c.comentario}</p>
+                  <p class="text-xs text-slate-350 leading-tight font-light">${escapeHtml(c.comentario)}</p>
                   <div class="flex gap-2 justify-end mt-2 pt-2 border-t border-white/5">
                     <button data-mod-disapprove-id="${c.id}" class="text-[9px] border border-white/10 hover:border-amber-500 hover:text-amber-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Ocultar</button>
                     <button data-mod-reject-id="${c.id}" class="text-[9px] bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:text-red-400 font-bold px-2 py-1 rounded uppercase tracking-wider transition-all cursor-pointer">Eliminar</button>
@@ -4140,12 +4159,13 @@ Las cifras se han sincronizado en tiempo real en la base de datos y en todo el s
               (btnTrigger as HTMLButtonElement).disabled = true;
 
               try {
-                // Invocamos la Edge Function de Supabase de manera directa y autenticada
-                const { data, error } = await supabase.functions.invoke('radio-monitor', {
-                  method: 'POST'
+                // La API interna valida la sesión del administrador; el cron queda separado.
+                const response = await fetch('/api/radio/scan', {
+                  headers: await adminRequestHeaders()
                 });
+                const data = await response.json().catch(() => null);
 
-                if (error) throw error;
+                if (!response.ok) throw new Error(data?.error || `Error HTTP ${response.status}`);
                 alert(`Escaneo finalizado. Procesado: ${data.processed || 0} radios. Coincidencias: ${data.results?.filter((r: any) => r.status === 'DETECTION').length || 0}`);
                 await logAction('Ejecutó sincronización manual del Radio Monitor');
                 loadRadioMonitor(); // Recargar datos

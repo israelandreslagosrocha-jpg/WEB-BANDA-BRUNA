@@ -1,63 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fetchVideoMetadata } from '../../../services/videoMetaFetcher.js';
+import {
+  authenticateAdminRequest,
+  createPublicSupabaseClient,
+  createServiceSupabaseClient,
+  jsonResponse
+} from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
-// 1. Cliente Supabase con Service Role o Bearer Auth
-function getSupabaseClient(authToken = null) {
-  const url = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY || process.env.PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
-    throw new Error('Variables de entorno de Supabase faltantes.');
-  }
-
-  const options = {
-    auth: { persistSession: false, autoRefreshToken: false }
-  };
-
-  if (authToken && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    options.global = {
-      headers: {
-        Authorization: `Bearer ${authToken}`
-      }
-    };
-  }
-
-  return createClient(url, key, options);
-}
-
-// 2. Autenticación de usuario administrador
-async function authenticateAdmin(request) {
-  const authHeader = request.headers.get('authorization') || request.headers.get('Authorization') || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-
-  // En entorno local permitir desarrollo si no hay token
-  const host = request.headers.get('host') || '';
-  if ((host.includes('localhost') || host.includes('127.0.0.1')) && !token) {
-    return { authorized: true, userEmail: 'admin@localhost', token: null };
-  }
-
-  if (!token) {
-    return { authorized: false, userEmail: null, token: null };
-  }
-
-  try {
-    const sb = getSupabaseClient(token);
-    const { data: { user }, error } = await sb.auth.getUser(token);
-    if (!error && user && (user.email === 'contacto@bandabruna.cl' || user.role === 'authenticated')) {
-      return { authorized: true, userEmail: user.email, token };
-    }
-  } catch (err) {
-    console.warn('[save-web-videos] Error validando JWT:', err.message);
-  }
-
-  return { authorized: false, userEmail: null, token: null };
-}
-
-// 3. Extraer ID de YouTube
+// 1. Extraer ID de YouTube
 function extractYouTubeId(url) {
   if (!url) return null;
   const str = url.trim();
@@ -91,34 +44,10 @@ function extractTikTokId(url, index) {
   return match ? match[1] : `tt_${index}`;
 }
 
-// Respuestas con CORS
-function corsResponse(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    }
-  });
-}
-
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    }
-  });
-}
-
 // GET: Retornar los videos curados actuales de la base de datos
 export async function GET({ request }) {
   try {
-    const sb = getSupabaseClient();
+    const sb = createPublicSupabaseClient();
     const { data: posts, error } = await sb
       .from('social_posts')
       .select('*')
@@ -128,7 +57,7 @@ export async function GET({ request }) {
       .order('web_order', { ascending: true });
 
     if (error) {
-      return corsResponse({ success: false, error: error.message }, 500);
+      return jsonResponse({ success: false, error: error.message }, 500);
     }
 
     // Cargar respaldo curatedVideos.json si existe para complementar portadas CDN
@@ -168,28 +97,28 @@ export async function GET({ request }) {
       }
     });
 
-    return corsResponse({ success: true, videos: grouped });
+    return jsonResponse({ success: true, videos: grouped });
   } catch (err) {
-    return corsResponse({ success: false, error: err.message }, 500);
+    return jsonResponse({ success: false, error: err.message }, 500);
   }
 }
 
 // POST: Guardar y actualizar los 20 videos en Supabase
 export async function POST({ request }) {
-  const auth = await authenticateAdmin(request);
+  const auth = await authenticateAdminRequest(request);
   if (!auth.authorized) {
-    return corsResponse({ success: false, error: 'No autorizado. Se requiere sesión de administrador.' }, 401);
+    return jsonResponse({ success: false, error: 'No autorizado. Se requiere sesión de administrador.' }, 401);
   }
 
   let body;
   try {
     body = await request.json();
   } catch {
-    return corsResponse({ success: false, error: 'Cuerpo de solicitud inválido (JSON esperado).' }, 400);
+    return jsonResponse({ success: false, error: 'Cuerpo de solicitud inválido (JSON esperado).' }, 400);
   }
 
   const platforms = ['youtube', 'facebook', 'instagram', 'tiktok'];
-  const sb = getSupabaseClient(auth.token);
+  const sb = createServiceSupabaseClient();
   const summary = {
     updated: 0,
     created: 0,
@@ -355,7 +284,7 @@ export async function POST({ request }) {
       console.warn('No se pudo guardar respaldo local curatedVideos.json:', fsErr.message);
     }
 
-    return corsResponse({
+    return jsonResponse({
       success: summary.errors.length === 0,
       summary,
       message: summary.errors.length === 0 
@@ -363,6 +292,6 @@ export async function POST({ request }) {
         : 'Algunos videos se actualizaron con advertencias.'
     });
   } catch (err) {
-    return corsResponse({ success: false, error: err.message }, 500);
+    return jsonResponse({ success: false, error: err.message }, 500);
   }
 }

@@ -27,9 +27,16 @@ drop policy if exists "Administrador comentarios completo" on public.comentarios
 create policy "Lectura pública de comentarios aprobados" on public.comentarios_lanzamientos
   for select using (aprobado = true);
 
--- Inserción pública para que los fans puedan comentar desde la landing
+-- Los visitantes sólo pueden crear comentarios pendientes, con tamaño acotado.
 create policy "Inserción pública de comentarios" on public.comentarios_lanzamientos
-  for insert with check (true);
+  for insert to anon with check (
+    aprobado = false
+    and char_length(trim(nombre)) between 2 and 80
+    and char_length(trim(comentario)) between 3 and 600
+    and (ciudad is null or char_length(trim(ciudad)) <= 80)
+    and char_length(trim(lanzamiento_slug)) between 1 and 120
+    and calificacion between 1 and 5
+  );
 
 -- Administrador tiene acceso completo (contacto@bandabruna.cl)
 create policy "Administrador comentarios completo" on public.comentarios_lanzamientos

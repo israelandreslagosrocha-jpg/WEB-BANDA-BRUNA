@@ -1,7 +1,6 @@
 import { supabase } from '../../../services/supabaseClient.js';
 import staticAlbums from '../../../data/albums.json';
-import fs from 'node:fs';
-import path from 'node:path';
+import { authenticateAdminRequest, createServiceSupabaseClient, jsonResponse } from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
@@ -15,15 +14,6 @@ function slugify(text) {
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/[\s_]+/g, '-')
     .replace(/^-+|-+$/g, '');
-}
-
-function updateLocalFile(albums) {
-  try {
-    const filePath = path.resolve(process.cwd(), 'src/data/albums.json');
-    fs.writeFileSync(filePath, JSON.stringify(albums, null, 2), 'utf-8');
-  } catch (e) {
-    console.warn('[galeria API] No se pudo guardar en albums.json local:', e.message);
-  }
 }
 
 export async function GET() {
@@ -59,25 +49,27 @@ export async function GET() {
 }
 
 export async function POST({ request }) {
+  const auth = await authenticateAdminRequest(request);
+  if (!auth.authorized) {
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
+  }
+
   try {
     const body = await request.json();
     const { action, id, album } = body;
-
-    // Obtener álbumes actuales para fallback
-    let currentAlbums = [...staticAlbums];
-    try {
-      const filePath = path.resolve(process.cwd(), 'src/data/albums.json');
-      if (fs.existsSync(filePath)) {
-        currentAlbums = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      }
-    } catch (e) {}
+    const adminSupabase = createServiceSupabaseClient();
 
     if (action === 'create' || action === 'update') {
       const albumId = (id || album?.id || slugify(album?.title || 'album')).trim();
-      const titulo = album?.title || album?.titulo || 'Álbum Sin Título';
+      const titulo = String(album?.title || album?.titulo || '').trim();
       const ano = parseInt(album?.year || album?.ano || new Date().getFullYear(), 10);
-      const fotos = Array.isArray(album?.photos) ? album.photos : (Array.isArray(album?.fotos) ? album.fotos : []);
+      const fotos = (Array.isArray(album?.photos) ? album.photos : (Array.isArray(album?.fotos) ? album.fotos : []))
+        .filter(photo => typeof photo === 'string' && photo.length <= 2048 && /^https:\/\//i.test(photo));
       const orden = album?.orden !== undefined ? parseInt(album.orden, 10) : 0;
+
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(albumId) || albumId.length > 120 || !titulo || titulo.length > 160 || !Number.isInteger(ano) || ano < 1900 || ano > 2100 || fotos.length > 100) {
+        return jsonResponse({ success: false, error: 'Datos de álbum inválidos.' }, 400);
+      }
 
       const newAlbumData = {
         id: albumId,
@@ -86,43 +78,23 @@ export async function POST({ request }) {
         photos: fotos
       };
 
-      // 1. Guardar en Supabase
-      let supabaseError = null;
-      try {
-        const { error } = await supabase
-          .from('galeria_albumes')
-          .upsert({
-            id: albumId,
-            titulo: titulo,
-            ano: ano,
-            fotos: fotos,
-            orden: orden,
-            activo: true,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'id' });
-        supabaseError = error;
-      } catch (e) {
-        supabaseError = e;
+      const { error } = await adminSupabase
+        .from('galeria_albumes')
+        .upsert({
+          id: albumId,
+          titulo,
+          ano,
+          fotos,
+          orden: Number.isInteger(orden) ? orden : 0,
+          activo: true,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (error) {
+        return jsonResponse({ success: false, error: 'No se pudo guardar el álbum.' }, 500);
       }
 
-      // 2. Guardar en local albums.json
-      const existingIdx = currentAlbums.findIndex(a => a.id === albumId);
-      if (existingIdx >= 0) {
-        currentAlbums[existingIdx] = newAlbumData;
-      } else {
-        currentAlbums.unshift(newAlbumData);
-      }
-      updateLocalFile(currentAlbums);
-
-      return new Response(JSON.stringify({
-        success: true,
-        album: newAlbumData,
-        supabaseSynced: !supabaseError,
-        supabaseError: supabaseError ? supabaseError.message : null
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonResponse({ success: true, album: newAlbumData });
     }
 
     if (action === 'delete') {
@@ -130,26 +102,17 @@ export async function POST({ request }) {
         return new Response(JSON.stringify({ success: false, error: 'ID requerido' }), { status: 400 });
       }
 
-      // 1. Borrar en Supabase
-      try {
-        await supabase.from('galeria_albumes').delete().eq('id', id);
-      } catch (e) {}
+      const { error } = await adminSupabase.from('galeria_albumes').delete().eq('id', id);
+      if (error) {
+        return jsonResponse({ success: false, error: 'No se pudo eliminar el álbum.' }, 500);
+      }
 
-      // 2. Borrar en local
-      currentAlbums = currentAlbums.filter(a => a.id !== id);
-      updateLocalFile(currentAlbums);
-
-      return new Response(JSON.stringify({ success: true, deletedId: id }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return jsonResponse({ success: true, deletedId: id });
     }
 
-    return new Response(JSON.stringify({ success: false, error: 'Acción inválida' }), { status: 400 });
+    return jsonResponse({ success: false, error: 'Acción inválida' }, 400);
   } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('[galeria API] Error al modificar álbum:', err.message);
+    return jsonResponse({ success: false, error: 'Error interno.' }, 500);
   }
 }

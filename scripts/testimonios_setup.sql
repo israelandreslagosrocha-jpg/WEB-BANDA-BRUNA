@@ -26,9 +26,16 @@ drop policy if exists "Administrador testimonios completo" on public.testimonios
 create policy "Lectura pública de testimonios aprobados" on public.testimonios
   for select using (aprobado = true);
 
--- Inserción pública para que los clientes puedan enviar comentarios
+-- Los visitantes sólo pueden crear testimonios pendientes, con tamaño acotado.
 create policy "Inserción pública de testimonios" on public.testimonios
-  for insert with check (true);
+  for insert to anon with check (
+    aprobado = false
+    and char_length(trim(nombre_cliente)) between 2 and 80
+    and char_length(trim(contenido)) between 10 and 1200
+    and (cargo_cliente is null or char_length(trim(cargo_cliente)) <= 100)
+    and (organizacion_cliente is null or char_length(trim(organizacion_cliente)) <= 140)
+    and calificacion between 1 and 5
+  );
 
 -- Administrador tiene acceso completo (contacto@bandabruna.cl)
 create policy "Administrador testimonios completo" on public.testimonios
