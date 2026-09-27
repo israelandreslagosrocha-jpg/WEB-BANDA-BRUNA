@@ -10,6 +10,7 @@ import { supabase } from '../services/supabaseClient.js';
 import NowPlayingWidget from '../modules/radio-monitor/components/NowPlayingWidget.astro';
 import QuoteForm from '../components/forms/QuoteForm.astro';
 import EventSlider from '../components/events/EventSlider.astro';
+import UpcomingEventFlyerCarousel from '../components/events/UpcomingEventFlyerCarousel.astro';
 import TourCalendar from '../components/events/TourCalendar.astro';
 
 // Fetch mock social data at build time
@@ -540,34 +541,8 @@ const fallbackEditorialPosts = [
         </div>
       </div>
 
-      <!-- Columna 2: Banner Promo (Fiesta para todos !) -->
-      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group relative">
-        <div class="relative w-full h-full min-h-[360px] flex items-center justify-center overflow-hidden">
-          <img 
-            src="https://res.cloudinary.com/dhgifjpkh/image/upload/v1789574626/compressed_fiestas_patrias_BB_o5dkoj.webp" 
-            alt="Banda Bruna - Show en vivo" 
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85" 
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent flex flex-col justify-end p-6 pointer-events-none">
-            <span class="text-gold-bruna text-[10px] font-extrabold uppercase tracking-[0.25em] mb-1">
-              EXPERIENCIA EN ESCENARIO
-            </span>
-            <h3 class="font-title font-extrabold text-xl text-white uppercase leading-tight tracking-wide">
-              ¡FIESTA PARA TODOS!
-            </h3>
-            <p class="text-xs text-slate-300 font-light mt-1 max-w-xs">
-              Música 100% en vivo para todas las generaciones con el auténtico sonido de la cumbia sureña.
-            </p>
-          </div>
-        </div>
-        <div class="p-4 bg-slate-950/90 border-t border-white/5 flex items-center justify-between">
-          <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Shows y Giras 2026</span>
-          <a href="#contacto" class="text-gold-bruna hover:underline text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-            Cotizar Fecha →
-          </a>
-        </div>
-      </div>
+      <!-- Columna 2: Flyers de eventos futuros o imagen de respaldo -->
+      <UpcomingEventFlyerCarousel events={upcomingEvents} />
 
       <!-- Columna 3: Detección de Radios (Radio Monitor en Vivo) -->
       <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-left">

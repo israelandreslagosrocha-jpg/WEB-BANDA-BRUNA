@@ -304,6 +304,17 @@ const pastEvents = events.filter(e => e.isPast);
         }
       };
 
+      const applyFilter = (filter: string, behavior: ScrollBehavior = 'smooth') => {
+        const cards = track.querySelectorAll<HTMLElement>('.event-slider-card');
+        cards.forEach((card) => {
+          const cardFilter = card.getAttribute('data-filter-type');
+          card.style.display = filter === 'all' || cardFilter === filter ? 'flex' : 'none';
+        });
+
+        track.scrollTo({ left: 0, behavior });
+        setTimeout(updateCounter, 100);
+      };
+
       track.addEventListener('scroll', updateCounter, { passive: true });
 
       if (prevBtn) {
@@ -333,25 +344,12 @@ const pastEvents = events.filter(e => e.isPast);
           btn.classList.add('active', 'bg-gold-bruna', 'text-black');
           btn.classList.remove('text-slate-400');
 
-          const filter = btn.getAttribute('data-slider-filter');
-          const cards = track.querySelectorAll<HTMLElement>('.event-slider-card');
-
-          cards.forEach((card) => {
-            const cardFilter = card.getAttribute('data-filter-type');
-            if (filter === 'all' || cardFilter === filter) {
-              card.style.display = 'flex';
-            } else {
-              card.style.display = 'none';
-            }
-          });
-
-          track.scrollTo({ left: 0, behavior: 'smooth' });
-          setTimeout(updateCounter, 100);
+          applyFilter(btn.getAttribute('data-slider-filter') || 'upcoming');
         });
       });
 
-      // Initial state
-      updateCounter();
+      // La agenda siempre abre mostrando solo fechas futuras, no los eventos realizados.
+      applyFilter('upcoming', 'auto');
     });
   }
 

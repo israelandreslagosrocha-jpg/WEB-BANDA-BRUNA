@@ -1,0 +1,178 @@
+---
+export interface UpcomingFlyerEvent {
+  id: string | number;
+  title: string;
+  date: string | number;
+  month: string;
+  year?: number;
+  venue?: string;
+  location?: string;
+  imagen?: string | null;
+}
+
+interface Props {
+  events: UpcomingFlyerEvent[];
+  fallbackImage?: string;
+}
+
+const {
+  events = [],
+  fallbackImage = '/assets/images/hero/hero_1.webp'
+} = Astro.props;
+
+const hasUpcomingEvents = events.length > 0;
+---
+
+{hasUpcomingEvents ? (
+  <section
+    class="bg-[#0b132b]/80 border border-white/10 rounded-2xl overflow-hidden shadow-xl relative"
+    data-upcoming-flyer-carousel
+    aria-roledescription="carrusel"
+    aria-label="Flyers de próximos eventos de Banda Bruna"
+  >
+    <div class="relative min-h-[360px] h-full overflow-hidden bg-slate-950">
+      {events.map((event, index) => (
+        <a
+          href="/agenda"
+          data-flyer-slide
+          data-slide-index={index}
+          aria-hidden={index === 0 ? 'false' : 'true'}
+          tabindex={index === 0 ? '0' : '-1'}
+          class:list={[
+            'absolute inset-0 block transition-opacity duration-700 ease-out',
+            index === 0 ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
+          ]}
+        >
+          <img
+            src={event.imagen || fallbackImage}
+            alt={event.imagen ? `Flyer: ${event.title}` : `Banda Bruna — ${event.title}`}
+            class="w-full h-full absolute inset-0 object-contain bg-slate-950"
+            loading={index === 0 ? 'eager' : 'lazy'}
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent"></div>
+          <div class="absolute inset-x-0 bottom-0 p-6">
+            <span class="text-gold-bruna text-[10px] font-extrabold uppercase tracking-[0.25em] mb-1 block">
+              Próximo evento
+            </span>
+            <h3 class="font-title font-extrabold text-xl text-white uppercase leading-tight tracking-wide line-clamp-2">
+              {event.title}
+            </h3>
+            <p class="text-xs text-slate-200 font-medium mt-1">
+              {event.date} {event.month}{event.year ? ` ${event.year}` : ''}
+              {event.location ? ` · ${event.location}` : ''}
+            </p>
+          </div>
+        </a>
+      ))}
+
+      {events.length > 1 && (
+        <div class="absolute bottom-3 right-4 z-20 flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1.5 backdrop-blur-sm">
+          {events.map((event, index) => (
+            <button
+              type="button"
+              data-flyer-dot={index}
+              aria-label={`Ver flyer ${index + 1}: ${event.title}`}
+              class:list={[
+                'h-2 w-2 rounded-full transition-all duration-300 cursor-pointer',
+                index === 0 ? 'bg-gold-bruna w-5' : 'bg-white/50 hover:bg-white'
+              ]}
+            ></button>
+          ))}
+        </div>
+      )}
+    </div>
+    <div class="p-4 bg-slate-950/90 border-t border-white/5 flex items-center justify-between gap-3">
+      <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Fechas confirmadas</span>
+      <a href="/agenda" class="text-gold-bruna hover:underline text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+        Ver agenda →
+      </a>
+    </div>
+  </section>
+) : (
+  <section class="bg-[#0b132b]/80 border border-white/10 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+    <div class="relative min-h-[360px] flex-1 overflow-hidden">
+      <img
+        src={fallbackImage}
+        alt="Banda Bruna en vivo"
+        class="absolute inset-0 h-full w-full object-cover opacity-85"
+        loading="lazy"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent flex flex-col justify-end p-6">
+        <span class="text-gold-bruna text-[10px] font-extrabold uppercase tracking-[0.25em] mb-1">Banda Bruna en vivo</span>
+        <h3 class="font-title font-extrabold text-xl text-white uppercase leading-tight tracking-wide">Próximas fechas pronto</h3>
+        <p class="text-xs text-slate-300 font-light mt-1 max-w-xs">Estamos preparando nuevas presentaciones. Revisa pronto la agenda oficial.</p>
+      </div>
+    </div>
+    <div class="p-4 bg-slate-950/90 border-t border-white/5 flex items-center justify-between gap-3">
+      <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Agenda disponible</span>
+      <a href="#contacto" class="text-gold-bruna hover:underline text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+        Cotizar fecha →
+      </a>
+    </div>
+  </section>
+)}
+
+<script>
+  function setupUpcomingEventFlyerCarousels() {
+    document.querySelectorAll<HTMLElement>('[data-upcoming-flyer-carousel]').forEach((carousel) => {
+      if (carousel.dataset.ready === 'true') return;
+      carousel.dataset.ready = 'true';
+
+      const slides = Array.from(carousel.querySelectorAll<HTMLElement>('[data-flyer-slide]'));
+      const dots = Array.from(carousel.querySelectorAll<HTMLButtonElement>('[data-flyer-dot]'));
+      if (slides.length < 2) return;
+
+      let activeIndex = 0;
+      let timer: ReturnType<typeof setInterval> | undefined;
+
+      const showSlide = (nextIndex: number) => {
+        activeIndex = (nextIndex + slides.length) % slides.length;
+        slides.forEach((slide, index) => {
+          const isActive = index === activeIndex;
+          slide.classList.toggle('opacity-100', isActive);
+          slide.classList.toggle('z-10', isActive);
+          slide.classList.toggle('opacity-0', !isActive);
+          slide.classList.toggle('pointer-events-none', !isActive);
+          slide.classList.toggle('z-0', !isActive);
+          slide.setAttribute('aria-hidden', String(!isActive));
+          slide.tabIndex = isActive ? 0 : -1;
+        });
+        dots.forEach((dot, index) => {
+          const isActive = index === activeIndex;
+          dot.classList.toggle('bg-gold-bruna', isActive);
+          dot.classList.toggle('w-5', isActive);
+          dot.classList.toggle('bg-white/50', !isActive);
+          dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+        });
+      };
+
+      const stopAutoplay = () => {
+        if (timer) window.clearInterval(timer);
+        timer = undefined;
+      };
+      const startAutoplay = () => {
+        stopAutoplay();
+        timer = window.setInterval(() => showSlide(activeIndex + 1), 5500);
+      };
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          showSlide(index);
+          startAutoplay();
+        });
+      });
+
+      carousel.addEventListener('mouseenter', stopAutoplay);
+      carousel.addEventListener('mouseleave', startAutoplay);
+      carousel.addEventListener('focusin', stopAutoplay);
+      carousel.addEventListener('focusout', (event) => {
+        if (!carousel.contains(event.relatedTarget as Node | null)) startAutoplay();
+      });
+
+      startAutoplay();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupUpcomingEventFlyerCarousels);
+  document.addEventListener('astro:page-load', setupUpcomingEventFlyerCarousels);
+</script>
