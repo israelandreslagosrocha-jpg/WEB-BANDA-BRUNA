@@ -45,6 +45,14 @@ function cleanMetadataText(text) {
   return text.replace(/\s+/g, ' ').trim();
 }
 
+// Una respuesta de metadata puede llegar retrasada respecto del audio real. Antes de
+// anunciar una canción como "en vivo", exigimos una segunda lectura coherente.
+const LIVE_CONFIRMATION_DELAY_MS = 12 * 1000;
+
+function wait(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 // 2. PROVEEDORES DE STREAMING
 async function getIcecastMetadata(streamUrl, metadataUrl) {
   let jsonUrl = metadataUrl;
@@ -281,6 +289,116 @@ async function getEmisoraClMetadata(url) {
   }
 }
 
+async function getRadioMetadata(radio) {
+  const provider = radio.radio_providers?.nombre;
+
+  try {
+    if (radio.metadata_url && radio.metadata_url.includes('emisora.cl')) {
+      return await getEmisoraClMetadata(radio.metadata_url);
+    }
+    if (provider === 'Icecast') {
+      return await getIcecastMetadata(radio.stream_url, radio.metadata_url);
+    }
+    if (provider === 'Shoutcast') {
+      return await getShoutcastMetadata(radio.stream_url, radio.metadata_url);
+    }
+    if (provider === 'AzuraCast') {
+      return await getAzuraMetadata(radio.stream_url, radio.metadata_url);
+    }
+    if (provider === 'StreamTheWorld') {
+      return await getStreamTheWorldMetadata(radio.stream_url, radio.metadata_url);
+    }
+    return await getIcecastMetadata(radio.stream_url, radio.metadata_url);
+  } catch (error) {
+    return {
+      artist: '',
+      title: '',
+      online: false,
+      raw: { exception: error instanceof Error ? error.message : 'Error al consultar metadata' },
+      artwork: null
+    };
+  }
+}
+
+function getMonitoredMatch(nowPlaying, artists, tracks, artistAliases, trackAliases) {
+  if (!nowPlaying.online) return null;
+
+  const isMonitoredArtist = matchesAlias(nowPlaying.artist, artistAliases);
+  const isMonitoredSong = matchesAlias(nowPlaying.title, trackAliases);
+  const mentionsArtistInTitle = matchesAlias(nowPlaying.title, artistAliases);
+  const isMatch = nowPlaying.artist && nowPlaying.title
+    ? isMonitoredArtist && isMonitoredSong
+    : nowPlaying.title && isMonitoredSong && mentionsArtistInTitle;
+
+  if (!isMatch) return null;
+
+  return {
+    artist: (artists || []).find(artist => matchesAlias(nowPlaying.artist, artist.aliases))?.nombre
+      || nowPlaying.artist
+      || 'Banda Bruna',
+    title: (tracks || []).find(track => matchesAlias(nowPlaying.title, track.aliases))?.titulo
+      || nowPlaying.title
+  };
+}
+
+function isSamePlayback(first, second) {
+  return first && second
+    && normalizeText(first.artist) === normalizeText(second.artist)
+    && normalizeText(first.title) === normalizeText(second.title);
+}
+
+async function registerRecentDetection(supabase, radio, detection, metadataRaw) {
+  // La misma canción no debe multiplicarse en el historial aunque la metadata siga
+  // atrasada durante varias ejecuciones.
+  const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const { data: recentPlays, error: recentPlaysError } = await supabase
+    .from('radio_tracks')
+    .select('id')
+    .eq('radio_id', radio.id)
+    .eq('title', detection.title)
+    .gte('detected_at', thirtyMinsAgo)
+    .limit(1);
+
+  if (recentPlaysError) throw recentPlaysError;
+  if (recentPlays?.length) return false;
+
+  const { error } = await supabase
+    .from('radio_tracks')
+    .insert({
+      radio_id: radio.id,
+      artist: detection.artist,
+      title: detection.title,
+      metadata_raw: metadataRaw,
+      stream_url: radio.stream_url
+    });
+
+  if (error) throw error;
+  return true;
+}
+
+async function clearNowPlaying(supabase, radioId) {
+  const { data: currentNp, error: currentNpError } = await supabase
+    .from('now_playing')
+    .select('artist')
+    .eq('radio_id', radioId)
+    .maybeSingle();
+
+  if (currentNpError) throw currentNpError;
+  if (!currentNp?.artist) return;
+
+  const { error } = await supabase
+    .from('now_playing')
+    .update({
+      artist: null,
+      title: null,
+      artwork: null,
+      updated_at: new Date().toISOString()
+    })
+    .eq('radio_id', radioId);
+
+  if (error) throw error;
+}
+
 
 export async function GET({ request }) {
   // Permite el cron de Vercel o una sesión autenticada del administrador para el disparo manual.
@@ -363,26 +481,7 @@ export async function GET({ request }) {
 
     // 4. Procesar radios en paralelo
     const scanPromises = (radios || []).map(async (radio) => {
-      const provider = radio.radio_providers?.nombre;
-      let nowPlaying = { artist: '', title: '', online: false, raw: null, artwork: null };
-
-      try {
-        if (radio.metadata_url && radio.metadata_url.includes('emisora.cl')) {
-          nowPlaying = await getEmisoraClMetadata(radio.metadata_url);
-        } else if (provider === 'Icecast') {
-          nowPlaying = await getIcecastMetadata(radio.stream_url, radio.metadata_url);
-        } else if (provider === 'Shoutcast') {
-          nowPlaying = await getShoutcastMetadata(radio.stream_url, radio.metadata_url);
-        } else if (provider === 'AzuraCast') {
-          nowPlaying = await getAzuraMetadata(radio.stream_url, radio.metadata_url);
-        } else if (provider === 'StreamTheWorld') {
-          nowPlaying = await getStreamTheWorldMetadata(radio.stream_url, radio.metadata_url);
-        } else {
-          nowPlaying = await getIcecastMetadata(radio.stream_url, radio.metadata_url);
-        }
-      } catch (err) {
-        nowPlaying = { artist: '', title: '', online: false, raw: { exception: err.message }, artwork: null };
-      }
+      const nowPlaying = await getRadioMetadata(radio);
 
       // Actualizar timestamp de última consulta de la radio
       await supabase
@@ -393,69 +492,64 @@ export async function GET({ request }) {
         })
         .eq('id', radio.id);
 
-      // Si detectamos contenido e identificamos que es un artista / canción monitoreada
-      const isMonitoredArtist = matchesAlias(nowPlaying.artist, artistAliases);
-      const isMonitoredSong = matchesAlias(nowPlaying.title, trackAliases);
-      const mentionsArtistInTitle = matchesAlias(nowPlaying.title, artistAliases);
+      const firstMatch = getMonitoredMatch(nowPlaying, artists, tracks, artistAliases, trackAliases);
 
-      // Lógica de coincidencia estricta:
-      // 1. Si la radio nos entrega tanto el artista como el título:
-      //    Ambos deben coincidir (el artista debe ser Banda Bruna y la canción una de sus canciones).
-      // 2. Si la radio nos entrega solo el título:
-      //    El título debe coincidir con la canción, y además debe mencionar explícitamente a Banda Bruna en el título.
-      let isMatch = false;
-      if (nowPlaying.online) {
-        if (nowPlaying.artist && nowPlaying.title) {
-          isMatch = isMonitoredArtist && isMonitoredSong;
-        } else if (nowPlaying.title) {
-          isMatch = isMonitoredSong && mentionsArtistInTitle;
+      if (firstMatch) {
+        // La primera lectura es útil como historial, pero por sí sola no prueba que el
+        // audio siga sonando. Evita falsos "En vivo" de metadata retardada.
+        await registerRecentDetection(supabase, radio, firstMatch, {
+          source: 'metadata_candidate',
+          observation: nowPlaying.raw || {}
+        });
+
+        await wait(LIVE_CONFIRMATION_DELAY_MS);
+        const confirmedNowPlaying = await getRadioMetadata(radio);
+        const confirmedMatch = getMonitoredMatch(
+          confirmedNowPlaying,
+          artists,
+          tracks,
+          artistAliases,
+          trackAliases
+        );
+
+        if (!isSamePlayback(firstMatch, confirmedMatch)) {
+          await clearNowPlaying(supabase, radio.id);
+          results.push({
+            radio: radio.nombre,
+            status: 'UNCONFIRMED_DETECTION',
+            artist: firstMatch.artist,
+            track: firstMatch.title
+          });
+          return;
         }
-      }
 
-      if (isMatch) {
-        // Encontramos una coincidencia en vivo. Registramos la detección.
-        const matchedArtist = (artists || []).find(a => matchesAlias(nowPlaying.artist, a.aliases))?.nombre || nowPlaying.artist || 'Banda Bruna';
-        const matchedTrack = (tracks || []).find(t => matchesAlias(nowPlaying.title, t.aliases))?.titulo || nowPlaying.title;
-
-        // Comprobamos qué estaba sonando en now_playing para esta radio
+        // Ambas lecturas coinciden: recién ahora puede mostrarse como reproducción en vivo.
         const { data: currentNp } = await supabase
           .from('now_playing')
           .select('*')
           .eq('radio_id', radio.id)
           .maybeSingle();
 
-        if (currentNp && currentNp.artist === matchedArtist && currentNp.title === matchedTrack) {
+        if (currentNp && currentNp.artist === firstMatch.artist && currentNp.title === firstMatch.title) {
           // Sigue sonando la misma canción. Actualizamos updated_at
           await supabase
             .from('now_playing')
             .update({ updated_at: new Date().toISOString() })
             .eq('radio_id', radio.id);
         } else {
-          // Nueva detección. Insertamos historial.
-          await supabase
-            .from('radio_tracks')
-            .insert({
-              radio_id: radio.id,
-              artist: matchedArtist,
-              title: matchedTrack,
-              metadata_raw: nowPlaying.raw || {},
-              stream_url: radio.stream_url
-            });
-
-          // Actualizamos el now_playing
           await supabase
             .from('now_playing')
             .upsert({
               radio_id: radio.id,
-              artist: matchedArtist,
-              title: matchedTrack,
-              artwork: nowPlaying.artwork || null,
+              artist: firstMatch.artist,
+              title: firstMatch.title,
+              artwork: confirmedNowPlaying.artwork || nowPlaying.artwork || null,
               started_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
         }
 
-        results.push({ radio: radio.nombre, status: 'DETECTION', artist: matchedArtist, track: matchedTrack });
+        results.push({ radio: radio.nombre, status: 'LIVE_CONFIRMED', artist: firstMatch.artist, track: firstMatch.title });
       } else {
         // Si no está sonando en este segundo exacto, verificar si sonó hace poco en el historial reciente (ej. Emisora.cl)
         let historyDetected = false;
@@ -469,53 +563,23 @@ export async function GET({ request }) {
               const matchedArtist = (artists || []).find(a => matchesAlias(prevItem.artist, a.aliases))?.nombre || prevItem.artist || 'Banda Bruna';
               const matchedTrack = (tracks || []).find(t => matchesAlias(prevItem.title, t.aliases))?.titulo || prevItem.title;
 
-              // Ventana de 30 minutos para no duplicar detecciones recientes
-              const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-              const { data: recentPlays } = await supabase
-                .from('radio_tracks')
-                .select('id')
-                .eq('radio_id', radio.id)
-                .eq('title', matchedTrack)
-                .gte('detected_at', thirtyMinsAgo)
-                .limit(1);
-
-              if (!recentPlays || recentPlays.length === 0) {
-                await supabase
-                  .from('radio_tracks')
-                  .insert({
-                    radio_id: radio.id,
-                    artist: matchedArtist,
-                    title: matchedTrack,
-                    metadata_raw: { source: 'emisora.cl_history', ...prevItem },
-                    stream_url: radio.stream_url
-                  });
-
+              const inserted = await registerRecentDetection(
+                supabase,
+                radio,
+                { artist: matchedArtist, title: matchedTrack },
+                { source: 'emisora.cl_history', ...prevItem }
+              );
+              historyDetected = true;
+              if (inserted) {
                 results.push({ radio: radio.nombre, status: 'HISTORY_DETECTION', artist: matchedArtist, track: matchedTrack });
-                historyDetected = true;
               }
               break;
             }
           }
         }
 
-        // Limpiar now_playing si no está sonando en vivo actualmente
-        const { data: currentNp } = await supabase
-          .from('now_playing')
-          .select('*')
-          .eq('radio_id', radio.id)
-          .maybeSingle();
-
-        if (currentNp && currentNp.artist) {
-          await supabase
-            .from('now_playing')
-            .update({
-              artist: null,
-              title: null,
-              artwork: null,
-              updated_at: new Date().toISOString()
-            })
-            .eq('radio_id', radio.id);
-        }
+        // Una lectura que ya no coincide invalida cualquier estado en vivo previo.
+        await clearNowPlaying(supabase, radio.id);
 
         if (!historyDetected) {
           results.push({ radio: radio.nombre, status: nowPlaying.online ? 'NO_MATCH' : 'OFFLINE' });
