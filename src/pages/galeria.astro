@@ -1,7 +1,13 @@
 ---
+// La galería se alimenta desde el panel de administración, por lo que debe
+// consultarse al solicitar la página y no quedar congelada en cada despliegue.
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import staticAlbums from '../data/albums.json';
 import { supabase } from '../services/supabaseClient.js';
+
+Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
 
 // Cargar álbumes activos desde Supabase con fallback a staticAlbums
 let albums = staticAlbums;
