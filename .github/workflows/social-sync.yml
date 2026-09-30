@@ -2,34 +2,89 @@ name: Sincronización Automática de Redes Sociales
 
 on:
   schedule:
-    # Ejecución 3 veces al día:
-    # 12:00 UTC = 09:00 AM Chile (Mañana)
-    # 18:00 UTC = 15:00 PM Chile (Tarde)
-    # 00:00 UTC = 21:00 PM Chile (Noche)
-    - cron: '0 0,12,18 * * *'
+    # Una vez al día, fuera de los minutos de mayor congestión de Actions.
+    # 12:17 UTC equivale a 09:17 en Chile durante el horario de verano
+    # (08:17 cuando Chile está en UTC-4).
+    - cron: '17 12 * * *'
   workflow_dispatch: # Permite ejecución manual desde GitHub Actions
+
+# El workflow solo llama una API protegida: no requiere permisos del repositorio.
+permissions: {}
+
+concurrency:
+  group: social-sync
+  cancel-in-progress: false
 
 jobs:
   sync:
     name: Sincronizar Métricas y Redes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
     steps:
       - name: Llamar Endpoint de Sincronización
         env:
-          CRON_SECRET_TOKEN: ${{ secrets.CRON_SECRET || '3ab319b9e61b8f0767f1d60c3953efb1f81301f3abe6ce99bac8c1927c2f143f' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          echo "Iniciando sincronización programada..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "https://www.bandabruna.cl/api/cron/sync-social" \
-            -H "Authorization: Bearer $CRON_SECRET_TOKEN")
-          
-          HTTP_BODY=$(echo "$RESPONSE" | sed '$d')
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          
-          echo "HTTP Status: $HTTP_CODE"
-          echo "Respuesta: $HTTP_BODY"
-          
-          if [ "$HTTP_CODE" -ne 200 ]; then
-            echo "Error: La sincronización respondió con código $HTTP_CODE"
+          set -euo pipefail
+
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta CRON_SECRET en los secretos del repositorio de GitHub Actions." >&2
             exit 1
           fi
-          echo "Sincronización completada exitosamente."
+
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          set +e
+          http_code="$(curl \
+            --silent \
+            --show-error \
+            --connect-timeout 10 \
+            --max-time 90 \
+            --retry 2 \
+            --retry-connrefused \
+            --output "$response_file" \
+            --write-out '%{http_code}' \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            'https://www.bandabruna.cl/api/cron/sync-social')"
+          curl_exit=$?
+          set -e
+
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "No se pudo conectar con el endpoint de redes (curl exit $curl_exit)." >&2
+            exit "$curl_exit"
+          fi
+
+          echo "HTTP Status: $http_code"
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "El endpoint de redes rechazó la solicitud. Respuesta:" >&2
+            tr '\n' ' ' < "$response_file" | cut -c1-1000 >&2
+            echo >&2
+            exit 1
+          fi
+
+          node -e '
+            const fs = require("fs");
+            let result;
+            try {
+              result = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            } catch (error) {
+              console.error("La respuesta de redes no fue JSON válido.");
+              process.exit(1);
+            }
+
+            if (result.success !== true) {
+              console.error("El endpoint informó una sincronización no exitosa.");
+              process.exit(1);
+            }
+
+            const warnings = Array.isArray(result.warnings) ? result.warnings : [];
+            const platforms = Object.entries(result.platforms || {})
+              .map(([platform, detail]) => `${platform}:${detail.status}`)
+              .join(", ");
+            console.log(`Sincronización completada. Plataformas: ${platforms || "sin detalle"}.`);
+
+            if (result.partial || warnings.length > 0) {
+              console.log(`::warning::Sincronización parcial: ${warnings.join(" | ").slice(0, 900) || "una o más fuentes públicas no entregaron datos nuevos"}`);
+            }
+          ' "$response_file"

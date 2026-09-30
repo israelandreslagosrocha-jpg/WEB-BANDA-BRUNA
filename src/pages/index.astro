@@ -13,7 +13,13 @@ import EventSlider from '../components/events/EventSlider.astro';
 import UpcomingEventFlyerCarousel from '../components/events/UpcomingEventFlyerCarousel.astro';
 import TourCalendar from '../components/events/TourCalendar.astro';
 
-// Fetch mock social data at build time
+// La portada muestra agenda, redes y métricas que cambian desde el panel.
+// Se renderiza bajo demanda para reflejar los valores diarios de Supabase sin
+// requerir un despliegue nuevo.
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+
+// Datos editoriales locales usados como fallback visual.
 const latestVideo = getLatestVideo();
 const instagramFeed = getInstagramFeed();
 const facebookFeed = getFacebookFeed();
@@ -194,29 +200,23 @@ const { data: dbConfig } = await supabase
   .single();
 
 const config = dbConfig || {};
+const configuredMetric = (value, fallback, minimum = 0) => {
+  const configured = Number(value);
+  if (Number.isFinite(configured) && configured > 0) return configured;
+
+  return Math.max(Number(fallback) || 0, minimum);
+};
+
 const stats = {
   musiciansTrajectory: config.cant_trayectoria !== undefined && config.cant_trayectoria !== null ? config.cant_trayectoria : (socialStats.musiciansTrajectory || 15),
   stageYears: config.cant_escenarios !== undefined && config.cant_escenarios !== null ? config.cant_escenarios : (socialStats.stageYears || 10),
-  instagramFollowers: Math.max(
-    Number(config.cant_instagram) || 0,
-    Number(socialStats.instagramFollowers) || 0,
-    3488
-  ),
-  facebookFriends: Math.max(
-    Number(config.cant_facebook) || 0,
-    Number(socialStats.facebookFriends) || 0,
-    4971
-  ),
-  youtubeSubscribers: Math.max(
-    Number(config.cant_youtube) || 0,
-    Number(socialStats.youtubeSubscribers) || 0,
-    948
-  ),
-  tiktokFollowers: Math.max(
-    Number(config.cant_tiktok) || 0,
-    Number(socialStats.tiktokFollowers) || 0,
-    1146
-  ),
+  // Si existe una lectura persistida, es el último valor verificado: no se
+  // mezcla con cifras antiguas del archivo estático ni se bloquean descensos
+  // reales de seguidores. El fallback solo se usa sin dato en Supabase.
+  instagramFollowers: configuredMetric(config.cant_instagram, socialStats.instagramFollowers, 3488),
+  facebookFriends: configuredMetric(config.cant_facebook, socialStats.facebookFriends, 4971),
+  youtubeSubscribers: configuredMetric(config.cant_youtube, socialStats.youtubeSubscribers, 948),
+  tiktokFollowers: configuredMetric(config.cant_tiktok, socialStats.tiktokFollowers, 1146),
   regions: config.cant_regiones !== undefined && config.cant_regiones !== null ? config.cant_regiones : (socialStats.regions || 5)
 };
 

@@ -17,28 +17,55 @@ concurrency:
 jobs:
   scan:
     name: Consultar radios
-    runs-on: ubuntu-latest
+    # Fijamos la imagen para evitar que un cambio automático de ubuntu-latest
+    # altere el comportamiento del monitor.
+    runs-on: ubuntu-24.04
     timeout-minutes: 2
 
     steps:
       - name: Invocar el escaneo protegido
         env:
-          RADIO_SCAN_URL: ${{ vars.RADIO_SCAN_URL }}
+          # La tarea programada siempre consulta producción. No es un secreto y
+          # evitar una variable adicional impide que el job falle por omisión.
+          RADIO_SCAN_URL: https://www.bandabruna.cl
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          if [ -z "$RADIO_SCAN_URL" ] || [ -z "$CRON_SECRET" ]; then
-            echo "Faltan RADIO_SCAN_URL o CRON_SECRET en la configuración de Actions." >&2
+          set -euo pipefail
+
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta CRON_SECRET en los secretos del repositorio de GitHub Actions." >&2
             exit 1
           fi
 
-          curl \
-            --fail-with-body \
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          set +e
+          http_code="$(curl \
             --silent \
             --show-error \
             --connect-timeout 10 \
             --max-time 90 \
             --retry 2 \
-            --retry-all-errors \
-            --retry-delay 5 \
+            --retry-connrefused \
+            --output "$response_file" \
+            --write-out '%{http_code}' \
             -H "Authorization: Bearer ${CRON_SECRET}" \
-            "${RADIO_SCAN_URL%/}/api/radio/scan"
+            "${RADIO_SCAN_URL%/}/api/radio/scan")"
+          curl_exit=$?
+          set -e
+
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "No se pudo conectar con el endpoint de radio (curl exit $curl_exit)." >&2
+            exit "$curl_exit"
+          fi
+
+          echo "HTTP Status: $http_code"
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "El endpoint de radio rechazó la solicitud. Respuesta:" >&2
+            tr '\n' ' ' < "$response_file" | cut -c1-1000 >&2
+            echo >&2
+            exit 1
+          fi
+
+          echo "Escaneo radial completado."

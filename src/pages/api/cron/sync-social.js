@@ -124,7 +124,9 @@ async function scrapeFacebookFollowers() {
 function buildFollowerResult({ platform, scraped, previous, minimum }) {
   const hasLiveValue = Number.isFinite(scraped) && scraped > 0;
   const preservedValue = previous || minimum;
-  const value = hasLiveValue ? Math.max(scraped, previous) : preservedValue;
+  // Una lectura pública válida es la fuente de verdad, incluso si bajó. Solo
+  // preservamos el dato previo cuando la fuente no entregó una cifra.
+  const value = hasLiveValue ? scraped : preservedValue;
 
   return {
     platform,
@@ -248,6 +250,7 @@ async function executeSynchronization(userEmail) {
     .eq('id', 1);
 
   if (confErr) {
+    result.success = false;
     result.warnings.push(`Error al actualizar configuracion: ${confErr.message}`);
   }
 
