@@ -10,6 +10,8 @@ create table if not exists public.logs_actividad (
 
 -- 2. Habilitar RLS en logs_actividad
 alter table public.logs_actividad enable row level security;
+alter table public.contactos enable row level security;
+alter table public.cotizaciones enable row level security;
 
 -- 3. Eliminar políticas previas para evitar conflictos de sobreescritura
 drop policy if exists "Permitir lectura publica de noticias" on public.noticias;
@@ -21,6 +23,8 @@ drop policy if exists "Lectura pública de configuracion" on public.configuracio
 drop policy if exists "Inserción pública de contactos" on public.contactos;
 drop policy if exists "Inserción pública de cotizaciones" on public.cotizaciones;
 drop policy if exists "Permitir insercion publica de cotizaciones" on public.cotizaciones;
+drop policy if exists "Administrador contactos completo" on public.contactos;
+drop policy if exists "Administrador cotizaciones completo" on public.cotizaciones;
 
 -- 4. POLÍTICAS DE ACCESO EXCLUSIVAS PARA ADMINISTRADOR (contacto@bandabruna.cl)
 
@@ -54,15 +58,14 @@ create policy "Administrador configuracion completo" on public.configuracion
   using (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl')
   with check (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl');
 
--- Contactos
-create policy "Inserción pública de contactos" on public.contactos for insert with check (true);
-create policy "Administrador contactos completo" on public.contactos 
+-- Contactos: la escritura pública se realiza solo por una API server-side.
+-- Se evita WITH CHECK (true), que permite inserciones directas anónimas.
+create policy "Administrador contactos completo" on public.contactos for all to authenticated
   using (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl')
   with check (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl');
 
--- Cotizaciones
-create policy "Inserción pública de cotizaciones" on public.cotizaciones for insert with check (true);
-create policy "Administrador cotizaciones completo" on public.cotizaciones 
+-- Cotizaciones: la escritura pública se realiza solo por /api/quote.
+create policy "Administrador cotizaciones completo" on public.cotizaciones for all to authenticated
   using (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl')
   with check (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl');
 

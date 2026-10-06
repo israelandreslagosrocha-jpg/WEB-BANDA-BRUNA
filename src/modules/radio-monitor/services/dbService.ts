@@ -1,4 +1,4 @@
-import { supabase } from '../../../services/supabaseClient.js';
+import { createServiceSupabaseClient } from '../../../services/serverAuth.js';
 import type { Radio, RadioTrack, NowPlaying, MonitoredArtist, MonitoredTrack, StatsOverview, SystemHealth } from '../types';
 
 // Una canción sin verificación reciente no puede presentarse como reproducción en vivo.
@@ -9,6 +9,7 @@ export class DbService {
    * Obtiene la lista de radios registradas.
    */
   async getRadios(onlyActive = true): Promise<Radio[]> {
+    const supabase = createServiceSupabaseClient();
     let query = supabase
       .from('radios')
       .select('*, radio_providers(nombre)');
@@ -30,6 +31,7 @@ export class DbService {
    * Obtiene todos los artistas bajo monitoreo con sus alias.
    */
   async getMonitoredArtists(): Promise<MonitoredArtist[]> {
+    const supabase = createServiceSupabaseClient();
     const { data, error } = await supabase
       .from('monitored_artists')
       .select('*')
@@ -43,6 +45,7 @@ export class DbService {
    * Obtiene todas las canciones bajo monitoreo con sus alias.
    */
   async getMonitoredTracks(): Promise<MonitoredTrack[]> {
+    const supabase = createServiceSupabaseClient();
     const { data, error } = await supabase
       .from('monitored_tracks')
       .select('*');
@@ -55,6 +58,7 @@ export class DbService {
    * Obtiene las canciones que están sonando actualmente en vivo (Now Playing).
    */
   async getNowPlaying(): Promise<NowPlaying[]> {
+    const supabase = createServiceSupabaseClient();
     const verifiedAfter = new Date(Date.now() - LIVE_DETECTION_MAX_AGE_MS).toISOString();
     const { data, error } = await supabase
       .from('now_playing')
@@ -80,9 +84,10 @@ export class DbService {
    * Obtiene el historial reciente de detecciones.
    */
   async getRecentHistory(limit = 50, filters?: { radioId?: string; search?: string }): Promise<RadioTrack[]> {
+    const supabase = createServiceSupabaseClient();
     let query = supabase
       .from('radio_tracks')
-      .select('*, radios(nombre, logo_url)')
+      .select('id, radio_id, artist, title, detected_at, radios(nombre, logo_url)')
       .ilike('artist', '%Banda Bruna%')
       .order('detected_at', { ascending: false });
 
@@ -90,9 +95,13 @@ export class DbService {
       query = query.eq('radio_id', filters.radioId);
     }
 
-    if (filters?.search) {
-      // Búsqueda insensible a mayúsculas por artista o título
-      query = query.or(`artist.ilike.%${filters.search}%,title.ilike.%${filters.search}%`);
+    const safeSearch = filters?.search
+      ?.replace(/[^\p{L}\p{N}\s'-]/gu, '')
+      .trim()
+      .slice(0, 80);
+    if (safeSearch && safeSearch.length >= 2) {
+      // El filtro de PostgREST no admite parámetros; se conserva solo texto seguro.
+      query = query.or(`artist.ilike.%${safeSearch}%,title.ilike.%${safeSearch}%`);
     }
 
     const { data, error } = await query.limit(limit);
@@ -103,8 +112,6 @@ export class DbService {
       radio_id: t.radio_id,
       artist: t.artist,
       title: t.title,
-      metadata_raw: t.metadata_raw,
-      stream_url: t.stream_url,
       detected_at: t.detected_at,
       radio_name: t.radios?.nombre,
       radio_logo: t.radios?.logo_url
@@ -116,6 +123,7 @@ export class DbService {
    * Evita duplicar inserciones si la canción ya estaba sonando.
    */
   async registerDetection(radioId: string, artist: string, title: string, metadataRaw?: any, streamUrl?: string): Promise<boolean> {
+    const supabase = createServiceSupabaseClient();
     // 1. Verificar el estado actual en now_playing
     const { data: current, error: currentError } = await supabase
       .from('now_playing')
@@ -172,6 +180,7 @@ export class DbService {
    * Limpia el now_playing de una radio si pasa a estar offline o cambia a otro tema no monitoreado.
    */
   async clearNowPlaying(radioId: string): Promise<void> {
+    const supabase = createServiceSupabaseClient();
     const { error } = await supabase
       .from('now_playing')
       .update({
@@ -189,6 +198,7 @@ export class DbService {
    * Genera estadísticas consolidadas del sistema.
    */
   async getStats(): Promise<StatsOverview> {
+    const supabase = createServiceSupabaseClient();
     // Total reproducciones
     const { count: totalDetections, error: countError } = await supabase
       .from('radio_tracks')
@@ -258,6 +268,7 @@ export class DbService {
    * Obtiene la información sobre salud del sistema.
    */
   async getSystemHealth(): Promise<SystemHealth> {
+    const supabase = createServiceSupabaseClient();
     const { data: radios, error } = await supabase
       .from('radios')
       .select('id, nombre, stream_url, verificado, ultima_actualizacion')

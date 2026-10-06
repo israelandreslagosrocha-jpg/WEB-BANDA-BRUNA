@@ -1,10 +1,16 @@
 import type { APIRoute } from 'astro';
 import { dbService } from '../../../modules/radio-monitor/services/dbService';
 import { cacheService } from '../../../modules/radio-monitor/services/cacheService';
+import { authenticateAdminRequest, jsonResponse } from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
+  const admin = await authenticateAdminRequest(request);
+  if (!admin.authorized) {
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
+  }
+
   const url = new URL(request.url);
   const onlyActive = url.searchParams.get('onlyActive') !== 'false';
 
@@ -16,7 +22,7 @@ export const GET: APIRoute = async ({ request }) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=60'
+        'Cache-Control': 'private, no-store'
       }
     });
   }
@@ -37,7 +43,7 @@ export const GET: APIRoute = async ({ request }) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=60'
+        'Cache-Control': 'private, no-store'
       }
     });
   } catch (error: any) {

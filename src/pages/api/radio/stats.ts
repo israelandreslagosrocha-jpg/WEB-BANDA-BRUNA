@@ -1,10 +1,16 @@
 import type { APIRoute } from 'astro';
 import { dbService } from '../../../modules/radio-monitor/services/dbService';
 import { cacheService } from '../../../modules/radio-monitor/services/cacheService';
+import { authenticateAdminRequest, jsonResponse } from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
+  const admin = await authenticateAdminRequest(request);
+  if (!admin.authorized) {
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
+  }
+
   const cacheKey = 'radio_monitoring_stats';
   const cachedData = cacheService.get(cacheKey);
 
@@ -13,7 +19,7 @@ export const GET: APIRoute = async () => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=120' // 2 minutos caché de navegador
+        'Cache-Control': 'private, no-store'
       }
     });
   }
@@ -34,7 +40,7 @@ export const GET: APIRoute = async () => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=120'
+        'Cache-Control': 'private, no-store'
       }
     });
   } catch (error: any) {

@@ -91,21 +91,13 @@ CREATE POLICY "Administrador testimonios completo" ON public.testimonios
   WITH CHECK (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl');
 
 DROP POLICY IF EXISTS "Inserción pública de comentarios" ON public.comentarios_lanzamientos;
+DROP POLICY IF EXISTS "insert_comentarios_public" ON public.comentarios_lanzamientos;
 DROP POLICY IF EXISTS "Lectura pública de comentarios aprobados" ON public.comentarios_lanzamientos;
+DROP POLICY IF EXISTS "Inserción pública de comentarios pendientes" ON public.comentarios_lanzamientos;
 DROP POLICY IF EXISTS "Administrador comentarios completo" ON public.comentarios_lanzamientos;
 
-CREATE POLICY "Lectura pública de comentarios aprobados" ON public.comentarios_lanzamientos
-  FOR SELECT TO anon, authenticated USING (aprobado = true);
-CREATE POLICY "Inserción pública de comentarios pendientes" ON public.comentarios_lanzamientos
-  FOR INSERT TO anon
-  WITH CHECK (
-    aprobado = false
-    AND char_length(trim(nombre)) BETWEEN 2 AND 80
-    AND char_length(trim(comentario)) BETWEEN 3 AND 600
-    AND (ciudad IS NULL OR char_length(trim(ciudad)) <= 80)
-    AND char_length(trim(lanzamiento_slug)) BETWEEN 1 AND 120
-    AND calificacion BETWEEN 1 AND 5
-  );
+-- Las rutas server-side devuelven solo comentarios aprobados y reciben las
+-- opiniones pendientes. No exponer la tabla por REST a visitantes anónimos.
 CREATE POLICY "Administrador comentarios completo" ON public.comentarios_lanzamientos
   FOR ALL TO authenticated
   USING (auth.jwt() ->> 'email' = 'contacto@bandabruna.cl')

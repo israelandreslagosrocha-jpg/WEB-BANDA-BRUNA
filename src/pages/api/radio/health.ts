@@ -1,9 +1,15 @@
 import type { APIRoute } from 'astro';
 import { dbService } from '../../../modules/radio-monitor/services/dbService';
+import { authenticateAdminRequest, jsonResponse } from '../../../services/serverAuth.js';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
+  const admin = await authenticateAdminRequest(request);
+  if (!admin.authorized) {
+    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
+  }
+
   try {
     const health = await dbService.getSystemHealth();
 

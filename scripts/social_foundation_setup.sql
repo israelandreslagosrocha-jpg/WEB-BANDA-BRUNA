@@ -100,6 +100,9 @@ CREATE TRIGGER trg_protect_admin_social_post_fields
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_admin_social_post_fields();
 
+-- Son funciones internas de trigger, no RPC públicas.
+REVOKE ALL ON FUNCTION public.protect_admin_social_post_fields() FROM PUBLIC, anon, authenticated;
+
 -- 5.2 Trigger: Disponibilidad ante 404s reales vs transitorios
 CREATE OR REPLACE FUNCTION public.check_social_post_availability()
 RETURNS TRIGGER
@@ -128,6 +131,9 @@ CREATE TRIGGER trg_check_social_post_availability
   BEFORE INSERT OR UPDATE ON public.social_posts
   FOR EACH ROW
   EXECUTE FUNCTION public.check_social_post_availability();
+
+-- Son funciones internas de trigger, no RPC públicas.
+REVOKE ALL ON FUNCTION public.check_social_post_availability() FROM PUBLIC, anon, authenticated;
 
 -- 5.3 Stored Procedure Idempotente para el Worker Server-Side
 CREATE OR REPLACE FUNCTION public.upsert_scraped_social_post(
@@ -211,11 +217,13 @@ GRANT EXECUTE ON FUNCTION public.upsert_scraped_social_post(VARCHAR, VARCHAR, TE
 -- ----------------------------------------------------------------------------
 -- 7. VISTA PÚBLICA PARA SSR (MÍNIMO PRIVILEGIO: OCULTA METADATA OPERACIONAL)
 -- ----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW public.social_accounts_public AS
+CREATE OR REPLACE VIEW public.social_accounts_public
+WITH (security_invoker = true) AS
   SELECT id, platform, username, profile_url, followers_count, followers_label
   FROM public.social_accounts;
 
-GRANT SELECT ON public.social_accounts_public TO anon, authenticated;
+-- Las cuentas sociales se consultan por rutas server-side o por el dashboard.
+REVOKE ALL ON TABLE public.social_accounts_public FROM PUBLIC, anon, authenticated;
 
 -- ----------------------------------------------------------------------------
 -- 8. ROW LEVEL SECURITY (RLS)

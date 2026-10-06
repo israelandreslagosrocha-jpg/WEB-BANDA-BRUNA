@@ -464,6 +464,11 @@ const allDetrasCamaras = [
               <textarea id="com-contenido" required rows="2" placeholder="¡Escribe tus buenas vibras aquí!..." class="bg-slate-950 border border-white/5 rounded-lg p-2 text-white text-[11px] outline-none resize-none focus:border-gold-bruna/40 transition-colors"></textarea>
             </div>
 
+            <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+              <label for="com-website">Sitio web</label>
+              <input id="com-website" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+
             <button type="submit" id="btn-submit-comentario" class="bg-gradient-to-r from-gold-bruna/80 to-gold-bruna text-black text-[10px] font-bold py-2.5 px-4 rounded-lg uppercase tracking-widest hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer text-center">
               Enviar Opinión
             </button>
@@ -1251,20 +1256,19 @@ const allDetrasCamaras = [
       }
 
       function loadMuroComentarios() {
-        if (!supabaseUrl || !supabaseKey || !muroGrid) return;
-        fetch(`${supabaseUrl}/rest/v1/comentarios_lanzamientos?lanzamiento_slug=eq.${slug}&aprobado=eq.true&select=*&order=created_at.desc`, {
-          headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`
-          }
+        if (!muroGrid) return;
+        fetch(`/api/launch-comments?slug=${encodeURIComponent(slug)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('No se pudieron cargar los comentarios.');
+          return res.json();
         })
-        .then(res => res.json())
-        .then(data => {
-          if (!data || data.length === 0) {
+        .then(payload => {
+          const comments = Array.isArray(payload?.comments) ? payload.comments : [];
+          if (comments.length === 0) {
             muroGrid.innerHTML = `<p class="text-xs text-slate-500 py-8 col-span-full uppercase font-bold tracking-widest font-title">¡Sé el primero en dejar tu buena vibra!</p>`;
             return;
           }
-          muroGrid.innerHTML = data.map(com => {
+          muroGrid.innerHTML = comments.map(com => {
             const calificacion = safeRating(com.calificacion);
             const estrellas = '★'.repeat(calificacion) + '☆'.repeat(5 - calificacion);
             const fecha = new Date(com.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
@@ -1315,12 +1319,13 @@ const allDetrasCamaras = [
 
       // Envío de opiniones
       if (comForm) {
-        comForm.addEventListener('submit', (e) => {
+        comForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const nombre = document.getElementById('com-nombre').value.trim();
           const ciudad = document.getElementById('com-ciudad').value.trim();
           const calificacion = parseInt(califInput ? califInput.value : '5');
           const comentario = document.getElementById('com-contenido').value.trim();
+          const website = document.getElementById('com-website')?.value || '';
 
           // Validar palabras groseras
           const lowerText = (nombre + ' ' + comentario).toLowerCase();
@@ -1336,27 +1341,24 @@ const allDetrasCamaras = [
             submitBtn.textContent = 'Enviando...';
           }
 
-          fetch(`${supabaseUrl}/rest/v1/comentarios_lanzamientos`, {
-            method: 'POST',
-            headers: {
-              'apikey': supabaseKey,
-              'Authorization': `Bearer ${supabaseKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              nombre,
-              ciudad: ciudad || null,
-              comentario,
-              calificacion,
-              lanzamiento_slug: slug,
-              aprobado: false // Moderación requerida
-            })
-          })
-          .then(res => {
-            if (!res.ok) throw new Error('Error al enviar opinión');
-            return res;
-          })
-          .then(() => {
+          try {
+            const response = await fetch('/api/launch-comments', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nombre,
+                ciudad: ciudad || null,
+                comentario,
+                calificacion,
+                lanzamiento_slug: slug,
+                website
+              })
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || !payload.success) {
+              throw new Error(payload.error || 'Error al enviar opinión');
+            }
+
             comForm.reset();
             // Resetear estrellas a 5
             starBtns.forEach(b => {
@@ -1371,15 +1373,14 @@ const allDetrasCamaras = [
               submitBtn.disabled = false;
               submitBtn.textContent = 'Enviar Opinión';
             }
-          })
-          .catch(err => {
+          } catch (err) {
             console.error(err);
-            alert('Error al enviar la opinión. Inténtalo de nuevo.');
+            alert(err instanceof Error ? err.message : 'Error al enviar la opinión. Inténtalo de nuevo.');
             if (submitBtn) {
               submitBtn.disabled = false;
               submitBtn.textContent = 'Enviar Opinión';
             }
-          });
+          }
         });
       }
 

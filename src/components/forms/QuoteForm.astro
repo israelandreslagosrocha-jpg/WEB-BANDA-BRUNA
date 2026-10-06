@@ -186,6 +186,11 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
       ></textarea>
     </div>
 
+    <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+      <label for="ext-website">Sitio web</label>
+      <input id="ext-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
     <button type="submit" class="bg-gradient-to-r from-gold-bruna to-gold-bruna-hover text-black font-extrabold py-4 px-6 rounded-md text-xs uppercase tracking-widest hover:scale-102 hover:shadow-lg hover:shadow-gold-bruna/20 transition-all cursor-pointer min-h-[48px] flex items-center justify-center">
       {submitButtonText}
     </button>
@@ -229,7 +234,6 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
 </div>
 
 <script>
-  import { supabase } from '../../services/supabaseClient.js';
   import { sendEmail } from '../../services/emailService.js';
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -249,6 +253,7 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
     const typeSelect = document.getElementById('ext-type') as HTMLSelectElement | null;
     const customFieldInput = document.getElementById('ext-custom-field') as HTMLInputElement | null;
     const messageInput = document.getElementById('ext-message') as HTMLTextAreaElement | null;
+    const websiteInput = document.getElementById('ext-website') as HTMLInputElement | null;
 
     const nameErr = document.getElementById('ext-name-err');
     const phoneErr = document.getElementById('ext-phone-err');
@@ -277,7 +282,7 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
       typeSelect.value = decodeURIComponent(urlParams.get('type') || '');
     }
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       nameErr?.classList.add('hidden');
@@ -348,38 +353,43 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
       const origin = form.getAttribute('data-origin') || 'web';
       const subject = form.getAttribute('data-subject') || 'Nueva Cotización desde el Sitio Web';
 
-      // 1. Guardar cotización en Supabase
-      supabase.from('cotizaciones').insert([
-        {
-          nombre: nameVal,
-          telefono: phoneVal,
-          email: emailVal,
-          fecha_evento: dateVal || null,
-          ciudad: cityVal,
-          tipo_evento: typeVal,
-          mensaje: msgVal
-        }
-      ]).then(({ error }) => {
-        if (error) {
-          console.error('Error al guardar en Supabase:', error);
-        } else {
-          console.log(`Cotización guardada exitosamente en Supabase (Origen: ${origin})`);
-        }
-      });
+      let quoteStored = false;
 
-      // 2. Enviar correo asíncronamente con Web3Forms
-      sendEmail({
-        Asunto: subject,
-        Nombre: nameVal,
-        Teléfono: phoneVal,
-        Email: emailVal,
-        "Tipo de Evento": typeVal,
-        "Fecha Tentativa": dateVal,
-        "Ciudad/Comuna": cityVal,
-        "Detalles/Mensaje": msgVal,
-        "Origen": origin
-      })
-      .then(() => {
+      try {
+        // La clave de servicio y la escritura de datos personales permanecen en el servidor.
+        const quoteResponse = await fetch('/api/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: nameVal,
+            telefono: phoneVal,
+            email: emailVal,
+            fecha_evento: dateVal,
+            ciudad: cityVal,
+            tipo_evento: typeVal,
+            mensaje: msgVal,
+            website: websiteInput?.value || ''
+          })
+        });
+        const quoteData = await quoteResponse.json().catch(() => ({}));
+        if (!quoteResponse.ok || !quoteData.success) {
+          throw new Error(quoteData.error || 'No se pudo registrar la solicitud.');
+        }
+        quoteStored = true;
+
+        // Mantiene el correo de respaldo ya existente después de registrar la solicitud.
+        await sendEmail({
+          Asunto: subject,
+          Nombre: nameVal,
+          Teléfono: phoneVal,
+          Email: emailVal,
+          "Tipo de Evento": typeVal,
+          "Fecha Tentativa": dateVal,
+          "Ciudad/Comuna": cityVal,
+          "Detalles/Mensaje": msgVal,
+          "Origen": origin
+        });
+
         if (btn) {
           btn.textContent = origText;
           btn.disabled = false;
@@ -411,18 +421,19 @@ const resolvedCategories = categories || DEFAULT_CATEGORIES;
         successPanel?.classList.remove('hidden');
 
         form.reset();
-      })
-      .catch((err) => {
+      } catch (err: any) {
         console.error('Error al enviar correo:', err);
         if (btn) {
           btn.textContent = origText;
           btn.disabled = false;
         }
         if (feedback) {
-          feedback.textContent = 'Hubo un inconveniente al enviar tu cotización por correo. Por favor, intenta de nuevo o contáctanos directamente a través de WhatsApp.';
+          feedback.textContent = quoteStored
+            ? 'Registramos tu cotización, pero el correo de respaldo falló. Puedes contactar al equipo por WhatsApp.'
+            : (err?.message || 'Hubo un inconveniente al registrar tu cotización. Intenta nuevamente o contáctanos por WhatsApp.');
           feedback.className = 'text-center text-xs py-2.5 px-4 rounded border bg-red-950/20 border-red-500/20 text-red-400 block font-bold';
         }
-      });
+      }
     });
 
     if (resetBtn && formContainer && successPanel) {

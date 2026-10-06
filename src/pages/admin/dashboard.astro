@@ -4217,7 +4217,7 @@ ${warnings}`;
         if (!badge) return;
         
         try {
-          const res = await fetch('/api/radio/health');
+          const res = await fetch('/api/radio/health', { headers: await adminRequestHeaders() });
           const data = await res.json();
           if (data.success && data.health) {
             const h = data.health;
@@ -4231,7 +4231,7 @@ ${warnings}`;
 
       async function fetchStats() {
         try {
-          const res = await fetch('/api/radio/stats');
+          const res = await fetch('/api/radio/stats', { headers: await adminRequestHeaders() });
           const data = await res.json();
           if (data.success && data.stats) {
             const s = data.stats;
@@ -4367,7 +4367,7 @@ ${warnings}`;
         if (!tbody) return;
 
         try {
-          const res = await fetch('/api/radio/radios?onlyActive=false');
+          const res = await fetch('/api/radio/radios?onlyActive=false', { headers: await adminRequestHeaders() });
           const data = await res.json();
           const radios = data.radios || [];
 
