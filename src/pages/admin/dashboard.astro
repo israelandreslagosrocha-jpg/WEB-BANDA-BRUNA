@@ -4181,7 +4181,8 @@ ${warnings}`;
                 const data = await response.json().catch(() => null);
 
                 if (!response.ok) throw new Error(data?.error || `Error HTTP ${response.status}`);
-                alert(`Escaneo finalizado. Procesado: ${data.processed || 0} radios. Coincidencias: ${data.results?.filter((r: any) => r.status === 'DETECTION').length || 0}`);
+                const counts = data.summary || {};
+                alert(`Escaneo finalizado: ${data.processed || 0} radios. Confirmadas: ${counts.LIVE_CONFIRMED || 0}. Historial: ${counts.HISTORY_DETECTION || 0}. Sin metadata útil o con errores: ${(data.results || []).filter((r: any) => !['LIVE_CONFIRMED', 'HISTORY_DETECTION', 'UNCONFIRMED_DETECTION', 'NO_MATCH'].includes(r.status)).length}. Consulta el diagnóstico por emisora en GitHub Actions.`);
                 await logAction('Ejecutó sincronización manual del Radio Monitor');
                 loadRadioMonitor(); // Recargar datos
               } catch (err: any) {
@@ -4221,7 +4222,8 @@ ${warnings}`;
           const data = await res.json();
           if (data.success && data.health) {
             const h = data.health;
-            badge.textContent = `Salud: ${h.totalErrors === 0 ? '✓ Óptima' : `⚠️ ${h.totalErrors} Offline`}`;
+            badge.textContent = `Consultas: ${h.activeCron ? `${h.totalErrors} atrasadas` : 'sin actividad reciente'}`;
+            document.getElementById('stat-last-sync')!.textContent = h.lastSync ? new Date(h.lastSync).toLocaleString('es-CL') : 'Sin consultas';
             badge.className = `text-xs py-1.5 px-3 rounded-full border ${h.totalErrors === 0 ? 'bg-green-950/20 border-green-500/20 text-green-400' : 'bg-red-950/20 border-red-500/20 text-red-400'}`;
           }
         } catch {
@@ -4238,7 +4240,6 @@ ${warnings}`;
             document.getElementById('stat-total-plays')!.textContent = s.totalDetections;
             document.getElementById('stat-active-radios')!.textContent = s.activeRadiosCount;
             document.getElementById('stat-offline-radios')!.textContent = s.offlineRadiosCount;
-            document.getElementById('stat-last-sync')!.textContent = new Date(data.timestamp).toLocaleTimeString('es-CL');
 
             // Renderizar ranking de canciones
             const tracksRanking = document.getElementById('stats-tracks-ranking');
@@ -4388,7 +4389,7 @@ ${warnings}`;
               ? (r.verificado ? 'bg-green-950/45 border-green-500/20 text-green-400' : 'bg-amber-950/45 border-amber-500/20 text-amber-400')
               : 'bg-red-950/45 border-red-500/20 text-red-400';
             const statusText = r.activo 
-              ? (r.verificado ? '✓ ONLINE' : '⚠️ CONSULTADA')
+              ? (r.verificado ? '✓ METADATA DISPONIBLE' : '⚠️ SIN METADATA ÚTIL')
               : '✗ INACTIVA';
 
             const linkHtml = r.sitio_web ? '<a href="' + r.sitio_web + '" target="_blank" class="text-[10px] text-gold-bruna hover:underline">Visitar sitio web</a>' : '';

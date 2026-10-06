@@ -6,6 +6,7 @@ import {
 } from '../../../services/serverAuth.js';
 
 export const prerender = false;
+import { createMetadataReader } from '../../../modules/radio-monitor/services/metadataReader.js';
 
 // 1. UTILIDADES Y MATCHER DE ALIAS
 function normalizeText(text) {
@@ -32,7 +33,7 @@ function matchesAlias(value, aliases) {
     if (normalizedValue === normalizedAlias) return true;
 
     if (normalizedAlias.length >= 4) {
-      if (normalizedValue.includes(normalizedAlias) || normalizedAlias.includes(normalizedValue)) {
+      if (` ${normalizedValue} `.includes(` ${normalizedAlias} `)) {
         return true;
       }
     }
@@ -53,273 +54,6 @@ function wait(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
-// 2. PROVEEDORES DE STREAMING
-async function getIcecastMetadata(streamUrl, metadataUrl) {
-  let jsonUrl = metadataUrl;
-  if (!jsonUrl) {
-    try {
-      const parsed = new URL(streamUrl);
-      parsed.pathname = '/status-json.xsl';
-      parsed.search = '';
-      jsonUrl = parsed.toString();
-    } catch {
-      jsonUrl = streamUrl + '/status-json.xsl';
-    }
-  }
-
-  try {
-    const response = await fetch(jsonUrl, { signal: AbortSignal.timeout(3000) });
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const data = await response.json();
-    
-    const sources = data?.icestats?.source;
-    if (!sources) return { artist: '', title: '', online: false, raw: data };
-
-    let titleString = '';
-    let artist = '';
-    let song = '';
-
-    if (Array.isArray(sources)) {
-      const streamPath = new URL(streamUrl).pathname;
-      const matched = sources.find(s => s.listenurl && s.listenurl.includes(streamPath)) || sources[0];
-      titleString = matched.title || matched.yp_currently_playing || '';
-      artist = matched.artist || '';
-      song = matched.title_only || '';
-    } else {
-      titleString = sources.title || sources.yp_currently_playing || '';
-      artist = sources.artist || '';
-      song = sources.title_only || '';
-    }
-
-    if (artist && song) {
-      return { artist: cleanMetadataText(artist), title: cleanMetadataText(song), online: true, raw: data };
-    }
-    if (titleString && titleString.includes(' - ')) {
-      const parts = titleString.split(' - ');
-      return { artist: cleanMetadataText(parts[0]), title: cleanMetadataText(parts.slice(1).join(' - ')), online: true, raw: data };
-    }
-    return { artist: '', title: cleanMetadataText(titleString || song), online: !!titleString, raw: data };
-  } catch (error) {
-    return { artist: '', title: '', online: false, raw: { error: error.message } };
-  }
-}
-
-async function getShoutcastMetadata(streamUrl, metadataUrl) {
-  let statsUrl = metadataUrl;
-  if (!statsUrl) {
-    try {
-      const parsed = new URL(streamUrl);
-      parsed.pathname = '/stats';
-      parsed.search = '';
-      statsUrl = parsed.toString();
-    } catch {
-      statsUrl = streamUrl + '/stats';
-    }
-  }
-
-  try {
-    const response = await fetch(statsUrl + (statsUrl.includes('?') ? '&json=1' : '?json=1'), { signal: AbortSignal.timeout(3000) });
-    if (response.ok) {
-      const text = await response.text();
-      let title = '';
-      if (text.includes('<SONGTITLE>')) {
-        const match = text.match(/<SONGTITLE>(.*?)<\/SONGTITLE>/i);
-        if (match) title = match[1];
-      } else {
-        try {
-          const data = JSON.parse(text);
-          title = data.songtitle || '';
-        } catch {}
-      }
-      if (title) {
-        if (title.includes(' - ')) {
-          const parts = title.split(' - ');
-          return { artist: cleanMetadataText(parts[0]), title: cleanMetadataText(parts.slice(1).join(' - ')), online: true, raw: text };
-        }
-        return { artist: '', title: cleanMetadataText(title), online: true, raw: text };
-      }
-    }
-  } catch (v2Error) {}
-
-  try {
-    const parsed = new URL(streamUrl);
-    parsed.pathname = '/7.html';
-    parsed.search = '';
-    const v1Response = await fetch(parsed.toString(), { signal: AbortSignal.timeout(3000) });
-    if (v1Response.ok) {
-      const text = await v1Response.text();
-      const match = text.match(/<body>(.*)<\/body>/i);
-      if (match && match[1]) {
-        const parts = match[1].split(',');
-        if (parts.length >= 7) {
-          const title = parts.slice(6).join(',');
-          if (title.includes(' - ')) {
-            const p = title.split(' - ');
-            return { artist: cleanMetadataText(p[0]), title: cleanMetadataText(p.slice(1).join(' - ')), online: true, raw: { v1: text } };
-          }
-          return { artist: '', title: cleanMetadataText(title), online: !!title, raw: { v1: text } };
-        }
-      }
-    }
-  } catch {}
-
-  return { artist: '', title: '', online: false, raw: {} };
-}
-
-async function getAzuraMetadata(streamUrl, metadataUrl) {
-  let apiUrl = metadataUrl;
-  if (!apiUrl) {
-    try {
-      const parsed = new URL(streamUrl);
-      parsed.pathname = '/api/nowplaying';
-      parsed.search = '';
-      apiUrl = parsed.toString();
-    } catch {
-      apiUrl = streamUrl + '/api/nowplaying';
-    }
-  }
-
-  try {
-    const response = await fetch(apiUrl, { signal: AbortSignal.timeout(3000) });
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const data = await response.json();
-    let stationData = Array.isArray(data) ? data[0] : data;
-    
-    const nowPlaying = stationData?.now_playing;
-    if (!nowPlaying) return { artist: '', title: '', online: false, raw: data };
-
-    return {
-      artist: cleanMetadataText(nowPlaying.song?.artist || ''),
-      title: cleanMetadataText(nowPlaying.song?.title || ''),
-      artwork: nowPlaying.song?.art || undefined,
-      online: true,
-      raw: data
-    };
-  } catch (error) {
-    return { artist: '', title: '', online: false, raw: { error: error.message } };
-  }
-}
-
-async function getStreamTheWorldMetadata(streamUrl, metadataUrl) {
-  let code = metadataUrl;
-  if (!code) {
-    try {
-      const parsed = new URL(streamUrl);
-      const pathname = parsed.pathname;
-      const parts = pathname.split('/');
-      const lastPart = parts[parts.length - 1];
-      code = lastPart.replace('.mp3', '').replace('.aac', '');
-    } catch {
-      code = '';
-    }
-  }
-
-  if (!code) return { artist: '', title: '', online: false, raw: { error: 'No code' } };
-  const apiUrl = `https://playerservices.streamtheworld.com/public/nowplaying?station=${code}`;
-
-  try {
-    const response = await fetch(apiUrl, { signal: AbortSignal.timeout(3000) });
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const xml = await response.text();
-    
-    const titleRegex = /name="cue_title"[^>]*>([^<]+)/i;
-    const artistRegex = /name="cue_artist"[^>]*>([^<]+)/i;
-
-    const titleMatch = xml.match(titleRegex);
-    const artistMatch = xml.match(artistRegex);
-
-    if (titleMatch || artistMatch) {
-      return {
-        artist: cleanMetadataText(artistMatch ? artistMatch[1] : ''),
-        title: cleanMetadataText(titleMatch ? titleMatch[1] : ''),
-        online: true,
-        raw: { xml }
-      };
-    }
-    
-    const altTitleRegex = /<title>([^<]+)<\/title>/i;
-    const altArtistRegex = /<artist>([^<]+)<\/artist>/i;
-    const altTitleMatch = xml.match(altTitleRegex);
-    const altArtistMatch = xml.match(altArtistRegex);
-
-    return {
-      artist: cleanMetadataText(altArtistMatch ? altArtistMatch[1] : ''),
-      title: cleanMetadataText(altTitleMatch ? altTitleMatch[1] : ''),
-      online: !!altTitleMatch,
-      raw: { xml }
-    };
-  } catch (error) {
-    return { artist: '', title: '', online: false, raw: { error: error.message } };
-  }
-}
-
-async function getEmisoraClMetadata(url) {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
-      },
-      signal: AbortSignal.timeout(7000)
-    });
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    const html = await response.text();
-
-    // 1. Canción actual en vivo
-    const currentMatch = html.match(/<div data-playlist-current-song[\s\S]*?<span class="playlist__song-name">([^<]+)<\/span>[\s\S]*?<span class="playlist__artist-name">([^<]+)<\/span>/i);
-    const currentSong = currentMatch ? cleanMetadataText(currentMatch[1]) : '';
-    const currentArtist = currentMatch ? cleanMetadataText(currentMatch[2]) : '';
-
-    // 2. Historial de temas recientes
-    const prevMatches = [...html.matchAll(/<li class="playlist__item"[\s\S]*?<span class="playlist__song-name">([^<]+)<\/span>[\s\S]*?<span class="playlist__artist-name">([^<]+)<\/span>/gi)];
-    const history = prevMatches.map(m => ({
-      title: cleanMetadataText(m[1]),
-      artist: cleanMetadataText(m[2])
-    }));
-
-    return {
-      artist: currentArtist,
-      title: currentSong,
-      history,
-      online: !!(currentSong || history.length > 0),
-      raw: { current: { artist: currentArtist, title: currentSong }, history }
-    };
-  } catch (error) {
-    return { artist: '', title: '', history: [], online: false, raw: { error: error.message } };
-  }
-}
-
-async function getRadioMetadata(radio) {
-  const provider = radio.radio_providers?.nombre;
-
-  try {
-    if (radio.metadata_url && radio.metadata_url.includes('emisora.cl')) {
-      return await getEmisoraClMetadata(radio.metadata_url);
-    }
-    if (provider === 'Icecast') {
-      return await getIcecastMetadata(radio.stream_url, radio.metadata_url);
-    }
-    if (provider === 'Shoutcast') {
-      return await getShoutcastMetadata(radio.stream_url, radio.metadata_url);
-    }
-    if (provider === 'AzuraCast') {
-      return await getAzuraMetadata(radio.stream_url, radio.metadata_url);
-    }
-    if (provider === 'StreamTheWorld') {
-      return await getStreamTheWorldMetadata(radio.stream_url, radio.metadata_url);
-    }
-    return await getIcecastMetadata(radio.stream_url, radio.metadata_url);
-  } catch (error) {
-    return {
-      artist: '',
-      title: '',
-      online: false,
-      raw: { exception: error instanceof Error ? error.message : 'Error al consultar metadata' },
-      artwork: null
-    };
-  }
-}
-
 function getMonitoredMatch(nowPlaying, artists, tracks, artistAliases, trackAliases) {
   if (!nowPlaying.online) return null;
 
@@ -333,10 +67,10 @@ function getMonitoredMatch(nowPlaying, artists, tracks, artistAliases, trackAlia
   if (!isMatch) return null;
 
   return {
-    artist: (artists || []).find(artist => matchesAlias(nowPlaying.artist, artist.aliases))?.nombre
+    artist: (artists || []).find(artist => matchesAlias(nowPlaying.artist, [artist.nombre, ...(artist.aliases || [])]))?.nombre
       || nowPlaying.artist
       || 'Banda Bruna',
-    title: (tracks || []).find(track => matchesAlias(nowPlaying.title, track.aliases))?.titulo
+    title: (tracks || []).find(track => matchesAlias(nowPlaying.title, [track.titulo, ...(track.aliases || [])]))?.titulo
       || nowPlaying.title
   };
 }
@@ -351,13 +85,16 @@ async function registerRecentDetection(supabase, radio, detection, metadataRaw) 
   // La misma canción no debe multiplicarse en el historial aunque la metadata siga
   // atrasada durante varias ejecuciones.
   const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-  const { data: recentPlays, error: recentPlaysError } = await supabase
+  const playedAtMs = Number(metadataRaw?.played_at) * 1000;
+  const playedAt = Number.isFinite(playedAtMs) && playedAtMs > 0 && playedAtMs <= Date.now()
+    ? new Date(playedAtMs).toISOString() : null;
+  let recentQuery = supabase
     .from('radio_tracks')
     .select('id')
     .eq('radio_id', radio.id)
-    .eq('title', detection.title)
-    .gte('detected_at', thirtyMinsAgo)
-    .limit(1);
+    .eq('title', detection.title);
+  recentQuery = playedAt ? recentQuery.eq('detected_at', playedAt) : recentQuery.gte('detected_at', thirtyMinsAgo);
+  const { data: recentPlays, error: recentPlaysError } = await recentQuery.limit(1);
 
   if (recentPlaysError) throw recentPlaysError;
   if (recentPlays?.length) return false;
@@ -369,6 +106,7 @@ async function registerRecentDetection(supabase, radio, detection, metadataRaw) 
       artist: detection.artist,
       title: detection.title,
       metadata_raw: metadataRaw,
+      ...(playedAt ? { detected_at: playedAt } : {}),
       stream_url: radio.stream_url
     });
 
@@ -441,12 +179,13 @@ export async function GET({ request }) {
       }
     }
 
-    // Adquisición inmediata del bloqueo en base de datos para impedir concurrencia entre instancias
+    // Ventana de enfriamiento: no sustituye un bloqueo transaccional de toda la ejecución.
     if (latestRadio?.id) {
-      await supabase
+      const { error: cooldownError } = await supabase
         .from('radios')
         .update({ ultima_actualizacion: new Date().toISOString() })
         .eq('id', latestRadio.id);
+      if (cooldownError) throw cooldownError;
     }
 
     console.log('Iniciando escaneo autorizado del Radio Monitor...');
@@ -474,8 +213,11 @@ export async function GET({ request }) {
 
     if (tracksError) throw tracksError;
 
-    const artistAliases = (artists || []).flatMap(a => a.aliases || []);
-    const trackAliases = (tracks || []).flatMap(t => t.aliases || []);
+    const artistAliases = (artists || []).flatMap(a => [a.nombre, ...(a.aliases || [])]);
+    const trackAliases = (tracks || []).flatMap(t => [t.titulo, ...(t.aliases || [])]);
+    const reader = createMetadataReader();
+    const getRadioMetadata = (radio, fresh = false) => reader.get(radio, fresh);
+    const startedAt = new Date().toISOString();
 
     const results = [];
 
@@ -483,27 +225,27 @@ export async function GET({ request }) {
     const scanPromises = (radios || []).map(async (radio) => {
       const nowPlaying = await getRadioMetadata(radio);
 
+      if (nowPlaying.status === 'SCAN_TIME_LIMIT') {
+        results.push({ radio: radio.nombre, status: nowPlaying.status, error: nowPlaying.raw.error });
+        return; // No fingir una consulta ni sobreescribir el último resultado.
+      }
+
       // Actualizar timestamp de última consulta de la radio
-      await supabase
+      const { error: radioUpdateError } = await supabase
         .from('radios')
         .update({ 
           ultima_actualizacion: new Date().toISOString(),
           verificado: nowPlaying.online 
         })
         .eq('id', radio.id);
+      if (radioUpdateError) throw radioUpdateError;
 
       const firstMatch = getMonitoredMatch(nowPlaying, artists, tracks, artistAliases, trackAliases);
 
       if (firstMatch) {
-        // La primera lectura es útil como historial, pero por sí sola no prueba que el
-        // audio siga sonando. Evita falsos "En vivo" de metadata retardada.
-        await registerRecentDetection(supabase, radio, firstMatch, {
-          source: 'metadata_candidate',
-          observation: nowPlaying.raw || {}
-        });
-
+        // No guardar candidatos como reproducciones hasta confirmar la segunda lectura.
         await wait(LIVE_CONFIRMATION_DELAY_MS);
-        const confirmedNowPlaying = await getRadioMetadata(radio);
+        const confirmedNowPlaying = await getRadioMetadata(radio, true);
         const confirmedMatch = getMonitoredMatch(
           confirmedNowPlaying,
           artists,
@@ -523,21 +265,27 @@ export async function GET({ request }) {
           return;
         }
 
+        await registerRecentDetection(supabase, radio, firstMatch, {
+          source: 'metadata_confirmed', observation: confirmedNowPlaying.raw || {}
+        });
+
         // Ambas lecturas coinciden: recién ahora puede mostrarse como reproducción en vivo.
-        const { data: currentNp } = await supabase
+        const { data: currentNp, error: currentError } = await supabase
           .from('now_playing')
           .select('*')
           .eq('radio_id', radio.id)
           .maybeSingle();
+        if (currentError) throw currentError;
 
         if (currentNp && currentNp.artist === firstMatch.artist && currentNp.title === firstMatch.title) {
           // Sigue sonando la misma canción. Actualizamos updated_at
-          await supabase
+          const { error: updateError } = await supabase
             .from('now_playing')
             .update({ updated_at: new Date().toISOString() })
             .eq('radio_id', radio.id);
+          if (updateError) throw updateError;
         } else {
-          await supabase
+          const { error: upsertError } = await supabase
             .from('now_playing')
             .upsert({
               radio_id: radio.id,
@@ -547,6 +295,7 @@ export async function GET({ request }) {
               started_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
+          if (upsertError) throw upsertError;
         }
 
         results.push({ radio: radio.nombre, status: 'LIVE_CONFIRMED', artist: firstMatch.artist, track: firstMatch.title });
@@ -560,19 +309,17 @@ export async function GET({ request }) {
             const hMentionsArtist = matchesAlias(prevItem.title, artistAliases);
 
             if ((hArtistMatch && hSongMatch) || (hSongMatch && hMentionsArtist)) {
-              const matchedArtist = (artists || []).find(a => matchesAlias(prevItem.artist, a.aliases))?.nombre || prevItem.artist || 'Banda Bruna';
-              const matchedTrack = (tracks || []).find(t => matchesAlias(prevItem.title, t.aliases))?.titulo || prevItem.title;
+              const matchedArtist = (artists || []).find(a => matchesAlias(prevItem.artist, [a.nombre, ...(a.aliases || [])]))?.nombre || prevItem.artist || 'Banda Bruna';
+              const matchedTrack = (tracks || []).find(t => matchesAlias(prevItem.title, [t.titulo, ...(t.aliases || [])]))?.titulo || prevItem.title;
 
               const inserted = await registerRecentDetection(
                 supabase,
                 radio,
                 { artist: matchedArtist, title: matchedTrack },
-                { source: 'emisora.cl_history', ...prevItem }
+                { source: 'provider_history', ...prevItem }
               );
               historyDetected = true;
-              if (inserted) {
-                results.push({ radio: radio.nombre, status: 'HISTORY_DETECTION', artist: matchedArtist, track: matchedTrack });
-              }
+              results.push({ radio: radio.nombre, status: 'HISTORY_DETECTION', inserted, artist: matchedArtist, track: matchedTrack });
               break;
             }
           }
@@ -582,19 +329,31 @@ export async function GET({ request }) {
         await clearNowPlaying(supabase, radio.id);
 
         if (!historyDetected) {
-          results.push({ radio: radio.nombre, status: nowPlaying.online ? 'NO_MATCH' : 'OFFLINE' });
+          results.push({ radio: radio.nombre, status: nowPlaying.online ? 'NO_MATCH' : nowPlaying.status,
+            metadataStatus: nowPlaying.status, error: nowPlaying.raw?.error || null,
+            artist: nowPlaying.artist, track: nowPlaying.title });
         }
       }
     });
 
-    await Promise.all(scanPromises);
+    const settled = await Promise.allSettled(scanPromises);
+    settled.forEach((outcome, index) => {
+      if (outcome.status === 'rejected') results.push({ radio: radios[index].nombre, status: 'DATABASE_ERROR', error: 'No se pudo guardar el resultado' });
+    });
+    const summary = results.reduce((counts, result) => {
+      counts[result.status] = (counts[result.status] || 0) + 1;
+      return counts;
+    }, {});
+    const failedWrites = summary.DATABASE_ERROR || 0;
 
     return new Response(JSON.stringify({ 
-      success: true, 
+      success: failedWrites === 0,
       processed: radios?.length || 0, 
-      results 
+      startedAt, finishedAt: new Date().toISOString(), requests: reader.requestCount,
+      partial: results.some(r => !['NO_MATCH', 'LIVE_CONFIRMED', 'HISTORY_DETECTION', 'UNCONFIRMED_DETECTION'].includes(r.status)),
+      summary, results
     }), {
-      status: 200,
+      status: failedWrites ? 500 : 200,
       headers: { 'Content-Type': 'application/json' }
     });
 

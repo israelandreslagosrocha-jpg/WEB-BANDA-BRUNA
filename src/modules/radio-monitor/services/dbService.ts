@@ -276,12 +276,13 @@ export class DbService {
 
     if (error) throw error;
 
-    // Filtramos las radios que no se han actualizado en los últimos 5 minutos como "offline" o "con problemas de consulta"
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    // El cron corre cada 30 minutos; dejamos margen para retrasos de GitHub.
+    // La ausencia de metadata NO demuestra que el audio esté desconectado.
+    const staleBefore = new Date(Date.now() - 75 * 60 * 1000);
     const offlineRadios = (radios || [])
       .filter(r => {
         const lastUpdate = r.ultima_actualizacion ? new Date(r.ultima_actualizacion) : null;
-        return !lastUpdate || lastUpdate < fiveMinutesAgo;
+        return !lastUpdate || lastUpdate < staleBefore;
       })
       .map(r => ({
         id: r.id,
@@ -290,9 +291,11 @@ export class DbService {
         lastOnline: r.ultima_actualizacion || 'Nunca'
       }));
 
+    const lastSync = (radios || []).map(r => r.ultima_actualizacion).filter(Boolean).sort().at(-1) || '';
     return {
-      lastSync: new Date().toISOString(),
-      activeCron: true,
+      lastSync,
+      // Indica consultas recientes, no certifica que el scheduler esté habilitado.
+      activeCron: !!lastSync && new Date(lastSync) >= staleBefore,
       totalErrors: offlineRadios.length,
       recentErrors: [],
       offlineRadios

@@ -132,7 +132,7 @@
 
       // Defensa adicional en cliente: un registro vencido solo puede aparecer en el historial.
       const liveDetections: NowPlayingInfo[] = (resNow.nowPlaying || [])
-        .filter(isFreshLiveDetection);
+        .filter((item: any) => isFreshLiveDetection(item.updated_at));
       const historyList: RadioTrackHistory[] = resHistory.history || [];
 
       let html = '';
@@ -246,7 +246,7 @@
         html += `
           <div class="flex flex-col items-center text-center py-6 px-4 gap-2 bg-slate-900/30 rounded-xl border border-white/5">
             <span class="text-xl">📡</span>
-            <p class="text-xs font-semibold text-slate-300">Escuchando radios en tiempo real</p>
+            <p class="text-xs font-semibold text-slate-300">Sin coincidencias vigentes en la última consulta</p>
             <p class="text-[11px] text-slate-500">Las reproducciones detectadas aparecerán automáticamente aquí.</p>
           </div>
         `;
@@ -265,7 +265,7 @@
             Monitoreo Radial Activo
           </span>
           <span class="bg-gold-bruna/10 text-gold-bruna border border-gold-bruna/20 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase">
-            +600 Radios en vivo
+            Consultas periódicas
           </span>
         </div>
       `;

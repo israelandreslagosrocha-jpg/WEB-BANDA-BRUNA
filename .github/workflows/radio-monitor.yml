@@ -68,4 +68,19 @@ jobs:
             exit 1
           fi
 
-          echo "Escaneo radial completado."
+          python3 - "$response_file" <<'PY'
+          import json, sys
+          with open(sys.argv[1]) as file:
+              data = json.load(file)
+          if data.get('success') is not True:
+              raise SystemExit('El endpoint no confirmó un escaneo correcto')
+          print('Radios procesadas:', data.get('processed', 0))
+          print('Peticiones de metadata:', data.get('requests', 'no informado'))
+          print('Resumen:', json.dumps(data.get('summary', {}), ensure_ascii=False))
+          if data.get('partial'):
+              print('::warning::Escaneo parcial: algunas fuentes no entregan canciones verificables. Revisar diagnóstico.')
+          # Un job verde no implica que todas las emisoras entregaron metadata.
+          for result in data.get('results', []):
+              # JSON mantiene saltos y caracteres externos escapados; nunca imprime URLs o secretos.
+              print(json.dumps({key: result.get(key) for key in ('radio', 'status', 'artist', 'track', 'error')}, ensure_ascii=True))
+          PY
