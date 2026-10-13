@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { collectPublicMetrics, parseFollowers, parseVideoMetrics, validateSnapshot } from '../src/modules/social-sync/publicMetrics.js';
+import { collectPublicMetrics, parseFollowers, parseVideoMetrics, parseRssVideoMetrics, validateSnapshot } from '../src/modules/social-sync/publicMetrics.js';
+assert.deepEqual(parseRssVideoMetrics('<entry><yt:videoId>mZhYl60ENAs</yt:videoId><media:statistics views="26961"/><media:starRating count="245"/></entry>', 'mZhYl60ENAs'), { views: 26961, likes: 245 });
+assert.deepEqual(parseRssVideoMetrics('<entry><yt:videoId>otro</yt:videoId><media:statistics views="90000"/></entry>', 'mZhYl60ENAs'), { views: null, likes: null });
 assert.equal(parseFollowers('instagram', '<meta content="3,620 seguidores - Banda Bruna" property="og:description">'), 3620);
 assert.equal(parseFollowers('facebook', '<meta property="og:description" content="5,1 mil seguidores">'), 5100);
 assert.equal(parseFollowers('tiktok', '<strong data-e2e="followers-count">1.2K</strong>'), 1200);

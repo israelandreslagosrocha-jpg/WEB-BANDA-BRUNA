@@ -52,6 +52,15 @@ export function launchVideoId(launch) {
   return link.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)?.[1] || null;
 }
 
+export function parseRssVideoMetrics(xml, videoId) {
+  const entry = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(m => m[1])
+    .find(text => text.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1]?.trim() === videoId);
+  if (!entry) return { views: null, likes: null };
+  const views = Number(entry.match(/<media:statistics\b[^>]*\bviews=["'](\d+)["']/)?.[1] ?? NaN);
+  const likes = Number(entry.match(/<media:starRating\b[^>]*\bcount=["'](\d+)["']/)?.[1] ?? NaN);
+  return { views: valid(views) ? views : null, likes: valid(likes) ? likes : null };
+}
+
 export async function readPublicPage(url, fetchImpl = fetch) {
   try {
     const response = await fetchImpl(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'es-419,es;q=0.9,en;q=0.8' }, signal: AbortSignal.timeout(12000) });
@@ -95,6 +104,15 @@ export async function collectPublicMetrics(videos = [], fetchImpl = fetch) {
     videoMetrics[videoId] = { ...metrics, httpStatus: page.httpStatus, error: page.error || (metrics.views === null && metrics.likes === null ? 'Métricas públicas no encontradas' : null) };
   }
   const feed = await read(RSS_URL);
+  if (feed.httpStatus === 200) {
+    for (const [id, metrics] of Object.entries(videoMetrics)) {
+      const rss = parseRssVideoMetrics(feed.html, id);
+      if ((metrics.views === null && rss.views !== null) || (metrics.likes === null && rss.likes !== null)) {
+        videoMetrics[id] = { ...metrics, views: metrics.views ?? rss.views, likes: metrics.likes ?? rss.likes, source: 'public_page_and_rss' };
+        videoMetrics[id].error = videoMetrics[id].views !== null && videoMetrics[id].likes !== null ? null : 'Solo una métrica está disponible en las fuentes públicas';
+      }
+    }
+  }
   const feedFits = new TextEncoder().encode(feed.html).byteLength <= 64 * 1024;
   return { version: 1, createdAt, followers, videos: videoMetrics,
     rss: { xml: feedFits ? feed.html : '', httpStatus: feed.httpStatus, error: feed.error || (feedFits ? null : 'Feed supera el límite de recepción') } };
