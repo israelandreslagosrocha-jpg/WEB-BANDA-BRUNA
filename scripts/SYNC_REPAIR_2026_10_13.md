@@ -30,6 +30,22 @@ La lectura local pública obtuvo Instagram 3537, YouTube 975, TikTok 1154, Ahoga
 
 ## Activación pendiente
 
+### Validación en rama temporal
+
+Rama `codex/validate-automatic-sync`, commit `debd7ed`. `main` no se modificó durante estas pruebas.
+
+La ejecución manual #37 de GitHub Actions, con `--dry-run`, pasó el 13 de octubre:
+https://github.com/israelandreslagosrocha-jpg/WEB-BANDA-BRUNA/actions/runs/38399671028
+
+- Instagram: 3537, obtenido de la representación pública incrustada, sin cookies.
+- YouTube: 975 suscriptores; TikTok: 1155 seguidores.
+- Ahogado: 26962 vistas / 245 likes; Fiestas Patrias: 14599 vistas / 174 likes.
+- RSS: HTTP 200 en GitHub; completa los contadores que la página de video no entrega al runner.
+- `writes: 0`, `verified: true`, `facebookPending: true`. Esta prueba certifica extracción, no guardado ni programación diaria.
+- Facebook sigue sin cifra pública: se preservará el valor anterior con advertencia, no se declarará actualizado.
+
+Las pruebas locales de radios y recepción social pasaron con base de datos simulada. Los Preview no pueden ejecutar escaneos ni sincronizaciones que escriban producción. Falta comprobar dos ejecuciones radiales programadas y el guardado social en un entorno autorizado antes de afirmar funcionamiento completo.
+
 1. Publicar el mismo commit con rutas y workflows. No requiere nueva migración SQL ni secretos adicionales: se reutilizan los existentes.
 2. Confirmar despliegue Ready y configuración radial en Cron Jobs de Vercel.
 3. Ejecutar una vez el workflow social después de que las nuevas rutas estén desplegadas; revisar cifras y advertencias en los logs.

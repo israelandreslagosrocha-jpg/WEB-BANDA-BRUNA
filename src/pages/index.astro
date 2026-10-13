@@ -189,7 +189,19 @@ const heroImages = [
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1790484256/compressed_WhatsApp_Image_2026-09-23_at_9.14.02_AM_3_wy26d7.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1790484256/compressed_WhatsApp_Image_2026-09-23_at_9.14.44_AM_1_cw7gi2.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1790484255/compressed_WhatsApp_Image_2026-09-23_at_9.15.09_AM_vhnsjb.webp"
-];
+].sort((a, b) => {
+  // Cloudinary incorpora la fecha de subida en la versión; las fotos locales
+  // originales quedan al final, conservando su orden relativo.
+  const uploadedAt = (url: string) => Number(url.match(/\/upload\/v(\d+)\//)?.[1] || 0);
+  return uploadedAt(b) - uploadedAt(a);
+});
+
+const heroImageUrl = (src: string, width: number) => src.startsWith('https://res.cloudinary.com/')
+  ? src.replace('/image/upload/', `/image/upload/f_auto,q_auto,w_${width},c_limit/`)
+  : src;
+const heroImageSrcset = (src: string) => src.startsWith('https://res.cloudinary.com/')
+  ? [480, 768, 1280, 1920].map(width => `${heroImageUrl(src, width)} ${width}w`).join(', ')
+  : undefined;
 
 // Cargar estadísticas desde Supabase
 const { data: dbConfig } = await supabase
@@ -279,27 +291,29 @@ const fallbackEditorialPosts = [
 ---
 
 <Layout title="Banda Bruna | Orquesta Oficial - Música en Vivo para Eventos y Festivales" description="Sitio oficial de Banda Bruna. Cumbia sureña y cumbia chilena en vivo para festivales municipales, bodas y eventos corporativos.">
-  <link rel="preload" href="/assets/images/hero/hero_1.webp" as="image" fetchpriority="high" slot="head" />
-  
-  <link rel="preload" as="image" href={heroImages[0]} fetchpriority="high" slot="head" />
+  <link rel="preload" as="image" href={heroImageUrl(heroImages[0], 1920)} imagesrcset={heroImageSrcset(heroImages[0])} imagesizes="100vw" fetchpriority="high" slot="head" />
   
   <!-- ====================================================================== -->
   <!-- BLOQUE 01. IMPACTO: HERO ESCÉNICO DOMINANTE                            -->
   <!-- ====================================================================== -->
-  <section class="relative min-h-[90vh] lg:min-h-screen flex flex-col justify-between overflow-hidden bg-black px-5 sm:px-8 md:px-12 pt-28 pb-12 lg:py-0" aria-label="Portada Principal - Banda Bruna en Vivo">
+  <section class="hero-section relative min-h-[90vh] lg:min-h-screen flex flex-col justify-between overflow-hidden bg-black px-5 sm:px-8 md:px-12 pt-28 pb-12 lg:py-0" aria-label="Portada Principal - Banda Bruna en Vivo">
     
     <!-- Background Slider/Carousel con iluminación escénica -->
-    <div class="absolute inset-0 z-0 w-full h-full overflow-hidden">
+    <div class="hero-background absolute inset-0 z-0 w-full h-full overflow-hidden">
       {heroImages.map((src, index) => (
         <div 
-          class={`hero-slide absolute inset-0 bg-cover bg-center transition-all duration-1000 ${index === 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`} 
-          style={`background-image: url('${src}');`}
-        ></div>
+          class={`hero-slide absolute inset-0 transition-all duration-1000 ${index === 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+          aria-hidden={index !== 0 ? 'true' : 'false'}
+        >
+          <img src={heroImageUrl(src, 1920)} srcset={heroImageSrcset(src)} sizes="100vw"
+            alt="Banda Bruna en concierto" class="hero-photo w-full h-full object-cover object-center"
+            loading={index === 0 ? 'eager' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'low'} decoding="async" />
+        </div>
       ))}
       
       <!-- Viñeta y gradiente escénico atmosférico (#040815) -->
-      <div class="absolute inset-0 bg-gradient-to-t from-[#040815] via-black/60 to-black/45 z-1"></div>
-      <div class="absolute inset-0 bg-radial-gradient from-transparent via-[#040815]/50 to-[#040815] z-1 pointer-events-none"></div>
+      <div class="hero-shade absolute inset-0 bg-gradient-to-t from-[#040815] via-black/60 to-black/45 z-1"></div>
+      <div class="hero-vignette absolute inset-0 bg-radial-gradient from-transparent via-[#040815]/50 to-[#040815] z-1 pointer-events-none"></div>
     </div>
 
     <!-- Controles del Slider Hero (Touch target >= 44x44px) -->
@@ -311,7 +325,7 @@ const fallbackEditorialPosts = [
     </button>
 
     <!-- Contenido Central del Hero: Impacto, Título y 2 CTAs -->
-    <div class="relative max-w-[1400px] mx-auto w-full lg:h-full z-20 flex flex-col justify-center py-12 lg:py-24 gap-6 text-center lg:text-left">
+    <div class="hero-content relative max-w-[1400px] mx-auto w-full lg:h-full z-20 flex flex-col justify-center py-12 lg:py-24 gap-6 text-center lg:text-left">
       
       <!-- Badges superiores (Próximo show + Estreno Patrio) -->
       <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 mb-2">
@@ -1419,6 +1433,22 @@ const fallbackEditorialPosts = [
   </section>
 
 
+  <style>
+    @media (max-width: 767px) {
+      .hero-section { --hero-photo-height: clamp(230px, 65vw, 340px); padding-top: 1rem; }
+      .hero-background { top: 1rem; height: var(--hero-photo-height); }
+      .hero-photo { object-fit: contain; }
+      .hero-slide { transform: none; }
+      .hero-shade { background: linear-gradient(to top, #040815, transparent 22%); }
+      .hero-vignette { display: none; }
+      .hero-content { padding-top: calc(var(--hero-photo-height) + 1rem); }
+      #hero-prev, #hero-next { top: calc(1rem + var(--hero-photo-height) / 2); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-slide { transition: none; transform: none; }
+    }
+  </style>
+
   <!-- Interactive Scripts (Sliders, Counters, Video Player Modals) -->
   <script>
     import { escapeHtml, safeRating } from '../utils/escapeHtml.js';
@@ -1438,6 +1468,7 @@ const fallbackEditorialPosts = [
       else currentIndex = index;
       
       slides.forEach((slide, idx) => {
+        slide.setAttribute('aria-hidden', String(idx !== currentIndex));
         if (idx === currentIndex) {
           slide.classList.remove('opacity-0', 'scale-105');
           slide.classList.add('opacity-100', 'scale-100');
@@ -1450,6 +1481,7 @@ const fallbackEditorialPosts = [
     
     function startAutoplay() {
       clearInterval(autoplayInterval);
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       autoplayInterval = setInterval(() => {
         showSlide(currentIndex + 1);
       }, slideDuration);
