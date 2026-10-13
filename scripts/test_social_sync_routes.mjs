@@ -18,6 +18,7 @@ globalThis.fetch = async (input, options = {}) => {
   if (method === 'HEAD') return new Response(null, { headers: { 'content-range': '0-1/1' } });
   if (url.pathname.endsWith('/configuracion')) return Response.json([{ id: 1, cant_youtube: 970, cant_instagram: 3499, cant_tiktok: 1154, cant_facebook: 4971 }]);
   if (url.pathname.endsWith('/lanzamientos')) {
+    assert.ok(!url.searchParams.get('select')?.split(',').includes('video_url'), 'video_url no existe en el esquema de lanzamientos');
     const launch = { id: 'launch', slug: 'ahogado-en-un-bar', nombre: 'Ahogado', plataformas_links: { youtube_views: 27000, youtube_likes: 250, youtube_metrics_updated_at: verifiedAt, youtube_likes_updated_at: verifiedAt } };
     return Response.json(new Headers(options.headers).get('accept')?.includes('vnd.pgrst.object') ? launch : [launch]);
   }
@@ -32,6 +33,12 @@ const ctx = (body, token = 'test-cron', route = '/api/cron/sync-social') => ({ r
   method: body ? 'POST' : 'GET', headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {})
 }) });
 try {
+  const manifest = await server.ssrLoadModule('/src/pages/api/cron/social-manifest.js');
+  assert.equal((await manifest.GET(ctx(null, '', '/api/cron/social-manifest'))).status, 401);
+  const manifestResponse = await manifest.GET(ctx(null, 'test-cron', '/api/cron/social-manifest'));
+  assert.equal(manifestResponse.status, 200);
+  assert.deepEqual((await manifestResponse.json()).videos, ['mZhYl60ENAs']);
+  assert.equal(writes.length, 0, 'El manifest solo lee el catálogo');
   const sync = await server.ssrLoadModule('/src/pages/api/cron/sync-social.js');
   assert.equal((await sync.POST(ctx(snapshot(), ''))).status, 401);
   assert.equal((await sync.POST(ctx(snapshot(), 'test-admin'))).status, 403);
@@ -50,7 +57,6 @@ try {
   assert.equal(launch.youtube_likes_updated_at, verifiedAt, 'Likes preservados no deben aparentar una nueva verificación');
   assert.equal(launch.youtube_metrics_status, 'partial');
   assert.ok(body.warnings.some(w => w.includes('RSS')));
-  const manifest = await server.ssrLoadModule('/src/pages/api/cron/social-manifest.js');
   const before = writes.length;
   assert.equal((await manifest.GET(ctx(null, '', '/api/cron/social-manifest'))).status, 401);
   const result = await manifest.GET(ctx(null, 'test-cron', '/api/cron/social-manifest'));
