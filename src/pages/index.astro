@@ -173,23 +173,22 @@ const calendarEvents = allTourEvents.map(e => ({
 
 const heroImages = [
   "/assets/images/hero/hero_1.webp",
-  "/assets/images/hero/hero_2.webp",
   "/assets/images/hero/hero_3.webp",
   "/assets/images/hero/hero_4.webp",
-  "/assets/images/hero/hero_5.webp",
-  "/assets/images/hero/hero_6.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1783398590/compressed_BB29_ncdsn8.webp",
   // Fotos adicionales para el Hero Slide:
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414189/compressed_20250322-_DSC8302_iiqi8k.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414123/compressed_DSC01050_r8fjdr.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414120/compressed_DSC00983_tcabl4.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414124/compressed_DSC00953_zemfwn.webp",
-  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414182/compressed_20250322-_DSC8018_bqynkm.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414191/compressed_20250322-_DSC8359_pl7ubh.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414152/compressed_DSC02356_1_l5mqsc.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1784414172/compressed_20250201230759_DSC00081_1_jv8mqo.webp",
   "https://res.cloudinary.com/dhgifjpkh/image/upload/v1789438483/compressed_IMG_4525_uqtzfg.webp",
-  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1789438482/compressed_IMG_4490_xutyjf.webp"
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1789438482/compressed_IMG_4490_xutyjf.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1790484256/compressed_WhatsApp_Image_2026-09-23_at_9.14.02_AM_3_wy26d7.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1790484256/compressed_WhatsApp_Image_2026-09-23_at_9.14.44_AM_1_cw7gi2.webp",
+  "https://res.cloudinary.com/dhgifjpkh/image/upload/v1790484255/compressed_WhatsApp_Image_2026-09-23_at_9.15.09_AM_vhnsjb.webp"
 ];
 
 // Cargar estadísticas desde Supabase
@@ -964,6 +963,18 @@ const fallbackEditorialPosts = [
                   <track kind="captions" src="/assets/captions.vtt" srclang="es" label="Español" default />
                 </video>
               </div>
+              <!-- Slide 6: Expo Mundo -->
+              <div class="w-full h-full shrink-0 relative flex items-center justify-center bg-black">
+                <video
+                  src="https://res.cloudinary.com/dhgifjpkh/video/upload/v1791313441/expo_mundo2_t1ug0e.mp4"
+                  poster="https://res.cloudinary.com/dhgifjpkh/video/upload/so_2/v1791313441/expo_mundo2_t1ug0e.jpg"
+                  class="w-full h-full object-cover bg-black"
+                  controls
+                  preload="none"
+                  playsinline
+                  aria-label="Presentación en vivo de Banda Bruna - Expo Mundo"
+                ></video>
+              </div>
             </div>
             
             <!-- Badge Superior -->
@@ -985,11 +996,12 @@ const fallbackEditorialPosts = [
               <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="2" aria-label="Video 3: Fiestas Patrias 1"></button>
               <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="3" aria-label="Video 4: Fiestas Patrias 2"></button>
               <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="4" aria-label="Video 5: Vagabundo en Victoria"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition-all cursor-pointer" data-home-slide="5" aria-label="Video 6: Expo Mundo"></button>
             </div>
           </div>
 
           <!-- Selector de Videos / Mini Tabs -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             <button type="button" data-home-tab="0" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-gold-bruna/60 bg-gold-bruna/10 text-left transition-all cursor-pointer flex flex-col gap-0.5">
               <span class="text-[9px] font-bold text-gold-bruna uppercase tracking-wider block">Video 1</span>
               <span class="text-xs font-bold text-white line-clamp-1">Puerto Saavedra</span>
@@ -1009,6 +1021,10 @@ const fallbackEditorialPosts = [
             <button type="button" data-home-tab="4" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
               <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 5</span>
               <span class="text-xs font-bold text-white line-clamp-1">Vagabundo (Victoria)</span>
+            </button>
+            <button type="button" data-home-tab="5" class="home-video-tab p-2.5 sm:p-3 rounded-xl border border-white/10 bg-slate-900/60 hover:border-white/25 text-left transition-all cursor-pointer flex flex-col gap-0.5">
+              <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Video 6</span>
+              <span class="text-xs font-bold text-white line-clamp-1">Expo Mundo</span>
             </button>
           </div>
 
@@ -1720,6 +1736,11 @@ const fallbackEditorialPosts = [
           tag: "EN VIVO · VICTORIA",
           title: "Vagabundo · En Vivo desde Victoria",
           desc: "Toda la potencia, ritmo y convocatoria de Banda Bruna haciendo bailar al público de Victoria con el clásico \"Vagabundo\"."
+        },
+        {
+          tag: "EN VIVO · BANDA BRUNA",
+          title: "Expo Mundo · Show en Directo",
+          desc: "Un nuevo registro de Banda Bruna sobre el escenario en Expo Mundo."
         }
       ];
 
