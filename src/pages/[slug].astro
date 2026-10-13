@@ -84,10 +84,8 @@ const dbLikes = Number(lanzamiento.plataformas_links?.youtube_likes) || 0;
 const isAhogado = lanzamiento.slug === 'ahogado-en-un-bar';
 const isPatrio = lanzamiento.slug === 'sesion-fiestas-patrias';
 const launchStatsForThisSlug = (launchStats && launchStats.slug === lanzamiento.slug) ? launchStats : null;
-const defaultViewsFloor = isAhogado ? 26611 : (isPatrio ? 9870 : 0);
-const defaultLikesFloor = isAhogado ? 244 : (isPatrio ? 132 : 0);
-const youtubeViews = Math.max(dbViews, Number(launchStatsForThisSlug?.youtube_views) || 0, defaultViewsFloor);
-const youtubeLikes = Math.max(dbLikes, Number(launchStatsForThisSlug?.youtube_likes) || 0, defaultLikesFloor);
+const youtubeViews = lanzamiento.plataformas_links?.youtube_views != null ? dbViews : Number(launchStatsForThisSlug?.youtube_views) || 0;
+const youtubeLikes = lanzamiento.plataformas_links?.youtube_likes != null ? dbLikes : Number(launchStatsForThisSlug?.youtube_likes) || 0;
 
 // Determinar visibilidad de plataformas de streaming (solo si tiene enlaces reales y no es sesión en vivo / videoclip)
 const hasAudioPlatforms = !!(
@@ -421,6 +419,7 @@ const allDetrasCamaras = [
               <span id="yt-likes-counter" class="text-xl md:text-2xl font-extrabold font-title text-white block mb-0.5" data-count-target={youtubeLikes}>{youtubeLikes > 0 ? youtubeLikes.toLocaleString('es-CL') : '0'}</span>
               <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block text-center leading-snug">Me Gusta YouTube</span>
             </div>
+            <p id="yt-stats-status" class="col-span-2 text-[10px] text-slate-400 text-center">Cifras almacenadas; actualización diaria. Consulta la fecha de verificación.</p>
           </div>
         )}
       </div>
@@ -879,26 +878,30 @@ const allDetrasCamaras = [
             
             // 2. Actualizar estadísticas de YouTube
             if (item.plataformas_links) {
-              const isCurrentAhogado = slug === 'ahogado-en-un-bar';
-              const isCurrentPatrio = slug === 'sesion-fiestas-patrias';
-              const minViews = isCurrentAhogado ? 26611 : (isCurrentPatrio ? 9870 : 0);
-              const minLikes = isCurrentAhogado ? 244 : (isCurrentPatrio ? 132 : 0);
-              const views = Math.max(Number(item.plataformas_links.youtube_views) || 0, minViews);
-              const likes = Math.max(Number(item.plataformas_links.youtube_likes) || 0, minLikes);
+              const statusEl = document.getElementById('yt-stats-status');
+              if (statusEl) {
+                const verifiedAt = item.plataformas_links.youtube_views_updated_at || item.plataformas_links.youtube_metrics_updated_at;
+                const verifiedTime = Date.parse(verifiedAt || '');
+                const validDate = Number.isFinite(verifiedTime);
+                const needsReview = item.plataformas_links.youtube_metrics_status !== 'ok' || !validDate || Date.now() - verifiedTime > 36 * 60 * 60 * 1000;
+                statusEl.textContent = validDate ? `${needsReview ? 'Actualización pendiente. ' : ''}Última verificación: ${new Date(verifiedTime).toLocaleString('es-CL')}` : 'Cifras almacenadas sin fecha de verificación; actualización pendiente.';
+              }
+              const views = item.plataformas_links.youtube_views == null ? null : Number(item.plataformas_links.youtube_views);
+              const likes = item.plataformas_links.youtube_likes == null ? null : Number(item.plataformas_links.youtube_likes);
               
               let updated = false;
               const viewsEl = document.getElementById('yt-views-counter');
-              if (viewsEl && views > 0) {
+              if (viewsEl && views !== null && Number.isFinite(views) && views >= 0) {
                 const currTarget = Number(viewsEl.getAttribute('data-count-target')) || 0;
-                if (views > currTarget) {
+                if (views !== currTarget) {
                   viewsEl.setAttribute('data-count-target', views.toString());
                   updated = true;
                 }
               }
               const likesEl = document.getElementById('yt-likes-counter');
-              if (likesEl && likes > 0) {
+              if (likesEl && likes !== null && Number.isFinite(likes) && likes >= 0) {
                 const currTarget = Number(likesEl.getAttribute('data-count-target')) || 0;
-                if (likes > currTarget) {
+                if (likes !== currTarget) {
                   likesEl.setAttribute('data-count-target', likes.toString());
                   updated = true;
                 }

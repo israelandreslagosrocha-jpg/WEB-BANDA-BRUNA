@@ -1,7 +1,6 @@
-import { parseYouTubeRssFeed, scrapeYouTubeSubscribers } from '../../../modules/social-sync/scrapers/youtube.js';
-import { scrapeInstagramFollowers } from '../../../modules/social-sync/scrapers/instagram.js';
+import { parseYouTubeRssFeed } from '../../../modules/social-sync/scrapers/youtube.js';
+import { collectPublicMetrics, launchVideoId, validateSnapshot } from '../../../modules/social-sync/publicMetrics.js';
 import { getVideoPlaylists } from '../../../services/socialApi.js';
-import { parseCount } from '../../../modules/social-sync/types.js';
 import { logScrapeRun, updateSocialAccount } from '../../../modules/social-sync/db.js';
 import {
   authenticateAdminRequest,
@@ -23,107 +22,9 @@ async function authenticateRequest(request) {
   return { ...admin, isCron: false };
 }
 
-// 3. Scrape en vivo de YouTube para "Ahogado en un Bar"
-async function fetchYouTubeVideoStats(videoId = 'mZhYl60ENAs') {
-  const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-  let views = null;
-  let likes = null;
-
-  try {
-    const res = await fetch(youtubeUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'es-419,es;q=0.9,en;q=0.8'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-
-    if (res.ok) {
-      const html = await res.text();
-      const viewMatch = html.match(/"viewCount":"(\d+)"/);
-      const likeMatch = html.match(/"likeCount":"(\d+)"/);
-
-      if (viewMatch && parseInt(viewMatch[1], 10) > 0) {
-        views = parseInt(viewMatch[1], 10);
-      }
-      if (likeMatch && parseInt(likeMatch[1], 10) > 0) {
-        likes = parseInt(likeMatch[1], 10);
-      }
-    }
-  } catch (err) {
-    console.warn('[sync-social] Error al scrapear video de YouTube:', err.message);
-  }
-
-  return { views, likes };
-}
-
-// 3.1 Scrape de seguidores de TikTok. Una sola consulta diaria: no usamos cookies,
-// sesiones ni servicios de terceros para evitar depender de credenciales expuestas.
-async function scrapeTikTokFollowers() {
-  try {
-    const res = await fetch('https://www.tiktok.com/@bandabrunaoficial', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (res.ok) {
-      const html = await res.text();
-      const descMatch = html.match(/<meta\s+(?:name|property)="(?:description|og:description)"\s+content="([^"]+)"/i);
-      if (descMatch) {
-        const descriptionCount = descMatch[1].match(/([0-9.,KkMm]+)\s*(?:seguidores|followers)/i);
-        if (descriptionCount) {
-          const parsed = parseCount(descriptionCount[1]);
-          if (parsed && parsed > 500) return parsed;
-        }
-      }
-      const match = html.match(/"followerCount":(\d+)/) ||
-                    html.match(/data-e2e="followers-count">([^<]+)<\/strong>/i) ||
-                    html.match(/"fans":(\d+)/);
-      if (match) {
-        const parsed = parseInt(match[1].replace(/[.,]/g, ''), 10);
-        if (parsed && parsed > 500) return parsed;
-      }
-    }
-  } catch (err) {
-    console.warn('[sync-social] TikTok no disponible:', err.message);
-  }
-
-  return null;
-}
-
-// 3.2 Scrape de seguidores de Facebook
-async function scrapeFacebookFollowers() {
-  try {
-    const res = await fetch('https://www.facebook.com/bandabruna', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'Accept-Language': 'es-CL,es;q=0.9,en;q=0.8'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (res.ok) {
-      const html = await res.text();
-      const descMatch = html.match(/<meta\s+name="description"\s+content="([^"]+)"/i);
-      if (descMatch) {
-        const match = descMatch[1].match(/([0-9.,KkMm]+)\s*(?:seguidores|personas siguen|followers)/i);
-        if (match) {
-          const parsed = parseCount(match[1]);
-          if (parsed && parsed > 1000) return parsed;
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('[sync-social] Facebook directo no disponible:', err.message);
-  }
-  return null;
-}
-
 function buildFollowerResult({ platform, scraped, previous, minimum }) {
-  const hasLiveValue = Number.isFinite(scraped) && scraped > 0;
-  const preservedValue = previous || minimum;
+  const hasLiveValue = Number.isFinite(scraped) && scraped >= 0;
+  const preservedValue = previous ?? minimum;
   // Una lectura pública válida es la fuente de verdad, incluso si bajó. Solo
   // preservamos el dato previo cuando la fuente no entregó una cifra.
   const value = hasLiveValue ? scraped : preservedValue;
@@ -167,7 +68,7 @@ async function persistFollowerResult(client, startedAt, followerResult) {
 }
 
 // 5. Orquestador central de Sincronización
-async function executeSynchronization(userEmail) {
+async function executeSynchronization(userEmail, snapshot = null) {
   const startedAt = new Date();
   const sb = createServiceSupabaseClient();
   const result = {
@@ -185,19 +86,22 @@ async function executeSynchronization(userEmail) {
   // --- PASO 1: SUSCRIPTORES Y SEGUIDORES (una consulta pública por plataforma) ---
   // Las consultas independientes van en paralelo para mantener bajo el tiempo total del cron.
   const followersStartedAt = new Date();
-  const [ytSubsScraped, igFollowersScraped, ttFollowersScraped, fbFollowersScraped] = await Promise.all([
-    scrapeYouTubeSubscribers(),
-    scrapeInstagramFollowers(),
-    scrapeTikTokFollowers(),
-    scrapeFacebookFollowers()
-  ]);
+  const { data: launches, error: launchesError } = await sb.from('lanzamientos').select('*');
+  if (launchesError) throw new Error('No se pudo leer el catálogo de lanzamientos');
+  const collected = snapshot || await collectPublicMetrics((launches || []).map(launchVideoId).filter(Boolean));
+  result.extraction_source = snapshot ? 'github_runner' : 'vercel_manual';
+  const ytSubsScraped = collected.followers.youtube.value;
+  const igFollowersScraped = collected.followers.instagram.value;
+  const ttFollowersScraped = collected.followers.tiktok.value;
+  const fbFollowersScraped = collected.followers.facebook.value;
 
   // Obtener valores actuales de configuracion para no decrementar números por fallas ni pisar ajustes manuales
-  const { data: currentConfig } = await sb
+  const { data: currentConfig, error: configReadError } = await sb
     .from('configuracion')
     .select('*')
     .eq('id', 1)
     .maybeSingle();
+  if (configReadError || !currentConfig) throw new Error('No se pudo leer la configuración actual');
 
   const prevConfig = currentConfig || {};
   const prevYoutube = Number(prevConfig.cant_youtube) || 0;
@@ -213,6 +117,11 @@ async function executeSynchronization(userEmail) {
     buildFollowerResult({ platform: 'tiktok', scraped: ttFollowersScraped, previous: prevTiktok, minimum: 1147 }),
     buildFollowerResult({ platform: 'facebook', scraped: fbFollowersScraped, previous: prevFacebook, minimum: 4971 })
   ];
+  for (const item of followerResults) {
+    const detail = collected.followers[item.platform];
+    item.httpStatus = detail.httpStatus;
+    if (item.status !== 'ok') item.error = `${detail.error || 'Cifra no disponible'}; se conserva el valor anterior.`;
+  }
 
   const followerResultByPlatform = Object.fromEntries(followerResults.map(item => [item.platform, item]));
   const finalYoutube = followerResultByPlatform.youtube.value;
@@ -229,6 +138,9 @@ async function executeSynchronization(userEmail) {
   result.platforms = Object.fromEntries(followerResults.map(item => [item.platform, {
     status: item.status,
     source: item.source,
+    httpStatus: item.httpStatus,
+    attempted_at: collected.createdAt,
+    verified_at: item.status === 'ok' ? collected.createdAt : null,
     error: item.error
   }]));
   result.partial = followerResults.some(item => item.status !== 'ok');
@@ -237,17 +149,10 @@ async function executeSynchronization(userEmail) {
   }
 
   // Actualizar tabla configuracion
-  const configUpdatePayload = {
-    cant_youtube: finalYoutube,
-    cant_instagram: finalInstagram,
-    cant_tiktok: finalTiktok,
-    cant_facebook: finalFacebook
-  };
-
-  const { error: confErr } = await sb
-    .from('configuracion')
-    .update(configUpdatePayload)
-    .eq('id', 1);
+  const configUpdatePayload = Object.fromEntries(followerResults.filter(item => item.status === 'ok').map(item => [`cant_${item.platform}`, item.value]));
+  const { error: confErr } = Object.keys(configUpdatePayload).length
+    ? await sb.from('configuracion').update(configUpdatePayload).eq('id', 1)
+    : { error: null };
 
   if (confErr) {
     result.success = false;
@@ -258,6 +163,7 @@ async function executeSynchronization(userEmail) {
   try {
     await Promise.all(followerResults.map(item => persistFollowerResult(sb, followersStartedAt, item)));
   } catch (err) {
+    result.success = false;
     result.warnings.push(`No se pudo registrar la auditoría de redes: ${err.message}`);
   }
 
@@ -266,44 +172,40 @@ async function executeSynchronization(userEmail) {
   const launchMetricsStartedAt = new Date();
   let launchMetricsAttempted = 0;
   let launchMetricsFailed = 0;
+  let launchMetricsPartial = 0;
   try {
-    const { data: allLanzamientos } = await sb
-      .from('lanzamientos')
-      .select('*');
+    const allLanzamientos = launches;
 
     if (allLanzamientos && allLanzamientos.length > 0) {
       for (const lan of allLanzamientos) {
-        let ytId = null;
-        if (lan.slug === 'ahogado-en-un-bar') {
-          ytId = 'mZhYl60ENAs';
-        } else if (lan.slug === 'sesion-fiestas-patrias') {
-          ytId = 'yXvWp-3sNuM';
-        } else {
-          const rawUrl = lan.video_url || (lan.plataformas_links && lan.plataformas_links.youtube) || '';
-          const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-          ytId = match ? match[1] : null;
-        }
+        const ytId = launchVideoId(lan);
 
         if (ytId) {
           launchMetricsAttempted++;
-          const stats = await fetchYouTubeVideoStats(ytId);
+          const stats = collected.videos[ytId] || { views: null, likes: null, error: 'Video no incluido en la consulta' };
           if (lan.slug === 'ahogado-en-un-bar') {
             result.ahogado_stats = stats;
           }
 
           if (stats.views !== null || stats.likes !== null) {
+            if (stats.views === null || stats.likes === null) {
+              launchMetricsPartial++;
+              result.warnings.push(`YouTube (${lan.slug}): solo se pudo actualizar ${stats.views === null ? 'likes' : 'reproducciones'}; el otro dato conserva su fecha anterior.`);
+            }
             const currentLinks = lan.plataformas_links || {};
-            const isAhogado = lan.slug === 'ahogado-en-un-bar';
-            const isPatrio = lan.slug === 'sesion-fiestas-patrias';
-            const minViews = isAhogado ? 26611 : (isPatrio ? 9870 : 0);
-            const minLikes = isAhogado ? 244 : (isPatrio ? 132 : 0);
-            const newViews = Math.max(stats.views || 0, Number(currentLinks.youtube_views) || 0, minViews);
-            const newLikes = Math.max(stats.likes || 0, Number(currentLinks.youtube_likes) || 0, minLikes);
+            const newViews = stats.views ?? currentLinks.youtube_views ?? null;
+            const newLikes = stats.likes ?? currentLinks.youtube_likes ?? null;
 
             const updatedLinks = {
               ...currentLinks,
               youtube_views: newViews,
-              youtube_likes: newLikes
+              youtube_likes: newLikes,
+              youtube_metrics_updated_at: collected.createdAt,
+              youtube_views_updated_at: stats.views !== null ? collected.createdAt : currentLinks.youtube_views_updated_at || null,
+              youtube_likes_updated_at: stats.likes !== null ? collected.createdAt : currentLinks.youtube_likes_updated_at || null,
+              youtube_metrics_attempted_at: collected.createdAt,
+              youtube_metrics_status: stats.views !== null && stats.likes !== null ? 'ok' : 'partial',
+              youtube_metrics_error: stats.error || null
             };
 
             const { error: lanErr } = await sb
@@ -315,6 +217,7 @@ async function executeSynchronization(userEmail) {
               .eq('id', lan.id);
 
             if (lanErr) {
+              result.success = false;
               launchMetricsFailed++;
               result.warnings.push(`Error al actualizar lanzamiento ${lan.slug}: ${lanErr.message}`);
             } else {
@@ -328,23 +231,30 @@ async function executeSynchronization(userEmail) {
             }
           } else {
             launchMetricsFailed++;
-            result.warnings.push(`YouTube: no se pudieron actualizar las métricas de ${lan.slug}; se conservan las cifras diarias anteriores.`);
+            const { error: statusError } = await sb.from('lanzamientos').update({ plataformas_links: {
+              ...(lan.plataformas_links || {}), youtube_metrics_attempted_at: collected.createdAt,
+              youtube_metrics_status: 'error', youtube_metrics_error: stats.error || 'Métricas no disponibles'
+            } }).eq('id', lan.id);
+            if (statusError) result.success = false;
+            result.warnings.push(`YouTube (${lan.slug}): ${stats.error || 'Métricas no disponibles'}; se conservan las cifras anteriores.`);
           }
         }
       }
     }
   } catch (err) {
+    result.success = false;
     launchMetricsFailed++;
     result.warnings.push(`Error al actualizar lanzamientos: ${err.message}`);
   }
 
   if (launchMetricsAttempted > 0) {
-    const metricsStatus = launchMetricsFailed > 0 ? 'warning' : 'success';
+    const metricsStatus = launchMetricsFailed > 0 || launchMetricsPartial > 0 ? 'warning' : 'success';
     result.launch_metrics = {
       status: metricsStatus,
       attempted: launchMetricsAttempted,
       updated: result.lanzamientos_updated.length,
-      failed: launchMetricsFailed
+      failed: launchMetricsFailed,
+      partial: launchMetricsPartial
     };
 
     try {
@@ -364,22 +274,15 @@ async function executeSynchronization(userEmail) {
         throw new Error('No se pudo guardar el registro de YouTube.');
       }
     } catch (err) {
+      result.success = false;
       result.warnings.push(`No se pudo registrar la auditoría de métricas: ${err.message}`);
     }
   }
 
   // --- PASO 3: ÚLTIMOS VIDEOS DE YOUTUBE VÍA RSS ---
   try {
-    const rssUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCYLlOjW9yD5BYFnYuoTM5kg';
-    const rssRes = await fetch(rssUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-
-    if (rssRes.ok) {
-      const xml = await rssRes.text();
+    if (collected.rss.httpStatus === 200 && collected.rss.xml) {
+      const xml = collected.rss.xml;
       const ytPosts = parseYouTubeRssFeed(xml);
 
       if (ytPosts && ytPosts.length > 0) {
@@ -417,7 +320,7 @@ async function executeSynchronization(userEmail) {
           }
         }
       }
-    }
+    } else result.warnings.push(`RSS YouTube: ${collected.rss.error || 'No se recibió un feed válido'}`);
   } catch (err) {
     result.warnings.push(`Error al sincronizar feed RSS de YouTube: ${err.message}`);
   }
@@ -490,25 +393,48 @@ async function executeSynchronization(userEmail) {
   }
 
   result.finished_at = new Date().toISOString();
+  result.partial = result.warnings.length > 0;
   return result;
 }
 
 export async function GET({ request }) {
+  if (process.env.VERCEL_ENV === 'preview') return jsonResponse({ success: false, error: 'Actualización deshabilitada en despliegues de prueba' }, 403);
   const auth = await authenticateRequest(request);
   if (!auth.authorized) {
     return jsonResponse({ success: false, error: 'No autorizado' }, 401);
   }
 
-  const result = await executeSynchronization(auth.userEmail);
-  return jsonResponse(result);
+  try {
+    const result = await executeSynchronization(auth.userEmail);
+    return jsonResponse(result, result.success ? 200 : 500);
+  } catch { return jsonResponse({ success: false, error: 'No se pudo completar la sincronización' }, 500); }
 }
 
 export async function POST({ request }) {
+  if (process.env.VERCEL_ENV === 'preview') return jsonResponse({ success: false, error: 'Actualización deshabilitada en despliegues de prueba' }, 403);
   const auth = await authenticateRequest(request);
   if (!auth.authorized) {
     return jsonResponse({ success: false, error: 'No autorizado' }, 401);
   }
 
-  const result = await executeSynchronization(auth.userEmail);
-  return jsonResponse(result);
+  let snapshot = null;
+  if (request.headers.get('content-type')?.includes('application/json')) {
+    if (!auth.isCron) return jsonResponse({ success: false, error: 'La recepción de métricas requiere autorización del cron' }, 403);
+    const reader = request.body?.getReader();
+    let bytes = 0, text = '';
+    const decoder = new TextDecoder();
+    try {
+      if (!reader) throw new Error('Sin cuerpo');
+      for (;;) { const { done, value } = await reader.read(); if (done) break;
+        bytes += value.byteLength; if (bytes > 128 * 1024) { await reader.cancel(); return jsonResponse({ success: false, error: 'Solicitud demasiado grande' }, 413); }
+        text += decoder.decode(value, { stream: true });
+      }
+      snapshot = JSON.parse(text + decoder.decode());
+      if (!validateSnapshot(snapshot)) throw new Error('Snapshot inválido');
+    } catch { return jsonResponse({ success: false, error: 'Métricas inválidas o vencidas' }, 400); }
+  }
+  try {
+    const result = await executeSynchronization(auth.userEmail, snapshot);
+    return jsonResponse(result, result.success ? 200 : 500);
+  } catch { return jsonResponse({ success: false, error: 'No se pudo completar la sincronización' }, 500); }
 }

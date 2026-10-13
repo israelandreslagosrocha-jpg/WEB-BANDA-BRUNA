@@ -1,5 +1,5 @@
 export const prerender = false;
-import { supabase } from '../../services/supabaseClient.js';
+import { createPublicSupabaseClient } from '../../services/serverAuth.js';
 
 export async function GET({ request }) {
   const url = new URL(request.url);
@@ -9,31 +9,36 @@ export async function GET({ request }) {
   const isPatrio = slug === 'sesion-fiestas-patrias' || requestedVideoId === 'yXvWp-3sNuM';
   const targetSlug = slug || (isAhogado ? 'ahogado-en-un-bar' : (isPatrio ? 'sesion-fiestas-patrias' : ''));
 
-  const defaultViewsFloor = isAhogado ? 26578 : (isPatrio ? 8598 : 0);
-  const defaultLikesFloor = isAhogado ? 243 : (isPatrio ? 122 : 0);
-
-  let views = defaultViewsFloor;
-  let likes = defaultLikesFloor;
+  if (!targetSlug || targetSlug.length > 120) return new Response(JSON.stringify({ success: false, error: 'Lanzamiento inválido' }), { status: 400 });
+  let views = null, likes = null, updatedAt = null, attemptedAt = null, metricStatus = 'unverified';
+  let viewsUpdatedAt = null, likesUpdatedAt = null;
 
   // Esta ruta no hace scraping: devuelve únicamente el último dato diario
   // persistido por /api/cron/sync-social, incluso si alguien la consulta directo.
   try {
     if (targetSlug) {
-      const { data } = await supabase
+      const { data, error } = await createPublicSupabaseClient()
         .from('lanzamientos')
         .select('id, plataformas_links')
         .eq('slug', targetSlug)
-        .single();
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return new Response(JSON.stringify({ success: false, error: 'Lanzamiento no encontrado' }), { status: 404 });
 
       if (data && data.plataformas_links) {
-        const dbV = Number(data.plataformas_links.youtube_views) || 0;
-        const dbL = Number(data.plataformas_links.youtube_likes) || 0;
-        views = Math.max(views, dbV);
-        likes = Math.max(likes, dbL);
+        const links = data.plataformas_links;
+        const count = value => value !== null && value !== undefined && Number.isSafeInteger(Number(value)) && Number(value) >= 0 ? Number(value) : null;
+        views = count(links.youtube_views);
+        likes = count(links.youtube_likes);
+        updatedAt = links.youtube_metrics_updated_at || null;
+        viewsUpdatedAt = links.youtube_views_updated_at || null;
+        likesUpdatedAt = links.youtube_likes_updated_at || null;
+        attemptedAt = links.youtube_metrics_attempted_at || null;
+        metricStatus = links.youtube_metrics_status || 'unverified';
       }
     }
   } catch (dbErr) {
-    // Si falla Supabase, se preservan los valores floor calculados
+    return new Response(JSON.stringify({ success: false, error: 'No se pudieron leer las métricas almacenadas' }), { status: 503, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
   }
 
   return new Response(JSON.stringify({
@@ -43,7 +48,12 @@ export async function GET({ request }) {
     views,
     likes,
     fetchedLive: false,
-    updated_at: new Date().toISOString()
+    updated_at: updatedAt,
+    views_updated_at: viewsUpdatedAt,
+    likes_updated_at: likesUpdatedAt,
+    last_attempt_at: attemptedAt,
+    status: metricStatus,
+    stale: metricStatus !== 'ok' || !updatedAt || !Number.isFinite(Date.parse(updatedAt)) || Date.now() - Date.parse(updatedAt) > 36 * 60 * 60 * 1000
   }), {
     status: 200,
     headers: {

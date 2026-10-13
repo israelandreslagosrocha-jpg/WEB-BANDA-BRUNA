@@ -1,9 +1,8 @@
 name: Monitor radial
 
 on:
-  schedule:
-    # Cada 30 minutos, evitando el minuto 00 donde GitHub suele tener mayor carga.
-    - cron: '7,37 * * * *'
+  # Producción se programa en Vercel Pro cada 30 minutos. Aquí solo queda
+  # el disparo manual para evitar dos programadores haciendo el mismo escaneo.
   workflow_dispatch:
 
 # El workflow solo invoca la API; no necesita acceso al repositorio ni permisos de GitHub.

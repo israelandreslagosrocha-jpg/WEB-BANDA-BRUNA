@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/generate_tech_pdfs.js && node scripts/zip_press_photos.js && node scripts/updateSocialStats.js && astro build",
+    "build": "node scripts/generate_tech_pdfs.js && node scripts/zip_press_photos.js && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },

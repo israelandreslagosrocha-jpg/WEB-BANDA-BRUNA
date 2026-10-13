@@ -1,6 +1,15 @@
 // Lecturas compartidas solo durante un escaneo. Nunca interpreta audio como metadata.
 const empty = (status, error) => ({ artist: '', title: '', online: false, status, raw: { error } });
-const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+const clean = value => String(value || '').replace(/&amp;/g, '&').replace(/&apos;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
+const normalize = value => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function isSong(result, radio) {
+  if (!result.artist || !result.title) return false;
+  const artist = normalize(result.artist), title = normalize(result.title), station = normalize(radio.nombre);
+  if (station && (artist === station || title === station)) return false;
+  if (artist === title || ['ads', 'advert', 'publicidad', 'undefined', 'radio'].includes(artist)) return false;
+  if (/live streaming by|la radio que|que buena radio|una radio global|now playing info/i.test(result.title)) return false;
+  return true;
+}
 const path = value => { try { return new URL(value).pathname.replace(/\/$/, ''); } catch { return ''; } };
 const splitSong = value => {
   const parts = clean(value).split(' - ');
@@ -61,7 +70,7 @@ export function createMetadataReader({ fetchImpl = fetch, concurrency = 16, time
       if (!url && /zeno\./i.test(stream.hostname)) return empty('UNSUPPORTED_SOURCE', 'Esta fuente no tiene endpoint de canciones configurado');
       if (/emisora\.cl/i.test(url || '')) kind = 'Emisora';
       else if (/azuracast|stationlink/i.test(stream.hostname) || /^\/listen\//.test(stream.pathname)) kind = 'AzuraCast';
-      else if (/sonic\./i.test(stream.hostname)) kind = 'Shoutcast';
+      else if (/sonic\./i.test(stream.hostname) || /\/;/.test(stream.pathname)) kind = 'Shoutcast';
 
       if (kind === 'StreamTheWorld') {
         if (!/^https?:\/\//i.test(url || '')) {
@@ -73,7 +82,13 @@ export function createMetadataReader({ fetchImpl = fetch, concurrency = 16, time
         url = new URL(kind === 'AzuraCast' ? '/api/nowplaying' : kind === 'Shoutcast' ? `${proxy ? '/' + proxy : ''}/stats` : '/status-json.xsl', stream.origin).href;
       }
       if (kind === 'Shoutcast') { const parsed = new URL(url); parsed.searchParams.set('json', '1'); url = parsed.href; }
-      const text = await read(url, fresh);
+      let text;
+      try { text = await read(url, fresh); }
+      catch (error) {
+        if (kind !== 'Shoutcast' || radio.metadata_url || error.message === 'SCAN_TIME_LIMIT') throw error;
+        const legacy = new URL(url); legacy.pathname = legacy.pathname.replace(/\/stats$/, '/7.html'); legacy.search = '';
+        text = await read(legacy.href, fresh);
+      }
       let result;
       if (kind === 'Emisora') {
         const current = text.match(/<div data-playlist-current-song[\s\S]*?<span class="playlist__song-name">([^<]+)<\/span>[\s\S]*?<span class="playlist__artist-name">([^<]+)<\/span>/i);
@@ -85,6 +100,8 @@ export function createMetadataReader({ fetchImpl = fetch, concurrency = 16, time
       } else if (kind === 'Shoutcast') {
         let song = text.match(/<SONGTITLE>([\s\S]*?)<\/SONGTITLE>/i)?.[1];
         if (!song) { try { song = JSON.parse(text).songtitle; } catch {} }
+        const legacyBody = text.match(/<body[^>]*>([^<]+)<\/body>/i)?.[1]?.split(',');
+        if (!song && legacyBody?.length >= 7) song = legacyBody.slice(6).join(',');
         if (!song && !radio.metadata_url) {
           const fallback = new URL(url); fallback.pathname = fallback.pathname.replace(/\/stats$/, '/7.html'); fallback.search = '';
           const legacy = await read(fallback.href, fresh);
@@ -99,7 +116,7 @@ export function createMetadataReader({ fetchImpl = fetch, concurrency = 16, time
           const shortcode = stream.pathname.match(/^\/listen\/([^/]+)/)?.[1];
           const stations = Array.isArray(data) ? data : [data];
           const station = stations.find(s => shortcode && s.station?.shortcode === shortcode)
-            || stations.find(s => [...(s.station?.mounts || []), ...(s.station?.remotes || [])].some(m => path(m.url) === path(stream.href)));
+            || stations.find(s => [...(s.station?.mounts || []), ...(s.station?.remotes || []), { url: s.station?.listen_url }].some(m => m.url && path(m.url) === path(stream.href)));
           // Una respuesta de una sola estación solo es segura si es un endpoint explícito.
           const selected = station || (!Array.isArray(data) && radio.metadata_url ? data : null);
           if (!selected) return empty('SOURCE_MISMATCH', 'No se encontró la emisora solicitada en el servidor');
@@ -116,7 +133,8 @@ export function createMetadataReader({ fetchImpl = fetch, concurrency = 16, time
           result = source.artist ? { artist: clean(source.artist), title: clean(source.title_only || source.title) } : splitSong(source.title || source.yp_currently_playing);
         }
       }
-      const available = !!(result.artist && result.title);
+      const available = isSong(result, radio);
+      result.history = (result.history || []).filter(item => isSong(item, radio));
       return { ...result, online: available || !!result.history?.length, status: available ? 'METADATA_OK' : 'NO_SONG_METADATA',
         raw: { provider: kind || 'Icecast', current: { artist: result.artist, title: result.title } } };
     } catch (error) {

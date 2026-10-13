@@ -8,7 +8,7 @@ const server = await createServer({ configFile: false, server: { middlewareMode:
 const originalTimeout = globalThis.setTimeout;
 // Solo acortar la espera de confirmación de la aplicación en esta prueba aislada.
 globalThis.setTimeout = (callback, delay, ...args) => originalTimeout(callback, delay === 12000 ? 0 : delay, ...args);
-let writes = [], readings = 0, failWrite = false, changedPlayback = false;
+let writes = [], readings = 0, failWrite = false, changedPlayback = false, lostClaim = false;
 globalThis.fetch = async (input, options = {}) => {
   const url = new URL(typeof input === 'string' ? input : input.url);
   if (url.hostname === 'radio-test.invalid') {
@@ -21,10 +21,11 @@ globalThis.fetch = async (input, options = {}) => {
   assert.equal(new Headers(options.headers).get('apikey'), 'test-service');
   if (options.method && options.method !== 'GET') {
     writes.push({ table: url.pathname.split('/').pop(), body: JSON.parse(options.body) });
+    if (lostClaim && url.pathname.endsWith('/radios')) return Response.json([]);
     return failWrite ? Response.json({ message: 'Simulación de fallo', code: 'TEST' }, { status: 500 }) : new Response(null, { status: 204 });
   }
   if (url.pathname.endsWith('/radios')) {
-    if (url.searchParams.has('limit')) return Response.json([]);
+    if (url.searchParams.has('limit')) return Response.json(lostClaim ? [{ id: 'radio1', ultima_actualizacion: '2020-01-01T00:00:00.000Z' }] : []);
     return Response.json([{ id: 'radio1', nombre: 'Radio prueba', stream_url: 'https://radio-test.invalid/stream', radio_providers: { nombre: 'Icecast' } }]);
   }
   if (url.pathname.endsWith('/monitored_artists')) return Response.json([{ nombre: 'Banda Bruna', aliases: [] }]);
@@ -49,6 +50,11 @@ try {
   assert.equal((await unconfirmed.json()).summary.UNCONFIRMED_DETECTION, 1);
   assert.equal(writes.some(w => w.table === 'radio_tracks'), false, 'No inventar historial con una detección que cambió');
   changedPlayback = false;
+  lostClaim = true;
+  const beforeClaim = readings;
+  assert.equal((await route.GET(ctx(true))).status, 429);
+  assert.equal(readings, beforeClaim, 'Una solicitud que pierde el bloqueo no debe consultar emisoras');
+  lostClaim = false;
   failWrite = true;
   const failure = await route.GET(ctx(true));
   assert.equal(failure.status, 500);

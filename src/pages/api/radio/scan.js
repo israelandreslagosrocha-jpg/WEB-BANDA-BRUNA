@@ -6,6 +6,7 @@ import {
 } from '../../../services/serverAuth.js';
 
 export const prerender = false;
+export const maxDuration = 90;
 import { createMetadataReader } from '../../../modules/radio-monitor/services/metadataReader.js';
 
 // 1. UTILIDADES Y MATCHER DE ALIAS
@@ -139,6 +140,7 @@ async function clearNowPlaying(supabase, radioId) {
 
 
 export async function GET({ request }) {
+  if (process.env.VERCEL_ENV === 'preview') return jsonResponse({ success: false, error: 'Escaneo con guardado deshabilitado en despliegues de prueba' }, 403);
   // Permite el cron de Vercel o una sesión autenticada del administrador para el disparo manual.
   const isCron = isValidCronRequest(request);
   const admin = isCron ? { authorized: false } : await authenticateAdminRequest(request);
@@ -150,15 +152,17 @@ export async function GET({ request }) {
     // Este endpoint actualiza varias tablas protegidas por RLS; nunca debe usar la clave pública.
     const supabase = createServiceSupabaseClient();
 
-    // 3.2. CONTROL PERSISTENTE DE CONCURRENCIA (Ventana mínima de 60 segundos entre escaneos)
-    const COOLDOWN_SECONDS = 60;
-    const { data: latestRadio } = await supabase
+    // 3.2. CONTROL PERSISTENTE DE CONCURRENCIA (ventana de 90 segundos)
+    const COOLDOWN_SECONDS = 90;
+    const { data: latestRadio, error: latestError } = await supabase
       .from('radios')
       .select('id, ultima_actualizacion')
       .eq('activo', true)
-      .order('ultima_actualizacion', { ascending: false })
+      .order('ultima_actualizacion', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: false })
       .limit(1)
       .maybeSingle();
+    if (latestError) throw latestError;
 
     if (latestRadio?.ultima_actualizacion) {
       const lastScanTime = new Date(latestRadio.ultima_actualizacion).getTime();
@@ -179,13 +183,16 @@ export async function GET({ request }) {
       }
     }
 
-    // Ventana de enfriamiento: no sustituye un bloqueo transaccional de toda la ejecución.
+    // Compare-and-set: solo una solicitud puede cambiar el timestamp observado.
     if (latestRadio?.id) {
-      const { error: cooldownError } = await supabase
+      let claim = supabase
         .from('radios')
         .update({ ultima_actualizacion: new Date().toISOString() })
         .eq('id', latestRadio.id);
+      claim = latestRadio.ultima_actualizacion ? claim.eq('ultima_actualizacion', latestRadio.ultima_actualizacion) : claim.is('ultima_actualizacion', null);
+      const { data: claimed, error: cooldownError } = await claim.select('id');
       if (cooldownError) throw cooldownError;
+      if (!claimed?.length) return jsonResponse({ success: false, error: 'Otra ejecución adquirió el escaneo', retryAfterSeconds: 90 }, 429);
     }
 
     console.log('Iniciando escaneo autorizado del Radio Monitor...');
@@ -345,6 +352,7 @@ export async function GET({ request }) {
       return counts;
     }, {});
     const failedWrites = summary.DATABASE_ERROR || 0;
+    console.log(JSON.stringify({ event: 'radio_scan_summary', startedAt, processed: radios?.length || 0, requests: reader.requestCount, summary }));
 
     return new Response(JSON.stringify({ 
       success: failedWrites === 0,

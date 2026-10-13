@@ -40,6 +40,10 @@ const noSong = createMetadataReader({ fetchImpl: async () => response({ songtitl
 const stationOnly = await noSong.get(radio('https://sonic.test.invalid/stream'));
 assert.equal(stationOnly.online, false);
 assert.equal(stationOnly.status, 'NO_SONG_METADATA');
+const stationId = createMetadataReader({ fetchImpl: async () => response({ icestats: { source: { artist: 'Radio Montecarlo', title: 'Una Radio Global!' } } }) });
+assert.equal((await stationId.get(radio('https://station.test.invalid/stream', 'Icecast', { nombre: 'Radio Montecarlo' }))).status, 'NO_SONG_METADATA');
+const legacy = createMetadataReader({ fetchImpl: async url => url.includes('/stats') ? new Response('', { status: 404 }) : response('<body>1,1,10,100,1,128,Banda Bruna - Agonía</body>') });
+assert.equal((await legacy.get(radio('https://station.test.invalid/;', 'Shoutcast'))).title, 'Agonía');
 const unsupported = createMetadataReader({ fetchImpl: async () => { throw new Error('No debería llamar'); } });
 assert.equal((await unsupported.get(radio('https://stream.zeno.fm/stream'))).status, 'UNSUPPORTED_SOURCE');
 

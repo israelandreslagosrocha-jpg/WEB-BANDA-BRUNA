@@ -2,14 +2,18 @@ name: Sincronización Automática de Redes Sociales
 
 on:
   schedule:
-    # Una vez al día, fuera de los minutos de mayor congestión de Actions.
-    # 12:17 UTC equivale a 09:17 en Chile durante el horario de verano
-    # (08:17 cuando Chile está en UTC-4).
-    - cron: '17 12 * * *'
-  workflow_dispatch: # Permite ejecución manual desde GitHub Actions
+    # Una sola consulta diaria; Vercel ya no tiene cron social.
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Solo extraer y validar; no guardar datos'
+        type: boolean
+        default: true
+        required: true
 
-# El workflow solo llama una API protegida: no requiere permisos del repositorio.
-permissions: {}
+permissions:
+  contents: read
 
 concurrency:
   group: social-sync
@@ -17,74 +21,15 @@ concurrency:
 
 jobs:
   sync:
-    name: Sincronizar Métricas y Redes
+    name: Extraer y guardar métricas públicas
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     steps:
-      - name: Llamar Endpoint de Sincronización
+      - name: Leer el código del recolector
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - name: Consultar redes desde el runner y enviar resultados
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: |
-          set -euo pipefail
-
-          if [ -z "$CRON_SECRET" ]; then
-            echo "Falta CRON_SECRET en los secretos del repositorio de GitHub Actions." >&2
-            exit 1
-          fi
-
-          response_file="$(mktemp)"
-          trap 'rm -f "$response_file"' EXIT
-
-          set +e
-          http_code="$(curl \
-            --silent \
-            --show-error \
-            --connect-timeout 10 \
-            --max-time 90 \
-            --retry 2 \
-            --retry-connrefused \
-            --output "$response_file" \
-            --write-out '%{http_code}' \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            'https://www.bandabruna.cl/api/cron/sync-social')"
-          curl_exit=$?
-          set -e
-
-          if [ "$curl_exit" -ne 0 ]; then
-            echo "No se pudo conectar con el endpoint de redes (curl exit $curl_exit)." >&2
-            exit "$curl_exit"
-          fi
-
-          echo "HTTP Status: $http_code"
-          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
-            echo "El endpoint de redes rechazó la solicitud. Respuesta:" >&2
-            tr '\n' ' ' < "$response_file" | cut -c1-1000 >&2
-            echo >&2
-            exit 1
-          fi
-
-          node -e '
-            const fs = require("fs");
-            let result;
-            try {
-              result = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
-            } catch (error) {
-              console.error("La respuesta de redes no fue JSON válido.");
-              process.exit(1);
-            }
-
-            if (result.success !== true) {
-              console.error("El endpoint informó una sincronización no exitosa.");
-              process.exit(1);
-            }
-
-            const warnings = Array.isArray(result.warnings) ? result.warnings : [];
-            const platforms = Object.entries(result.platforms || {})
-              .map(([platform, detail]) => `${platform}:${detail.status}`)
-              .join(", ");
-            console.log(`Sincronización completada. Plataformas: ${platforms || "sin detalle"}.`);
-
-            if (result.partial || warnings.length > 0) {
-              console.log(`::warning::Sincronización parcial: ${warnings.join(" | ").slice(0, 900) || "una o más fuentes públicas no entregaron datos nuevos"}`);
-            }
-          ' "$response_file"
+        run: node scripts/run_social_sync.mjs ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '--dry-run' || '' }}

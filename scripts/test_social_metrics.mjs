@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { collectPublicMetrics, parseFollowers, parseVideoMetrics, validateSnapshot } from '../src/modules/social-sync/publicMetrics.js';
+assert.equal(parseFollowers('instagram', '<meta content="3,620 seguidores - Banda Bruna" property="og:description">'), 3620);
+assert.equal(parseFollowers('facebook', '<meta property="og:description" content="5,1 mil seguidores">'), 5100);
+assert.equal(parseFollowers('tiktok', '<strong data-e2e="followers-count">1.2K</strong>'), 1200);
+assert.equal(parseFollowers('instagram', '<html>"userInteractionCount":"7000"</html>'), null, 'No confundir otras interacciones con seguidores');
+assert.deepEqual(parseVideoMetrics('"videoId":"mZhYl60ENAs","viewCount":"26961","likeCount":"245"', 'mZhYl60ENAs'), { views: 26961, likes: 245 });
+assert.deepEqual(parseVideoMetrics('<html>Consent</html>', 'mZhYl60ENAs'), { views: null, likes: null });
+let calls = [];
+const snapshot = await collectPublicMetrics(['mZhYl60ENAs', 'mZhYl60ENAs'], async url => {
+  calls.push(url);
+  if (url.includes('instagram')) return new Response('Bloqueado', { status: 429 });
+  if (url.includes('/feeds/')) return new Response('No disponible', { status: 404 });
+  if (url.includes('/watch')) return new Response('"videoId":"mZhYl60ENAs","viewCount":"26961","likeCount":"245"');
+  return new Response('<meta name="description" content="1.2K followers">');
+});
+assert.equal(calls.filter(url => url.includes('/watch')).length, 1);
+assert.equal(snapshot.followers.instagram.value, null);
+assert.equal(snapshot.followers.instagram.httpStatus, 429);
+assert.equal(snapshot.rss.httpStatus, 404);
+assert.ok(validateSnapshot(snapshot));
+assert.equal(validateSnapshot({ ...snapshot, createdAt: '2000-01-01' }), false);
+assert.equal(validateSnapshot({ ...snapshot, videos: { invalid: { views: -1 } } }), false);
+console.log('OK: cifras abreviadas, metadata reordenada, fallos HTTP visibles, extracción deduplicada y contrato seguro.');

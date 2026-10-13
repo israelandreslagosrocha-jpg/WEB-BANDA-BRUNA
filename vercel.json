@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/sync-social",
-      "schedule": "0 12 * * *"
+      "path": "/api/radio/scan",
+      "schedule": "7,37 * * * *"
     }
   ],
   "headers": [
