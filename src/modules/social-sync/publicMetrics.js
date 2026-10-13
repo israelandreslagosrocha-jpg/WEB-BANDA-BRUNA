@@ -2,7 +2,7 @@ import { parseCount } from './types.js';
 
 export const PROFILE_URLS = Object.freeze({
   youtube: 'https://www.youtube.com/@bandabrunaoficial',
-  instagram: 'https://www.instagram.com/banda_bruna/',
+  instagram: 'https://www.instagram.com/banda_bruna/embed/',
   tiktok: 'https://www.tiktok.com/@bandabrunaoficial',
   facebook: 'https://www.facebook.com/bandabruna'
 });
@@ -16,13 +16,16 @@ function descriptions(html) {
 }
 
 export function parseFollowers(platform, html) {
+  // La representación pública incrustada serializa sus datos dentro de JSON.
+  // Normalizar únicamente las comillas escapadas, sin ejecutar el contenido.
+  if (platform === 'instagram') html = html.replace(/\\+"/g, '"');
   const description = descriptions(html);
   const label = platform === 'youtube' ? '(?:suscriptores|subscribers)' : '(?:seguidores|followers|personas siguen)';
   const described = description.match(new RegExp(`([0-9.,]+(?:\\s*(?:K|M|mil|millones))?)\\s*${label}`, 'i'));
   if (described) return parseCount(described[1]);
   const patterns = {
     youtube: [/"@type":"InteractionCounter","interactionType":\{"@type":"FollowAction"\},"userInteractionCount":"(\d+)"/, /"subscriberCountText":\{.*?"(?:simpleText|label)":"([^"]+)"/i, /"content":"([^"\n]*(?:suscriptores|subscribers))"/i],
-    instagram: [/"edge_followed_by":\s*\{\s*"count":\s*(\d+)/],
+    instagram: [/"followers_count":\s*(\d+)/, /"edge_followed_by":\s*\{\s*"count":\s*(\d+)/],
     tiktok: [/"followerCount":\s*(\d+)/, /data-e2e=["']followers-count["'][^>]*>([^<]+)</i],
     facebook: [/"follower_count":\s*(\d+)/, /"text":"([0-9.,]+(?:\s*(?:K|M|mil))?\s+(?:seguidores|followers))"/i]
   };

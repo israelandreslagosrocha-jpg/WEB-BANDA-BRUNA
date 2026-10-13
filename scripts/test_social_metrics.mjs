@@ -6,6 +6,7 @@ assert.equal(parseFollowers('instagram', '<meta content="3,620 seguidores - Band
 assert.equal(parseFollowers('facebook', '<meta property="og:description" content="5,1 mil seguidores">'), 5100);
 assert.equal(parseFollowers('tiktok', '<strong data-e2e="followers-count">1.2K</strong>'), 1200);
 assert.equal(parseFollowers('instagram', '<html>"userInteractionCount":"7000"</html>'), null, 'No confundir otras interacciones con seguidores');
+assert.equal(parseFollowers('instagram', String.raw`{"profile":{\"followers_count\":3537,\"posts_count\":190}}`), 3537);
 assert.deepEqual(parseVideoMetrics('"videoId":"mZhYl60ENAs","viewCount":"26961","likeCount":"245"', 'mZhYl60ENAs'), { views: 26961, likes: 245 });
 assert.deepEqual(parseVideoMetrics('<html>Consent</html>', 'mZhYl60ENAs'), { views: null, likes: null });
 let calls = [];
