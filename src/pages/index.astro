@@ -7,7 +7,7 @@ import {
 } from '../services/socialApi.js';
 import socialStats from '../data/socialStats.json';
 import { supabase } from '../services/supabaseClient.js';
-import NowPlayingWidget from '../modules/radio-monitor/components/NowPlayingWidget.astro';
+import FeaturedAlbum from '../components/FeaturedAlbum.astro';
 import QuoteForm from '../components/forms/QuoteForm.astro';
 import EventSlider from '../components/events/EventSlider.astro';
 import UpcomingEventFlyerCarousel from '../components/events/UpcomingEventFlyerCarousel.astro';
@@ -334,7 +334,7 @@ const fallbackEditorialPosts = [
           class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#030d2a] via-[#10204d] to-[#4c0b0b] border border-red-500/60 hover:border-gold-bruna text-white text-xs font-bold tracking-wider uppercase shadow-[0_0_20px_rgba(220,38,38,0.35)] transition-all hover:scale-105 active:scale-95 group backdrop-blur-md"
         >
           <span class="text-sm">🇨🇱</span>
-          <span class="bg-red-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono shadow-sm">ESTRENO</span>
+          <span class="bg-red-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono shadow-sm">NUEVO ÁLBUM</span>
           <span class="text-slate-100 group-hover:text-gold-bruna transition-colors font-title">Sesión Fiestas Patrias</span>
           <span class="text-gold-bruna group-hover:translate-x-0.5 transition-transform font-bold">➔</span>
         </a>
@@ -557,24 +557,8 @@ const fallbackEditorialPosts = [
       <!-- Columna 2: Flyers de eventos futuros o imagen de respaldo -->
       <UpcomingEventFlyerCarousel events={upcomingEvents} />
 
-      <!-- Columna 3: Detección de Radios (Radio Monitor en Vivo) -->
-      <div class="bg-[#0b132b]/80 border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col justify-between text-left">
-        <div>
-          <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <h2 class="font-title font-extrabold text-base sm:text-lg text-white uppercase tracking-wider">
-                DETECCIÓN DE RADIOS
-              </h2>
-            </div>
-            <span class="text-[9px] text-slate-400 font-mono uppercase tracking-wider">CHILE AIRPLAY</span>
-          </div>
-          <p class="text-xs text-slate-300 font-light mb-4 leading-relaxed">
-            Monitoreo en vivo de emisoras de radio que transmiten canciones de Banda Bruna en directo:
-          </p>
-          <NowPlayingWidget />
-        </div>
-      </div>
+      <!-- El álbum ocupa el espacio del monitor radial retirado. -->
+      <FeaturedAlbum compact />
 
     </div>
   </section>
@@ -1065,16 +1049,20 @@ const fallbackEditorialPosts = [
           </div>
         </div>
 
-        <!-- Lado B (5 cols): Sencillo Oficial + Plataformas Streaming + Descargas Técnicas -->
+        <!-- Lado B: álbum más reciente, videoclip conservado y recursos técnicos -->
         <div class="lg:col-span-5 flex flex-col justify-between gap-6">
+          <div>
+            <h3 class="font-title font-extrabold text-xs text-gold-bruna uppercase tracking-wider mb-3">Último lanzamiento oficial</h3>
+            <FeaturedAlbum compact />
+          </div>
           
-          <!-- Panel 1: Sencillo Oficial Destacado / Último Lanzamiento -->
+          <!-- El videoclip anterior permanece accesible, debajo del nuevo álbum. -->
           <div class="bg-[#0b132b]/90 border border-white/10 rounded-2xl p-5 shadow-xl text-left flex flex-col justify-between">
             <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
               <div class="flex items-center gap-2">
                 <span class="text-red-500 text-sm animate-pulse">▶</span>
                 <h3 class="font-title font-extrabold text-xs text-white uppercase tracking-wider">
-                  ÚLTIMO LANZAMIENTO OFICIAL
+                  SINGLE & VIDEOCLIP OFICIAL
                 </h3>
               </div>
               <span class="text-[9px] bg-red-950/60 border border-red-500/30 text-red-300 font-extrabold px-2 py-0.5 rounded uppercase tracking-wider font-mono">
@@ -1108,7 +1096,7 @@ const fallbackEditorialPosts = [
                 class="w-full sm:w-auto bg-gradient-to-r from-gold-bruna to-gold-bruna-hover hover:from-amber-400 hover:to-amber-500 text-black px-5 py-2.5 rounded-lg text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-md shadow-gold-bruna/20 cursor-pointer"
               >
                 <span>🎬</span>
-                <span>Ir a ver último single</span>
+                <span>Ver single y videoclip</span>
                 <span>→</span>
               </a>
               <a 

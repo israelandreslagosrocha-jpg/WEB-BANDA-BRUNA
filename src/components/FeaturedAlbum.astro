@@ -1,0 +1,19 @@
+---
+import { featuredAlbum as album } from '../data/featuredAlbum.js';
+const { compact = false } = Astro.props;
+---
+<section aria-label="Nuevo álbum de Banda Bruna" class:list={['rounded-2xl border border-gold-bruna/30 bg-gradient-to-br from-[#172242] to-[#080e20] p-6 shadow-xl', !compact && 'grid gap-6 md:grid-cols-2 items-center my-10']}>
+  <div>
+    <a href={album.link} class="block mb-5">
+      <img src={album.cover} alt={`Portada oficial de ${album.title} — Banda Bruna`} width="300" height="300" loading="lazy" class:list={['aspect-square object-contain rounded-xl w-full shadow-lg', !compact && 'max-w-[300px] mx-auto']} />
+    </a>
+    <span class="text-gold-bruna font-bold uppercase text-xs tracking-widest">Nuevo álbum · En vivo</span>
+    <h2 class="text-white font-title font-extrabold text-2xl mt-2">{album.title}</h2>
+    <p class="text-slate-300 text-sm leading-relaxed mt-3">La fiesta de Banda Bruna, ahora en un álbum. Disponible en todas las plataformas digitales.</p>
+    <div class="flex flex-wrap gap-3 mt-5">
+      <a href={album.spotifyUrl} target="_blank" rel="noopener noreferrer" class="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[#1DB954] text-black font-bold text-sm px-4 py-3">Escuchar álbum en Spotify ↗</a>
+      <a href={album.link} class="min-h-[44px] inline-flex items-center text-white text-sm underline underline-offset-4">Ver sesión y lanzamiento →</a>
+    </div>
+  </div>
+  {!compact && <iframe src={album.embedUrl} title={`Escuchar ${album.title} de Banda Bruna en Spotify`} width="100%" height="352" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" class="rounded-xl border-0 min-w-0"></iframe>}
+</section>

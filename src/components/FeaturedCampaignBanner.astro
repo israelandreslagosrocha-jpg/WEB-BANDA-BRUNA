@@ -1,5 +1,6 @@
 ---
 import { supabase } from '../services/supabaseClient.js';
+import { featuredAlbum } from '../data/featuredAlbum.js';
 
 let dbCampaign = null;
 
@@ -26,11 +27,11 @@ try {
 // Banner 1: Lanzamiento Especial Fiestas Patrias
 const patrioCampaign = {
   id: 'sesion-fiestas-patrias',
-  title: '¡ESTRENO: SESIÓN EN VIVO FIESTAS PATRIAS!',
-  subtitle: 'Siente toda la fiesta, la cumbia sureña y la energía dieciochera de Banda Bruna en vivo. ¡Mira el video oficial y celebra con nosotros!',
-  button_text: 'VER SESIÓN EN VIVO',
+  title: 'NUEVO ÁLBUM: SESIÓN FIESTAS PATRIAS',
+  subtitle: 'Banda Bruna en vivo, ahora disponible en todas las plataformas digitales. Escucha el álbum y revive la sesión completa.',
+  button_text: 'ESCUCHAR ÁLBUM Y VER SESIÓN',
   button_url: '/sesion-fiestas-patrias',
-  image_url: 'https://res.cloudinary.com/dhgifjpkh/image/upload/v1789574626/compressed_fiestas_patrias_BB_o5dkoj.webp',
+  image_url: featuredAlbum.cover,
   theme: 'patrio'
 };
 
@@ -149,7 +150,7 @@ const campaigns = [patrioCampaign, veranoCampaign];
                     <span>🇨🇱</span> ESPECIAL FIESTAS PATRIAS
                   </span>
                   <span class="text-gold-bruna text-[10px] font-extrabold tracking-widest uppercase font-title flex items-center gap-1">
-                    ★ NUEVA SESIÓN EN VIVO ★
+                    ★ NUEVO ÁLBUM EN PLATAFORMAS ★
                   </span>
                 </>
               ) : (

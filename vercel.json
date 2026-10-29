@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/radio/scan",
-      "schedule": "7,37 * * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

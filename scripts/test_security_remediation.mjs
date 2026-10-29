@@ -47,30 +47,17 @@ for (const match of source.matchAll(/<script\b[^>]*\bis:inline[^>]*>([\s\S]*?)<\
 }
 console.log('OK: scripts inline válidos como JavaScript.');
 
-for (const name of ['health', 'stats', 'radios']) {
+for (const name of ['health', 'stats', 'radios', 'now', 'history']) {
   const route = await loadRoute(`src/pages/api/radio/${name}.ts`);
   const before = calls.length;
   const response = await route.GET(context(`/api/radio/${name}`));
-  assert.equal(response.status, 401);
-  assert.equal(calls.length, before, 'Sin token no se consulta la base');
+  assert.equal(response.status, 410);
+  assert.equal((await response.json()).retired, true);
+  const authorized = await route.GET(context(`/api/radio/${name}`, null, { authorization: 'Bearer test-admin' }));
+  assert.equal(authorized.status, 410);
+  assert.equal(calls.length, before, 'El monitor retirado no consulta la base, ni siquiera con token');
 }
-console.log('OK: APIs administrativas devuelven 401 sin token.');
-
-const nowRoute = await loadRoute('src/pages/api/radio/now.ts');
-const live = await nowRoute.GET(context('/api/radio/now'));
-assert.equal(live.status, 200);
-assert.equal((await live.json()).nowPlaying[0].title, 'Agonía');
-const historyRoute = await loadRoute('src/pages/api/radio/history.ts');
-const history = await historyRoute.GET(context('/api/radio/history?limit=25'));
-assert.equal(history.status, 200);
-assert.equal((await history.json()).history[0].metadata_raw, undefined);
-console.log('OK: radio pública devuelve detecciones e historial con cliente de servidor.');
-
-const radiosRoute = await loadRoute('src/pages/api/radio/radios.ts');
-const radios = await radiosRoute.GET(context('/api/radio/radios', null, { authorization: 'Bearer test-admin' }));
-assert.equal(radios.status, 200);
-assert.match(radios.headers.get('cache-control'), /private/);
-console.log('OK: catálogo funciona para administrador sin caché pública.');
+console.log('OK: APIs retiradas devuelven 410 y no acceden a la base.');
 
 const quoteRoute = await loadRoute('src/pages/api/quote.js');
 assert.equal((await quoteRoute.POST(context('/api/quote', {}))).status, 400);

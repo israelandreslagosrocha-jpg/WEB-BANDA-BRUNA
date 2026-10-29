@@ -1,36 +1,7 @@
-import type { APIRoute } from 'astro';
-import { dbService } from '../../../modules/radio-monitor/services/dbService';
-import { authenticateAdminRequest, jsonResponse } from '../../../services/serverAuth.js';
-
+// Monitor radial retirado por decisión del propietario; no consulta ni modifica datos.
 export const prerender = false;
-
-export const GET: APIRoute = async ({ request }) => {
-  const admin = await authenticateAdminRequest(request);
-  if (!admin.authorized) {
-    return jsonResponse({ success: false, error: 'No autorizado' }, 401);
-  }
-
-  try {
-    const health = await dbService.getSystemHealth();
-
-    return new Response(JSON.stringify({
-      success: true,
-      timestamp: new Date().toISOString(),
-      health
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate' // Sin caché para reporte en tiempo real
-      }
-    });
-  } catch (error: any) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: error.message || 'Error interno al consultar salud del motor'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-};
+export function GET() {
+  return new Response(JSON.stringify({ success: false, retired: true, error: 'El seguimiento de radios fue retirado' }), {
+    status: 410, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+  });
+}

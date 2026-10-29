@@ -1,11 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FeaturedAlbum from '../components/FeaturedAlbum.astro';
+import { featuredAlbum } from '../data/featuredAlbum.js';
 import { getSpotifyAlbum } from '../services/socialApi.js';
 
 const spotifyData = getSpotifyAlbum();
 
 // Lanzamientos oficiales con sus portadas cuadradas originales
 const discographyReleases = [
+  featuredAlbum,
   {
     title: "Ahogado en un Bar",
     year: "2026",
@@ -74,6 +77,7 @@ const discographyReleases = [
       <div class="w-12 h-0.5 bg-gold-bruna mx-auto mt-4"></div>
     </div>
 
+    <FeaturedAlbum />
     <!-- 1. Reproductor de Spotify (Izquierda) + Temas Más Escuchados y Plataformas (Derecha) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
       
@@ -223,6 +227,11 @@ const discographyReleases = [
               <div class="absolute top-3 right-3 bg-black/80 backdrop-blur-md border border-white/10 text-gold-bruna text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-md shadow-md">
                 {release.year}
               </div>
+              {release.link === featuredAlbum.link && (
+                <span class="absolute bottom-3 left-3 z-10 rounded-md bg-gold-bruna text-black px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider shadow-lg">
+                  Nuevo lanzamiento
+                </span>
+              )}
               <!-- Overlay con botón play al pasar el mouse -->
               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <div class="w-12 h-12 rounded-full bg-gold-bruna text-black flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform pl-0.5">
