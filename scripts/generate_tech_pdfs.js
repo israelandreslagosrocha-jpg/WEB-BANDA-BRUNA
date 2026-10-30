@@ -1,3 +1,4 @@
+import { riderChannels, riderMonitors } from '../src/data/technicalRider.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -109,7 +110,7 @@ function drawFooter(doc, pageNum, totalPages = 1) {
 }
 
 // =====================================================================
-// 1. GENERAR: INPUT LIST PDF (SOUNDCRAFT Ui24R & 8 AUXILIARES)
+// 1. GENERAR: INPUT LIST PDF (ALLEN & HEATH Qu-7D & 9 SALIDAS)
 // =====================================================================
 function generateInputListPDF(canales, layoutName, logoPath) {
   const pdfPath = path.join(downloadsDir, 'input_list_banda_bruna.pdf');
@@ -119,14 +120,14 @@ function generateInputListPDF(canales, layoutName, logoPath) {
   // ----------------------------------------------------
   // PÁGINA 1: PATCH DE CANALES AUDIO (FOH / SALA)
   // ----------------------------------------------------
-  drawHeader(doc, 'Input List & Patch de Canales', 'Soundcraft Ui24R • Ficha Oficial', logoPath);
+  drawHeader(doc, 'Input List & Patch de Canales', 'Allen & Heath Qu-7D • Ficha Oficial', logoPath);
 
   // 1. Aviso de Consola Propia y Flexibilidad
   const noticeY = 114;
   doc.rect(40, noticeY, 515, 30).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.5).text('CONSOLA DIGITAL PROPIA EN GIRA: SOUNDCRAFT Ui24R', 48, noticeY + 5);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.5).text('CONSOLA DIGITAL PROPIA EN GIRA: ALLEN & HEATH Qu-7D', 48, noticeY + 5);
   doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8).text(
-    'Banda Bruna viaja con su propia consola Soundcraft Ui24R (escenas y monitores preconfigurados para Line Check ágil de 10-15 min).\nSe solicita contar con la microfonía indicada o modelos de características similares o superior, según disponibilidad de la producción.',
+    'Banda Bruna viaja con su propia consola Allen & Heath Qu-7D (32 entradas Mic/Line, núcleo XCVI 96 kHz y Dante 16x16).\nSe solicita contar con la microfonía indicada o modelos de características similares o superior, según disponibilidad de la producción.',
     48, noticeY + 15, { lineGap: 1.5 }
   );
 
@@ -152,29 +153,29 @@ function generateInputListPDF(canales, layoutName, logoPath) {
     if (idx % 2 === 1) {
       doc.rect(40, currentY, 515, rowHeight).fill(COLOR_LIGHT_BG);
     }
-    
+
     doc.fillColor(COLOR_TEXT);
     let drawX = 40;
-    
+
     // Canal
     doc.font('Helvetica-Bold');
     doc.text(c.canal.toString(), drawX + 6, currentY + 3.5, { width: colWidths[0] - 12, align: 'center' });
     drawX += colWidths[0];
-    
+
     // Instrumento
     doc.font('Helvetica-Bold');
     doc.text(c.instrumento, drawX + 6, currentY + 3.5, { width: colWidths[1] - 12 });
     drawX += colWidths[1];
-    
+
     // Conexión
     doc.font('Helvetica');
     doc.text(c.conexion, drawX + 6, currentY + 3.5, { width: colWidths[2] - 12 });
     drawX += colWidths[2];
-    
+
     // Categoría
     doc.fillColor(COLOR_MUTED);
     doc.text(c.categoria, drawX + 6, currentY + 3.5, { width: colWidths[3] - 12 });
-    
+
     doc.rect(40, currentY + rowHeight, 515, 0.5).fill(COLOR_BORDER);
     currentY += rowHeight;
   });
@@ -184,8 +185,8 @@ function generateInputListPDF(canales, layoutName, logoPath) {
   doc.rect(40, notesY, 515, 38).fill(COLOR_GOLD_LIGHT).stroke(COLOR_GOLD);
   doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.2).text('NOTAS TÉCNICAS PARA FOH & PATCHERA:', 48, notesY + 5);
   doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8);
-  doc.text('• Clamps LP: Canales 3, 4, 5, 11 y 12 utilizan montajes Clamp Claw LP (ahorra atriles en tarimas).', 48, notesY + 15);
-  doc.text('• Líneas RCA & Phantom: Ch 21/22 corresponden a entradas RCA físicas. Phantom (+48V) requerido en Ch 5, 6, 14 y 19.', 48, notesY + 25);
+  doc.text('• Clamps LP: Canales 3, 4, 9 y 10 utilizan montajes Clamp Claw LP (ahorra atriles en tarimas).', 48, notesY + 15);
+  doc.text('• Phantom según modelo/conexión (Ch 1, 5, 6, 12 y 23). Playback y ACC: conexión por coordinar.', 48, notesY + 25);
 
   // 4. Pie de página web & redes
   const footerCardY = notesY + 44;
@@ -197,31 +198,31 @@ function generateInputListPDF(canales, layoutName, logoPath) {
   drawFooter(doc, 1, 2);
 
   // ----------------------------------------------------
-  // PÁGINA 2: LISTA DE MONITORES (8 ENVIOS AUXILIARES)
+  // PÁGINA 2: LISTA DE MONITORES (9 ENVIOS AUXILIARES)
   // ----------------------------------------------------
   doc.addPage({ size: 'A4', margin: 40 });
 
-  drawHeader(doc, 'Lista de Monitores & Retornos', '8 Salidas Auxiliares Soundcraft Ui24R', logoPath);
+  drawHeader(doc, 'Lista de Monitores & Retornos', '9 Salidas Auxiliares Allen & Heath Qu-7D', logoPath);
 
   // Subcabecera
   const subY = 114;
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('SISTEMA DE MONITOREO OFICIAL (8 MEZCLAS INDEPENDIENTES):', 40, subY);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8.5).text('SISTEMA DE MONITOREO OFICIAL (9 MEZCLAS INDEPENDIENTES):', 40, subY);
   doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(7.5).text(
-    'Configuración exacta de las 8 salidas auxiliares físicas de la consola Soundcraft Ui24R de Banda Bruna.', 
+    'Configuración exacta de las 9 salidas auxiliares físicas de la consola Allen & Heath Qu-7D de Banda Bruna.',
     40, subY + 11
   );
 
   // Resumen de Infraestructura
   const infraY = 138;
-  doc.rect(40, infraY, 515, 32).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
+  doc.rect(40, infraY, 515, 40).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
   doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.8).text('RESUMEN DE SALIDAS DE MONITOREO:', 48, infraY + 5);
   doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(7).text(
-    '• 3x Envíos In-Ear Cableados (XLR macho en escenario para Piano, Batería y Congas).\n• 3x Envíos In-Ear Inalámbricos UHF (Bodypacks para Vocal, Bajo y Guitarra/Güira) provistos por Banda Bruna.\n• 2x Monitores Wedge Activos de Piso (12" o 15") provistos por la productora (Piso Batería y Piso Bajo).',
+    '• Salidas 1-7: Batería, Congas, Huiro, Bajo, Guitarra, Teclados y César.\n• Sistema de retorno cableado o inalámbrico por coordinar con dirección técnica.\n• Salidas 8-9: monitores de piso para Batería y Bajo.',
     48, infraY + 15, { lineGap: 1.5 }
   );
 
-  // Tabla Monitoreo (8 Auxiliares Exactos)
-  let currentYM = 176;
+  // Tabla Monitoreo (9 salidas Exactos)
+  let currentYM = 186;
   const colWidthsMix = [45, 110, 80, 110, 170];
   const colTitlesMix = ['Aux #', 'Destino / Músico', 'Tipo Salida', 'Sistema Retorno', 'Detalle de Mezcla'];
 
@@ -236,19 +237,10 @@ function generateInputListPDF(canales, layoutName, logoPath) {
   currentYM += 16;
   doc.font('Helvetica').fontSize(7.2);
 
-  const monitorMixes = [
-    { mix: 'Aux 1', member: 'PIANO (Israel Lagos)', out: 'XLR', type: 'In-Ear Cableado (XLR)', spec: 'Pianos, teclados L/R, secuencias estéreo, click y referencia.' },
-    { mix: 'Aux 2', member: 'BATERIA (Jaime C. Q.)', out: 'XLR', type: 'In-Ear Cableado (XLR)', spec: 'Batería, click, guía, bajo y retorno de voces.' },
-    { mix: 'Aux 3', member: 'CONGA (Jaime C. S.)', out: 'XLR', type: 'In-Ear Cableado (XLR)', spec: 'Percusión latina, timbal, base rítmica y coros.' },
-    { mix: 'Aux 4', member: 'GUITAR - GÜIRA', out: 'BODYPACK', type: 'In-Ear Inalámbrico UHF', spec: 'Vicente N. & Fabián G.: Balance guitarra, animación, coros y secuencias.' },
-    { mix: 'Aux 5', member: 'BASS (Gerson Ulloa)', out: 'BODYPACK', type: 'In-Ear Inalámbrico UHF', spec: 'Bajo al frente, bombo, timbales, armonía y click.' },
-    { mix: 'Aux 6', member: 'VOCAL (César Bruna)', out: 'BODYPACK', type: 'In-Ear Inalámbrico UHF', spec: 'Voz principal al frente, reverb, teclados y secuencias.' },
-    { mix: 'Aux 7', member: 'PISO BATERIA', out: 'XLR', type: 'Monitor Wedge (Piso)', spec: '1 Monitor Activo 12" o 15" para presión acústica y rítmica en tarima.' },
-    { mix: 'Aux 8', member: 'PISO BASS', out: 'XLR', type: 'Monitor Wedge (Piso)', spec: '1 Monitor Activo 12" o 15" para referencia frontal de graves y armonía.' }
-  ];
+  const monitorMixes = riderMonitors.map(m => ({mix:m.mezcla, member:m.destino, out:m.salida, type:m.tipo, spec:m.destino.startsWith('PISO') ? 'Monitor activo 12 o 15 pulgadas' : 'Sistema de retorno por coordinar'}));
 
   monitorMixes.forEach((m, idx) => {
-    const rowH = 19;
+    const rowH = 40;
     if (idx % 2 === 1) {
       doc.rect(40, currentYM, 515, rowH).fill(COLOR_LIGHT_BG);
     }
@@ -278,10 +270,10 @@ function generateInputListPDF(canales, layoutName, logoPath) {
   doc.rect(40, monReqY, 515, 68).fill(COLOR_LIGHT_BG).stroke(COLOR_BORDER);
   doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(7.5).text('DIRECTRICES DE CONEXIÓN EN ESCENARIO:', 48, monReqY + 6);
   doc.fillColor(COLOR_TEXT).font('Helvetica').fontSize(6.8);
-  doc.text('1. Envíos Cableados (Aux 1, 2, 3, 7, 8): Requieren líneas balanceadas XLR macho rotuladas en escenario.', 48, monReqY + 18);
-  doc.text('2. Talkback (Canal 20): Asignado para intercomunicación interna entre músicos y el equipo técnico.', 48, monReqY + 28);
-  doc.text('3. Monitores Wedge (Aux 7 y 8): Deben ser activos de 12" o 15", verificados en fase y ecualizados para evitar acoples.', 48, monReqY + 38);
-  doc.text('4. Transmisores Bodypack (Aux 4, 5, 6): Operan en banda UHF; se solicita coordinar frecuencias libres con producción.', 48, monReqY + 48);
+  doc.text('1. Salidas 1-7: coordinar sistema individual y patch físico de consola con dirección técnica.', 48, monReqY + 18);
+  doc.text('2. Talkbacks 24/25, click 28 y guía 29: uso interno, excluir del sistema de PA.', 48, monReqY + 28);
+  doc.text('3. Monitores Wedge (Aux 8 y 9): Deben ser activos de 12" o 15", verificados en fase y ecualizados para evitar acoples.', 48, monReqY + 38);
+  doc.text('4. Coordinar frecuencias de los sistemas inalámbricos y enlace con sala antes del evento.', 48, monReqY + 48);
 
   // Tarjeta de contacto
   const contactCardY = monReqY + 76;
@@ -527,7 +519,7 @@ function generateStagePlotPDF(stageObjects, members, layoutName, logoPath) {
 
   doc.fillColor(COLOR_PRIMARY).fontSize(8).font('Helvetica-Bold').text('ENERGÍA & MONITOREO:', 305, colY + 6);
   doc.font('Helvetica').fontSize(7).fillColor(COLOR_TEXT)
-     .text('• Corriente: 4 Puntos 220V estabilizada (Tarimas y Frontal)\n• Monitoreo: 5 IEMs Inalámbricos UHF + 2 Wedges de Piso Activos', 305, colY + 17, { lineGap: 1.5 });
+     .text('• Corriente: 4 Puntos 220V estabilizada (Tarimas y Frontal)\n• Monitoreo: 7 retornos individuales + 2 Wedges de Piso Activos', 305, colY + 17, { lineGap: 1.5 });
 
   // Título de la Ilustración
   const imgY = 158;
@@ -559,17 +551,17 @@ function generateStagePlotPDF(stageObjects, members, layoutName, logoPath) {
   doc.font('Helvetica').fontSize(6.8);
 
   const stageList = [
-    { pos: 'Atrás Izq.', name: 'Jaime C. Sanhueza', inst: 'Congas & Bongós', aux: 'Aux 3 XLR', req: 'Tarima 2x2m c/alfombra' },
-    { pos: 'Atrás Centro', name: 'Jaime C. Quilodrán', inst: 'Batería, Timbal & Octapad', aux: 'Aux 2 XLR + Aux 7 Wedge', req: 'Tarima 2x2m + 220V + Mixer' },
-    { pos: 'Atrás Der.', name: 'Israel Lagos Rocha', inst: 'Pianos & Teclados', aux: 'Aux 1 XLR', req: '220V + 2 Cajas Directas (D.I.)' },
-    { pos: 'Frente Izq.', name: 'Gerson Ulloa', inst: 'Bajo Eléctrico', aux: 'Aux 5 Bodypack + Aux 8 Wedge', req: '220V + Amplificador' },
-    { pos: 'Frente C-Izq.', name: 'Fabián Garrido', inst: 'Güiro & Animación', aux: 'Aux 4 Bodypack', req: 'Inalámbrico (Mic & In-Ear)' },
-    { pos: 'Frente Centro', name: 'César Bruna', inst: 'Voz Principal', aux: 'Aux 6 Bodypack', req: 'Inalámbrico (Beta 87A)' },
-    { pos: 'Frente Der.', name: 'Vicente Núñez', inst: 'Guitarra Eléctrica & Dir.', aux: 'Aux 4 Bodypack', req: '220V + Amplificador + Pedales' }
+    { pos: 'Atrás Izq.', name: 'Jaime C. Sanhueza', inst: 'Congas & Bongós', aux: 'Aux 2', req: 'Tarima 2x2m c/alfombra' },
+    { pos: 'Atrás Centro', name: 'Jaime C. Quilodrán', inst: 'Batería, Timbal & Octapad', aux: 'Aux 1 + Aux 8 Wedge', req: 'Tarima 2x2m + 220V + Mixer' },
+    { pos: 'Atrás Der.', name: 'Israel Lagos Rocha', inst: 'Pianos & Teclados', aux: 'Aux 6', req: '220V + 2 Cajas Directas (D.I.)' },
+    { pos: 'Frente Izq.', name: 'Gerson Ulloa', inst: 'Bajo Eléctrico', aux: 'Aux 4 + Aux 9 Wedge', req: '220V + Amplificador' },
+    { pos: 'Frente C-Izq.', name: 'Fabián Garrido', inst: 'Güiro & Animación', aux: 'Aux 3', req: 'Retorno por coordinar' },
+    { pos: 'Frente Centro', name: 'César Bruna', inst: 'Voz Principal', aux: 'Aux 7', req: 'Inalámbrico (Beta 87A)' },
+    { pos: 'Frente Der.', name: 'Vicente Núñez', inst: 'Guitarra Eléctrica & Dir.', aux: 'Aux 5', req: '220V + Amplificador + Pedales' }
   ];
 
   stageList.forEach((s, idx) => {
-    const rh = 13.5;
+    const rh = 22;
     if (idx % 2 === 1) {
       doc.rect(40, currentY1, 515, rh).fill(COLOR_LIGHT_BG);
     }
@@ -626,9 +618,9 @@ function generateStagePlotPDF(stageObjects, members, layoutName, logoPath) {
     doc.rect(40, imgY2 + 11, 515, 289).stroke(COLOR_BORDER);
   }
 
-  // Tabla Completa de Monitores de Retorno (8 Auxiliares)
+  // Tabla Completa de Monitores de Retorno (9 salidas)
   let currentY2 = imgY2 + 306;
-  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8).text('DISTRIBUCIÓN OFICIAL DE RETORNOS DE MONITOREO (8 AUXILIARES):', 40, currentY2);
+  doc.fillColor(COLOR_PRIMARY).font('Helvetica-Bold').fontSize(8).text('DISTRIBUCIÓN OFICIAL DE RETORNOS DE MONITOREO (9 SALIDAS):', 40, currentY2);
   currentY2 += 11;
 
   const colWidthsMix2 = [50, 120, 140, 205];
@@ -645,19 +637,10 @@ function generateStagePlotPDF(stageObjects, members, layoutName, logoPath) {
   currentY2 += 15;
   doc.font('Helvetica').fontSize(7);
 
-  const mixes2 = [
-    { mix: 'Aux 1', member: 'PIANO (Israel Lagos)', type: 'XLR (In-Ear Cableado)', spec: 'Retorno estéreo teclado, secuencias y click' },
-    { mix: 'Aux 2', member: 'BATERIA (Jaime C. Q.)', type: 'XLR (In-Ear Cableado)', spec: 'Retorno batería, bajo, click y voces' },
-    { mix: 'Aux 3', member: 'CONGA (Jaime C. S.)', type: 'XLR (In-Ear Cableado)', spec: 'Percusión latina, timbal, base y voces' },
-    { mix: 'Aux 4', member: 'GUITAR - GÜIRA', type: 'BODYPACK (In-Ear UHF)', spec: 'Vicente N. & Fabián G.: guitarra y animación' },
-    { mix: 'Aux 5', member: 'BASS (Gerson Ulloa)', type: 'BODYPACK (In-Ear UHF)', spec: 'Bajo al frente, bombo y armonía' },
-    { mix: 'Aux 6', member: 'VOCAL (César Bruna)', type: 'BODYPACK (In-Ear UHF)', spec: 'Voz principal al frente y reverb' },
-    { mix: 'Aux 7', member: 'PISO BATERIA', type: 'XLR (Monitor Wedge)', spec: '1 Monitor Activo 12" o 15" en tarima' },
-    { mix: 'Aux 8', member: 'PISO BASS', type: 'XLR (Monitor Wedge)', spec: '1 Monitor Activo 12" o 15" en boca de escenario' }
-  ];
+  const mixes2 = riderMonitors.map(m => ({mix:m.mezcla, member:m.destino, type:m.tipo, spec:m.destino.startsWith('PISO') ? 'Monitor activo 12 o 15 pulgadas' : 'Sistema de retorno por coordinar'}));
 
   mixes2.forEach((m, idx) => {
-    const rh = 13.5;
+    const rh = 22;
     if (idx % 2 === 1) {
       doc.rect(40, currentY2, 515, rh).fill(COLOR_LIGHT_BG);
     }
@@ -702,15 +685,15 @@ function generateStagePlotPDF(stageObjects, members, layoutName, logoPath) {
 // FLUJO PRINCIPAL
 // =====================================================================
 async function main() {
-  let layoutId = '77777777-7777-7777-7777-777777777777'; 
+  let layoutId = '77777777-7777-7777-7777-777777777777';
   let layoutName = 'Show Oficial 2026';
   let supabase = null;
   let useFallback = true;
 
-  if (supabaseUrl && supabaseAnonKey) {
+  if (!process.argv.includes('--offline') && supabaseUrl && supabaseAnonKey) {
     try {
       supabase = createClient(supabaseUrl, supabaseAnonKey);
-      
+
       const { data: layouts, error: layoutError } = await supabase
         .from('stage_layouts')
         .select('*')
@@ -730,58 +713,7 @@ async function main() {
 
   // Cargar canales
   let canales = [];
-  const defaultCanales = [
-    { canal: 1, instrumento: 'KICK', conexion: 'SHURE BETA 91', categoria: 'Batería' },
-    { canal: 2, instrumento: 'SNARE', conexion: 'SENNHEISER E609', categoria: 'Batería' },
-    { canal: 3, instrumento: 'TIMBAL HI', conexion: 'SHURE SM57 - CLAMP CLAW LP', categoria: 'Batería' },
-    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE SM57 - CLAMP CLAW LP', categoria: 'Batería' },
-    { canal: 5, instrumento: 'OH ACCESORIOS', conexion: 'AKG C1000S - CLAMP CLAW LP', categoria: 'Batería' },
-    { canal: 6, instrumento: 'OH HI-HAT', conexion: 'AKG C1000S', categoria: 'Batería' },
-    { canal: 7, instrumento: 'BASS', conexion: 'XLR DIRECTO', categoria: 'Cuerdas / Armonía' },
-    { canal: 8, instrumento: 'GUITAR', conexion: 'SHURE SM57', categoria: 'Cuerdas / Armonía' },
-    { canal: 9, instrumento: 'TECLADO L', conexion: 'CAJA DIRECTA', categoria: 'Cuerdas / Armonía' },
-    { canal: 10, instrumento: 'TECLADO R', conexion: 'CAJA DIRECTA', categoria: 'Cuerdas / Armonía' },
-    { canal: 11, instrumento: 'CONGA HI', conexion: 'SENNHEISER E604 - CLAMP CLAW LP', categoria: 'Percusión' },
-    { canal: 12, instrumento: 'CONGA LOW', conexion: 'SENNHEISER E604 - CLAMP CLAW LP', categoria: 'Percusión' },
-    { canal: 13, instrumento: 'BONGO', conexion: 'SHURE SM57', categoria: 'Percusión' },
-    { canal: 14, instrumento: 'CHIMES', conexion: 'AKG C1000S', categoria: 'Percusión' },
-    { canal: 15, instrumento: 'VOZ DRUM', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 16, instrumento: 'VOZ GUITAR', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 17, instrumento: 'VOZ BASS', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 18, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 19, instrumento: 'VOZ PRINCIPAL', conexion: 'SHURE BETA 87A', categoria: 'Voces' },
-    { canal: 20, instrumento: 'TALKBACK BATERIA - GUITAR', conexion: 'SHURE SM58', categoria: 'Voces' },
-    { canal: 21, instrumento: 'OCTAPAD', conexion: 'DIRECT LINE RCA L', categoria: 'Batería' },
-    { canal: 22, instrumento: 'GÜIRA', conexion: 'DIRECT LINE RCA R / SHURE BETA 98H/C', categoria: 'Percusión' },
-    { canal: 23, instrumento: 'CLICK', conexion: 'USB', categoria: 'Secuencia / Otros' },
-    { canal: 24, instrumento: 'GUIA', conexion: 'USB', categoria: 'Secuencia / Otros' },
-    { canal: 25, instrumento: 'SECUENCIA L', conexion: 'USB', categoria: 'Secuencia / Otros' },
-    { canal: 26, instrumento: 'SECUENCIA R', conexion: 'USB', categoria: 'Secuencia / Otros' }
-  ];
-
-  if (!useFallback && supabase) {
-    const { data: dbCanales } = await supabase
-      .from('rider_canales')
-      .select('*')
-      .or(`layout_id.eq.${layoutId},layout_id.is.null`)
-      .order('canal', { ascending: true });
-
-    if (dbCanales && dbCanales.length > 0) {
-      canales = dbCanales.map(c => ({
-        canal: c.canal,
-        instrumento: c.instrumento,
-        conexion: c.conexion,
-        categoria: c.categoria === 'bateria' ? 'Batería' :
-                   c.categoria === 'percusion' ? 'Percusión' :
-                   c.categoria === 'cuerdas' ? 'Cuerdas / Armonía' :
-                   c.categoria === 'voces' ? 'Voces' : c.categoria
-      }));
-    } else {
-      canales = defaultCanales;
-    }
-  } else {
-    canales = defaultCanales;
-  }
+  canales = riderChannels;
 
   // Cargar focos y FX
   let stageObjects = [];
@@ -834,44 +766,44 @@ async function main() {
             initials = 'JQ';
             name = 'Jaime C. Quilodrán';
             role = 'Percusión/Timbal/Voces';
-            aux = 'Aux 6 Wedge';
+            aux = 'Aux 1 + Aux 8 Wedge';
             isWedge = true;
             hasAC = true;
           } else if (el.tipo === 'congas') {
             initials = 'JS';
             name = 'Jaime C. Sanhueza';
             role = 'Congas/Bongós/Coros';
-            aux = 'Aux 7 Wedge';
+            aux = 'Aux 2';
             isWedge = true;
             hasAC = true;
           } else if (el.tipo === 'teclado') {
             initials = 'IL';
             name = 'Israel Lagos Rocha';
             role = 'Pianos/Teclados/Sintetizadores';
-            aux = 'Aux 5 IEM';
+            aux = 'Aux 6';
             hasAC = true;
           } else if (el.tipo === 'bajo') {
             initials = 'GU';
             name = 'Gerson Ulloa';
             role = 'Bajos/Coros';
-            aux = 'Aux 4 IEM';
+            aux = 'Aux 4';
             hasAC = true;
           } else if (el.tipo === 'guiro') {
             initials = 'FG';
             name = 'Fabian Garrido';
             role = 'Guiro/Animación';
-            aux = 'Aux 2 IEM';
+            aux = 'Aux 3';
           } else if (el.tipo === 'gtr') {
             initials = 'VN';
             name = 'Vicente Nuñez';
             role = 'Guitarra Electrica/Dir/Coros';
-            aux = 'Aux 3 IEM';
+            aux = 'Aux 5';
             hasAC = true;
           } else if (el.tipo === 'vocal') {
             initials = 'CB';
             name = 'Cesar Bruna';
             role = 'Voz principal';
-            aux = 'Aux 1 IEM';
+            aux = 'Aux 7';
           } else if (el.tipo === 'monitor') {
             initials = 'MON';
             name = el.nombre || 'Monitor';
@@ -914,7 +846,7 @@ async function main() {
           name: m.name,
           role: m.role,
           initials: m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-          aux: m.tipo === 'bateria' ? 'Aux 6 Wedge' : m.tipo === 'congas' ? 'Aux 7 Wedge' : m.tipo === 'teclado' ? 'Aux 5 IEM' : m.tipo === 'bajo' ? 'Aux 4 IEM' : m.tipo === 'guiro' ? 'Aux 2 IEM' : m.tipo === 'gtr' ? 'Aux 3 IEM' : 'Aux 1 IEM',
+          aux: m.tipo === 'bateria' ? 'Aux 1 + Aux 8 Wedge' : m.tipo === 'congas' ? 'Aux 2' : m.tipo === 'teclado' ? 'Aux 6' : m.tipo === 'bajo' ? 'Aux 4' : m.tipo === 'guiro' ? 'Aux 3' : m.tipo === 'gtr' ? 'Aux 5' : 'Aux 7',
           isWedge: (m.tipo === 'bateria' || m.tipo === 'congas'),
           hasAC: (m.tipo === 'teclado' || m.tipo === 'bajo' || m.tipo === 'gtr' || m.tipo === 'bateria' || m.tipo === 'congas'),
           isMonitorOrPower: false,
@@ -930,7 +862,7 @@ async function main() {
         name: m.name,
         role: m.role,
         initials: m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-        aux: m.tipo === 'bateria' ? 'Aux 6 Wedge' : m.tipo === 'congas' ? 'Aux 7 Wedge' : m.tipo === 'teclado' ? 'Aux 5 IEM' : m.tipo === 'bajo' ? 'Aux 4 IEM' : m.tipo === 'guiro' ? 'Aux 2 IEM' : m.tipo === 'gtr' ? 'Aux 3 IEM' : 'Aux 1 IEM',
+        aux: m.tipo === 'bateria' ? 'Aux 1 + Aux 8 Wedge' : m.tipo === 'congas' ? 'Aux 2' : m.tipo === 'teclado' ? 'Aux 6' : m.tipo === 'bajo' ? 'Aux 4' : m.tipo === 'guiro' ? 'Aux 3' : m.tipo === 'gtr' ? 'Aux 5' : 'Aux 7',
         isWedge: (m.tipo === 'bateria' || m.tipo === 'congas'),
         hasAC: (m.tipo === 'teclado' || m.tipo === 'bajo' || m.tipo === 'gtr' || m.tipo === 'bateria' || m.tipo === 'congas'),
         isMonitorOrPower: false,
@@ -945,7 +877,7 @@ async function main() {
       name: m.name,
       role: m.role,
       initials: m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-      aux: m.tipo === 'bateria' ? 'Aux 6 Wedge' : m.tipo === 'congas' ? 'Aux 7 Wedge' : m.tipo === 'teclado' ? 'Aux 5 IEM' : m.tipo === 'bajo' ? 'Aux 4 IEM' : m.tipo === 'guiro' ? 'Aux 2 IEM' : m.tipo === 'gtr' ? 'Aux 3 IEM' : 'Aux 1 IEM',
+      aux: m.tipo === 'bateria' ? 'Aux 1 + Aux 8 Wedge' : m.tipo === 'congas' ? 'Aux 2' : m.tipo === 'teclado' ? 'Aux 6' : m.tipo === 'bajo' ? 'Aux 4' : m.tipo === 'guiro' ? 'Aux 3' : m.tipo === 'gtr' ? 'Aux 5' : 'Aux 7',
       isWedge: (m.tipo === 'bateria' || m.tipo === 'congas'),
       hasAC: (m.tipo === 'teclado' || m.tipo === 'bajo' || m.tipo === 'gtr' || m.tipo === 'bateria' || m.tipo === 'congas'),
       isMonitorOrPower: false,

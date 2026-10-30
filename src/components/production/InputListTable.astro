@@ -3,7 +3,7 @@
 ---
 <div class="space-y-8" id="input-list-root">
 
-  <!-- AVISO TÉCNICO OFICIAL: CONSOLA SOUNDCRAFT UI24R & FLEXIBILIDAD TÉCNICA -->
+  <!-- AVISO TÉCNICO OFICIAL: CONSOLA ALLEN & HEATH QU-7D & FLEXIBILIDAD TÉCNICA -->
   <div class="p-5 rounded-3xl bg-gradient-to-r from-slate-950 via-[#0d1629] to-slate-950 border border-gold-bruna/35 shadow-xl relative overflow-hidden">
     <div class="absolute -right-16 -top-16 w-48 h-48 bg-gold-bruna/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -15,12 +15,11 @@
               Consola Propia en Gira
             </span>
             <span class="text-white font-title font-bold text-sm tracking-wide">
-              SOUNDCRAFT Ui24R (24 Canales / 8 Auxiliares)
+              ALLEN &amp; HEATH Qu-7D · 32 entradas Mic/Line · Dante
             </span>
           </div>
           <p class="text-xs text-slate-300 leading-relaxed max-w-3xl">
-            Banda Bruna cuenta con su propia consola de audio digital <strong>Soundcraft Ui24R</strong> con escenas, ruteos y mezclas de retorno previamente calibradas. Se solicita formalmente a la productora considerar el uso de dicha consola durante la presentación para garantizar un <strong>Line Check rápido (10-15 min)</strong> o enlace directo vía splitter hacia el sistema de sala.
-          </p>
+            Banda Bruna trabaja con consola propia <strong>Allen &amp; Heath Qu-7D</strong>: 32 entradas Mic/Line, procesamiento XCVI a 96 kHz y Dante integrado 16×16. Una infraestructura propia para gestionar las 29 fuentes del show y sus 9 retornos. La integración con sala, el patch físico y los tiempos de prueba se coordinan con la producción.</p>
           <div class="mt-2 text-[11px] text-amber-300/90 font-mono flex items-center gap-1.5">
             <span>★</span>
             <span>Para el correcto desarrollo del show, se solicita contar con la microfonía indicada en esta ficha técnica, <em>o modelos de características similares o superior</em>, según disponibilidad de la producción.</span>
@@ -42,6 +41,11 @@
     </div>
   </div>
 
+  <figure class="rounded-3xl border border-gold-bruna/25 bg-slate-950 p-6">
+    <img src="https://www.allen-heath.com/content/uploads/2025/05/Qu-7D-Carousel.png" alt="Consola digital Allen &amp; Heath Qu-7D utilizada por Banda Bruna" loading="lazy" width="1200" height="600" class="w-full max-w-3xl mx-auto h-auto object-contain" />
+    <figcaption class="text-center text-sm text-slate-300 mt-4">Equipamiento propio para un show profesional: Allen &amp; Heath Qu-7D.<br /><a class="text-gold-bruna underline" href="https://www.allen-heath.com/hardware/qu/qu-7-qu-7d/" target="_blank" rel="noopener noreferrer">Fotografía y ficha técnica oficial Allen &amp; Heath</a></figcaption>
+  </figure>
+
   <!-- 1. INPUT LIST (PATCH DE CANALES) -->
   <div class="bg-slate-900/40 border border-white/5 rounded-3xl p-6 md:p-8 relative overflow-hidden">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -50,7 +54,7 @@
           <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-gold-bruna/10 text-gold-bruna border border-gold-bruna/20">
             Audio FOH & Sala
           </span>
-          <span class="text-[10px] text-slate-400 font-mono">26 Canales Patch Oficial</span>
+          <span class="text-[10px] text-slate-400 font-mono">29 Canales Patch Oficial</span>
         </div>
         <h3 class="font-title font-bold text-xl uppercase text-white tracking-wide">Input List Oficial (Patch de Canales)</h3>
         <p class="text-xs text-slate-400">Distribución de canales, microfonía requerida (o equivalente) y fijación con Clamps LP.</p>
@@ -62,7 +66,7 @@
           🔩 Clamps LP en Timbales & Congas
         </span>
         <span class="px-3 py-1 rounded-xl bg-slate-950 border border-white/10 text-[10px] font-mono text-slate-300">
-          🔌 Ch 21-22 Entradas RCA Línea
+          🔌 Teclados 16-17 · Secuencias 26-27
         </span>
       </div>
     </div>
@@ -70,22 +74,22 @@
     <!-- Filtro rápido de categorías -->
     <div class="flex flex-wrap gap-1.5 bg-slate-950 p-1 rounded-xl border border-white/5 mb-4" id="input-cat-filters">
       <button class="cat-filter-btn active text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer bg-gold-bruna text-black" data-cat="all">
-        Ver Todo (26 Ch)
+        Ver Todo (29 Ch)
       </button>
       <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="bateria">
-        Batería (Ch 1-6, 21)
+        Batería (Ch 1-8)
       </button>
       <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="percusion">
-        Percusión (Ch 11-14, 22)
+        Percusión (Ch 9-13)
       </button>
       <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="cuerdas">
-        Cuerdas / Teclados (Ch 7-10)
+        Cuerdas / Teclados (Ch 14-17)
       </button>
       <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="voces">
-        Voces (Ch 15-20)
+        Voces (Ch 18-23)
       </button>
       <button class="cat-filter-btn text-[10px] px-3.5 py-2 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white" data-cat="otros">
-        Secuencias (Ch 23-26)
+        Talkback / Playback (Ch 24-29)
       </button>
     </div>
 
@@ -108,8 +112,8 @@
 
     <!-- Nota al pie de Input List -->
     <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 font-mono">
-      <span>* Los canales 3, 4, 5, 11 y 12 utilizan montajes <strong>Clamp Claw LP</strong> para optimizar espacio en tarima.</span>
-      <span class="text-gold-bruna">Alimentación Phantom (+48V) requerida en canales condensador: Ch 5, 6, 14 y 19.</span>
+      <span>* Los canales 3, 4, 9 y 10 utilizan montajes <strong>Clamp Claw LP</strong> para optimizar espacio en tarima.</span>
+      <span class="text-gold-bruna">Alimentación Phantom (+48V) requerida en canales condensador: Ch 1, 5, 6, 12 y 23 (según modelo y conexión).</span>
     </div>
   </div>
 
@@ -121,19 +125,19 @@
           <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
             Escenario & Retornos
           </span>
-          <span class="text-[10px] text-slate-400 font-mono">8 Salidas Físicas Soundcraft Ui24R</span>
+          <span class="text-[10px] text-slate-400 font-mono">9 salidas de monitoreo · Allen &amp; Heath Qu-7D</span>
         </div>
-        <h3 class="font-title font-bold text-xl uppercase text-white tracking-wide">Lista de Monitores (8 Envíos Auxiliares)</h3>
+        <h3 class="font-title font-bold text-xl uppercase text-white tracking-wide">Lista de Monitores (9 salidas)</h3>
         <p class="text-xs text-slate-400">Distribución oficial de mezclas de retorno independientes para la banda.</p>
       </div>
 
       <!-- Resumen de Infraestructura -->
       <div class="flex items-center gap-2 flex-wrap">
         <div class="px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-mono font-bold">
-          📻 3x Bodypacks Inalámbricos
+          🎧 7 retornos individuales
         </div>
         <div class="px-3 py-1.5 rounded-xl bg-gold-bruna/10 border border-gold-bruna/20 text-gold-bruna text-[11px] font-mono font-bold">
-          🎧 3x Envíos In-Ear XLR
+          🎛️ Patch de salidas 1–9
         </div>
         <div class="px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] font-mono font-bold">
           🔊 2x Cuñas Wedge Piso
@@ -166,8 +170,7 @@
         <div class="text-slate-300">
           <strong class="text-white">Especificación de Retornos en Escenario:</strong>
           <p class="text-[11px] text-slate-400 mt-0.5">
-            Los envíos 1, 2 y 3 (Piano, Batería, Congas) son por <strong>cable XLR directo</strong> hacia audífonos / amplificador de audífonos. Los envíos 4, 5 y 6 operan mediante <strong>Bodypacks In-Ear UHF</strong>. Las mezclas 7 y 8 requieren <strong>2 monitores de piso tipo wedge activos de 12" o 15"</strong> (uno para Batería y otro para Bajo).
-          </p>
+            Salidas 1–7: Batería, Congas, Huiro, Bajo, Guitarra, Teclados y César. Sistema cableado o inalámbrico por coordinar. Salidas 8 y 9: monitores de piso para Batería y Bajo. Click, guía y talkbacks son señales internas: excluir de PA y coordinar su envío a retornos. La numeración indica el patch del show; confirmar asignación física en consola.</p>
         </div>
       </div>
     </div>
@@ -175,53 +178,17 @@
 </div>
 
 <script>
-  import { supabase } from '../../services/supabaseClient.js';
+  import { riderChannels, riderMonitors } from '../../data/technicalRider.js';
 
   let currentLayoutId = '';
   let channelsList = [];
   let selectedCategory = 'all';
 
   // Input List oficial con microfonía exacta y LP Claws
-  const defaultCanales = [
-    { canal: 1, instrumento: 'KICK', conexion: 'SHURE BETA 91', categoria: 'bateria' },
-    { canal: 2, instrumento: 'SNARE', conexion: 'SENNHEISER E609', categoria: 'bateria' },
-    { canal: 3, instrumento: 'TIMBAL HI', conexion: 'SHURE SM57 - CLAMP CLAW LP', categoria: 'bateria' },
-    { canal: 4, instrumento: 'TIMBAL LOW', conexion: 'SHURE SM57 - CLAMP CLAW LP', categoria: 'bateria' },
-    { canal: 5, instrumento: 'OH ACCESORIOS', conexion: 'AKG C1000S - CLAMP CLAW LP', categoria: 'bateria' },
-    { canal: 6, instrumento: 'OH HI-HAT', conexion: 'AKG C1000S', categoria: 'bateria' },
-    { canal: 7, instrumento: 'BASS', conexion: 'XLR DIRECTO', categoria: 'cuerdas' },
-    { canal: 8, instrumento: 'GUITAR', conexion: 'SHURE SM57', categoria: 'cuerdas' },
-    { canal: 9, instrumento: 'TECLADO L', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
-    { canal: 10, instrumento: 'TECLADO R', conexion: 'CAJA DIRECTA', categoria: 'cuerdas' },
-    { canal: 11, instrumento: 'CONGA HI', conexion: 'SENNHEISER E604 - CLAMP CLAW LP', categoria: 'percusion' },
-    { canal: 12, instrumento: 'CONGA LOW', conexion: 'SENNHEISER E604 - CLAMP CLAW LP', categoria: 'percusion' },
-    { canal: 13, instrumento: 'BONGO', conexion: 'SHURE SM57', categoria: 'percusion' },
-    { canal: 14, instrumento: 'CHIMES', conexion: 'AKG C1000S', categoria: 'percusion' },
-    { canal: 15, instrumento: 'VOZ DRUM', conexion: 'SHURE SM58', categoria: 'voces' },
-    { canal: 16, instrumento: 'VOZ GUITAR', conexion: 'SHURE SM58', categoria: 'voces' },
-    { canal: 17, instrumento: 'VOZ BASS', conexion: 'SHURE SM58', categoria: 'voces' },
-    { canal: 18, instrumento: 'VOZ CONGA', conexion: 'SHURE SM58', categoria: 'voces' },
-    { canal: 19, instrumento: 'VOZ PRINCIPAL', conexion: 'SHURE BETA 87A', categoria: 'voces' },
-    { canal: 20, instrumento: 'TALKBACK BATERIA - GUITAR', conexion: 'SHURE SM58', categoria: 'voces' },
-    { canal: 21, instrumento: 'OCTAPAD', conexion: 'DIRECT LINE RCA L', categoria: 'bateria' },
-    { canal: 22, instrumento: 'GÜIRA', conexion: 'DIRECT LINE RCA R / SHURE BETA 98H/C', categoria: 'percusion' },
-    { canal: 23, instrumento: 'CLICK', conexion: 'USB', categoria: 'otros' },
-    { canal: 24, instrumento: 'GUIA', conexion: 'USB', categoria: 'otros' },
-    { canal: 25, instrumento: 'SECUENCIA L', conexion: 'USB', categoria: 'otros' },
-    { canal: 26, instrumento: 'SECUENCIA R', conexion: 'USB', categoria: 'otros' }
-  ];
+  const defaultCanales = riderChannels;
 
-  // 8 Mezclas de Monitoreo exactas a la Soundcraft Ui24R
-  const defaultMonitores = [
-    { mezcla: 'Aux 1', destino: 'PIANO', salida: 'XLR', tipo: 'In-Ear Cableado (XLR)', nota: 'Israel Lagos Rocha: Pianos, teclados L/R, secuencias estéreo, click y referencia.' },
-    { mezcla: 'Aux 2', destino: 'BATERIA', salida: 'XLR', tipo: 'In-Ear Cableado (XLR)', nota: 'Jaime C. Quilodrán: Batería, click, guía, bajo y retorno de voces.' },
-    { mezcla: 'Aux 3', destino: 'CONGA', salida: 'XLR', tipo: 'In-Ear Cableado (XLR)', nota: 'Jaime C. Sanhueza: Percusión latina, timbal, base rítmica y voces.' },
-    { mezcla: 'Aux 4', destino: 'GUITAR - GÜIRA', salida: 'BODYPACK', tipo: 'In-Ear Inalámbrico (UHF)', nota: 'Vicente Núñez & Fabián Garrido: Balance guitarra, animación, coros y secuencias.' },
-    { mezcla: 'Aux 5', destino: 'BASS', salida: 'BODYPACK', tipo: 'In-Ear Inalámbrico (UHF)', nota: 'Gerson Ulloa: Bajo al frente, bombo, timbales, armonía y voces.' },
-    { mezcla: 'Aux 6', destino: 'VOCAL', salida: 'BODYPACK', tipo: 'In-Ear Inalámbrico (UHF)', nota: 'César Bruna: Voz principal al frente, reverb, teclados y secuencias.' },
-    { mezcla: 'Aux 7', destino: 'PISO BATERIA', salida: 'XLR', tipo: 'Monitor Wedge (Piso)', nota: '1 Monitor Activo 12" o 15": Presión sonora percusiva, bajo y voces en tarima.' },
-    { mezcla: 'Aux 8', destino: 'PISO BASS', salida: 'XLR', tipo: 'Monitor Wedge (Piso)', nota: '1 Monitor Activo 12" o 15": Referencia frontal de bajo y armonía en escenario.' }
-  ];
+  // 8 Mezclas de Monitoreo exactas a la Allen &amp; Heath Qu-7D
+  const defaultMonitores = riderMonitors;
 
   // Escuchar cambio de layout
   document.addEventListener('production-layout-changed', async (e: any) => {
@@ -236,21 +203,7 @@
 
     tableBody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500 uppercase tracking-widest animate-pulse">Cargando canales...</td></tr>';
 
-    try {
-      const { data, error } = await supabase
-        .from('rider_canales')
-        .select('*')
-        .or(`layout_id.eq.${currentLayoutId},layout_id.is.null`)
-        .order('canal', { ascending: true });
-
-      if (!error && data && data.length > 0) {
-        channelsList = data;
-      } else {
-        channelsList = defaultCanales;
-      }
-    } catch {
-      channelsList = defaultCanales;
-    }
+    channelsList = defaultCanales;
 
     renderTable();
   }
