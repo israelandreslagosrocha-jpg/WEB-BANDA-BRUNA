@@ -22,6 +22,7 @@ export function createPreview() {
  document.querySelector('.intranet')!.prepend(banner);
  return {
   previewCatalogue: catalogue,
+  previewOfficialEvents:[{id:'official-demo',nombre:'Show oficial de la banda · ejemplo',fecha:'2026-11-28',lugar:'Teatro de ejemplo',ciudad:'Temuco',publicado:true}],
   auth:{getUser:async()=>({data:{user},error:null}),signOut:async()=>({error:null})},
   rpc:async(_name:string,args:any)=>{const id=crypto.randomUUID();tables.intranet_entries.unshift({...base,...args.payload,id,author_email:user.email});tables.intranet_event_payments.push(...args.payments.map((p:any)=>({...p,entry_id:id})));return {data:id,error:null};},
   from(table:string) {

@@ -14,7 +14,7 @@ export async function rehearsalPdf(plan) {
  text(isEvent?'BANDA BRUNA / CONSOLIDADO PERSONAL DEL EVENTO':'BANDA BRUNA / DIRECCIÓN MUSICAL',10,'#947137');doc.moveDown(.6);
  doc.font('Helvetica-Bold').fontSize(23).fillColor('#0f172a').text(plan.title||'Plan musical');doc.moveDown(.5);
  if(plan.author)text(`Enviado por: ${plan.author}`);
- if(plan.starts_at)text(`${isEvent?'Fecha y tocata':'Fecha'}: ${new Intl.DateTimeFormat('es-CL',{dateStyle:'full',timeStyle:'short',timeZone:'America/Santiago'}).format(new Date(plan.starts_at))}`);
+ if(plan.starts_at)text(`${isEvent?'Fecha y tocata':'Fecha'}: ${new Intl.DateTimeFormat('es-CL',{dateStyle:'full',...(plan.all_day?{}:{timeStyle:'short'}),timeZone:'America/Santiago'}).format(new Date(plan.starts_at))}${plan.all_day?' · Hora por confirmar':''}`);
  if(plan.location)text(`Lugar: ${plan.location}`);
  text(`Destinatarios: ${plan.recipients?.length?plan.recipients.join(', '):'Toda la banda'}`);
  if(isEvent){

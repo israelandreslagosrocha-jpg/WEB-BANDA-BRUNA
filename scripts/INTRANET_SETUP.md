@@ -86,3 +86,11 @@ Archivo `MIX_BRUNA_COMPLETO_AGONIA_-_LUNA_-_AHOGADO.mp3_ppmfj4`, original MP3 de
 ## Canal externo elegido: Web Push
 
 El propietario eligió notificaciones push en lugar de WhatsApp. Implementación y activación en `scripts/INTRANET_PUSH_SETUP.md`; migraciones `intranet_push_setup.sql` y `intranet_push_delivery_setup.sql`. Las preparaciones de WhatsApp se conservan sin activar. Las claves VAPID locales permanecen privadas en `.env.push.local`, ignorado por Git. No se han desplegado ni enviado avisos reales.
+
+## Agenda oficial coordinada con la intranet
+
+La agenda del equipo consulta en vivo `eventos` con `publicado=true`, la misma fuente de las fechas oficiales. Se combina con ensayos y otras actividades internas y se actualiza al abrir o refrescar el panel (y durante la actualización periódica). No se copian shows a otra tabla. `/api/intranet/agenda` exige sesión de integrante y usa las políticas RLS existentes.
+
+Jefatura puede elegir una fecha oficial al publicar una ficha de evento o tenida. Se guarda su ID en `event_details.official_event_id`; los avisos vinculados quedan agrupados en una actividad del calendario. La fecha, nombre y lugar oficiales tienen prioridad; la hora de tocata se completa en la ficha interna. Sin hora, se muestra «Hora por confirmar». Los PDFs de avisos vinculados vuelven a consultar la fuente oficial al descargarse. Si deja de estar publicada, la agenda avisa que hay que revisar el vínculo y no genera un consolidado con una fecha oficial desactualizada.
+
+No requiere migración adicional de Supabase. Las fechas no publicadas permanecen fuera de esta consulta; las actividades presupuestadas internas siguen disponibles desde las fichas del equipo. No genera notificaciones push por consultar o sincronizar el calendario. Prueba: `node scripts/test_intranet_official_agenda.mjs`.

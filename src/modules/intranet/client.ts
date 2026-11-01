@@ -1,3 +1,4 @@
+import { officialAgenda } from './officialAgenda';
 import { agendaView, rehearsalView, dayKey } from './schedule';
 import { setupPush } from './pushClient';
 import { outfitFor } from './outfits';
@@ -8,17 +9,21 @@ let supabase: any = liveSupabase;
 import { members, memberFor } from './members';
 import { escapeHtml as esc } from '../../utils/escapeHtml';
 const $ = (id: string) => document.getElementById(id)!;
+let officialEvents:any[]=[],officialError='';
 let user: any, entries: any[] = [], receipts: any[] = [], payments: any[] = [], filter = '', busy = false;
 const rehearsalLabels: Record<string,string> = {internal_work:'Trabajo interno y participantes',next_rehearsal:'Próximo ensayo',show_setlist:'Repertorio del próximo show',new_songs:'Canciones nuevas'};
 const kinds: Record<string,string> = {comunicado:'Comunicado',evento:'Evento',ensayo:'Ensayo',repertorio:'Repertorio',cancion:'Canción / mix',personal:'Indicación personal',tenida:'Tenida para evento'};
 function check(result: any) { if (result.error) throw result.error; return result.data; }
 function message(error: any) { $('status').textContent = `No se pudo completar: ${error.message || error}. Si la intranet aún no está habilitada, falta aplicar su configuración en Supabase.`; }
-function date(value: string) {return new Intl.DateTimeFormat('es-CL',{dateStyle:'full',timeStyle:'short',timeZone:'America/Santiago'}).format(new Date(value));}
+function date(value: string,allDay=false) {return new Intl.DateTimeFormat('es-CL',{dateStyle:'full',...(allDay?{}:{timeStyle:'short' as const}),timeZone:'America/Santiago'}).format(new Date(value))+(allDay?' · Hora por confirmar':'');}
 async function load() {
  if(busy) return; busy=true;
  try {
   const [a,b,c] = await Promise.all([supabase.from('intranet_entries').select('*').order('created_at',{ascending:false}),supabase.from('intranet_receipts').select('*').eq('user_id',user.id),supabase.from('intranet_event_payments').select('*').eq('member_email',user.email.toLowerCase())]);
-  entries=check(a)||[]; receipts=check(b)||[]; payments=check(c)||[]; render(); $('status').textContent='';
+  entries=check(a)||[]; receipts=check(b)||[]; payments=check(c)||[];
+  try{officialEvents=(supabase as any).previewOfficialEvents||await officialAgendaRequest();officialError='';}catch{officialError='No se pudo actualizar la agenda oficial. Se muestran los avisos internos; pulsa Actualizar avisos para reintentar.';}
+  const officialSelect=$('official-event') as HTMLSelectElement;const oldSelection=officialSelect.value;officialSelect.innerHTML='<option value="">Actividad independiente</option>'+officialEvents.map(e=>`<option value="${esc(e.id)}">${esc(e.fecha)} · ${esc(e.nombre)}</option>`).join('');officialSelect.value=oldSelection;
+  render(); $('status').textContent=officialError;
  } catch(e) {message(e);} finally {busy=false;}
 }
 function openSection(next: string) {
@@ -37,7 +42,7 @@ function eventMarkup(e:any,receipt:any){
  if(!['evento','tenida'].includes(e.kind))return '';
  const info=e.event_details||{};const outfit=outfitFor(info.outfit_slug);const pay=payments.find(p=>p.entry_id===e.id);
  const extra=receipt?.personal_checklist||[];
- return `<div class="event-data"><p>Salida: ${info.departure_at?esc(date(info.departure_at)):'Por confirmar'}</p><p>Tocata: ${e.starts_at?esc(date(e.starts_at)):'Por confirmar'}</p><p>Encuentro: ${esc(info.meeting_point||'Por confirmar')}</p><p>Mi valor a recibir: ${pay?esc(new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(pay.amount_clp)):'Por confirmar'}</p></div>${outfit?`<h3>${esc(outfit.name)}</h3><img class="event-outfit" src="${esc(outfit.cloudinaryUrl||outfit.image)}" alt="Tenida LEGO ${esc(outfit.name)}"/><p>${esc(outfit.description)}</p>`:''}<details><summary>Mi checklist personal · ${extra.filter((t:any)=>t.done).length}/${extra.length} preparados</summary>${extra.map((t:any)=>`<div class="personal-task"><label><input type="checkbox" data-personal-entry="${e.id}" data-personal-task="${esc(t.id)}" ${t.done?'checked':''}/> ${esc(t.text)}</label><button data-remove-task="${esc(t.id)}" data-task-entry="${e.id}">Quitar</button></div>`).join('')}<input id="new-task-${e.id}" data-new-task="${e.id}" maxlength="300" aria-label="Nuevo pendiente personal" placeholder="Ej.: cargar body, llevar audífonos…"/><button data-add-task="${e.id}">+ Agregar a mi checklist</button></details>`;
+ return `<div class="event-data"><p>Salida: ${info.departure_at?esc(date(info.departure_at)):'Por confirmar'}</p><p>Tocata: ${e.starts_at?esc(date(e.starts_at,e.all_day)):'Por confirmar'}</p><p>Encuentro: ${esc(info.meeting_point||'Por confirmar')}</p><p>Mi valor a recibir: ${pay?esc(new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(pay.amount_clp)):'Por confirmar'}</p></div>${outfit?`<h3>${esc(outfit.name)}</h3><img class="event-outfit" src="${esc(outfit.cloudinaryUrl||outfit.image)}" alt="Tenida LEGO ${esc(outfit.name)}"/><p>${esc(outfit.description)}</p>`:''}<details><summary>Mi checklist personal · ${extra.filter((t:any)=>t.done).length}/${extra.length} preparados</summary>${extra.map((t:any)=>`<div class="personal-task"><label><input type="checkbox" data-personal-entry="${e.id}" data-personal-task="${esc(t.id)}" ${t.done?'checked':''}/> ${esc(t.text)}</label><button data-remove-task="${esc(t.id)}" data-task-entry="${e.id}">Quitar</button></div>`).join('')}<input id="new-task-${e.id}" data-new-task="${e.id}" maxlength="300" aria-label="Nuevo pendiente personal" placeholder="Ej.: cargar body, llevar audífonos…"/><button data-add-task="${e.id}">+ Agregar a mi checklist</button></details>`;
 }
 const initialDay=dayKey(new Date()).split('-').map(Number);
 let calendarYear=initialDay[0],calendarMonth=initialDay[1]-1,calendarDay='';
@@ -46,10 +51,11 @@ function render() {
  const visible=entries.filter(e=> filter==='todos' || (filter==='pendientes' && !receipts.some(r=>r.entry_id===e.id && r.read_at)) || (filter==='agenda' && ['evento','tenida','ensayo'].includes(e.kind)) || (filter==='material' && ['repertorio','cancion'].includes(e.kind)) || (filter==='personal' && e.recipients.includes(user.email.toLowerCase())) || filter===e.kind);
  if(filter==='agenda') visible.sort((a,b)=>(a.starts_at||'9999').localeCompare(b.starts_at||'9999'));
  const detail=(e:any)=>{
+ if(e.official_only)return `<article class="entry"><h2>${esc(e.title)}</h2><p>${esc(e.location)}</p><p>Fecha de la agenda oficial: ${esc(e.official_date)}. Horario de tocata por confirmar.</p><p>Jefatura puede asociar la tenida, setlist y ficha interna al seleccionar esta fecha al publicar.</p><a href="/agenda" target="_blank" rel="noopener">Ver agenda oficial ↗</a></article>`;
  const receipt=receipts.find(r=>r.entry_id===e.id); const author=memberFor(e.author_email)?.[1]||e.author_email;
- return `<article class="entry"><p class="entry-meta">${esc(kinds[e.kind])} · ${esc(author)} · ${esc(date(e.created_at))}${e.recipients.length?' · Privado':''}</p><h2>${esc(e.title)}</h2>${e.starts_at?`<p>${esc(date(e.starts_at))}</p>`:''}${e.location?`<p>📍 ${esc(e.location)}</p>`:''}<p class="entry-body">${esc(e.body)}</p>${Object.entries(rehearsalLabels).filter(([key])=>e.rehearsal?.[key]).map(([key,label])=>`<h3>${esc(label)}</h3><p class="entry-body">${esc(e.rehearsal[key])}</p>`).join('')}${eventMarkup(e,receipt)}${musicSummary(e.rehearsal?.music||[])}${e.rehearsal?.music?.length||['evento','tenida'].includes(e.kind)?`<button data-plan-pdf="${e.id}">${['evento','tenida'].includes(e.kind)?'↓ Descargar mi consolidado del evento':'↓ Descargar PDF del plan'}</button>`:''}${e.outfit_text?`<p>Tenida: ${esc(e.outfit_text)}</p>`:''}${e.mix_mode?`<p>Mix: ${esc(e.mix_mode)}</p>`:''}${e.checklist.map((item:string,i:number)=>`<label><input type="checkbox" data-entry="${e.id}" data-index="${i}" ${receipt?.completed.includes(i)?'checked':''}/> ${esc(item)}</label>`).join('')}${e.file_path?`<button data-file="${e.id}">Abrir / descargar ${esc(e.file_name||'archivo')}</button><div id="file-${e.id}"></div>`:''}<button data-read="${e.id}" ${receipt?.read_at?'disabled':''}>${receipt?.read_at?'✓ Leído':'Marcar como leído'}</button></article>`;
+ return `<article class="entry"><p class="entry-meta">${esc(kinds[e.kind])} · ${esc(author)} · ${esc(date(e.created_at))}${e.recipients.length?' · Privado':''}</p><h2>${esc(e.title)}</h2>${e.starts_at?`<p>${esc(date(e.starts_at,e.all_day))}</p>`:''}${e.location?`<p>📍 ${esc(e.location)}</p>`:''}<p class="entry-body">${esc(e.body)}</p>${Object.entries(rehearsalLabels).filter(([key])=>e.rehearsal?.[key]).map(([key,label])=>`<h3>${esc(label)}</h3><p class="entry-body">${esc(e.rehearsal[key])}</p>`).join('')}${eventMarkup(e,receipt)}${musicSummary(e.rehearsal?.music||[])}${e.rehearsal?.music?.length||['evento','tenida'].includes(e.kind)?`<button data-plan-pdf="${e.id}">${['evento','tenida'].includes(e.kind)?'↓ Descargar mi consolidado del evento':'↓ Descargar PDF del plan'}</button>`:''}${e.outfit_text?`<p>Tenida: ${esc(e.outfit_text)}</p>`:''}${e.mix_mode?`<p>Mix: ${esc(e.mix_mode)}</p>`:''}${e.checklist.map((item:string,i:number)=>`<label><input type="checkbox" data-entry="${e.id}" data-index="${i}" ${receipt?.completed.includes(i)?'checked':''}/> ${esc(item)}</label>`).join('')}${e.file_path?`<button data-file="${e.id}">Abrir / descargar ${esc(e.file_name||'archivo')}</button><div id="file-${e.id}"></div>`:''}<button data-read="${e.id}" ${receipt?.read_at?'disabled':''}>${receipt?.read_at?'✓ Leído':'Marcar como leído'}</button></article>`;
  };
- if(filter==='agenda'){$('feed').innerHTML=agendaView(visible,{year:calendarYear,month:calendarMonth,selectedDay:calendarDay},detail);return;}
+ if(filter==='agenda'){$('feed').innerHTML=agendaView(officialAgenda(officialEvents,visible),{year:calendarYear,month:calendarMonth,selectedDay:calendarDay},(e:any)=>detail(e)+(e.related_entries||[]).map(detail).join(''));return;}
  if(filter==='ensayo'){$('feed').innerHTML=rehearsalView(visible,entries.filter(e=>e.kind==='personal'&&e.author_email==='vicentenunez@bandabruna.cl'&&e.recipients.includes(user.email.toLowerCase())),detail);return;}
  $('feed').innerHTML=visible.length?visible.map(detail).join(''):'<p>No hay información en esta sección.</p>';
 }
@@ -103,6 +109,7 @@ async function init() {
   $('kind').innerHTML=Object.entries(kinds).filter(([k])=>member[2]==='jefatura'||['ensayo','repertorio','cancion','personal'].includes(k)).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
   const updateFields=()=>{const kind=($('kind') as HTMLSelectElement).value;const event=member[2]==='jefatura'&&['evento','tenida'].includes(kind);$('event-fields').hidden=!event;$('event-pdf-options').hidden=!event;$('outfit-fields').hidden=!event;$('rehearsal-fields').hidden=!['ensayo','repertorio','cancion','personal'].includes(kind);};
   $('kind').onchange=updateFields; updateFields();
+  $('official-event').onchange=()=>{const event=officialEvents.find(e=>String(e.id)===($('official-event') as HTMLSelectElement).value);if(!event)return;const form=$('publish-form') as HTMLFormElement;const start=form.elements.namedItem('starts_at') as HTMLInputElement;if(start.value.split('T')[1])start.value=event.fecha+'T'+start.value.split('T')[1];$('official-date-hint').textContent=`Fecha oficial: ${event.fecha}. Completa la hora de tocata para la ficha.`;(form.elements.namedItem('location') as HTMLInputElement).value=[event.lugar,event.ciudad].filter(Boolean).join(' · ');(form.elements.namedItem('title') as HTMLInputElement).value=event.nombre;};
   $('draft-music-pdf').onclick=async()=>{const form=$('publish-form') as HTMLFormElement;try{$('pdf-status').textContent='Preparando PDF…';await getPlanPdf(draftPlan(new FormData(form)));$('pdf-status').textContent='PDF descargado.';}catch(e:any){$('pdf-status').textContent=e.message;}};
   $('recipients').innerHTML=members.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('');
   document.querySelectorAll<HTMLButtonElement>('[data-outfit-slug]').forEach(button=>button.onclick=()=>{($('outfit-slug') as HTMLInputElement).value=button.dataset.outfitSlug!;($('outfits') as HTMLSelectElement).value='';document.querySelectorAll<HTMLButtonElement>('[data-outfit-slug]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));$('outfit-choice').textContent=`Tenida seleccionada: ${outfitFor(button.dataset.outfitSlug)?.name}`;});
@@ -116,7 +123,7 @@ async function init() {
    try {
     const recipients=data.getAll('recipients').map(String);const kind=String(data.get('kind'));
     if(kind==='personal' && recipients.length!==1)throw new Error('Selecciona exactamente un destinatario para la indicación personal.');
-    const start=String(data.get('starts_at'));const starts_at=start?chileISO(start):null;
+    const start=String(data.get('starts_at'));const linkedOfficial=['evento','tenida'].includes(kind)?officialEvents.find(e=>String(e.id)===String(data.get('official_event_id'))):null;const starts_at=start?chileISO(linkedOfficial?linkedOfficial.fecha+'T'+start.split('T')[1]:start):null;
     const checklist=String(data.get('checklist')).split('\n').map(v=>v.trim()).filter(Boolean);if(checklist.length>50)throw new Error('El checklist admite hasta 50 puntos.');
     const file=data.get('file') as File;
     if(file?.size){if(file.size>52428800)throw new Error('El archivo supera 50 MB.');path=`${user.id}/${crypto.randomUUID()}/${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;check(await supabase.storage.from('intranet').upload(path,file));}
@@ -125,7 +132,7 @@ async function init() {
     if(kind==='tenida'&&(!(outfit.value||chosen)||!starts_at||!String(data.get('location')).trim()))throw new Error('Selecciona tenida, fecha y evento.');
     const payload:any={kind,title:String(data.get('title')).trim(),body:String(data.get('body')),recipients,starts_at,rehearsal:{...Object.fromEntries(Object.keys(rehearsalLabels).map(key=>[key,String(data.get(key)||'')])),music:selectedMusic(),catalog_version:'2026-11-01'},location:String(data.get('location')),outfit_id:outfit.value||null,outfit_text:chosen?`${chosen.name} · ${chosen.description}`:outfit.value?outfit.selectedOptions[0].textContent:'',mix_mode:data.get('mix_mode'),checklist,file_path:path,file_name:file?.size?file.name:null,file_mime:file?.size?file.type:null};
     if(['evento','tenida'].includes(kind)){
-     const departure=String(data.get('departure_at')||'');payload.event_details={departure_at:departure?chileISO(departure):null,meeting_point:String(data.get('meeting_point')||''),category:String(data.get('event_category')||'tocata'),status:String(data.get('event_status')||'confirmado'),outfit_slug:chosen?.id||null};
+     const departure=String(data.get('departure_at')||'');payload.event_details={departure_at:departure?chileISO(departure):null,meeting_point:String(data.get('meeting_point')||''),official_event_id:String(data.get('official_event_id')||'')||null,category:String(data.get('event_category')||'tocata'),status:String(data.get('event_status')||'confirmado'),outfit_slug:chosen?.id||null};
      const eventPayments=members.filter(m=>!recipients.length||recipients.includes(m[0])).filter(m=>String(data.get(`payment_${m[0]}`)||'').trim()!=='').map(m=>({member_email:m[0],amount_clp:Number(data.get(`payment_${m[0]}`))}));
      if(eventPayments.some(p=>!Number.isSafeInteger(p.amount_clp)||p.amount_clp<0||p.amount_clp>100000000))throw new Error('Revisa los pagos: ingresa pesos enteros entre 0 y 100.000.000.');
      check(await supabase.rpc('publish_intranet_event',{payload,payments:eventPayments}));
@@ -145,10 +152,13 @@ async function headers() {
  if(!session)throw new Error('La sesión expiró. Vuelve a ingresar.');
  return {Authorization:`Bearer ${session.access_token}`,'Content-Type':'application/json'};
 }
+async function officialAgendaRequest(){const response=await fetch('/api/intranet/agenda',{headers:await headers(),cache:'no-store'});if(!response.ok)throw new Error('Agenda no disponible');return (await response.json()).events;}
 async function catalogueRequest(){const response=await fetch('/api/intranet/catalog',{headers:await headers()});if(!response.ok)throw new Error('No se pudo cargar la biblioteca.');return response.json();}
 function draftPlan(data:FormData){
  const start=String(data.get('starts_at'));const departure=String(data.get('departure_at')||'');const target=String(data.get('pdf_for_member')||user.email);const amount=String(data.get(`payment_${target}`)||'');const chosen=outfitFor(String(data.get('outfit_slug')));
- return {kind:String(data.get('kind')),title:String(data.get('title')||'Plan del evento'),body:String(data.get('body')||''),starts_at:start?chileISO(start):null,location:String(data.get('location')||''),recipients:data.getAll('recipients').map(String),music:selectedMusic(),internal_work:String(data.get('internal_work')||''),event_details:{departure_at:departure?chileISO(departure):null,meeting_point:String(data.get('meeting_point')||''),category:String(data.get('event_category')||'tocata'),status:String(data.get('event_status')||'confirmado'),outfit_slug:chosen?.id||null},outfit_text:chosen?chosen.name:'',checklist:String(data.get('checklist')||'').split('\n').map(t=>t.trim()).filter(Boolean),member_email:target,payment_amount:amount!==''?Number(amount):null};
+ const draftOfficial=officialEvents.find(e=>String(e.id)===String(data.get('official_event_id')));
+ const plan={kind:String(data.get('kind')),title:String(data.get('title')||'Plan del evento'),body:String(data.get('body')||''),starts_at:start?chileISO(start):null,location:String(data.get('location')||''),recipients:data.getAll('recipients').map(String),music:selectedMusic(),internal_work:String(data.get('internal_work')||''),event_details:{departure_at:departure?chileISO(departure):null,meeting_point:String(data.get('meeting_point')||''),official_event_id:String(data.get('official_event_id')||'')||null,category:String(data.get('event_category')||'tocata'),status:String(data.get('event_status')||'confirmado'),outfit_slug:chosen?.id||null},outfit_text:chosen?chosen.name:'',checklist:String(data.get('checklist')||'').split('\n').map(t=>t.trim()).filter(Boolean),member_email:target,payment_amount:amount!==''?Number(amount):null};
+ return draftOfficial&&['evento','tenida'].includes(plan.kind)?officialAgenda([draftOfficial],[plan])[0]:plan;
 }
 async function getPlanPdf(plan:any){
  const preview=import.meta.env.DEV && Boolean((supabase as any).previewCatalogue);

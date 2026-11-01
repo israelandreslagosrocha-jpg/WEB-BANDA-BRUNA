@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {officialAgenda} from '../src/modules/intranet/officialAgenda.js';
+import {dayKey,agendaView} from '../src/modules/intranet/schedule.js';
+const source={id:'show-1',nombre:'Show oficial',fecha:'2026-11-28',lugar:'Teatro',ciudad:'Temuco',publicado:true};
+const independent={id:'rehearsal',kind:'ensayo',starts_at:'2026-11-05T23:00:00Z',title:'Ensayo'};
+let rows=officialAgenda([source],[independent]);assert.equal(rows.length,2);assert.equal(rows[1].all_day,true);assert.equal(dayKey(rows[1].starts_at),source.fecha);
+const linked={id:'notice',kind:'evento',starts_at:'2026-11-07T22:00:00Z',location:'Viejo',event_details:{official_event_id:'show-1'},recipients:[],checklist:[]};
+rows=officialAgenda([source],[linked,independent]);assert.equal(rows.length,2);assert.equal(rows[0].location,'Teatro · Temuco');assert.equal(rows[0].starts_at,'2026-11-28T22:00:00.000Z');assert.equal(rows[0].id,'notice');
+const grouped=officialAgenda([source],[linked,{...linked,id:'notice-2'}]);assert.equal(grouped.length,1);assert.equal(grouped[0].related_entries.length,1);
+assert.equal(officialAgenda([source],[{...linked,all_day:true}])[0].all_day,true);
+assert.equal(officialAgenda([{...source,publicado:false}],[]).length,0);
+assert.equal(officialAgenda([],[linked])[0].official_missing,true);
+assert.equal(officialAgenda([{...source,fecha:'2027-06-01'}],[linked])[0].starts_at,'2027-06-01T23:00:00.000Z');
+const html=agendaView(officialAgenda([source],[]),{year:2026,month:10,selectedDay:''},()=>'<p>Ficha</p>');assert.ok(html.includes('Hora por confirmar'));assert.ok(!html.includes('12:00 h'));assert.ok(html.includes('Agenda oficial'));
+console.log('OK: agenda oficial, vínculo sin duplicar, cambio de fecha/lugar, hora de Chile e información no publicada.');
