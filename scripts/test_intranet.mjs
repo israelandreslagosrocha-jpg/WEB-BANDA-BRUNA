@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { memberFor, members } from '../src/modules/intranet/members.js';
+import { chileISO } from '../src/modules/intranet/time.js';
+assert.equal(members.length,7);
+assert.equal(new Set(members.map(m=>m[0])).size,7);
+assert.equal(memberFor('Jaimecardenas@bandabruna.cl')[2],'jefatura');
+assert.equal(memberFor('Cesarbruna@bandabruna.cl')[2],'jefatura');
+assert.equal(memberFor('Vicentenunez@bandabruna.cl')[2],'director');
+assert.equal(memberFor('Jaimecardenasjr@bandabruna.cl')[2],'miembro');
+assert.equal(memberFor('extra@bandabruna.cl'),undefined);
+assert.equal(chileISO('2026-07-15T20:00'),'2026-07-16T00:00:00.000Z');
+assert.equal(chileISO('2026-11-15T20:00'),'2026-11-15T23:00:00.000Z');
+assert.throws(()=>chileISO('2026-09-06T00:30'),/no existe/);
+console.log('OK: siete miembros, roles, normalización de correos y horarios de Santiago (verano, invierno y salto DST).');

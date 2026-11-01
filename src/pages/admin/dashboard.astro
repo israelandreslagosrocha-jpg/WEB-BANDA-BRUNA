@@ -33,6 +33,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
     <div class="max-w-[1400px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
       <!-- Sidebar Navigation -->
       <aside class="lg:col-span-1 flex flex-col gap-2">
+        <a href="/admin/personal" class="block border border-gold-bruna/30 text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold uppercase">👤 Intranet del equipo</a>
         <button data-tab-target="noticias" class="tab-btn active w-full text-left bg-slate-900/40 border border-white/5 hover:border-gold-bruna/20 hover:text-gold-bruna px-4 py-3 rounded-lg text-xs font-bold tracking-widest uppercase transition-all flex items-center gap-3">
           📰 Noticias & Blog
         </button>
@@ -789,6 +790,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
 
   <script>
     import { supabase } from '../../services/supabaseClient.js';
+    import { memberFor } from '../../modules/intranet/members.js';
     import { escapeHtml, safeRating } from '../../utils/escapeHtml.js';
 
     let loggedInUserEmail = '';
@@ -797,6 +799,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. AUTENTICACIÓN: Verificar acceso seguro y correo exacto
       const { data: { session } } = await supabase.auth.getSession();
+      if (memberFor(session?.user?.email)) { window.location.href = '/admin/personal'; return; }
       const emailsAutorizados = ['contacto@bandabruna.cl'];
       
       if (!session || !session.user || !session.user.email || !emailsAutorizados.includes(session.user.email)) {

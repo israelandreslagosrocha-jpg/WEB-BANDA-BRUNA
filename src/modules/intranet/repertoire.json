@@ -1,0 +1,1066 @@
+{
+  "version": "2026-11-01",
+  "sections": [
+    {
+      "id": "viking",
+      "title": "Sección Viking"
+    },
+    {
+      "id": "adulto-mayor",
+      "title": "Show adulto mayor"
+    },
+    {
+      "id": "cumbia",
+      "title": "Mix cumbia varios"
+    },
+    {
+      "id": "nuevos",
+      "title": "Mix nuevos"
+    },
+    {
+      "id": "originales",
+      "title": "Originales Banda Bruna"
+    },
+    {
+      "id": "produccion",
+      "title": "En producción / lanzamiento"
+    },
+    {
+      "id": "especiales",
+      "title": "Mix especiales"
+    },
+    {
+      "id": "adicionales",
+      "title": "Otros audios en carpeta"
+    }
+  ],
+  "items": [
+    {
+      "id": "viking-1",
+      "title": "Mix Viking 1",
+      "section": "viking",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "01_-_MIX_VIKING_1_jh175k",
+        "version": "v1793563133",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563133/01_-_MIX_VIKING_1_jh175k.mp3",
+        "sourceFormat": "M4A",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.118Z"
+      },
+      "tracks": [
+        {
+          "id": "viking-1-01",
+          "title": "Intro / De Coquimbo soy",
+          "key": "Gm"
+        },
+        {
+          "id": "viking-1-02",
+          "title": "Vacilón / Paseando en la playa",
+          "key": "Em"
+        },
+        {
+          "id": "viking-1-03",
+          "title": "Vacilón / Mira ese barco",
+          "key": "E7"
+        },
+        {
+          "id": "viking-1-04",
+          "title": "Magic Woman",
+          "key": "Dm"
+        },
+        {
+          "id": "viking-1-05",
+          "title": "Tus besos son",
+          "key": "Dm"
+        },
+        {
+          "id": "viking-1-06",
+          "title": "Vacilón",
+          "key": "E"
+        },
+        {
+          "id": "viking-1-07",
+          "title": "Cómo es mi muchacha",
+          "key": "E / Em"
+        }
+      ]
+    },
+    {
+      "id": "avikingzao",
+      "title": "Avikingzao",
+      "section": "viking",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "02_-_MIX_AVIKINGZAO_gkpirq",
+        "version": "v1793563509",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563509/02_-_MIX_AVIKINGZAO_gkpirq.mp3",
+        "sourceFormat": "M4A",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.095Z"
+      },
+      "tracks": [
+        {
+          "id": "avikingzao-01",
+          "title": "Tiburón",
+          "key": "G"
+        },
+        {
+          "id": "avikingzao-02",
+          "title": "Vacilón / Cuando yo venía viajando",
+          "key": "E"
+        },
+        {
+          "id": "avikingzao-03",
+          "title": "Acelera / Cocaleca",
+          "key": "E"
+        }
+      ]
+    },
+    {
+      "id": "viking-2",
+      "title": "Mix Viking 2",
+      "section": "viking",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "06_-_MIX_VIKING_2_xdkhih",
+        "version": "v1793563128",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563128/06_-_MIX_VIKING_2_xdkhih.mp3",
+        "sourceFormat": "M4A",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.100Z"
+      },
+      "tracks": [
+        {
+          "id": "viking-2-01",
+          "title": "Lloro por quererte",
+          "key": "Am"
+        },
+        {
+          "id": "viking-2-02",
+          "title": "Quiero un sombrero",
+          "key": "D7 > Gm > Dm"
+        },
+        {
+          "id": "viking-2-03",
+          "title": "El tiempo pasa y se nos va la vida",
+          "key": "C7 > Fm"
+        },
+        {
+          "id": "viking-2-04",
+          "title": "Vacilón",
+          "key": "F"
+        },
+        {
+          "id": "viking-2-05",
+          "title": "Déjame vivir mi vida",
+          "key": "Eb > Ab > C7 > Fm (Ab)"
+        },
+        {
+          "id": "viking-2-06",
+          "title": "Vacilón / Para qué llorar",
+          "key": "E"
+        },
+        {
+          "id": "viking-2-07",
+          "title": "Intro merengue / Todos arriba",
+          "key": "F"
+        },
+        {
+          "id": "viking-2-08",
+          "title": "Que me voy, que me voy",
+          "key": "D"
+        }
+      ]
+    },
+    {
+      "id": "viking-3",
+      "title": "Mix Viking 3",
+      "section": "viking",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_VIKING_3_q2lkfc",
+        "version": "v1793551889",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551889/MIX_VIKING_3_q2lkfc.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.957Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": [
+        {
+          "id": "viking-3-01",
+          "title": "Un año más",
+          "key": "Em"
+        },
+        {
+          "id": "viking-3-02",
+          "title": "Son quince, son veinte",
+          "key": "E"
+        },
+        {
+          "id": "viking-3-03",
+          "title": "El galeón español",
+          "key": "Am"
+        },
+        {
+          "id": "viking-3-04",
+          "title": "La piragua",
+          "key": "Dm / A7"
+        },
+        {
+          "id": "viking-3-05",
+          "title": "Vacilón / Me estoy enamorando",
+          "key": "E"
+        },
+        {
+          "id": "viking-3-06",
+          "title": "Vacilón / El minero",
+          "key": "Em"
+        },
+        {
+          "id": "viking-3-07",
+          "title": "Vacilón",
+          "key": "G"
+        },
+        {
+          "id": "viking-3-08",
+          "title": "Secretaria",
+          "key": "Dm"
+        },
+        {
+          "id": "viking-3-09",
+          "title": "El cuartelazo",
+          "key": "Gm > Dm > A7 > Dm (Dm)"
+        },
+        {
+          "id": "viking-3-10",
+          "title": "Gavilán",
+          "key": "Intro D-C#-B-A · D"
+        },
+        {
+          "id": "viking-3-11",
+          "title": "Vacilón",
+          "key": "A7 > Dm"
+        },
+        {
+          "id": "viking-3-12",
+          "title": "Tu hermana",
+          "key": "F#7-Bm · Bm"
+        },
+        {
+          "id": "viking-3-13",
+          "title": "Goyo",
+          "key": "Am"
+        }
+      ]
+    },
+    {
+      "id": "viking-4",
+      "title": "Mix Viking 4",
+      "section": "viking",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "07_-_MIX_VIKING_4_arrie7",
+        "version": "v1793563128",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563128/07_-_MIX_VIKING_4_arrie7.mp3",
+        "sourceFormat": "M4A",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.089Z"
+      },
+      "tracks": [
+        {
+          "id": "viking-4-01",
+          "title": "Si te vas de mí",
+          "key": "Em"
+        },
+        {
+          "id": "viking-4-02",
+          "title": "Negro José",
+          "key": "D"
+        },
+        {
+          "id": "viking-4-03",
+          "title": "Vaca blanca",
+          "key": "Dm / F"
+        },
+        {
+          "id": "viking-4-04",
+          "title": "Así como empezaron papá y mamá",
+          "key": "Am"
+        },
+        {
+          "id": "viking-4-05",
+          "title": "Farolito",
+          "key": "Bb > F > Bb"
+        },
+        {
+          "id": "viking-4-06",
+          "title": "Merengue",
+          "key": "Fm > C7"
+        },
+        {
+          "id": "viking-4-07",
+          "title": "Vacilón / La gallina no",
+          "key": "Gm"
+        }
+      ]
+    },
+    {
+      "id": "viking-valpo",
+      "title": "Mix Viking Valpo",
+      "section": "viking",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "mix_vikings_valpoo.mp3_m9m7u5",
+        "version": "v1793551889",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551889/mix_vikings_valpoo.mp3_m9m7u5.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.978Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": [
+        {
+          "id": "viking-valpo-01",
+          "title": "Caña dulce",
+          "key": "Em"
+        },
+        {
+          "id": "viking-valpo-02",
+          "title": "La tarde languidece",
+          "key": "Am-G-F-E7"
+        },
+        {
+          "id": "viking-valpo-03",
+          "title": "Si me voy",
+          "key": "E"
+        },
+        {
+          "id": "viking-valpo-04",
+          "title": "No tengo nada que darte",
+          "key": "C"
+        },
+        {
+          "id": "viking-valpo-05",
+          "title": "Cara sucia",
+          "key": "E7 > A"
+        },
+        {
+          "id": "viking-valpo-06",
+          "title": "Soy feliz sin tu amor",
+          "key": "B7 > Em"
+        },
+        {
+          "id": "viking-valpo-07",
+          "title": "Macondo",
+          "key": "Dm > Bb > A7 · Dm"
+        }
+      ]
+    },
+    {
+      "id": "marco-antonio-solis",
+      "title": "Mix Marco Antonio Solís",
+      "section": "adulto-mayor",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "01_-_MIX_MARCO_ANTONIO_SOLIS.mp3_ewdcks",
+        "version": "v1793551903",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551903/01_-_MIX_MARCO_ANTONIO_SOLIS.mp3_ewdcks.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.976Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": [
+        {
+          "id": "marco-antonio-solis-01",
+          "title": "Si no te hubieras ido",
+          "key": ""
+        },
+        {
+          "id": "marco-antonio-solis-02",
+          "title": "Si te hago tanto mal",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "zalo-reyes",
+      "title": "Mix Zalo Reyes",
+      "section": "adulto-mayor",
+      "status": "activo",
+      "note": "Composición tomada del PowerPoint; tonalidades por confirmar.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "03_-_MIX_ZALO_REYES_c6mbgk",
+        "version": "v1793562272",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793562272/03_-_MIX_ZALO_REYES_c6mbgk.mp3",
+        "sourceFormat": "MP3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.671Z"
+      },
+      "tracks": [
+        {
+          "id": "zalo-reyes-01",
+          "title": "Llorando me alejé",
+          "key": ""
+        },
+        {
+          "id": "zalo-reyes-02",
+          "title": "Con una lágrima en la garganta",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "leo-dan",
+      "title": "Mix Leo Dan",
+      "section": "adulto-mayor",
+      "status": "activo",
+      "note": "Listado del PowerPoint; tonalidades por confirmar.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "02_-_MIX_LEO_DAN_owdybq",
+        "version": "v1793551922",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551922/02_-_MIX_LEO_DAN_owdybq.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.320Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": [
+        {
+          "id": "leo-dan-01",
+          "title": "Te he prometido",
+          "key": ""
+        },
+        {
+          "id": "leo-dan-02",
+          "title": "Por qué se fue",
+          "key": ""
+        },
+        {
+          "id": "leo-dan-03",
+          "title": "Amor divino",
+          "key": ""
+        },
+        {
+          "id": "leo-dan-04",
+          "title": "Puerto Montt",
+          "key": ""
+        },
+        {
+          "id": "leo-dan-05",
+          "title": "Y la lluvia caerá",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "nueva-ola",
+      "title": "Mix clásicos Nueva Ola",
+      "section": "adulto-mayor",
+      "status": "activo",
+      "note": "Archivo identificado como CON SECUENCIA. El detalle de canciones queda por confirmar: el PowerPoint mezcla títulos e indicaciones.",
+      "mode": "secuencia",
+      "audio": {
+        "publicId": "04_-_MIX_NUEVA_OLA_CON_SECUENCIA_at4nsl",
+        "version": "v1793551913",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551913/04_-_MIX_NUEVA_OLA_CON_SECUENCIA_at4nsl.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.311Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "koky",
+      "title": "Mix Koky y su Banda Tropical",
+      "section": "cumbia",
+      "status": "activo",
+      "note": "Referencias del PowerPoint; títulos y tonalidades por confirmar.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "mix_koky_hozfdx",
+        "version": "v1793567850",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793567850/mix_koky_hozfdx.mp3",
+        "sourceFormat": "MP3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T21:25:20.114290+00:00"
+      },
+      "tracks": [
+        {
+          "id": "koky-01",
+          "title": "Porque de ahora en adelante",
+          "key": ""
+        },
+        {
+          "id": "koky-02",
+          "title": "Dios mío, haz que me enamore",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "eros",
+      "title": "Mix Eros Ramazzotti",
+      "section": "cumbia",
+      "status": "activo",
+      "note": "Archivo identificado como MIX EROS RAMAZZOTTI LA MORENA PELIGROSA; composición exacta y tonalidades por confirmar con dirección musical.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_EROS_RAMAZZOTTI_LA_MORENA_PELIGROSA_xopdiz",
+        "version": "v1793562548",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793562548/MIX_EROS_RAMAZZOTTI_LA_MORENA_PELIGROSA_xopdiz.mp3",
+        "sourceFormat": "MP3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.688Z"
+      },
+      "tracks": []
+    },
+    {
+      "id": "vicente",
+      "title": "Mix Vicente",
+      "section": "cumbia",
+      "status": "activo",
+      "note": "Composición exacta y tonalidades por confirmar.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "04_-_MIX_VICENTE_qksff3",
+        "version": "v1793563129",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563129/04_-_MIX_VICENTE_qksff3.mp3",
+        "sourceFormat": "M4A",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.093Z"
+      },
+      "tracks": []
+    },
+    {
+      "id": "adrian",
+      "title": "Mix Adrián",
+      "section": "cumbia",
+      "status": "activo",
+      "note": "Listado del PowerPoint; tonalidades por confirmar.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "09_-_MIX_ADRIAN.mp3_mv3ngn",
+        "version": "v1793551905",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551905/09_-_MIX_ADRIAN.mp3_mv3ngn.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.289Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": [
+        {
+          "id": "adrian-01",
+          "title": "Tarjetita de invitación",
+          "key": ""
+        },
+        {
+          "id": "adrian-02",
+          "title": "Pastorcita",
+          "key": ""
+        },
+        {
+          "id": "adrian-03",
+          "title": "Chica vacilona",
+          "key": ""
+        },
+        {
+          "id": "adrian-04",
+          "title": "Vida de mi vida",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "la-noche",
+      "title": "Mix La Noche",
+      "section": "cumbia",
+      "status": "activo",
+      "note": "Títulos del PowerPoint; original M4A de 4,53 MB, entrega MP3.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "07_-_MIX_LA_NOCHE_gvjwck",
+        "version": "v1793565764",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793565764/07_-_MIX_LA_NOCHE_gvjwck.mp3",
+        "sourceFormat": "M4A",
+        "sourceSizeMB": 4.53,
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:43:39.100168+00:00"
+      },
+      "tracks": [
+        {
+          "id": "la-noche-01",
+          "title": "Que nadie se entere",
+          "key": ""
+        },
+        {
+          "id": "la-noche-02",
+          "title": "Amor sobre cuatro ruedas",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "antonio-rios",
+      "title": "Mix Antonio Ríos",
+      "section": "cumbia",
+      "status": "nuevo",
+      "note": "Solo estas tres canciones. Confirmar que el audio cargado corresponde a esta versión; no se usa la composición antigua del PowerPoint.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_ANTONIO_RIOS_rvlvpu",
+        "version": "v1793549572",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549572/MIX_ANTONIO_RIOS_rvlvpu.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.832Z",
+        "sourceFormat": "MOV"
+      },
+      "tracks": [
+        {
+          "id": "antonio-rios-01",
+          "title": "Quisiera recorrer tu cuerpo",
+          "key": ""
+        },
+        {
+          "id": "antonio-rios-02",
+          "title": "Amigo mío",
+          "key": ""
+        },
+        {
+          "id": "antonio-rios-03",
+          "title": "Nunca me faltes",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "alegria",
+      "title": "Mix Alegría",
+      "section": "cumbia",
+      "status": "activo",
+      "note": "Hay una versión de ensayo adicional en la carpeta.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_ALEGRIA.mp3_y7nyen",
+        "version": "v1793550690",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793550690/MIX_ALEGRIA.mp3_y7nyen.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.892Z",
+        "sourceFormat": "MOV"
+      },
+      "tracks": []
+    },
+    {
+      "id": "amar-azul",
+      "title": "Mix Amar Azul",
+      "section": "nuevos",
+      "status": "nuevo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_AMAR_AZUL_FINAL_y4ltwl",
+        "version": "v1793549474",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549474/MIX_AMAR_AZUL_FINAL_y4ltwl.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.874Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "caricia",
+      "title": "Mix Caricia",
+      "section": "nuevos",
+      "status": "nuevo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "mix_caricia_e9py1y",
+        "version": "v1793548738",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793548738/mix_caricia_e9py1y.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.836Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "chileno",
+      "title": "Mix Chileno",
+      "section": "nuevos",
+      "status": "nuevo",
+      "note": "Versión preliminar: el archivo de Cloudinary está identificado como preview.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_CHILENO_preview_xripna",
+        "version": "v1793562710",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793562710/MIX_CHILENO_preview_xripna.mp3",
+        "sourceFormat": "MP3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.677Z"
+      },
+      "tracks": []
+    },
+    {
+      "id": "merengue",
+      "title": "Mix Merengue",
+      "section": "nuevos",
+      "status": "nuevo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "mix_merengue_BB_cog7x6",
+        "version": "v1793563108",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563108/mix_merengue_BB_cog7x6.mp3",
+        "sourceFormat": "MP3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.720Z"
+      },
+      "tracks": []
+    },
+    {
+      "id": "bruna",
+      "title": "Mix Bruna",
+      "section": "originales",
+      "status": "activo",
+      "note": "Mix completo: Agonía, Luna Amiga y Ahogado en un bar. Cada tema también está disponible por separado.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_BRUNA_COMPLETO_AGONIA_-_LUNA_-_AHOGADO.mp3_ppmfj4",
+        "version": "v1793568407",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793568407/MIX_BRUNA_COMPLETO_AGONIA_-_LUNA_-_AHOGADO.mp3_ppmfj4.mp3",
+        "sourceFormat": "MP3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T21:28:22.204218+00:00"
+      },
+      "tracks": [
+        {
+          "id": "bruna-01",
+          "title": "Agonía",
+          "key": ""
+        },
+        {
+          "id": "bruna-02",
+          "title": "Luna Amiga",
+          "key": ""
+        },
+        {
+          "id": "bruna-03",
+          "title": "Ahogado en un bar",
+          "key": ""
+        }
+      ]
+    },
+    {
+      "id": "agonia",
+      "title": "Agonía",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_Agonia_ma9nzb",
+        "version": "v1793549770",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549770/BB_-_Agonia_ma9nzb.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:32.549Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "luna-amiga",
+      "title": "Luna Amiga",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_Luna_Amiga_bxxipu",
+        "version": "v1793549769",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549769/BB_-_Luna_Amiga_bxxipu.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.268Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "ahogado",
+      "title": "Ahogado en un bar",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_Ahogado_En_Un_Bar_-_Master.mp3_1_u363e0",
+        "version": "v1793549767",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549767/BB_-_Ahogado_En_Un_Bar_-_Master.mp3_1_u363e0.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.267Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "te-juro",
+      "title": "Te juro",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_Te_Juro_klba9m",
+        "version": "v1793549770",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549770/BB_-_Te_Juro_klba9m.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:32.576Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "no-sufrire",
+      "title": "No sufriré por nadie",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_No_sufrire_por_nadie_fqwo81",
+        "version": "v1793549770",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549770/BB_-_No_sufrire_por_nadie_fqwo81.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:32.552Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "para-no-verte",
+      "title": "Para no verte más",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_Para_No_Verte_Más_j2krgp",
+        "version": "v1793550062",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793550062/BB_-_Para_No_Verte_Más_j2krgp.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:32.569Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "chupacabras",
+      "title": "La boda del chupacabras",
+      "section": "originales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_La_Boda_del_Chupacabras_nmmafs",
+        "version": "v1793549768",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549768/BB_-_La_Boda_del_Chupacabras_nmmafs.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.272Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "yo-creia",
+      "title": "Yo creía que todo",
+      "section": "produccion",
+      "status": "produccion",
+      "note": "Master en carpeta; se conserva en producción / lanzamiento según tu indicación.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "BB_-_Yo_Creía_Que_Todo_-_Master_jdjzhx",
+        "version": "v1793550224",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793550224/BB_-_Yo_Creía_Que_Todo_-_Master_jdjzhx.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:32.548Z",
+        "sourceFormat": "M4A"
+      },
+      "tracks": []
+    },
+    {
+      "id": "me-tienes-loco",
+      "title": "Me tienes loco",
+      "section": "produccion",
+      "status": "produccion",
+      "note": "Maqueta; no es una versión final.",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "m_tienes_loco_maqueta.mp3_zrkxxy",
+        "version": "v1793549758",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549758/m_tienes_loco_maqueta.mp3_zrkxxy.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.861Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "cuecas",
+      "title": "Cuecas",
+      "section": "especiales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "05_-_CUECAS_aqbuha",
+        "version": "v1793563127",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793563127/05_-_CUECAS_aqbuha.mp3",
+        "sourceFormat": "M4A",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:30.686Z"
+      },
+      "tracks": []
+    },
+    {
+      "id": "rafaga",
+      "title": "Mix Ráfaga",
+      "section": "adicionales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "06_-_MIX_RAFAGA.mp3_aetjnp",
+        "version": "v1793551905",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551905/06_-_MIX_RAFAGA.mp3_aetjnp.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.308Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "tao-tao",
+      "title": "Mix Tao Tao",
+      "section": "adicionales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "mix_tao_tao.mp3_gkuduu",
+        "version": "v1793551902",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793551902/mix_tao_tao.mp3_gkuduu.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:31.899Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "alegria-ensayo",
+      "title": "Mix Alegría · ensayo",
+      "section": "adicionales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "MIX_ALEGRIA_ENSAYO_BB.mp3_hecoqc",
+        "version": "v1793549763",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549763/MIX_ALEGRIA_ENSAYO_BB.mp3_hecoqc.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.266Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "intro-2027",
+      "title": "Intro Banda Bruna 2027",
+      "section": "adicionales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "INTRO_BANDA_BRUNA_2027.mp3_jhofj5",
+        "version": "v1793549760",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549760/INTRO_BANDA_BRUNA_2027.mp3_jhofj5.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.270Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    },
+    {
+      "id": "outro-2027",
+      "title": "Outro Banda Bruna 2027",
+      "section": "adicionales",
+      "status": "activo",
+      "note": "",
+      "mode": "por-confirmar",
+      "audio": {
+        "publicId": "OUTRO_BB_2027.mp3_jgokbr",
+        "version": "v1793549759",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549759/OUTRO_BB_2027.mp3_jgokbr.mp3",
+        "verified": true,
+        "httpStatus": 200,
+        "checkedAt": "2026-11-01T20:38:33.795Z",
+        "sourceFormat": "MP3"
+      },
+      "tracks": []
+    }
+  ],
+  "inventory": {
+    "folder": "BANDA BRUNA/Music BB",
+    "reviewedOn": "2026-11-01",
+    "assetCount": 37,
+    "missingIds": []
+  }
+}

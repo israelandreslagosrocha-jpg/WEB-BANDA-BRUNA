@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import vm from 'node:vm';
+import {validEndpoint,validateSubscription,pushPayload} from '../src/modules/intranet/pushValidation.js';
+const subscription={endpoint:'https://fcm.googleapis.com/fcm/send/example',keys:{p256dh:'B'+'a'.repeat(86),auth:'a'.repeat(22)}};
+assert.equal(validateSubscription(subscription).endpoint,subscription.endpoint);
+for(const endpoint of ['http://fcm.googleapis.com/x','https://localhost/x','https://127.0.0.1/x','https://fcm.googleapis.com.evil.test/x','https://evil@fcm.googleapis.com/x','https://fcm.googleapis.com:444/x'])assert.equal(validEndpoint(endpoint),false);
+assert.throws(()=>validateSubscription({...subscription,keys:{auth:'bad'}}));
+const payload=JSON.parse(pushPayload({id:'event-1',body:'Privado',payment_amount:50000}));
+assert.equal(payload.url,'/admin/personal');assert.ok(!JSON.stringify(payload).includes('Privado'));assert.ok(!JSON.stringify(payload).includes('50000'));
+const listeners={};const notifications=[];let opened;
+const self={addEventListener:(name,fn)=>listeners[name]=fn,registration:{showNotification:async(title,options)=>notifications.push({title,options})},location:{origin:'https://bandabruna.cl'},clients:{matchAll:async()=>[],openWindow:async url=>opened=url}};
+vm.runInNewContext(await fs.readFile('public/intranet-sw.js','utf8'),{self,URL});
+let work;listeners.push({data:{json:()=>({title:'No confiable',body:'Texto privado',url:'https://evil.test',tag:'event-1'})},waitUntil:p=>work=p});await work;
+assert.equal(notifications[0].title,'Banda Bruna · Novedades');assert.ok(!notifications[0].options.body.includes('privado'));
+listeners.notificationclick({notification:{close(){}},waitUntil:p=>work=p});await work;assert.equal(opened,'https://bandabruna.cl/admin/personal');
+console.log('OK: suscripciones, rechazo SSRF, aviso sin datos privados y apertura segura de la intranet. Sin envíos reales.');

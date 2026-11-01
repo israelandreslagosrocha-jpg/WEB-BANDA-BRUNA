@@ -1,0 +1,120 @@
+[
+  {
+    "id": "ahogado-en-un-bar",
+    "name": "Ahogado en un Bar",
+    "garments": [
+      "Chaqueta y pantalón de mezclilla",
+      "Polera negra Banda Bruna",
+      "Zapatillas blancas"
+    ],
+    "description": "Chaqueta y pantalón de mezclilla · Polera negra Banda Bruna · Zapatillas blancas",
+    "suggested": false,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/ahogado-en-un-bar_jai7ej.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/ahogado-en-un-bar_jai7ej.webp",
+    "cloudinaryPublicId": "ahogado-en-un-bar_jai7ej"
+  },
+  {
+    "id": "azul-gala",
+    "name": "Azul Gala",
+    "garments": [
+      "Traje azul: chaqueta y pantalón",
+      "Camisa blanca",
+      "Zapatos negros de charol"
+    ],
+    "description": "Traje azul: chaqueta y pantalón · Camisa blanca · Zapatos negros de charol",
+    "suggested": false,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/azul-gala_k6j1ab.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/azul-gala_k6j1ab.webp",
+    "cloudinaryPublicId": "azul-gala_k6j1ab"
+  },
+  {
+    "id": "noche-plata",
+    "name": "Noche Plata",
+    "garments": [
+      "Pantalón negro",
+      "Camisa negra",
+      "Bolero / chaleco gris",
+      "Zapatos negros de charol"
+    ],
+    "description": "Pantalón negro · Camisa negra · Bolero / chaleco gris · Zapatos negros de charol",
+    "suggested": false,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/noche-plata_n9jtax.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/noche-plata_n9jtax.webp",
+    "cloudinaryPublicId": "noche-plata_n9jtax"
+  },
+  {
+    "id": "blanco-urbano",
+    "name": "Blanco Urbano",
+    "garments": [
+      "Pantalón blanco",
+      "Polera negra",
+      "Bolero / chaleco gris",
+      "Zapatillas blancas"
+    ],
+    "description": "Pantalón blanco · Polera negra · Bolero / chaleco gris · Zapatillas blancas",
+    "suggested": false,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/blanco-urbano_ylpekn.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/blanco-urbano_ylpekn.webp",
+    "cloudinaryPublicId": "blanco-urbano_ylpekn"
+  },
+  {
+    "id": "rojo-escenario",
+    "name": "Rojo Escenario",
+    "garments": [
+      "Pantalón negro",
+      "Camisa negra",
+      "Bolero / chaleco rojo brillante",
+      "Zapatos negros de charol"
+    ],
+    "description": "Pantalón negro · Camisa negra · Bolero / chaleco rojo brillante · Zapatos negros de charol",
+    "suggested": false,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/rojo-escenario_awrlls.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/rojo-escenario_awrlls.webp",
+    "cloudinaryPublicId": "rojo-escenario_awrlls"
+  },
+  {
+    "id": "azul-nocturno",
+    "name": "Azul Nocturno",
+    "garments": [
+      "Pantalón negro",
+      "Polera negra",
+      "Bolero / chaleco azul",
+      "Zapatos negros de charol"
+    ],
+    "description": "Pantalón negro · Polera negra · Bolero / chaleco azul · Zapatos negros de charol",
+    "suggested": false,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/azul-nocturno_nhz6fr.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/azul-nocturno_nhz6fr.webp",
+    "cloudinaryPublicId": "azul-nocturno_nhz6fr"
+  },
+  {
+    "id": "rojo-polar",
+    "name": "Rojo Polar",
+    "garments": [
+      "Pantalón blanco",
+      "Polera negra",
+      "Bolero / chaleco rojo brillante",
+      "Zapatillas blancas"
+    ],
+    "description": "Pantalón blanco · Polera negra · Bolero / chaleco rojo brillante · Zapatillas blancas",
+    "suggested": true,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/rojo-polar_cncmwg.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/rojo-polar_cncmwg.webp",
+    "cloudinaryPublicId": "rojo-polar_cncmwg"
+  },
+  {
+    "id": "denim-plata",
+    "name": "Denim Plata",
+    "garments": [
+      "Pantalón de mezclilla",
+      "Polera negra",
+      "Bolero / chaleco gris",
+      "Zapatillas blancas"
+    ],
+    "description": "Pantalón de mezclilla · Polera negra · Bolero / chaleco gris · Zapatillas blancas",
+    "suggested": true,
+    "image": "https://res.cloudinary.com/dhgifjpkh/image/upload/denim-plata_vinr3j.webp",
+    "cloudinaryUrl": "https://res.cloudinary.com/dhgifjpkh/image/upload/denim-plata_vinr3j.webp",
+    "cloudinaryPublicId": "denim-plata_vinr3j"
+  }
+]

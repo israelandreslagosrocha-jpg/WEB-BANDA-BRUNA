@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import { personalizeEvent } from '../src/modules/intranet/personalEvent.js';
+import { rehearsalPdf } from '../src/modules/intranet/rehearsalPdf.js';
+import { outfits } from '../src/modules/intranet/outfits.js';
+const calls=[];
+const data={intranet_event_payments:[{entry_id:'event-1',member_email:'israellagos@bandabruna.cl',amount_clp:50000},{entry_id:'event-1',member_email:'gersonulloa@bandabruna.cl',amount_clp:65000}],intranet_receipts:[{entry_id:'event-1',user_id:'israel',completed:[0],personal_checklist:[{id:'task-1',text:'Cargar body y baterías de respaldo',done:true},{id:'task-2',text:'Llevar audífonos in ear y alargador',done:false}]}]};
+const client={from(table){const filters=[];const q={select(){return q;},eq(k,v){filters.push([k,v]);return q;},async maybeSingle(){calls.push({table,filters});return {data:data[table].find(r=>filters.every(([k,v])=>r[k]===v))||null,error:null};}};return q;}};
+const entry={id:'event-1',kind:'evento',title:'Ejemplo · Consolidado personal del evento',author:'Jaime Cárdenas',starts_at:'2026-11-07T22:00:00Z',location:'Evento de demostración · Temuco',event_details:{departure_at:'2026-11-07T18:00:00Z',meeting_point:'Sala de ensayo · dirección de ejemplo',outfit_slug:'blanco-urbano'},body:'Ejemplo de ficha. Considerar dos horas de viaje. No habrá amenities: llevar agua y snack.',checklist:['Llevar tenida completa','Revisar conexiones y alargadores','Confirmar hora y punto de encuentro'],music:[{id:'viking-1',purpose:'show',mode:'secuencia',notes:'Apertura con la intro. Revisar cortes.'},{id:'antonio-rios',purpose:'show',mode:'bruto',notes:'Solo Quisiera recorrer tu cuerpo, Amigo mío y Nunca me faltes.'}]};
+const own=await personalizeEvent({user:{id:'israel',email:'IsraelLagos@bandabruna.cl'},client},entry);
+assert.equal(own.payment_amount,50000);
+assert.equal(own.member_email,'israellagos@bandabruna.cl');
+assert.equal(own.personal_checklist.length,2);
+const other=await personalizeEvent({user:{id:'gerson',email:'gersonulloa@bandabruna.cl'},client},entry);
+assert.equal(other.payment_amount,65000);
+assert.equal(other.personal_checklist.length,0);
+assert.ok(calls.every(c=>c.filters.some(([k,v])=>k==='entry_id'&&v==='event-1')));
+assert.equal(outfits.length,8);assert.equal(new Set(outfits.map(o=>o.id)).size,8);
+for(const outfit of outfits){const bytes=await fs.readFile(new URL('../public/assets/images/tenidas/'+outfit.id+'.webp',import.meta.url));assert.equal(bytes.toString('ascii',8,12),'WEBP');assert.ok(bytes.length<250000);}
+const pdf=await rehearsalPdf(own);assert.equal(pdf.subarray(0,4).toString(),'%PDF');
+await fs.mkdir('output/pdf',{recursive:true});await fs.writeFile('output/pdf/consolidado-evento-ejemplo-bruna.pdf',pdf);
+const empty=await rehearsalPdf({...own,music:[],payment_amount:null});assert.ok(empty.length>10000);
+console.log('OK: pago y checklist por sesión, 8 WebP, PDF consolidado y evento sin setlist.');
