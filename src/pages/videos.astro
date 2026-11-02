@@ -68,8 +68,7 @@ try {
     });
 
     const formattedYt = dedupedYt.map((v: any, idx: number) => {
-      const orderIdx = (v.web_order || idx + 1) - 1;
-      const fallbackItem = (curatedFallback as any)?.youtube?.[orderIdx];
+      const fallbackItem = (curatedFallback as any)?.youtube?.find((item: any) => item.url.includes(v.external_id));
       let thumb = v.thumbnail_url;
       if (!thumb || thumb.startsWith('/assets/images/') || (v.external_id && !thumb.includes(v.external_id))) {
         thumb = fallbackItem?.thumbnail || (v.external_id ? `https://i.ytimg.com/vi/${v.external_id}/hqdefault.jpg` : '');
@@ -92,10 +91,9 @@ try {
   // Si hay reels de Facebook en Supabase
   if (fbRes.data && fbRes.data.length > 0) {
     const formattedFb = fbRes.data.map((r: any, idx: number) => {
-      const orderIdx = (r.web_order || idx + 1) - 1;
-      const fallbackItem = (curatedFallback as any)?.facebook?.[orderIdx];
+      const fallbackItem = (curatedFallback as any)?.facebook?.find((item: any) => item.url.replace(/\/$/, '') === r.url?.replace(/\/$/, ''));
       let thumb = r.thumbnail_url;
-      if ((!thumb || thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail) {
+      if ((!thumb || !thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail?.startsWith('/assets/images/')) {
         thumb = fallbackItem.thumbnail;
       }
       return {
@@ -103,7 +101,7 @@ try {
         title: r.title || r.caption || fallbackItem?.title || 'Banda Bruna en vivo',
         url: r.url,
         thumbnail: thumb || '/assets/images/facebook/fb_fiestas_patrias.webp',
-        duration: '0:45',
+        duration: 'Reel',
         category: 'Facebook Reel'
       };
     });
@@ -114,10 +112,9 @@ try {
   // Si hay reels de Instagram en Supabase
   if (igRes.data && igRes.data.length > 0) {
     const formattedIg = igRes.data.map((r: any, idx: number) => {
-      const orderIdx = (r.web_order || idx + 1) - 1;
-      const fallbackItem = (curatedFallback as any)?.instagram?.[orderIdx];
+      const fallbackItem = (curatedFallback as any)?.instagram?.find((item: any) => item.url.replace(/\/$/, '') === r.url?.replace(/\/$/, ''));
       let thumb = r.thumbnail_url;
-      if ((!thumb || thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail) {
+      if ((!thumb || !thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail?.startsWith('/assets/images/')) {
         thumb = fallbackItem.thumbnail;
       }
       return {
@@ -125,7 +122,7 @@ try {
         title: r.title || r.caption || fallbackItem?.title || 'Banda Bruna en Instagram',
         url: r.url,
         thumbnail: thumb || '/assets/images/instagram/ig_boca_de_lobos.webp',
-        duration: '0:45',
+        duration: 'Reel',
         category: 'Instagram Reel'
       };
     });
@@ -136,10 +133,9 @@ try {
   // Si hay videos de TikTok en Supabase
   if (ttRes.data && ttRes.data.length > 0) {
     const formattedTt = ttRes.data.map((t: any, idx: number) => {
-      const orderIdx = (t.web_order || idx + 1) - 1;
-      const fallbackItem = (curatedFallback as any)?.tiktok?.[orderIdx];
+      const fallbackItem = (curatedFallback as any)?.tiktok?.find((item: any) => item.url.replace(/\/$/, '') === t.url?.replace(/\/$/, ''));
       let thumb = t.thumbnail_url;
-      if ((!thumb || thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail) {
+      if ((!thumb || !thumb.startsWith('/assets/images/')) && fallbackItem?.thumbnail?.startsWith('/assets/images/')) {
         thumb = fallbackItem.thumbnail;
       }
       return {
@@ -147,7 +143,7 @@ try {
         title: t.title || t.caption || fallbackItem?.title || 'Banda Bruna en TikTok',
         url: t.url,
         thumbnail: thumb || '/assets/images/tiktok/tiktok_minero.webp',
-        duration: '0:45',
+        duration: 'TikTok',
         category: 'TikTok Oficial'
       };
     });

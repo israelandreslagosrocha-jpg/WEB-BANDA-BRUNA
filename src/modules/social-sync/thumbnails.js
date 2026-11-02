@@ -1,4 +1,5 @@
 import { getVideoPlaylists, getInstagramFeed, getFacebookFeed } from '../../services/socialApi.js';
+import curated from '../../data/curatedVideos.json';
 
 const genericCover = '/assets/images/hero/hero_1.webp';
 function postKey(value) {
@@ -11,7 +12,7 @@ function postKey(value) {
   } catch { return ''; }
 }
 const saved = new Map();
-for (const item of [...Object.values(getVideoPlaylists()).flat(), ...getInstagramFeed(), ...getFacebookFeed()]) {
+for (const item of [...Object.values(getVideoPlaylists()).flat(), ...getInstagramFeed(), ...getFacebookFeed(), ...Object.values(curated).flat()]) {
   const image = item.thumbnail || item.imageUrl;
   if (image?.startsWith('/assets/images/')) saved.set(postKey(item.url || item.link), image);
 }
