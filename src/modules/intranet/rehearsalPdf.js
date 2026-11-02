@@ -1,3 +1,4 @@
+import {pendingText} from './workflow.js';
 import { outfitFor } from './outfits.js';
 import { memberFor } from './members.js';
 import outfitImages from './outfit-pdf-images.json' with { type: 'json' };
@@ -6,7 +7,7 @@ import { findMusic, musicPurposes, validateMusic, downloadAudioUrl } from './cat
 export async function rehearsalPdf(plan) {
  const rows=validateMusic(plan.music||[]);
  const isEvent=['evento','tenida'].includes(plan.kind);
- if(!rows.length&&!isEvent)throw new Error('Selecciona al menos un tema para generar el PDF.');
+ if(!rows.length&&!isEvent&&plan.kind!=='ensayo')throw new Error('Selecciona al menos un tema para generar el PDF.');
  const doc=new PDFDocument({size:'A4',margin:48,bufferPages:true,info:{Title:plan.title||'Plan musical Banda Bruna',Author:'Banda Bruna'}});
  const chunks=[];const finished=new Promise((resolve,reject)=>{doc.on('data',b=>chunks.push(b));doc.on('end',()=>resolve(Buffer.concat(chunks)));doc.on('error',reject);});
  const text=(value,size=10,color='#334155')=>doc.font('Helvetica').fontSize(size).fillColor(color).text(String(value||''),{lineGap:3});
@@ -31,6 +32,8 @@ export async function rehearsalPdf(plan) {
   }else text(`Tenida: ${plan.outfit_text||'Por confirmar'}`);
   if(!plan.starts_at)text('Fecha y horario de tocata: por confirmar');
  }
+ if(['evento','tenida','ensayo'].includes(plan.kind)&&!rows.length){doc.moveDown(.5);text(pendingText(plan),11,'#947137');}
+ if(plan.musical_notes){doc.moveDown(.5);text('Indicaciones musicales de Vicente',11,'#947137');text(plan.musical_notes);}
  if(plan.body){doc.moveDown();text(plan.body);}
  const internal=plan.internal_work||plan.rehearsal?.internal_work;
  if(internal){doc.moveDown(.5);text('Trabajo interno y participantes',10,'#947137');text(internal);}

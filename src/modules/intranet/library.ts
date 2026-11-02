@@ -6,6 +6,7 @@ const purposes:Record<string,string>={ensayo:'Próximo ensayo',show:'Próximo sh
 const modes:Record<string,string>={'por-confirmar':'Secuencia / bruto: por confirmar',secuencia:'Con secuencia',bruto:'En bruto',mixto:'Mixto'};
 let catalogue:any, selected:Selection[]=[], canPublish=false;
 export function selectedMusic(){return selected.map(row=>({...row}));}
+export function setSelectedMusic(rows:Selection[]){selected=rows.map(r=>({...r}));renderSelection();renderPicker();}
 export function clearMusic(){selected=[];renderSelection();renderPicker();}
 export function musicItem(id:string){for(const item of catalogue?.items||[]){if(item.id===id)return item;const track=item.tracks.find((t:any)=>t.id===id);if(track)return {...track,parentTitle:item.title,audio:item.audio,tracks:[]};}return null;}
 function downloadUrl(audio:any){const url=new URL(audio.url);url.pathname=url.pathname.replace('/video/upload/','/video/upload/fl_attachment/');return url.href;}
@@ -32,14 +33,15 @@ export function setupLibrary(data:any,publish:boolean){
  ['library-search','library-category','library-missing'].forEach(id=>$(id).addEventListener('input',renderLibrary));
  renderLibrary();
  if(publish){
-  $('music-picker').hidden=false;
+
   $('picker-search').addEventListener('input',renderPicker);
   $('repertoire-picker').addEventListener('click',event=>{
    const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-music-add]');if(!button)return;
    if(selected.length>=100){alert('Puedes seleccionar hasta 100 temas o mixes.');return;}
    const id=button.dataset.musicAdd!;if(selected.some(row=>row.id===id))return;
    const item=data.items.find((i:any)=>i.id===id)||data.items.find((i:any)=>i.tracks.some((t:any)=>t.id===id));
-   selected.push({id,purpose:($('kind') as HTMLSelectElement).value==='personal'?'personal':['evento','tenida'].includes(($('kind') as HTMLSelectElement).value)?'show':'ensayo',mode:item.mode,notes:''});
+   const target=($('music-target') as HTMLSelectElement)?.selectedOptions[0]?.dataset.kind;
+   selected.push({id,purpose:!$('music-director').hidden?(target==='ensayo'?'ensayo':'show'):($('kind') as HTMLSelectElement).value==='personal'?'personal':['evento','tenida'].includes(($('kind') as HTMLSelectElement).value)?'show':'ensayo',mode:item.mode,notes:''});
    renderSelection();renderPicker();
   });
   $('music-selected').addEventListener('click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('button');if(!button)return;

@@ -1,3 +1,4 @@
+import { complementPublishedPlan } from '../../../modules/intranet/musicalPlan.js';
 import { officialAgenda } from '../../../modules/intranet/officialAgenda.js';
 import { personalizeEvent } from '../../../modules/intranet/personalEvent.js';
 import { intranetAuth } from '../../../modules/intranet/auth.js';
@@ -24,9 +25,11 @@ export async function POST({request}) {
   } else {
    if(!['director','jefatura'].includes(auth.role))return jsonResponse({error:'Solo dirección musical o jefatura pueden preparar planes.'},403);
    if(['evento','tenida'].includes(input.kind)&&auth.role!=='jefatura')return jsonResponse({error:'Solo jefatura puede preparar la ficha de evento.'},403);
+   if(auth.role!=='director'&&Array.isArray(input.music)&&input.music.length)return jsonResponse({error:'Solo Vicente puede preparar el setlist.'},403);
    plan={all_day:input.all_day===true,kind:input.kind,title:String(input.title||'Plan musical').slice(0,200),body:String(input.body||'').slice(0,20000),starts_at:input.starts_at||null,location:String(input.location||'').slice(0,300),recipients:Array.isArray(input.recipients)?input.recipients.filter(v=>typeof v==='string').slice(0,7):[],music:input.music,internal_work:String(input.internal_work||'').slice(0,10000),author:auth.user.email,event_details:input.event_details||{},outfit_text:String(input.outfit_text||'').slice(0,1000),checklist:Array.isArray(input.checklist)?input.checklist.slice(0,50):[],completed:preview&&Array.isArray(input.completed)?input.completed:[],personal_checklist:preview&&Array.isArray(input.personal_checklist)?input.personal_checklist.slice(0,50):[],member_email:memberFor(input.member_email)?input.member_email:auth.user.email,payment_amount:input.payment_amount!=null&&Number.isSafeInteger(input.payment_amount)&&input.payment_amount>=0&&input.payment_amount<=100000000?input.payment_amount:null};
   }
   if(!preview&&plan.event_details?.official_event_id){const {data:official,error}=await auth.client.from('eventos').select('id,nombre,fecha,lugar,ciudad,publicado').eq('id',plan.event_details.official_event_id).eq('publicado',true).maybeSingle();if(error||!official)throw new Error('La fecha oficial no está disponible. Revisa el vínculo antes de descargar el PDF.');plan=officialAgenda([official],[plan])[0];}
+  if(!preview&&(input.entryId||(['evento','tenida'].includes(plan.kind)&&plan.event_details?.official_event_id))){plan=await complementPublishedPlan(auth,plan);plan.music=plan.rehearsal?.music||plan.music||[];}
   const bytes=await rehearsalPdf(plan);
   return new Response(new Uint8Array(bytes),{headers:{'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="plan-musical-banda-bruna.pdf"','Cache-Control':'private, no-store'}});
  } catch(error){return jsonResponse({error:error.message||'No se pudo generar el PDF.'},400);}

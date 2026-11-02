@@ -24,7 +24,7 @@ export function createPreview() {
   previewCatalogue: catalogue,
   previewOfficialEvents:[{id:'official-demo',nombre:'Show oficial de la banda · ejemplo',fecha:'2026-11-28',lugar:'Teatro de ejemplo',ciudad:'Temuco',publicado:true}],
   auth:{getUser:async()=>({data:{user},error:null}),signOut:async()=>({error:null})},
-  rpc:async(_name:string,args:any)=>{const id=crypto.randomUUID();tables.intranet_entries.unshift({...base,...args.payload,id,author_email:user.email});tables.intranet_event_payments.push(...args.payments.map((p:any)=>({...p,entry_id:id})));return {data:id,error:null};},
+  rpc:async(name:string,args:any)=>{const id=crypto.randomUUID();if(name==='save_intranet_musical_plan'){if(member[2]!=='director')return {data:null,error:{message:'Solo Vicente puede editar el setlist.'}};const rows=tables.intranet_musical_plans||=[];const index=rows.findIndex(p=>p.target_key===args.target);const plan={id:index<0?id:rows[index].id,target_key:args.target,music:args.music,general_notes:args.general_notes,author_email:user.email,updated_at:new Date().toISOString()};if(index<0)rows.push(plan);else rows[index]=plan;tables.intranet_entries.unshift({...base,id:crypto.randomUUID(),kind:'comunicado',title:'Dirección musical · setlist actualizado',body:'Vicente actualizó el setlist de una ficha.',author_email:user.email});return {data:plan.id,error:null};}tables.intranet_entries.unshift({...base,...args.payload,id,author_email:user.email});tables.intranet_event_payments.push(...args.payments.map((p:any)=>({...p,entry_id:id})));return {data:id,error:null};},
   from(table:string) {
    let mode='select',payload:any,field:string|undefined,value:any;
    const query:any={

@@ -94,3 +94,13 @@ La agenda del equipo consulta en vivo `eventos` con `publicado=true`, la misma f
 Jefatura puede elegir una fecha oficial al publicar una ficha de evento o tenida. Se guarda su ID en `event_details.official_event_id`; los avisos vinculados quedan agrupados en una actividad del calendario. La fecha, nombre y lugar oficiales tienen prioridad; la hora de tocata se completa en la ficha interna. Sin hora, se muestra «Hora por confirmar». Los PDFs de avisos vinculados vuelven a consultar la fuente oficial al descargarse. Si deja de estar publicada, la agenda avisa que hay que revisar el vínculo y no genera un consolidado con una fecha oficial desactualizada.
 
 No requiere migración adicional de Supabase. Las fechas no publicadas permanecen fuera de esta consulta; las actividades presupuestadas internas siguen disponibles desde las fichas del equipo. No genera notificaciones push por consultar o sincronizar el calendario. Prueba: `node scripts/test_intranet_official_agenda.mjs`.
+
+## Formularios por tipo y dirección musical exclusiva
+
+Aplicar `scripts/intranet_workflow_setup.sql` después de las migraciones anteriores. Reduce las publicaciones nuevas a comunicado, evento, ensayo e indicación personal. Comunicado contiene título, mensaje y destinatarios; personal exige exactamente una persona. Ensayo requiere fecha, hora y lugar. Solo el evento incluye tenida, pagos y preparativos, y solo jefatura lo publica.
+
+Vicente completa y ordena el setlist desde **Dirección musical**, seleccionando una ficha existente de evento/ensayo o una fecha oficial publicada. El plan se guarda en `intranet_musical_plans` y se complementa con la ficha y su PDF; no reemplaza logística, pagos ni tenida. Las fechas oficiales comparten el plan mediante `official:<id>`. Sin selección musical aparece el mensaje de espera de Vicente. Las selecciones antiguas de jefatura no se muestran como repertorio aprobado; se conservan las de Vicente. Vicente también puede citar repertorio en indicaciones personales.
+
+El control se aplica en interfaz, API, RLS y funciones SQL. Solo Vicente puede guardar planes mediante la función protegida; los destinatarios autorizados pueden leerlos. Guardar un plan genera un comunicado para el mismo público y utiliza el canal push ya configurado. Las pruebas SQL se ejecutan dentro de una transacción terminada en ROLLBACK, por lo que no entregan notificaciones ni dejan datos de prueba.
+
+Validación: `node scripts/test_intranet_workflow.mjs`, pruebas de eventos, agenda oficial y push; compilación Astro. `scripts/test_intranet_workflow.sql` comprueba roles reales con JWT de prueba transaccional. Migración aplicada en Supabase el 1 de noviembre de 2026, tras validar los roles reales con ROLLBACK sin persistir datos ni avisos de prueba.
