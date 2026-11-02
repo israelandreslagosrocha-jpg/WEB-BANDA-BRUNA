@@ -12,6 +12,7 @@ import QuoteForm from '../components/forms/QuoteForm.astro';
 import EventSlider from '../components/events/EventSlider.astro';
 import UpcomingEventFlyerCarousel from '../components/events/UpcomingEventFlyerCarousel.astro';
 import TourCalendar from '../components/events/TourCalendar.astro';
+import SocialPostThumbnail from '../components/SocialPostThumbnail.astro';
 
 // La portada muestra agenda, redes y métricas que cambian desde el panel.
 // Se renderiza bajo demanda para reflejar los valores diarios de Supabase sin
@@ -1248,16 +1249,7 @@ const fallbackEditorialPosts = [
                     <span class="text-[9px] text-slate-500 font-mono">#{post.web_order}</span>
                   </div>
 
-                  {post.thumbnail_url && (
-                    <div class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5">
-                      <img 
-                        src={post.thumbnail_url} 
-                        alt={post.title || post.caption || 'Publicación Banda Bruna'} 
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        loading="lazy" 
-                      />
-                    </div>
-                  )}
+                  <SocialPostThumbnail post={post} />
 
                   <h3 class="font-title font-bold text-xs text-white uppercase line-clamp-2 mb-2 group-hover:text-gold-bruna transition-colors">
                     {post.title || post.caption || 'Ver publicación oficial'}

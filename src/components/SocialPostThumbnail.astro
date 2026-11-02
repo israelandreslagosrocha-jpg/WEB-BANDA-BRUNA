@@ -1,0 +1,30 @@
+---
+import { socialThumbnail } from '../modules/social-sync/thumbnails.js';
+const { post } = Astro.props;
+const thumbnail = socialThumbnail(post);
+---
+<figure class="relative aspect-video rounded-xl overflow-hidden bg-black mb-3.5 border border-white/5" data-social-thumbnail>
+  <img src={thumbnail.src} data-fallback={thumbnail.fallback}
+    alt={thumbnail.generic ? 'Banda Bruna en concierto' : (post.title || post.caption || 'Publicación Banda Bruna')}
+    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
+  <figcaption hidden={!thumbnail.generic} class="absolute bottom-0 inset-x-0 px-3 py-1.5 bg-black/75 text-[10px] text-white">Imagen de Banda Bruna · abre la publicación original</figcaption>
+</figure>
+<script>
+  function setupSocialThumbnails() {
+    document.querySelectorAll<HTMLImageElement>('[data-social-thumbnail] img').forEach(image => {
+      if (image.dataset.bound) return;
+      image.dataset.bound = 'true';
+      const fallback = () => {
+        if (!image.dataset.fallback || image.getAttribute('src') === image.dataset.fallback) return;
+        image.src = image.dataset.fallback;
+        image.alt = 'Banda Bruna en concierto';
+        const caption = image.parentElement?.querySelector('figcaption');
+        if (caption) caption.hidden = false;
+      };
+      image.addEventListener('error', fallback);
+      if (image.complete && !image.naturalWidth) fallback();
+    });
+  }
+  setupSocialThumbnails();
+  document.addEventListener('astro:page-load', setupSocialThumbnails);
+</script>
