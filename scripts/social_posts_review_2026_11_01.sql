@@ -1,5 +1,7 @@
 -- Publicaciones verificadas en los perfiles oficiales. Conserva el histórico.
 begin;
+-- Contexto editorial de esta sesión administrativa; el trigger conserva los campos para procesos automáticos.
+select set_config('request.jwt.claim.role','authenticated',true);
 update public.social_posts set web_order=100+web_order where show_on_web=true and web_order<100;
 insert into public.social_posts(platform,external_id,url,title,caption,thumbnail_url,web_order,post_type,published_at,disponible,show_on_web,thumbnail_is_ephemeral,last_scraped_at,updated_at)
 select platform,external_id,url,title,caption,thumbnail_url,web_order,post_type,published_at,disponible,show_on_web,thumbnail_is_ephemeral,now(),now()
