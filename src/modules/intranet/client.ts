@@ -1,3 +1,4 @@
+import { pdfDownloadButton, publicationCopy } from './actions.js';
 import { publicationKinds, publicationFields, musicTarget, complementMusic, pendingText } from './workflow';
 import { officialAgenda } from './officialAgenda';
 import { agendaView, rehearsalView, dayKey } from './schedule';
@@ -37,17 +38,18 @@ function openSection(next: string) {
  const picker=$('music-picker');if(next==='music-plan'){$('musical-picker-slot').append(picker);picker.hidden=false;loadTargetMusic();}else{$('personal-music-slot').append(picker);refreshPublisher();}
  $('publisher').hidden=next!=='publish';
  $('repertoire-library').hidden=next!=='material';
- $('section-title').textContent=({todos:'Toda la información',pendientes:'Avisos sin leer',agenda:'Agenda',ensayo:'Ensayos',material:'Material',personal:'Para mí',publish:'Enviar información','music-plan':'Dirección musical'} as Record<string,string>)[next] || 'Tu información';
+ $('section-title').textContent=({todos:'Toda la información',pendientes:'Avisos sin leer',agenda:'Agenda',ensayo:'Ensayos',material:'Material',personal:'Para mí',publish:'Enviar comunicado','music-plan':'Dirección musical'} as Record<string,string>)[next] || 'Tu información';
  render();
  $('section-title').focus({preventScroll:true});
  $('section-content').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function directorPlanButton(entry:any){return currentRole==='director'&&['evento','tenida','ensayo'].includes(entry.kind)?`<button data-edit-music-target="${esc(musicTarget(entry))}">♫ Preparar / editar setlist</button>`:'';}
+function directorPlanButton(entry:any){return currentRole==='director'&&['evento','tenida','ensayo'].includes(entry.kind)&&musicalTargets.has(musicTarget(entry))?`<button class="setlist-edit-action" data-edit-music-target="${esc(musicTarget(entry))}">${entry.rehearsal?.music?.length?'Editar setlist de esta fecha':'Agregar setlist a esta fecha'}</button>`:'';}
 function refreshMusicalTargets(){
  const old=($('music-target') as HTMLSelectElement).value;musicalTargets=new Map();
- const rows=officialAgenda(officialEvents,entries.filter(e=>['evento','tenida','ensayo'].includes(e.kind)));
+ const rows=complementMusic(officialAgenda(officialEvents,entries.filter(e=>['evento','tenida','ensayo'].includes(e.kind))),musicPlans).sort((a,b)=>(a.starts_at||'9999').localeCompare(b.starts_at||'9999'));
  for(const entry of rows)if(!entry.starts_at||dayKey(entry.starts_at)>=dayKey(new Date()))musicalTargets.set(musicTarget(entry),entry);
  $('music-target').innerHTML='<option value="">Selecciona evento o ensayo</option>'+[...musicalTargets.entries()].map(([key,e])=>`<option value="${esc(key)}" data-kind="${e.kind}">${e.starts_at?esc(date(e.starts_at,e.all_day))+' · ':''}${esc(e.title)}</option>`).join('');($('music-target') as HTMLSelectElement).value=old;
+ $('music-target-list').innerHTML=`<table class="schedule-table"><thead><tr><th>Fecha</th><th>Evento o ensayo</th><th>Setlist</th><th>Acción</th></tr></thead><tbody>${[...musicalTargets.entries()].map(([key,e])=>`<tr><td>${e.starts_at?esc(date(e.starts_at,e.all_day)):'Fecha por confirmar'}</td><td><strong>${esc(e.title)}</strong><small>${e.kind==='ensayo'?'Ensayo':e.official_source?'Evento de agenda oficial':'Evento creado por jefatura'}</small><span>${esc(e.location||'Lugar por confirmar')}</span></td><td>${e.rehearsal?.music?.length?'Setlist disponible':'Pendiente de Vicente'}</td><td><button type="button" class="setlist-edit-action" data-select-music-target="${esc(key)}">${e.rehearsal?.music?.length?'Editar setlist':'Agregar setlist'}</button></td></tr>`).join('')||'<tr><td colspan="4">No hay eventos ni ensayos próximos. Los eventos aparecerán cuando Jaime o César los creen o se confirmen en la agenda oficial.</td></tr>'}</tbody></table>`;
 }
 function loadTargetMusic(){const key=($('music-target') as HTMLSelectElement).value;const entry=musicalTargets.get(key);const plan=musicPlans.find(p=>p.target_key===key);setSelectedMusic(plan?.music||entry?.rehearsal?.music||[]);($('musical-notes') as HTMLTextAreaElement).value=plan?.general_notes||'';$('music-target-info').textContent=entry?`${entry.location||'Lugar por confirmar'} · La tenida y la logística se definen desde jefatura.`:'';$('musical-save-status').textContent='';}
 function eventMarkup(e:any,receipt:any){
@@ -65,7 +67,7 @@ function render() {
  const detail=(e:any)=>{
  if(e.official_only)return `<article class="entry"><h2>${esc(e.title)}</h2><p>${esc(e.location)}</p><p>Fecha de la agenda oficial: ${esc(e.official_date)}. Horario de tocata por confirmar.</p><p>Jaime y César completan la logística y la tenida. Vicente proporciona y ordena el setlist.</p><p class="pending-setlist" ${e.rehearsal?.music?.length?'hidden':''}>${esc(pendingText(e))}</p>${musicSummary(e.rehearsal?.music||[])}${e.musical_notes?`<p class="musical-general">${esc(e.musical_notes)}</p>`:''}${directorPlanButton(e)}<a href="/agenda" target="_blank" rel="noopener">Ver agenda oficial ↗</a></article>`;
  const receipt=receipts.find(r=>r.entry_id===e.id); const author=memberFor(e.author_email)?.[1]||e.author_email;
- return `<article class="entry"><p class="entry-meta">${esc(kinds[e.kind])} · ${esc(author)} · ${esc(date(e.created_at))}${e.recipients.length?' · Privado':''}</p><h2>${esc(e.title)}</h2>${e.starts_at?`<p>${esc(date(e.starts_at,e.all_day))}</p>`:''}${e.location?`<p>📍 ${esc(e.location)}</p>`:''}<p class="entry-body">${esc(e.body)}</p>${Object.entries(rehearsalLabels).filter(([key])=>e.rehearsal?.[key]).map(([key,label])=>`<h3>${esc(label)}</h3><p class="entry-body">${esc(e.rehearsal[key])}</p>`).join('')}${eventMarkup(e,receipt)}${e.setlist_pending?`<p class="pending-setlist">${esc(pendingText(e))}</p>`:''}${e.musical_notes?`<p class="musical-general">Indicaciones de Vicente: ${esc(e.musical_notes)}</p>`:''}${directorPlanButton(e)}${musicSummary(e.rehearsal?.music||[])}${e.rehearsal?.music?.length||['evento','tenida','ensayo'].includes(e.kind)?`<button data-plan-pdf="${e.id}">${['evento','tenida'].includes(e.kind)?'↓ Descargar mi consolidado del evento':'↓ Descargar PDF del plan'}</button>`:''}${e.outfit_text?`<p>Tenida: ${esc(e.outfit_text)}</p>`:''}${e.mix_mode?`<p>Mix: ${esc(e.mix_mode)}</p>`:''}${e.checklist.map((item:string,i:number)=>`<label><input type="checkbox" data-entry="${e.id}" data-index="${i}" ${receipt?.completed.includes(i)?'checked':''}/> ${esc(item)}</label>`).join('')}${e.file_path?`<button data-file="${e.id}">Abrir / descargar ${esc(e.file_name||'archivo')}</button><div id="file-${e.id}"></div>`:''}<button data-read="${e.id}" ${receipt?.read_at?'disabled':''}>${receipt?.read_at?'✓ Leído':'Marcar como leído'}</button></article>`;
+ return `<article class="entry"><p class="entry-meta">${esc(kinds[e.kind])} · ${esc(author)} · ${esc(date(e.created_at))}${e.recipients.length?' · Privado':''}</p><h2>${esc(e.title)}</h2>${e.starts_at?`<p>${esc(date(e.starts_at,e.all_day))}</p>`:''}${e.location?`<p>📍 ${esc(e.location)}</p>`:''}<p class="entry-body">${esc(e.body)}</p>${Object.entries(rehearsalLabels).filter(([key])=>e.rehearsal?.[key]).map(([key,label])=>`<h3>${esc(label)}</h3><p class="entry-body">${esc(e.rehearsal[key])}</p>`).join('')}${eventMarkup(e,receipt)}${e.setlist_pending?`<p class="pending-setlist">${esc(pendingText(e))}</p>`:''}${e.musical_notes?`<p class="musical-general">Indicaciones de Vicente: ${esc(e.musical_notes)}</p>`:''}${directorPlanButton(e)}${musicSummary(e.rehearsal?.music||[])}${!['agenda','ensayo'].includes(filter)&&(e.rehearsal?.music?.length||['evento','tenida','ensayo'].includes(e.kind))?pdfDownloadButton(e):''}${e.outfit_text?`<p>Tenida: ${esc(e.outfit_text)}</p>`:''}${e.mix_mode?`<p>Mix: ${esc(e.mix_mode)}</p>`:''}${e.checklist.map((item:string,i:number)=>`<label><input type="checkbox" data-entry="${e.id}" data-index="${i}" ${receipt?.completed.includes(i)?'checked':''}/> ${esc(item)}</label>`).join('')}${e.file_path?`<button data-file="${e.id}">Abrir / descargar ${esc(e.file_name||'archivo')}</button><div id="file-${e.id}"></div>`:''}<button data-read="${e.id}" ${receipt?.read_at?'disabled':''}>${receipt?.read_at?'✓ Leído':'Marcar como leído'}</button></article>`;
  };
  if(filter==='agenda'){$('feed').innerHTML=agendaView(complementMusic(officialAgenda(officialEvents,visible),musicPlans),{year:calendarYear,month:calendarMonth,selectedDay:calendarDay},(e:any)=>detail(e)+(e.related_entries||[]).map(detail).join(''));return;}
  if(filter==='ensayo'){$('feed').innerHTML=rehearsalView(visible,entries.filter(e=>e.kind==='personal'&&e.author_email==='vicentenunez@bandabruna.cl'&&e.recipients.includes(user.email.toLowerCase())),detail);return;}
@@ -118,11 +120,16 @@ async function init() {
   try{await saveReceipt(id,[...completed]);}catch(e){input.checked=!input.checked;input.disabled=false;message(e);}
  });
  if(member[2]!=='miembro') {
-  $('open-publisher').hidden=false;
-  $('open-publisher').onclick=()=>openSection('publish');
+  $('team-actions').hidden=false;
+  $('role-guidance').textContent=member[2]==='jefatura'?'Jaime y César crean los eventos y definen la logística y la tenida. Vicente completa el setlist.':'Como director musical, agregas el setlist a los eventos de Jaime y César o de la agenda oficial. También puedes enviar comunicados y programar ensayos.';
+  const openPublication=(kind:string)=>{if(!publicationKinds(member[2]).includes(kind))return;($('kind') as HTMLSelectElement).value=kind;clearMusic();openSection('publish');};
+  $('open-publisher').hidden=false;$('open-publisher').onclick=()=>openPublication('comunicado');
+  $('register-rehearsal').hidden=false;$('register-rehearsal').onclick=()=>openPublication('ensayo');
+  if(member[2]==='jefatura'){$('create-event').hidden=false;$('create-event').onclick=()=>openPublication('evento');}
   $('kind').innerHTML=publicationKinds(member[2]).map(k=>`<option value="${k}">${kinds[k]}</option>`).join('');
   const updateFields=()=>{
-   const kind=($('kind') as HTMLSelectElement).value;const f=publicationFields(member[2],kind);
+   const kind=($('kind') as HTMLSelectElement).value;const f=publicationFields(member[2],kind);const copy=publicationCopy[kind];
+   $('publisher-title').textContent=copy.title;$('publisher-description').textContent=copy.description;$('publication-subject').textContent=copy.subject;$('send').textContent=copy.submit;if(filter==='publish')$('section-title').textContent=copy.title;
    $('schedule-fields').hidden=!f.schedule;$('event-fields').hidden=!f.event;$('event-pdf-options').hidden=!f.event;$('outfit-fields').hidden=!f.event;$('event-extras').hidden=!f.event;$('waiting-setlist').hidden=!f.schedule;
    $('personal-music-slot').hidden=!f.music;$('music-picker').hidden=filter!=='music-plan'&&!f.music;
    const form=$('publish-form') as HTMLFormElement;(form.elements.namedItem('starts_at') as HTMLInputElement).required=kind==='ensayo';(form.elements.namedItem('location') as HTMLInputElement).required=kind==='ensayo';
@@ -131,7 +138,9 @@ async function init() {
    $('recipients-hint').textContent=f.personal?'Selecciona una sola persona.':'Sin selección: todos los integrantes.';
   };refreshPublisher=updateFields;
   $('kind').onchange=()=>{clearMusic();updateFields();};updateFields();
-  if(member[2]==='director'){$('open-musical-plan').hidden=false;$('open-musical-plan').onclick=()=>openSection('music-plan');$('music-target').onchange=loadTargetMusic;}
+  if(member[2]==='director'){$('open-musical-plan').hidden=false;$('open-musical-plan').onclick=()=>openSection('music-plan');$('music-target').onchange=loadTargetMusic;
+   $('music-target-list').addEventListener('click',event=>{const button=(event.target as HTMLElement).closest<HTMLButtonElement>('[data-select-music-target]');if(!button)return;($('music-target') as HTMLSelectElement).value=button.dataset.selectMusicTarget!;loadTargetMusic();$('musical-plan-form').scrollIntoView({behavior:'smooth',block:'start'});$('music-target').focus({preventScroll:true});});
+  }
   $('official-event').onchange=()=>{const event=officialEvents.find(e=>String(e.id)===($('official-event') as HTMLSelectElement).value);if(!event)return;const form=$('publish-form') as HTMLFormElement;const start=form.elements.namedItem('starts_at') as HTMLInputElement;if(start.value.split('T')[1])start.value=event.fecha+'T'+start.value.split('T')[1];$('official-date-hint').textContent=`Fecha oficial: ${event.fecha}. Completa la hora de tocata para la ficha.`;(form.elements.namedItem('location') as HTMLInputElement).value=[event.lugar,event.ciudad].filter(Boolean).join(' · ');(form.elements.namedItem('title') as HTMLInputElement).value=event.nombre;};
   const downloadDraft=async()=>{const form=$('publish-form') as HTMLFormElement;try{$('pdf-status').textContent='Preparando PDF…';const target=musicalTargets.get(($('music-target') as HTMLSelectElement).value);await getPlanPdf(filter==='music-plan'?{kind:'ensayo',title:'Setlist · '+(target?.title||'Plan musical'),starts_at:target?.starts_at,location:target?.location,music:selectedMusic(),body:($('musical-notes') as HTMLTextAreaElement).value}:draftPlan(new FormData(form)));$('pdf-status').textContent='PDF descargado.';}catch(e:any){$('pdf-status').textContent=e.message;}};
   $('draft-music-pdf').onclick=downloadDraft;$('event-draft-pdf').onclick=downloadDraft;
