@@ -104,3 +104,11 @@ Vicente completa y ordena el setlist desde **Dirección musical**, seleccionando
 El control se aplica en interfaz, API, RLS y funciones SQL. Solo Vicente puede guardar planes mediante la función protegida; los destinatarios autorizados pueden leerlos. Guardar un plan genera un comunicado para el mismo público y utiliza el canal push ya configurado. Las pruebas SQL se ejecutan dentro de una transacción terminada en ROLLBACK, por lo que no entregan notificaciones ni dejan datos de prueba.
 
 Validación: `node scripts/test_intranet_workflow.mjs`, pruebas de eventos, agenda oficial y push; compilación Astro. `scripts/test_intranet_workflow.sql` comprueba roles reales con JWT de prueba transaccional. Migración aplicada en Supabase el 1 de noviembre de 2026, tras validar los roles reales con ROLLBACK sin persistir datos ni avisos de prueba.
+
+## Ficha accesible desde la agenda · 3 de noviembre de 2026
+
+Los eventos del calendario y de la lista abren una ficha con enlace `#evento=entry:<uuid>` o `#evento=official:<id>`. Jefatura tiene acciones para editar datos, elegir tenida y enviar un comunicado ligado a la fecha. Dirección musical solo modifica su setlist; los integrantes consultan la ficha y su PDF y mantienen su checklist personal. Las fechas oficiales sin ficha permiten a jefatura completar su logística sin duplicar la fecha en el calendario.
+
+Migración `intranet_event_management_setup.sql` aplicada en Supabase: añade revisión de edición y contexto de comunicados. La función restringida `update_intranet_event` actualiza solo logística y pagos, conserva autor/destinatarios/vínculo oficial/setlist y rechaza revisiones antiguas. Al cambiar preparativos generales se reinician sus marcas por posición, conservando el checklist personal. Cada edición emite un aviso asociado sin divulgar montos en la notificación. La tabla no permite edición directa de un integrante. Los comunicados privados asociados no pueden ampliar la audiencia del evento.
+
+Validación: `test_intranet_event_navigation.mjs`, pruebas de flujo/eventos/agenda, compilación Astro y navegación con los tres perfiles en previsualización. `test_intranet_event_management.sql` validó roles reales y conservación de datos dentro de una transacción revertida, sin avisos ni pagos de prueba persistidos.
