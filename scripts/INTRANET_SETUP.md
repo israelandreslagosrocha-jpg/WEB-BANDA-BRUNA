@@ -115,3 +115,5 @@ Validación: `test_intranet_event_navigation.mjs`, pruebas de flujo/eventos/agen
 
 ### Borrado de publicaciones · 3 noviembre 2026
 Aplicada `scripts/intranet_deletion_setup.sql`: RPC `delete_intranet_entry` valida autor autenticado y admite solo comunicado, personal y ensayo. Las fichas de evento y fechas oficiales quedan protegidas. El botón solicita confirmación y refresca agenda/avisos; los registros dependientes del ensayo se eliminan mediante las FK existentes. Los archivos adjuntos no se purgan del almacenamiento. Verificación: `node scripts/test_intranet_deletion.mjs` y compilación Astro.
+
+Revisión móvil: acceso «Mis publicaciones · gestionar / borrar», botón al inicio de cada publicación y visible en la tabla de ensayos sin expandir detalles. CSS global para controles generados y confirmación con diálogo de la página. Comprobado a 390 px con cancelar/conservar y confirmar/borrar sobre datos de demostración; sin tocar publicaciones reales.

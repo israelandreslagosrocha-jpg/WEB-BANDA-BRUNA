@@ -45,7 +45,7 @@ function openSection(next: string) {
  const picker=$('music-picker');if(next==='music-plan'){$('musical-picker-slot').append(picker);picker.hidden=false;loadTargetMusic();}else{$('personal-music-slot').append(picker);refreshPublisher();}
  $('publisher').hidden=next!=='publish';
  $('repertoire-library').hidden=next!=='material';
- $('section-title').textContent=({todos:'Toda la información',pendientes:'Avisos sin leer',agenda:'Agenda',ensayo:'Ensayos',material:'Material',personal:'Para mí',publish:publicationCopy[($('kind') as HTMLSelectElement).value]?.title||'Enviar comunicado','music-plan':'Dirección musical',event:'Ficha del evento'} as Record<string,string>)[next] || 'Tu información';
+ $('section-title').textContent=({todos:'Toda la información',pendientes:'Avisos sin leer',agenda:'Agenda',ensayo:'Ensayos',material:'Material',personal:'Para mí',mias:'Mis publicaciones',publish:publicationCopy[($('kind') as HTMLSelectElement).value]?.title||'Enviar comunicado','music-plan':'Dirección musical',event:'Ficha del evento'} as Record<string,string>)[next] || 'Tu información';
  $('back-sections').textContent=next==='event'?'← Volver a la agenda':next==='publish'&&publicationEventKey?'← Volver a la ficha':'← Volver a mi intranet';
  render();
  $('section-title').focus({preventScroll:true});
@@ -70,28 +70,34 @@ const initialDay=dayKey(new Date()).split('-').map(Number);
 let calendarYear=initialDay[0],calendarMonth=initialDay[1]-1,calendarDay='';
 function render() {
  $('unread').textContent=`${entries.filter(e=>!receipts.some(r=>r.entry_id===e.id && r.read_at)).length} avisos sin leer`;
- const visible=entries.filter(e=> filter==='todos' || (filter==='pendientes' && !receipts.some(r=>r.entry_id===e.id && r.read_at)) || (filter==='agenda' && ['evento','tenida','ensayo'].includes(e.kind)) || (filter==='material' && ['repertorio','cancion'].includes(e.kind)) || (filter==='personal' && e.recipients.includes(user.email.toLowerCase())) || filter===e.kind);
+ const visible=entries.filter(e=> filter==='todos' || (filter==='mias' && e.author===user.id) || (filter==='pendientes' && !receipts.some(r=>r.entry_id===e.id && r.read_at)) || (filter==='agenda' && ['evento','tenida','ensayo'].includes(e.kind)) || (filter==='material' && ['repertorio','cancion'].includes(e.kind)) || (filter==='personal' && e.recipients.includes(user.email.toLowerCase())) || filter===e.kind);
  if(filter==='agenda') visible.sort((a,b)=>(a.starts_at||'9999').localeCompare(b.starts_at||'9999'));
  const detail=(e:any)=>{
  if(e.official_only)return `<article class="entry"><h2>${esc(e.title)}</h2><p>${esc(e.location)}</p><p>Fecha de la agenda oficial: ${esc(e.official_date)}. Horario de tocata por confirmar.</p><p>Jaime y César completan la logística y la tenida. Vicente proporciona y ordena el setlist.</p><p class="pending-setlist" ${e.rehearsal?.music?.length?'hidden':''}>${esc(pendingText(e))}</p>${musicSummary(e.rehearsal?.music||[])}${e.musical_notes?`<p class="musical-general">${esc(e.musical_notes)}</p>`:''}${filter==='event'?'':directorPlanButton(e)}<a href="/agenda" target="_blank" rel="noopener">Ver agenda oficial ↗</a></article>`;
  const receipt=receipts.find(r=>r.entry_id===e.id); const author=memberFor(e.author_email)?.[1]||e.author_email;
- return `<article class="entry"><p class="entry-meta">${esc(kinds[e.kind])} · ${esc(author)} · ${esc(date(e.created_at))}${e.recipients.length?' · Privado':''}</p><h2>${esc(e.title)}</h2>${e.starts_at?`<p>${esc(date(e.starts_at,e.all_day))}</p>`:''}${e.location?`<p>📍 ${esc(e.location)}</p>`:''}<p class="entry-body">${esc(e.body)}</p>${Object.entries(rehearsalLabels).filter(([key])=>e.rehearsal?.[key]).map(([key,label])=>`<h3>${esc(label)}</h3><p class="entry-body">${esc(e.rehearsal[key])}</p>`).join('')}${eventMarkup(e,receipt)}${e.setlist_pending?`<p class="pending-setlist">${esc(pendingText(e))}</p>`:''}${e.musical_notes?`<p class="musical-general">Indicaciones de Vicente: ${esc(e.musical_notes)}</p>`:''}${filter==='event'?'':directorPlanButton(e)}${musicSummary(e.rehearsal?.music||[])}${!['agenda','ensayo'].includes(filter)&&(e.rehearsal?.music?.length||['evento','tenida','ensayo'].includes(e.kind))?pdfDownloadButton(e):''}${e.outfit_text?`<p>Tenida: ${esc(e.outfit_text)}</p>`:''}${e.mix_mode?`<p>Mix: ${esc(e.mix_mode)}</p>`:''}${e.checklist.map((item:string,i:number)=>`<label><input type="checkbox" data-entry="${e.id}" data-index="${i}" ${receipt?.completed.includes(i)?'checked':''}/> ${esc(item)}</label>`).join('')}${e.event_context?`<button class="event-context-link" data-open-event="${esc(e.event_context)}">Ver ficha del evento →</button>`:''}${e.file_path?`<button data-file="${e.id}">Abrir / descargar ${esc(e.file_name||'archivo')}</button><div id="file-${e.id}"></div>`:''}${deleteEntryButton(e,user)}<button data-read="${e.id}" ${receipt?.read_at?'disabled':''}>${receipt?.read_at?'✓ Leído':'Marcar como leído'}</button></article>`;
+ return `<article class="entry"><p class="entry-meta">${esc(kinds[e.kind])} · ${esc(author)} · ${esc(date(e.created_at))}${e.recipients.length?' · Privado':''}</p><h2>${esc(e.title)}</h2>${deleteEntryButton(e,user)}${e.starts_at?`<p>${esc(date(e.starts_at,e.all_day))}</p>`:''}${e.location?`<p>📍 ${esc(e.location)}</p>`:''}<p class="entry-body">${esc(e.body)}</p>${Object.entries(rehearsalLabels).filter(([key])=>e.rehearsal?.[key]).map(([key,label])=>`<h3>${esc(label)}</h3><p class="entry-body">${esc(e.rehearsal[key])}</p>`).join('')}${eventMarkup(e,receipt)}${e.setlist_pending?`<p class="pending-setlist">${esc(pendingText(e))}</p>`:''}${e.musical_notes?`<p class="musical-general">Indicaciones de Vicente: ${esc(e.musical_notes)}</p>`:''}${filter==='event'?'':directorPlanButton(e)}${musicSummary(e.rehearsal?.music||[])}${!['agenda','ensayo'].includes(filter)&&(e.rehearsal?.music?.length||['evento','tenida','ensayo'].includes(e.kind))?pdfDownloadButton(e):''}${e.outfit_text?`<p>Tenida: ${esc(e.outfit_text)}</p>`:''}${e.mix_mode?`<p>Mix: ${esc(e.mix_mode)}</p>`:''}${e.checklist.map((item:string,i:number)=>`<label><input type="checkbox" data-entry="${e.id}" data-index="${i}" ${receipt?.completed.includes(i)?'checked':''}/> ${esc(item)}</label>`).join('')}${e.event_context?`<button class="event-context-link" data-open-event="${esc(e.event_context)}">Ver ficha del evento →</button>`:''}${e.file_path?`<button data-file="${e.id}">Abrir / descargar ${esc(e.file_name||'archivo')}</button><div id="file-${e.id}"></div>`:''}<button data-read="${e.id}" ${receipt?.read_at?'disabled':''}>${receipt?.read_at?'✓ Leído':'Marcar como leído'}</button></article>`;
  };
  if(filter==='event'){const entry=eventForKey(selectedEventKey);$('section-title').textContent=entry?.kind==='ensayo'?'Ficha del ensayo':'Ficha del evento';$('feed').innerHTML=entry?eventPage(entry,currentRole,detail,entries.filter(e=>e.kind==='comunicado'&&e.event_context===selectedEventKey)):'<p>Esta ficha ya no está disponible para tu perfil.</p>';return;}
  if(filter==='agenda'){$('feed').innerHTML=agendaView(agendaEntries(),{year:calendarYear,month:calendarMonth,selectedDay:calendarDay},detail,currentRole);return;}
- if(filter==='ensayo'){$('feed').innerHTML=rehearsalView(visible,entries.filter(e=>e.kind==='personal'&&e.author_email==='vicentenunez@bandabruna.cl'&&e.recipients.includes(user.email.toLowerCase())),detail);return;}
- $('feed').innerHTML=visible.length?visible.map(detail).join(''):'<p>No hay información en esta sección.</p>';
+ if(filter==='ensayo'){$('feed').innerHTML=rehearsalView(visible,entries.filter(e=>e.kind==='personal'&&e.author_email==='vicentenunez@bandabruna.cl'&&e.recipients.includes(user.email.toLowerCase())),detail,e=>deleteEntryButton(e,user));return;}
+ $('feed').innerHTML=(filter==='mias'?'<p>Publicaciones creadas con tu cuenta. Puedes borrar tus comunicados, indicaciones y ensayos. Las fechas oficiales se administran en la agenda general.</p>':'')+(visible.length?visible.map(detail).join(''):'<p>No hay información en esta sección.</p>');
 }
 async function saveReceipt(id: string, completed?: number[],personalChecklist?:any[]) {
  const previous=receipts.find(r=>r.entry_id===id);
  check(await supabase.from('intranet_receipts').upsert({entry_id:id,user_id:user.id,read_at:previous?.read_at||new Date().toISOString(),completed:completed||previous?.completed||[],personal_checklist:personalChecklist||previous?.personal_checklist||[]}));
  await load();
 }
+async function confirmDeletion(entry:any):Promise<boolean>{
+ const dialog=$('delete-confirmation') as HTMLDialogElement;
+ $('delete-confirmation-title').textContent=`¿Borrar «${entry.title}»?`;
+ dialog.returnValue='cancel';dialog.showModal();
+ return new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='delete'),{once:true}));
+}
 async function init() {
  const {data:{user: authenticated},error} = await supabase.auth.getUser();
  if(error||!authenticated||(!memberFor(authenticated.email)&&authenticated.email?.toLowerCase()!=='contacto@bandabruna.cl')){location.href='/admin';return;}
  user=authenticated; const member=memberFor(user.email)||['contacto@bandabruna.cl','Administración','jefatura'];
- currentRole=member[2];
+ currentRole=member[2];$('my-publications').hidden=!['director','jefatura'].includes(currentRole);
  const adminLink=document.querySelector<HTMLAnchorElement>('a[href="/admin/dashboard"]'); if(adminLink)adminLink.hidden=user.email.toLowerCase()!=='contacto@bandabruna.cl';
  $('identity').textContent=`${member[1]} · ${member[2]==='director'?'Dirección musical':member[2]==='jefatura'?'Jefatura':'Integrante'}`;
  $('workspace').hidden=false;
@@ -112,7 +118,7 @@ async function init() {
    if(button.dataset.deleteEntry){
     const entry=entries.find(e=>e.id===button.dataset.deleteEntry);
     if(!entry||!canDeleteEntry(entry,user))throw new Error('Solo quien creó esta publicación puede borrarla.');
-    if(!window.confirm(`¿Borrar «${entry.title}»? Se eliminará de la intranet para todos sus destinatarios. Esta acción no se puede deshacer.`))return;
+    if(!await confirmDeletion(entry))return;
     check(await supabase.rpc('delete_intranet_entry',{target_id:entry.id}));
     if(filter==='event'){filter='agenda';selectedEventKey='';window.history.replaceState(null,'',location.pathname+location.search);}
     await load();$('status').textContent='Publicación borrada.';return;
