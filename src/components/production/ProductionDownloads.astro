@@ -1,0 +1,18 @@
+---
+import { productionDownloads } from '../../data/productionDownloads.js';
+---
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="downloads-grid-container">
+  {productionDownloads.map(d => (
+    <div class="bg-slate-950/60 border border-white/5 p-6 rounded-2xl flex flex-col justify-between hover:border-gold-bruna/20 transition-all group">
+      <div class="mb-5">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-[9px] text-slate-500 font-mono uppercase tracking-wider">{d.categoria}</span>
+          <span class:list={[d.badge_class, 'border text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono']}>{d.estado_badge}</span>
+        </div>
+        <h4 class="font-title font-bold text-sm text-white uppercase mb-2 group-hover:text-gold-bruna">{d.titulo}</h4>
+        <p class="text-xs text-slate-400 leading-relaxed">{d.descripcion}</p>
+      </div>
+      <a href={d.url} download class="w-full text-center bg-slate-900 hover:bg-gold-bruna hover:text-black border border-white/10 text-white font-semibold py-2.5 rounded-lg text-xs uppercase tracking-wider font-title">{d.boton_label}</a>
+    </div>
+  ))}
+</div>

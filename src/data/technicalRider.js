@@ -1,4 +1,4 @@
-// Patch oficial Qu-7D. Fuente única para web y PDF; sustituye el patch Ui24R.
+// Patch y monitoreo oficial. Nombres por músico conservados; opciones complementadas con ficha 2026-27.
 export const riderChannels = [
   {
     "canal": 1,
@@ -9,7 +9,7 @@ export const riderChannels = [
   {
     "canal": 2,
     "instrumento": "CAJA",
-    "conexion": "SENNHEISER E609",
+    "conexion": "SENNHEISER E609 / E904",
     "categoria": "bateria"
   },
   {
@@ -39,13 +39,13 @@ export const riderChannels = [
   {
     "canal": 7,
     "instrumento": "ACC",
-    "conexion": "Fuente / conexión por coordinar",
+    "conexion": "SENNHEISER E609",
     "categoria": "bateria"
   },
   {
     "canal": 8,
     "instrumento": "OCTAPAD",
-    "conexion": "Línea / D.I. por coordinar",
+    "conexion": "CAJA DIRECTA",
     "categoria": "bateria"
   },
   {
@@ -63,7 +63,7 @@ export const riderChannels = [
   {
     "canal": 11,
     "instrumento": "BONGO",
-    "conexion": "SHURE SM57",
+    "conexion": "SHURE SM57 / SENNHEISER E604 CON CLAMP LP",
     "categoria": "percusion"
   },
   {
@@ -75,7 +75,7 @@ export const riderChannels = [
   {
     "canal": 13,
     "instrumento": "HUIRO",
-    "conexion": "SHURE BETA 98H/C o equivalente",
+    "conexion": "SHURE BETA 98H/C INALÁMBRICO O EQUIVALENTE",
     "categoria": "percusion"
   },
   {
@@ -105,37 +105,37 @@ export const riderChannels = [
   {
     "canal": 18,
     "instrumento": "VOZ FABI",
-    "conexion": "SHURE SM58",
+    "conexion": "SHURE SM58 / SLXD24+/B58",
     "categoria": "voces"
   },
   {
     "canal": 19,
     "instrumento": "VOZ GERSON",
-    "conexion": "SHURE SM58",
+    "conexion": "SHURE SM58 / SLXD24+/B58",
     "categoria": "voces"
   },
   {
     "canal": 20,
     "instrumento": "VOZ VICHO",
-    "conexion": "SHURE SM58",
+    "conexion": "SHURE SM58 / SLXD24+/B58",
     "categoria": "voces"
   },
   {
     "canal": 21,
     "instrumento": "VOZ ISRAEL",
-    "conexion": "SHURE SM58",
+    "conexion": "SHURE SM58 / SLXD24+/B58",
     "categoria": "voces"
   },
   {
     "canal": 22,
     "instrumento": "VOZ JAIME",
-    "conexion": "SHURE SM58",
+    "conexion": "SHURE SM58 / SLXD24+/B58",
     "categoria": "voces"
   },
   {
     "canal": 23,
     "instrumento": "CESAR",
-    "conexion": "SHURE BETA 87A",
+    "conexion": "SHURE BETA 87A / SLXD24+/B58 INALÁMBRICO",
     "categoria": "voces"
   },
   {
@@ -153,25 +153,25 @@ export const riderChannels = [
   {
     "canal": 26,
     "instrumento": "SECUENCIA L",
-    "conexion": "Fuente / conexión por coordinar",
+    "conexion": "CAJA DIRECTA",
     "categoria": "otros"
   },
   {
     "canal": 27,
     "instrumento": "SECUENCIA R",
-    "conexion": "Fuente / conexión por coordinar",
+    "conexion": "CAJA DIRECTA",
     "categoria": "otros"
   },
   {
     "canal": 28,
     "instrumento": "CLICK",
-    "conexion": "Fuente / conexión por coordinar",
+    "conexion": "CAJA DIRECTA",
     "categoria": "otros"
   },
   {
     "canal": 29,
     "instrumento": "GUIA",
-    "conexion": "Fuente / conexión por coordinar",
+    "conexion": "CAJA DIRECTA",
     "categoria": "otros"
   }
 ];
@@ -179,51 +179,51 @@ export const riderMonitors = [
   {
     "mezcla": "Aux 1",
     "destino": "BATERIA",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "XLR",
+    "tipo": "In-Ear cableado",
+    "nota": "Jaime Cárdenas Quilodrán: línea XLR hacia amplificador de audífonos."
   },
   {
     "mezcla": "Aux 2",
     "destino": "CONGAS",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "XLR",
+    "tipo": "In-Ear cableado",
+    "nota": "Jaime Cárdenas Sanhueza: línea XLR hacia amplificador de audífonos."
   },
   {
     "mezcla": "Aux 3",
     "destino": "HUIRO",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "BODYPACK",
+    "tipo": "In-Ear inalámbrico",
+    "nota": "Fabián Garrido: bodypack Shure o Sennheiser. Frecuencia y modo mono/estéreo por coordinar."
   },
   {
     "mezcla": "Aux 4",
     "destino": "BAJO",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "BODYPACK",
+    "tipo": "In-Ear inalámbrico",
+    "nota": "Gerson Ulloa: bodypack Shure o Sennheiser. Frecuencia y modo mono/estéreo por coordinar."
   },
   {
     "mezcla": "Aux 5",
     "destino": "GUITARRA",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "BODYPACK",
+    "tipo": "In-Ear inalámbrico",
+    "nota": "Vicente Núñez: bodypack Shure o Sennheiser. Frecuencia y modo mono/estéreo por coordinar."
   },
   {
     "mezcla": "Aux 6",
     "destino": "TECLADOS",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "BODYPACK",
+    "tipo": "In-Ear inalámbrico",
+    "nota": "Israel Lagos Rocha: bodypack Shure o Sennheiser. Frecuencia y modo mono/estéreo por coordinar."
   },
   {
     "mezcla": "Aux 7",
     "destino": "CESAR",
-    "salida": "Por coordinar",
-    "tipo": "Retorno individual",
-    "nota": "Sistema cableado o inalámbrico y mezcla a coordinar con dirección técnica."
+    "salida": "BODYPACK",
+    "tipo": "In-Ear inalámbrico",
+    "nota": "César Bruna: bodypack Shure o Sennheiser. Frecuencia y modo mono/estéreo por coordinar."
   },
   {
     "mezcla": "Aux 8",

@@ -29,7 +29,7 @@ const stageMembers: Member[] = [
         <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-gold-bruna/10 text-gold-bruna border border-gold-bruna/20">
           Oficial 2026 - 2027
         </span>
-        <span class="text-[10px] text-slate-400 font-mono">2 Variantes de Montaje</span>
+        <span class="text-[10px] text-slate-400 font-mono">Montaje principal: teclados de lado</span>
       </div>
       <h3 class="font-title font-bold text-xl uppercase text-white tracking-wide">Stage Plot (Orden en Escenario)</h3>
       <p class="text-xs text-slate-400">Diagrama ilustrado con ubicación exacta de músicos, backline, sistemas de retorno y energía 220V.</p>
@@ -39,29 +39,29 @@ const stageMembers: Member[] = [
     <div class="flex flex-wrap items-center gap-2">
       <!-- Selector de Variante -->
       <div class="inline-flex p-1 bg-slate-950/80 border border-white/10 rounded-xl" role="tablist">
-        <button 
-          id="btn-stage-opt-1" 
-          type="button" 
+        <button
+          id="btn-stage-opt-2"
+          type="button"
           class="stage-opt-btn active px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer bg-gold-bruna text-black shadow-md shadow-gold-bruna/20"
-          data-target="plot-option-1"
-        >
-          Opción 1: Típica (Frontal)
-        </button>
-        <button 
-          id="btn-stage-opt-2" 
-          type="button" 
-          class="stage-opt-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white"
           data-target="plot-option-2"
         >
-          Opción 2: Teclados Lateral
+          En uso: teclados de lado
+        </button>
+        <button
+          id="btn-stage-opt-1"
+          type="button"
+          class="stage-opt-btn px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-slate-400 hover:text-white"
+          data-target="plot-option-1"
+        >
+          Alternativa secundaria: teclados atrás
         </button>
       </div>
 
       <!-- Botón Descargar PDF -->
-      <a 
-        href="/assets/downloads/stageplot_banda_bruna.pdf" 
-        target="_blank" 
-        rel="noopener" 
+      <a
+        href="/assets/downloads/stageplot_banda_bruna.pdf"
+        target="_blank"
+        rel="noopener"
         class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-white/10 transition-colors"
         title="Descargar Ficha en PDF"
       >
@@ -73,21 +73,21 @@ const stageMembers: Member[] = [
 
   <!-- Contenedor Principal de Visualización -->
   <div class="relative bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl p-2 sm:p-4">
-    
+
     <!-- Barra superior interna con badges explicativos -->
     <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-white/5 bg-slate-900/60 rounded-xl mb-3 text-[11px]">
-      <div id="plot-description-1" class="plot-desc text-slate-300 font-mono flex items-center gap-2">
+      <div id="plot-description-1" class="plot-desc hidden text-slate-300 font-mono flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-gold-bruna animate-pulse"></span>
-        <span><strong>OPCIÓN 1:</strong> Distribución estándar en 2 líneas frontales. Ideal para la mayoría de escenarios y festivales.</span>
+        <span><strong>ALTERNATIVA SECUNDARIA:</strong> Teclados atrás. No es el montaje actual; sólo se utiliza previa coordinación.</span>
       </div>
-      <div id="plot-description-2" class="plot-desc hidden text-slate-300 font-mono flex items-center gap-2">
+      <div id="plot-description-2" class="plot-desc text-slate-300 font-mono flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span><strong>OPCIÓN 2:</strong> Teclados en ángulo lateral mirando al centro de la banda. Ideal para escenarios profundos.</span>
+        <span><strong>STAGE PLOT EN USO:</strong> Teclados de lado mirando al centro de la banda. Es la planta principal incluida en la ficha técnica descargable.</span>
       </div>
 
-      <button 
-        id="btn-open-stage-zoom" 
-        type="button" 
+      <button
+        id="btn-open-stage-zoom"
+        type="button"
         class="text-gold-bruna hover:text-white text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 cursor-pointer transition-colors ml-auto"
       >
         <span>🔍</span>
@@ -96,14 +96,14 @@ const stageMembers: Member[] = [
     </div>
 
     <!-- Panel Opción 1 -->
-    <div id="plot-option-1" class="stage-plot-panel block transition-opacity duration-300">
+    <div id="plot-option-1" class="stage-plot-panel hidden transition-opacity duration-300">
       <div class="relative rounded-xl overflow-hidden bg-black/50 border border-white/5 flex items-center justify-center">
         <picture>
           <source srcset="/assets/images/rider/stage_plot_1.webp" type="image/webp" />
-          <img 
-            id="stage-img-1" 
-            src="/assets/images/rider/stage_plot_1.png" 
-            alt="Stage Plot Oficial Opción 1 - Banda Bruna" 
+          <img
+            id="stage-img-1"
+            src="/assets/images/rider/stage_plot_1.png"
+            alt="Alternativa secundaria: teclados atrás - Banda Bruna"
             class="w-full h-auto max-h-[580px] object-contain cursor-zoom-in"
             loading="lazy"
           />
@@ -112,14 +112,14 @@ const stageMembers: Member[] = [
     </div>
 
     <!-- Panel Opción 2 -->
-    <div id="plot-option-2" class="stage-plot-panel hidden transition-opacity duration-300">
+    <div id="plot-option-2" class="stage-plot-panel block transition-opacity duration-300">
       <div class="relative rounded-xl overflow-hidden bg-black/50 border border-white/5 flex items-center justify-center">
         <picture>
           <source srcset="/assets/images/rider/stage_plot_2.webp" type="image/webp" />
-          <img 
-            id="stage-img-2" 
-            src="/assets/images/rider/stage_plot_2.png" 
-            alt="Stage Plot Oficial Opción 2 - Banda Bruna" 
+          <img
+            id="stage-img-2"
+            src="/assets/images/rider/stage_plot_2.png"
+            alt="Stage plot en uso: teclados de lado - Banda Bruna"
             class="w-full h-auto max-h-[580px] object-contain cursor-zoom-in"
             loading="lazy"
           />
@@ -199,8 +199,8 @@ const stageMembers: Member[] = [
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
               <span class={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${
-                m.type === 'iem' 
-                  ? 'bg-gold-bruna/10 text-gold-bruna border-gold-bruna/30' 
+                m.type === 'iem'
+                  ? 'bg-gold-bruna/10 text-gold-bruna border-gold-bruna/30'
                   : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
               }`}>
                 {m.aux}
@@ -230,7 +230,7 @@ const stageMembers: Member[] = [
     </div>
 
     <div class="flex-grow flex items-center justify-center p-2 overflow-auto">
-      <img id="stage-zoom-img" src="/assets/images/rider/stage_plot_1.png" alt="Stage Plot Grande" class="max-w-full max-h-[82vh] object-contain rounded-lg shadow-2xl" />
+      <img id="stage-zoom-img" src="/assets/images/rider/stage_plot_2.png" alt="Stage Plot Grande" class="max-w-full max-h-[82vh] object-contain rounded-lg shadow-2xl" />
     </div>
 
     <div class="border-t border-white/10 pt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 font-mono">
@@ -257,7 +257,7 @@ const stageMembers: Member[] = [
     const img1 = document.getElementById('stage-img-1');
     const img2 = document.getElementById('stage-img-2');
 
-    let activeOption = 1;
+    let activeOption = 2;
 
     function selectOption(opt: number) {
       activeOption = opt;
@@ -284,6 +284,8 @@ const stageMembers: Member[] = [
       }
     }
 
+    selectOption(2);
+
     btnOpt1?.addEventListener('click', () => selectOption(1));
     btnOpt2?.addEventListener('click', () => selectOption(2));
 
@@ -291,10 +293,10 @@ const stageMembers: Member[] = [
       if (!modal || !modalImg) return;
       if (activeOption === 1) {
         modalImg.src = '/assets/images/rider/stage_plot_1.png';
-        if (modalTitle) modalTitle.textContent = 'Stage Plot Oficial - Opción 1: Distribución Estándar (Frontal)';
+        if (modalTitle) modalTitle.textContent = 'Stage Plot - Alternativa secundaria: teclados atrás';
       } else {
         modalImg.src = '/assets/images/rider/stage_plot_2.png';
-        if (modalTitle) modalTitle.textContent = 'Stage Plot Oficial - Opción 2: Distribución Alternativa (Teclados Lateral)';
+        if (modalTitle) modalTitle.textContent = 'Stage Plot en uso - Teclados de lado';
       }
 
       modal.classList.remove('hidden');

@@ -1,0 +1,10 @@
+// Requerimientos de backline compartidos por web y ficha descargable.
+export const backlineInstruments = [
+    { id: 'vocal', name: 'Voz Vocal', icon: '🎤', rec: 'Shure Beta 58 Wireless / Sennheiser EW-D', defaultItems: ['Micrófono inalámbrico Shure Beta 58', 'Atril de micrófono con brazo jirafa', 'Agua mineral a temperatura ambiente', 'Toalla limpia en escenario'] },
+    { id: 'bajo', name: 'Bajo', icon: '🎸', rec: 'Ampeg SVT-CL / SVT-4PRO o Gallien Krueger 800RB', defaultItems: ['Cabezal de bajo a tubos de mínimo 300W', 'Gabinete de 4x10" o 8x10"', 'Línea directa activa (DI) de alta calidad', 'Atril de bajo en escenario'] },
+    { id: 'guitarra', name: 'Guitarra', icon: '🎸', rec: 'Fender Twin Reverb, Hot Rod Deluxe o Marshall DSL40', defaultItems: ['Amplificador de guitarra valvular de mínimo 40W', 'Caja directa para guitarra acústica', 'Atril de guitarra en escenario', 'Alimentación eléctrica 220V cercana'] },
+    { id: 'piano', name: 'Piano / Teclado', icon: '🎹', rec: 'Atriles K&M o Hercules reforzados', defaultItems: ['Soporte doble de teclado tipo "X" o "Z" reforzado', '2 Cajas Directas pasivas de alta gama', 'Toma de corriente 220V certificada', 'Atril de partitura con luz LED'] },
+    { id: 'guiro', name: 'Güiro', icon: '🪵', rec: 'Güiro de metal LP o Meinl profesional', defaultItems: ['Atril/Soporte para percusión menor', 'Güiro metálico profesional con rascador de metal', 'Micrófono de percusión SM57 o clip', 'Punto de hidratación'] },
+    { id: 'congas', name: 'Congas', icon: '🪘', rec: 'LP Classic o Giovanni Series', defaultItems: ['Par de congas (Quinto 11" y Conga 11.75") con soporte', 'Bongó profesional con soporte de pie', 'Tarima sólida de 2x2 metros (altura 40cm)', 'Atril de platillo para chimes'] },
+    { id: 'timbal', name: 'Timbal / Batería', icon: '🥁', rec: 'DW Collector\'s, Pearl Reference o LP Tito Puente', defaultItems: ['Bombo de 22" (con orificio para mic)', 'Toms aéreos 10" y 12", Tom de piso 14" o 16"', 'Atril de caja y atril de Hi-Hat profesional', '5 atriles de platillo de doble felpa', 'Silla neumática para baterista'] }
+  ];
