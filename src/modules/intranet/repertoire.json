@@ -1022,19 +1022,18 @@
     },
     {
       "id": "intro-2027",
-      "title": "Intro Banda Bruna 2027",
+      "title": "INTRO 2027 Banda Bruna + Bloque 1 (La Carretera + Chupacabras)",
       "section": "adicionales",
-      "status": "activo",
-      "note": "",
+      "status": "produccion",
+      "note": "Maqueta de trabajo. Audio provisional; aún no corresponde a la versión oficial.",
       "mode": "por-confirmar",
       "audio": {
-        "publicId": "INTRO_BANDA_BRUNA_2027.mp3_jhofj5",
-        "version": "v1793549760",
-        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1793549760/INTRO_BANDA_BRUNA_2027.mp3_jhofj5.mp3",
+        "publicId": "bloque_1_bb_ukt6ay",
+        "version": "v1795136509",
+        "url": "https://res.cloudinary.com/dhgifjpkh/video/upload/v1795136509/bloque_1_bb_ukt6ay.mp3",
+        "sourceFormat": "MP3",
         "verified": true,
-        "httpStatus": 200,
-        "checkedAt": "2026-11-01T20:38:33.270Z",
-        "sourceFormat": "MP3"
+        "httpStatus": 200
       },
       "tracks": []
     },

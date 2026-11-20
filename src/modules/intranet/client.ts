@@ -1,3 +1,4 @@
+import { setupAudioDownloads } from './downloads.js';
 import { canDeleteEntry, deleteEntryButton } from './deletion.js';
 import { eventPage } from './eventPage.js';
 import { pdfDownloadButton, publicationCopy } from './actions.js';
@@ -94,6 +95,7 @@ async function confirmDeletion(entry:any):Promise<boolean>{
  return new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='delete'),{once:true}));
 }
 async function init() {
+ setupAudioDownloads(document, text=>{$('status').textContent=text;});
  const {data:{user: authenticated},error} = await supabase.auth.getUser();
  if(error||!authenticated||(!memberFor(authenticated.email)&&authenticated.email?.toLowerCase()!=='contacto@bandabruna.cl')){location.href='/admin';return;}
  user=authenticated; const member=memberFor(user.email)||['contacto@bandabruna.cl','Administración','jefatura'];
