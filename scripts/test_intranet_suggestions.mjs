@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {managementSuggestions} from '../src/modules/intranet/suggestions.js';
+const now=new Date('2026-11-19T15:00:00Z');
+const event={id:'future',kind:'evento',title:'Evento <seguro>',starts_at:'2026-12-05T20:00:00Z',event_details:{},rehearsal:{},checklist:[]};
+const past={...event,id:'past',title:'Teletón pasado',starts_at:'2026-11-07T20:00:00Z'};
+assert.equal(managementSuggestions([event],'miembro',now),'');
+const j=managementSuggestions([event,past],'jefatura',now),d=managementSuggestions([event,past],'director',now);
+assert(j.includes('data-suggest-edit="entry:future"'));assert(!j.includes('data-suggest-music'));assert(j.includes('tenida'));assert(!j.includes('Teletón pasado'));assert(j.includes('Evento &lt;seguro&gt;'));
+assert(d.includes('data-suggest-music="entry:future"'));assert(!d.includes('data-suggest-edit'));assert(d.includes('data-suggest-request'));
+const rehearsal={...event,kind:'ensayo',id:'rehearsal',rehearsal:{music:[{id:'viking-1'}]}};
+const ready=managementSuggestions([rehearsal],'director',now);assert(!ready.includes('data-suggest-request'));assert(!ready.includes('data-suggest-music'));
+const complete={...event,location:'Teatro',body:'Indicaciones',outfit_text:'Azul',checklist:['Body'],event_details:{departure_at:'2026-12-05T18:00:00Z'}};
+assert(!managementSuggestions([complete,rehearsal],'jefatura',now).includes('data-suggest-edit'));
+console.log('OK: sugerencias por rol, faltantes, fecha de ensayo, exclusión de pasados y desaparición al completar.');

@@ -1,3 +1,4 @@
+import { managementSuggestions } from './suggestions.js';
 import { isPastActivity as activityHasPassed } from './lifecycle.js';
 import { setupAudioDownloads } from './downloads.js';
 import { canDeleteEntry, deleteEntryButton } from './deletion.js';
@@ -72,6 +73,7 @@ const initialDay=dayKey(new Date()).split('-').map(Number);
 let calendarYear=initialDay[0],calendarMonth=initialDay[1]-1,calendarDay='';
 function isPastActivity(e:any){return activityHasPassed(e,entries,officialEvents);}
 function render() {
+ $('management-suggestions').innerHTML=managementSuggestions(agendaEntries(),currentRole);$('management-suggestions').hidden=!['jefatura','director'].includes(currentRole);
  $('unread').textContent=`${entries.filter(e=>!isPastActivity(e)&&!receipts.some(r=>r.entry_id===e.id && r.read_at)).length} avisos sin leer`;
  const source=filter==='historial'?[...agendaEntries(),...entries.filter(e=>!['evento','tenida','ensayo'].includes(e.kind))]:entries;
  const visible=source.filter(e=> (filter==='historial' && isPastActivity(e)) || (filter==='todos' && !isPastActivity(e)) || (filter==='mias' && e.author===user.id) || (filter==='pendientes' && !isPastActivity(e) && !receipts.some(r=>r.entry_id===e.id && r.read_at)) || (filter==='agenda' && ['evento','tenida','ensayo'].includes(e.kind)) || (filter==='material' && ['repertorio','cancion'].includes(e.kind)) || (filter==='personal' && e.recipients.includes(user.email.toLowerCase())) || filter===e.kind);
@@ -110,6 +112,20 @@ async function init() {
  const stopPush=await setupPush(supabase,Boolean((supabase as any).previewCatalogue));
  $('logout').onclick=async()=>{try{await stopPush?.();}catch{ $('status').textContent='No se pudo desactivar este dispositivo. Reintenta antes de cerrar sesión.';return;}await supabase.auth.signOut();location.href='/admin';};
  $('refresh').onclick=load;
+ $('management-suggestions').addEventListener('click',async event=>{
+  const b=(event.target as HTMLElement).closest<HTMLButtonElement>('button');if(!b)return;
+  try{
+   if(b.dataset.suggestEdit)await editEvent(b.dataset.suggestEdit);
+   if(b.dataset.suggestMusic){openSection('music-plan');($('music-target') as HTMLSelectElement).value=b.dataset.suggestMusic;loadTargetMusic();}
+   if(b.hasAttribute('data-suggest-rehearsal'))$('register-rehearsal').click();
+   if(b.hasAttribute('data-suggest-request')){
+    $('open-publisher').click();const form=$('publish-form') as HTMLFormElement;
+    (form.elements.namedItem('title') as HTMLInputElement).value='Solicitud de fecha para el próximo ensayo';
+    (form.elements.namedItem('body') as HTMLTextAreaElement).value='Jaime y César: ¿pueden proponer fecha, hora y lugar para el próximo ensayo? Cuando esté programado prepararé el setlist y las indicaciones musicales.';
+    Array.from(($('recipients') as HTMLSelectElement).options).forEach(o=>o.selected=['jaimecardenas@bandabruna.cl','cesarbruna@bandabruna.cl'].includes(o.value));
+   }
+  }catch(error){message(error);}
+ });
  document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach(button=>button.onclick=()=>openSection(button.dataset.filter!));
  $('back-sections').onclick=()=>{if(filter==='event'){openSection('agenda');window.history.replaceState(null,'',location.pathname+location.search);return;}if(filter==='publish'&&publicationEventKey){const key=publicationEventKey;resetPublication();openEvent(key,false);return;}filter='';$('section-picker').hidden=false;$('section-content').hidden=true;$('section-picker').scrollIntoView({behavior:'smooth',block:'start'});};
  $('feed').addEventListener('click',async(event)=>{
