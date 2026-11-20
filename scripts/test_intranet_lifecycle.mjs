@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {isPastActivity} from '../src/modules/intranet/lifecycle.js';
+import {eventActions} from '../src/modules/intranet/eventPage.js';
+const official=[{id:'teleton',fecha:'2026-11-07'}],now=new Date('2026-11-19T15:00:00Z');
+const entry={id:'internal',kind:'evento',starts_at:'2027-11-07T20:00:00Z',event_details:{official_event_id:'teleton'}};
+assert(isPastActivity(entry,[entry],official,now));
+for(const event_context of ['entry:internal','official:teleton'])assert(isPastActivity({kind:'comunicado',event_context},[entry],official,now));
+assert(!isPastActivity({kind:'comunicado'},[],official,now));
+assert(!isPastActivity({kind:'evento',starts_at:'2026-11-20T02:59:00Z'},[],[],now));
+assert(isPastActivity({kind:'evento',starts_at:'2026-11-19T02:59:00Z'},[],[],now));
+for(const role of ['miembro','director','jefatura'])assert(!eventActions({kind:'evento',starts_at:'2000-11-07T20:00:00Z'},role).includes('data-edit'));
+console.log('OK: archivo por fecha oficial, avisos vinculados, día de Chile y ficha pasada sin edición.');

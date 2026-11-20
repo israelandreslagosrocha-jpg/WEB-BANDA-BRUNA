@@ -1,7 +1,9 @@
+import { isPastActivity } from './lifecycle.js';
 import { escapeHtml as esc } from '../../utils/escapeHtml.js';
 import { musicTarget } from './workflow.js';
 import { outfitFor } from './outfits.js';
 export function eventActions(e,role,compact=false){
+ if(isPastActivity(e))return '<p class="music-note">Actividad pasada · Consulta del archivo</p>';
  const key=esc(musicTarget(e));const event=['evento','tenida'].includes(e.kind);
  const open=compact?`<button class="event-open-action" data-open-event="${key}">Abrir ficha ${event?'del evento':'del ensayo'} →</button>`:'';
  if(role==='jefatura'&&event)return `${open}<div class="event-actions ${compact?'is-compact':''}"><button data-edit-event="${key}"><strong>${e.official_only?'Completar ficha':'Editar datos'}</strong>${compact?'':'<span>Fecha, lugar, horarios, salida, pagos y preparativos</span>'}</button><button data-edit-event="${key}" data-edit-outfit="true"><strong>Elegir tenida</strong>${compact?'':'<span>Seleccionar o cambiar la vestimenta de esta fecha</span>'}</button><button data-event-notice="${key}"><strong>Enviar comunicado</strong>${compact?'':'<span>Mensaje vinculado a este evento y a sus destinatarios</span>'}</button></div>`;
@@ -14,5 +16,5 @@ export function eventChecklist(e){
 }
 export function eventPage(e,role,detail,notices=[]){
  const event=['evento','tenida'].includes(e.kind);
- return `<section class="event-screen"><p class="eyebrow">${event?'FICHA DEL EVENTO':'FICHA DEL ENSAYO'}</p><h2>${esc(e.title)}</h2><p>${role==='jefatura'&&event?'Gestiona esta fecha desde sus acciones. Los cambios se guardan en la misma ficha; Vicente conserva el control del setlist.':role==='director'?'Consulta la logística de jefatura y agrega o edita el setlist de esta misma fecha.':'Revisa la información de esta fecha, descarga tu PDF y prepara tu checklist personal.'}</p>${eventActions(e,role)}${event?eventChecklist(e):''}${detail(e)}${e.related_entries?.length?`<details class="event-notices"><summary>Otros avisos vinculados a esta fecha</summary>${e.related_entries.map(n=>detail(n)).join('')}</details>`:''}${notices.length?`<section class="event-notices"><h3>Comunicados de este evento</h3>${notices.map(n=>detail(n)).join('')}</section>`:'<p class="music-note">No hay comunicados asociados a esta fecha.</p>'}</section>`;
+ return `<section class="event-screen"><p class="eyebrow">${event?'FICHA DEL EVENTO':'FICHA DEL ENSAYO'}</p><h2>${esc(e.title)}</h2><p>${isPastActivity(e)?'Esta actividad ya se realizó. Su información se conserva como archivo de la banda.':role==='jefatura'&&event?'Gestiona esta fecha desde sus acciones. Los cambios se guardan en la misma ficha; Vicente conserva el control del setlist.':role==='director'?'Consulta la logística de jefatura y agrega o edita el setlist de esta misma fecha.':'Revisa la información de esta fecha, descarga tu PDF y prepara tu checklist personal.'}</p>${eventActions(e,role)}${event&&!isPastActivity(e)?eventChecklist(e):''}${detail(e)}${e.related_entries?.length?`<details class="event-notices"><summary>Otros avisos vinculados a esta fecha</summary>${e.related_entries.map(n=>detail(n)).join('')}</details>`:''}${notices.length?`<section class="event-notices"><h3>Comunicados de este evento</h3>${notices.map(n=>detail(n)).join('')}</section>`:'<p class="music-note">No hay comunicados asociados a esta fecha.</p>'}</section>`;
 }
