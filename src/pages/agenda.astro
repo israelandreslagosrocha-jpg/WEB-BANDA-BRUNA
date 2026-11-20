@@ -1,4 +1,5 @@
 ---
+export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../services/supabaseClient.js';
 import TourCalendar from '../components/events/TourCalendar.astro';
@@ -13,8 +14,7 @@ const { data: rawEvents } = await supabase
 
 const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SET", "OCT", "NOV", "DIC"];
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+const todayKey = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 
 const events = (rawEvents || []).map((event: any) => {
   const d = new Date(event.fecha + 'T12:00:00'); // Evitar descalces de zona horaria
@@ -24,7 +24,7 @@ const events = (rawEvents || []).map((event: any) => {
   const fullDateStr = event.fecha.replace(/-/g, '');
 
   const eventDateMidnight = new Date(event.fecha + 'T00:00:00');
-  const isPast = eventDateMidnight.getTime() < today.getTime() || event.fecha === '2026-08-08';
+  const isPast = event.fecha < todayKey;
 
   // Metadatos parseados desde descripcion
   let meta: any = {};
