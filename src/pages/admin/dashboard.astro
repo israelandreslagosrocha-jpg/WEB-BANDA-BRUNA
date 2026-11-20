@@ -748,6 +748,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
             </button>
           </div>
 
+          <button id="moderate-anniversary-wishes" type="button" class="mb-4 rounded border border-gold-bruna/30 px-4 py-2 text-sm text-gold-bruna cursor-pointer">Moderar saludos del aniversario</button>
           <div id="lanzamientos-list" class="flex flex-col gap-4">
             <!-- Se inyectarán dinámicamente -->
           </div>
@@ -789,6 +790,7 @@ import SocialFeedAdminTab from '../../components/admin/SocialFeedAdminTab.astro'
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" is:inline></script>
 
   <script>
+    import { anniversary } from '../../data/anniversary';
     import { supabase } from '../../services/supabaseClient.js';
     import { memberFor } from '../../modules/intranet/members.js';
     import { escapeHtml, safeRating } from '../../utils/escapeHtml.js';
@@ -3799,6 +3801,10 @@ ${warnings}`;
         }
       }
 
+      document.getElementById('moderate-anniversary-wishes')?.addEventListener('click', () => {
+        openCommentsModal(anniversary.slug, anniversary.title);
+      });
+
       async function openCommentsModal(slug: string | undefined, name: string | undefined) {
         if (!slug) return;
         const modal = document.getElementById('modal-container');
@@ -3881,7 +3887,7 @@ ${warnings}`;
           } else {
             pendientesList.innerHTML = pendientes.map((c: any) => {
               const rating = safeRating(c.calificacion);
-              const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+              const stars = slug === anniversary.slug ? '' : '★'.repeat(rating) + '☆'.repeat(5 - rating);
               return `
                 <div class="bg-slate-950 border border-white/5 p-4 rounded-xl flex flex-col gap-2 relative">
                   <div class="flex justify-between items-start">
@@ -3936,7 +3942,7 @@ ${warnings}`;
           } else {
             aprobadosList.innerHTML = aprobados.map((c: any) => {
               const rating = safeRating(c.calificacion);
-              const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+              const stars = slug === anniversary.slug ? '' : '★'.repeat(rating) + '☆'.repeat(5 - rating);
               return `
                 <div class="bg-slate-950/60 border border-white/5 p-4 rounded-xl flex flex-col gap-2 relative">
                   <div class="flex justify-between items-start">

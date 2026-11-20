@@ -1,3 +1,4 @@
+import { anniversary } from '../../data/anniversary';
 import { createServiceSupabaseClient, jsonResponse } from '../../services/serverAuth.js';
 import {
   allowPublicSubmission,
@@ -78,15 +79,14 @@ export async function POST({ request }) {
   const ciudad = cleanText(body?.ciudad, 80) || null;
   const comentario = cleanText(body?.comentario, 600);
   const lanzamientoSlug = cleanText(body?.lanzamiento_slug, 120);
-  const calificacion = Number.parseInt(body?.calificacion, 10);
+  const isAnniversary = lanzamientoSlug === anniversary.slug;
+  const calificacion = isAnniversary ? null : Number.parseInt(body?.calificacion, 10);
 
   if (
     nombre.length < 2
     || comentario.length < 3
     || !isValidSlug(lanzamientoSlug)
-    || !Number.isInteger(calificacion)
-    || calificacion < 1
-    || calificacion > 5
+    || (!isAnniversary && (!Number.isInteger(calificacion) || calificacion < 1 || calificacion > 5))
   ) {
     return jsonResponse({ success: false, error: 'Revisa los datos de tu opinión.' }, 400);
   }
